@@ -22,6 +22,7 @@ class DetailViewController: UIViewController {
   @IBOutlet weak var imageView: UIImageView!
   @IBOutlet weak var runtimeLabel: UILabel!
   @IBOutlet weak var yearLabel: UILabel!
+  @IBOutlet weak var certificationLabel: UILabel!
   @IBOutlet weak var diskLabel: UILabel!
   @IBOutlet weak var textView: UITextView!
 
@@ -67,6 +68,19 @@ class DetailViewController: UIViewController {
         group.leave()
       }
     }
+    group.enter()
+    queue.async {
+      let text: String
+      if let certification = self.movieDb.certification(for: self.detailItem!.id) {
+        text = "FSK \(certification)"
+      } else {
+        text = "No certification available."
+      }
+      DispatchQueue.main.async {
+        self.certificationLabel.text = text
+        group.leave()
+      }
+    }
     group.notify(queue: .main) {
       UIApplication.shared.isNetworkActivityIndicatorVisible = false
     }
@@ -83,6 +97,7 @@ class DetailViewController: UIViewController {
     UIApplication.shared.isNetworkActivityIndicatorVisible = true
     runtimeLabel?.text = ""
     yearLabel?.text = ""
+    certificationLabel?.text = ""
     diskLabel?.text = ""
     configureView()
     super.viewDidLoad()

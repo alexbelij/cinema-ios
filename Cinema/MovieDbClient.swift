@@ -10,6 +10,8 @@ protocol MovieDbClient {
 
   func overview(for id: Int) -> String?
 
+  func certification(for id: Int) -> String?
+
 }
 
 public enum PosterSize: String {

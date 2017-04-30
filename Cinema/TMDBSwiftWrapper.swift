@@ -10,6 +10,8 @@ class TMDBSwiftWrapper: MovieDbClient {
 
   private static let language = "de"
 
+  private static let country = "DE"
+
   func tryConnect() {
     isConnected = true
   }
@@ -49,4 +51,29 @@ class TMDBSwiftWrapper: MovieDbClient {
     semaphore.wait()
     return value
   }
+
+  func certification(for id: Int) -> String? {
+    if Thread.isMainThread {
+      fatalError("must not be called on the main thread")
+    }
+    var value: String?
+    let semaphore = DispatchSemaphore(value: 0)
+    MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: TMDBSwiftWrapper.language) {
+      apiReturn, movie in
+      MovieMDB.release_dates(TMDBSwiftWrapper.apiKey, movieID: id) {
+        apiReturn, releaseDates in
+        if let releaseDates = releaseDates {
+          for date in releaseDates {
+            if date.iso_3166_1 == TMDBSwiftWrapper.country {
+              value = date.release_dates[0].certification
+            }
+          }
+        }
+        semaphore.signal()
+      }
+    }
+    semaphore.wait()
+    return value
+  }
+
 }
