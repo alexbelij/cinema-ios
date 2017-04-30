@@ -20,6 +20,7 @@ class DetailViewController: UIViewController {
   @IBOutlet weak var titleLabel: UILabel!
   @IBOutlet weak var subtitleLabel: UILabel!
   @IBOutlet weak var imageView: UIImageView!
+  @IBOutlet weak var genreLabel: UILabel!
   @IBOutlet weak var runtimeLabel: UILabel!
   @IBOutlet weak var yearLabel: UILabel!
   @IBOutlet weak var certificationLabel: UILabel!
@@ -70,6 +71,20 @@ class DetailViewController: UIViewController {
     }
     group.enter()
     queue.async {
+      let genreString = self.movieDb.genres(for: self.detailItem!.id).reduce("") { (result, next) in
+        if result.isEmpty {
+          return next
+        } else {
+          return "\(result), \(next)"
+        }
+      }
+      DispatchQueue.main.async {
+        self.genreLabel.text = genreString
+        group.leave()
+      }
+    }
+    group.enter()
+    queue.async {
       let text: String
       if let certification = self.movieDb.certification(for: self.detailItem!.id) {
         text = "FSK \(certification)"
@@ -95,6 +110,7 @@ class DetailViewController: UIViewController {
 
   override func viewDidLoad() {
     UIApplication.shared.isNetworkActivityIndicatorVisible = true
+    genreLabel?.text = ""
     runtimeLabel?.text = ""
     yearLabel?.text = ""
     certificationLabel?.text = ""

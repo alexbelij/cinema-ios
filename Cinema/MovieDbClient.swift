@@ -12,6 +12,8 @@ protocol MovieDbClient {
 
   func certification(for id: Int) -> String?
 
+  func genres(for id: Int) -> [String]
+
 }
 
 public enum PosterSize: String {

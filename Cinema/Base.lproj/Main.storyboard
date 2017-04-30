@@ -66,10 +66,27 @@
                                         </constraints>
                                     </imageView>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="RpT-u2-5JV">
-                                        <rect key="frame" x="102" y="23" width="186" height="92"/>
+                                        <rect key="frame" x="102" y="10.5" width="186" height="117"/>
                                         <subviews>
-                                            <stackView opaque="NO" contentMode="scaleToFill" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="EF9-Rp-F0c">
+                                            <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="Re7-tf-LeB">
                                                 <rect key="frame" x="0.0" y="0.0" width="186" height="17"/>
+                                                <subviews>
+                                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Masks" translatesAutoresizingMaskIntoConstraints="NO" id="aUl-Ix-wyO">
+                                                        <rect key="frame" x="0.0" y="0.5" width="16" height="16"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="width" constant="16" id="p83-Iu-dDO"/>
+                                                        </constraints>
+                                                    </imageView>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Genre" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Di6-NW-eKI">
+                                                        <rect key="frame" x="20" y="0.0" width="166" height="17"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                </subviews>
+                                            </stackView>
+                                            <stackView opaque="NO" contentMode="scaleToFill" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="EF9-Rp-F0c">
+                                                <rect key="frame" x="0.0" y="25" width="186" height="17"/>
                                                 <subviews>
                                                     <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Clock" translatesAutoresizingMaskIntoConstraints="NO" id="73H-U5-HQC">
                                                         <rect key="frame" x="0.0" y="0.0" width="16" height="17"/>
@@ -83,7 +100,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="2tX-G0-NnM">
-                                                <rect key="frame" x="0.0" y="25" width="186" height="17"/>
+                                                <rect key="frame" x="0.0" y="50" width="186" height="17"/>
                                                 <subviews>
                                                     <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Calendar" translatesAutoresizingMaskIntoConstraints="NO" id="m3h-Xw-rCi">
                                                         <rect key="frame" x="0.0" y="0.0" width="16" height="17"/>
@@ -97,7 +114,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="sku-DX-ihc">
-                                                <rect key="frame" x="0.0" y="50" width="186" height="17"/>
+                                                <rect key="frame" x="0.0" y="75" width="186" height="17"/>
                                                 <subviews>
                                                     <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Certification" translatesAutoresizingMaskIntoConstraints="NO" id="Bu7-cf-0vB">
                                                         <rect key="frame" x="0.0" y="0.0" width="16" height="17"/>
@@ -111,7 +128,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="sdo-iD-Ghw">
-                                                <rect key="frame" x="0.0" y="75" width="186" height="17"/>
+                                                <rect key="frame" x="0.0" y="100" width="186" height="17"/>
                                                 <subviews>
                                                     <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Disk" translatesAutoresizingMaskIntoConstraints="NO" id="t9Y-iU-dQZ">
                                                         <rect key="frame" x="0.0" y="0.0" width="16" height="17"/>
@@ -154,6 +171,7 @@
                     <connections>
                         <outlet property="certificationLabel" destination="1oE-tC-Pti" id="5qY-AG-Xbf"/>
                         <outlet property="diskLabel" destination="lu0-Yv-0Bi" id="3cW-0q-2wX"/>
+                        <outlet property="genreLabel" destination="Di6-NW-eKI" id="a2U-Hw-jpV"/>
                         <outlet property="imageView" destination="G5A-3g-BU1" id="Yd2-cw-1JD"/>
                         <outlet property="runtimeLabel" destination="5gG-ms-RwD" id="SMu-2V-5k6"/>
                         <outlet property="subtitleLabel" destination="RdX-7n-C4l" id="cwJ-o7-Tt4"/>
@@ -283,6 +301,7 @@
         <image name="Clock" width="16" height="16"/>
         <image name="Disk" width="16" height="16"/>
         <image name="GenericPoster-w92" width="92" height="138"/>
+        <image name="Masks" width="16" height="16"/>
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="6S0-TO-JiA"/>
