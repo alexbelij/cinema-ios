@@ -49,18 +49,26 @@ class DetailViewController: UIViewController {
 
   private func fetchAdditionalData() {
     let queue = DispatchQueue.global(qos: .userInitiated)
+    let group = DispatchGroup()
+    group.enter()
     queue.async {
       if let poster = self.movieDb.poster(for: self.detailItem!.id, size: .w185) {
         DispatchQueue.main.async {
           self.imageView.image = poster
+          group.leave()
         }
       }
     }
+    group.enter()
     queue.async {
       let overview = self.movieDb.overview(for: self.detailItem!.id)
       DispatchQueue.main.async {
         self.textView.text = overview
+        group.leave()
       }
+    }
+    group.notify(queue: .main) {
+      UIApplication.shared.isNetworkActivityIndicatorVisible = false
     }
   }
 
@@ -72,6 +80,7 @@ class DetailViewController: UIViewController {
   }
 
   override func viewDidLoad() {
+    UIApplication.shared.isNetworkActivityIndicatorVisible = true
     runtimeLabel?.text = ""
     yearLabel?.text = ""
     diskLabel?.text = ""
