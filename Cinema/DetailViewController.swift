@@ -22,6 +22,7 @@ class DetailViewController: UIViewController {
   @IBOutlet weak var imageView: UIImageView!
   @IBOutlet weak var runtimeLabel: UILabel!
   @IBOutlet weak var yearLabel: UILabel!
+  @IBOutlet weak var textView: UITextView!
 
   var movieDb: MovieDbClient!
 
@@ -45,11 +46,18 @@ class DetailViewController: UIViewController {
   }
 
   private func fetchAdditionalData() {
-    DispatchQueue.global(qos: .userInitiated).async {
+    let queue = DispatchQueue.global(qos: .userInitiated)
+    queue.async {
       if let poster = self.movieDb.poster(for: self.detailItem!.id, size: .w185) {
         DispatchQueue.main.async {
           self.imageView.image = poster
         }
+      }
+    }
+    queue.async {
+      let overview = self.movieDb.overview(for: self.detailItem!.id)
+      DispatchQueue.main.async {
+        self.textView.text = overview
       }
     }
   }

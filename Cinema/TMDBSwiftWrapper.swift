@@ -34,4 +34,19 @@ class TMDBSwiftWrapper: MovieDbClient {
     semaphore.wait()
     return value
   }
+
+  func overview(for id: Int) -> String? {
+    if Thread.isMainThread {
+      fatalError("must not be called on the main thread")
+    }
+    var value: String?
+    let semaphore = DispatchSemaphore(value: 0)
+    MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: TMDBSwiftWrapper.language) {
+      apiReturn, movie in
+      value = movie?.overview
+      semaphore.signal()
+    }
+    semaphore.wait()
+    return value
+  }
 }

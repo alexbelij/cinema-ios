@@ -100,13 +100,23 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" text="Overview" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="juI-mP-94u">
+                                <rect key="frame" x="16" y="286" width="288" height="274"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstAttribute="trailingMargin" secondItem="juI-mP-94u" secondAttribute="trailing" id="2WT-Rz-evM"/>
                             <constraint firstAttribute="leadingMargin" secondItem="Feu-bs-ssQ" secondAttribute="leading" id="4ah-KX-SlQ"/>
                             <constraint firstItem="Feu-bs-ssQ" firstAttribute="top" secondItem="Mpb-Ni-OAS" secondAttribute="bottom" constant="8" symbolic="YES" id="HJM-x1-9T2"/>
+                            <constraint firstAttribute="leadingMargin" secondItem="juI-mP-94u" secondAttribute="leading" id="LKB-Hc-nxM"/>
                             <constraint firstItem="Mpb-Ni-OAS" firstAttribute="top" secondItem="SYR-Wa-9uf" secondAttribute="bottom" constant="8" symbolic="YES" id="NmQ-Si-54B"/>
+                            <constraint firstItem="juI-mP-94u" firstAttribute="top" secondItem="Feu-bs-ssQ" secondAttribute="bottom" constant="8" symbolic="YES" id="NvC-0x-IH7"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Mpb-Ni-OAS" secondAttribute="trailing" id="OER-3b-zZ9"/>
+                            <constraint firstItem="GAO-Cl-Wes" firstAttribute="top" secondItem="juI-mP-94u" secondAttribute="bottom" constant="8" symbolic="YES" id="aPR-eb-YlT"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Feu-bs-ssQ" secondAttribute="trailing" id="cmO-jn-VXN"/>
                             <constraint firstAttribute="leadingMargin" secondItem="Mpb-Ni-OAS" secondAttribute="leading" id="eaP-cL-GNY"/>
                         </constraints>
@@ -117,6 +127,7 @@
                         <outlet property="imageView" destination="G5A-3g-BU1" id="Yd2-cw-1JD"/>
                         <outlet property="runtimeLabel" destination="5gG-ms-RwD" id="SMu-2V-5k6"/>
                         <outlet property="subtitleLabel" destination="RdX-7n-C4l" id="cwJ-o7-Tt4"/>
+                        <outlet property="textView" destination="juI-mP-94u" id="97j-Ss-7RJ"/>
                         <outlet property="titleLabel" destination="gZA-AT-KDO" id="Roc-CX-GKg"/>
                         <outlet property="yearLabel" destination="swd-vr-IQS" id="sPp-Fh-xi3"/>
                     </connections>

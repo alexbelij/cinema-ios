@@ -8,6 +8,8 @@ protocol MovieDbClient {
 
   func poster(for id: Int, size: PosterSize) -> UIKit.UIImage?
 
+  func overview(for id: Int) -> String?
+
 }
 
 public enum PosterSize: String {
