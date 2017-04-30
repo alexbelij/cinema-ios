@@ -22,6 +22,7 @@ class DetailViewController: UIViewController {
   @IBOutlet weak var imageView: UIImageView!
   @IBOutlet weak var runtimeLabel: UILabel!
   @IBOutlet weak var yearLabel: UILabel!
+  @IBOutlet weak var diskLabel: UILabel!
   @IBOutlet weak var textView: UITextView!
 
   var movieDb: MovieDbClient!
@@ -38,6 +39,7 @@ class DetailViewController: UIViewController {
       }
       runtimeLabel.text = Utils.formatDuration(mediaItem.runtime)
       yearLabel.text = "\(mediaItem.year)"
+      diskLabel.text = localize(diskType: mediaItem.diskType)
 
       if movieDb.isConnected {
         fetchAdditionalData()
@@ -62,7 +64,7 @@ class DetailViewController: UIViewController {
     }
   }
 
-  private func localizedDiskType(_ diskType: DiskType) -> String {
+  private func localize(diskType: DiskType) -> String {
     switch diskType {
       case .dvd: return "DVD"
       case .bluRay: return "Blu-ray"
@@ -72,6 +74,7 @@ class DetailViewController: UIViewController {
   override func viewDidLoad() {
     runtimeLabel?.text = ""
     yearLabel?.text = ""
+    diskLabel?.text = ""
     configureView()
     super.viewDidLoad()
   }
