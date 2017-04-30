@@ -6,6 +6,7 @@
 //  Copyright © 2017 Martin Bauer. All rights reserved.
 //
 
+import Dispatch
 import UIKit
 
 class DetailViewController: UIViewController {
@@ -36,6 +37,20 @@ class DetailViewController: UIViewController {
       }
       runtimeLabel.text = Utils.formatDuration(mediaItem.runtime)
       yearLabel.text = "\(mediaItem.year)"
+
+      if movieDb.isConnected {
+        fetchAdditionalData()
+      }
+    }
+  }
+
+  private func fetchAdditionalData() {
+    DispatchQueue.global(qos: .userInitiated).async {
+      if let poster = self.movieDb.poster(for: self.detailItem!.id, size: .w185) {
+        DispatchQueue.main.async {
+          self.imageView.image = poster
+        }
+      }
     }
   }
 

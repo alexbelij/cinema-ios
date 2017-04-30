@@ -6,8 +6,10 @@ protocol MovieDbClient {
 
   var isConnected: Bool { get }
 
+  func poster(for id: Int, size: PosterSize) -> UIKit.UIImage?
+
 }
 
-public enum PosterSize : String {
+public enum PosterSize: String {
   case w92, w154, w185, w342, w500, w780, original
 }
