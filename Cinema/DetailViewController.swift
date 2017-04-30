@@ -21,6 +21,8 @@ class DetailViewController: UIViewController {
   @IBOutlet weak var runtimeLabel: UILabel!
   @IBOutlet weak var yearLabel: UILabel!
 
+  var movieDb: MovieDbClient!
+
   func configureView() {
     guard isViewLoaded else { return }
     if let mediaItem = detailItem {
