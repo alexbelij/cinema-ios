@@ -4,5 +4,6 @@ target 'Cinema' do
   use_frameworks!
 
   # Pods for Cinema
+  pod 'TMDBSwift'
 
 end

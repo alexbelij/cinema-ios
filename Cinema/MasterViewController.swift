@@ -17,6 +17,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   var detailViewController: DetailViewController? = nil
   let searchController: UISearchController = UISearchController(searchResultsController: nil)
 
+  private var movieDb: MovieDbClient!
+
   override func viewDidLoad() {
     super.viewDidLoad()
     if let split = splitViewController {
@@ -37,6 +39,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         return left.year < right.year
       }
     }
+    movieDb = TMDBSwiftWrapper()
+    movieDb.tryConnect()
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -59,6 +63,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         controller.detailItem = selectedItem
         controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
         controller.navigationItem.leftItemsSupplementBackButton = true
+        controller.movieDb = movieDb
       }
     }
   }
