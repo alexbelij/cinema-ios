@@ -19,63 +19,53 @@ class TMDBSwiftWrapper: MovieDbClient {
   private(set) var isConnected: Bool = false
 
   func poster(for id: Int, size: PosterSize) -> UIKit.UIImage? {
-    var value: UIKit.UIImage?
-    waitUntil { done in
-      MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: TMDBSwiftWrapper.language) {
-        apiReturn, movie in
-        if let posterPath = movie?.poster_path {
-          let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
-          let image = try! UIImage(data: Data(contentsOf: URL(string: path)!))
-          value = image
-        }
-        done()
-      }
+    if let posterPath = movie(for: id)?.poster_path {
+      let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
+      let image = try! UIImage(data: Data(contentsOf: URL(string: path)!))
+      return image
     }
-    return value
+    return nil
   }
 
   func overview(for id: Int) -> String? {
-    var value: String?
-    waitUntil { done in
-      MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: TMDBSwiftWrapper.language) {
-        apiReturn, movie in
-        value = movie?.overview
-        done()
-      }
-    }
-    return value
+    return movie(for: id)?.overview
   }
 
   func certification(for id: Int) -> String? {
-    var value: String?
+    var certification: String?
     waitUntil { done in
       MovieMDB.release_dates(TMDBSwiftWrapper.apiKey, movieID: id) {
         apiReturn, releaseDates in
         if let releaseDates = releaseDates {
           for date in releaseDates {
             if date.iso_3166_1 == TMDBSwiftWrapper.country {
-              value = date.release_dates[0].certification
+              certification = date.release_dates[0].certification
             }
           }
         }
         done()
       }
     }
-    return value
+    return certification
   }
 
   func genres(for id: Int) -> [String] {
-    var value = [String]()
+    if let genres = movie(for: id)?.genres.map({ $0.name! }) {
+      return genres
+    }
+    return []
+  }
+
+  private func movie(for id: Int) -> MovieDetailedMDB? {
+    var movieToReturn: MovieDetailedMDB?
     waitUntil { done in
       MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: TMDBSwiftWrapper.language) {
         apiReturn, movie in
-        if let genres = movie?.genres.map({ $0.name! }) {
-          value = genres
-        }
+        movieToReturn = movie
         done()
       }
     }
-    return value
+    return movieToReturn
   }
 
   private func waitUntil(_ asyncProcess: (_ done: @escaping () -> Void) -> Void) {
