@@ -49,19 +49,16 @@ class TMDBSwiftWrapper: MovieDbClient {
   func certification(for id: Int) -> String? {
     var value: String?
     waitUntil { done in
-      MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: TMDBSwiftWrapper.language) {
-        apiReturn, movie in
-        MovieMDB.release_dates(TMDBSwiftWrapper.apiKey, movieID: id) {
-          apiReturn, releaseDates in
-          if let releaseDates = releaseDates {
-            for date in releaseDates {
-              if date.iso_3166_1 == TMDBSwiftWrapper.country {
-                value = date.release_dates[0].certification
-              }
+      MovieMDB.release_dates(TMDBSwiftWrapper.apiKey, movieID: id) {
+        apiReturn, releaseDates in
+        if let releaseDates = releaseDates {
+          for date in releaseDates {
+            if date.iso_3166_1 == TMDBSwiftWrapper.country {
+              value = date.release_dates[0].certification
             }
           }
-          done()
         }
+        done()
       }
     }
     return value
