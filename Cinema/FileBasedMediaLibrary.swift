@@ -6,29 +6,36 @@ class FileBasedMediaLibrary: MediaLibrary {
 
   private let fileName: String
 
+  private let dataFormat: DataFormat
+
   private var mediaItems: [MediaItem]
 
-  init(directory: URL, fileName: String) {
+  init(directory: URL, fileName: String, dataFormat: DataFormat) {
     self.directory = directory
     self.fileName = fileName
+    self.dataFormat = dataFormat
     let url = directory.appendingPathComponent(fileName)
-    mediaItems = FileBasedMediaLibrary.readData(from: url) ?? [MediaItem]()
+    mediaItems = FileBasedMediaLibrary.readData(from: url, format: dataFormat) ?? [MediaItem]()
   }
 
-  private static func readData(from url: URL) -> [MediaItem]? {
+  private static func readData(from url: URL, format: DataFormat) -> [MediaItem]? {
     do {
       let data = try Data(contentsOf: URL(fileURLWithPath: url.path))
-      let array = NSKeyedUnarchiver.unarchiveObject(with: data) as! [[String: Any]]
-      return array.map { MediaItem(dataDictionary: $0) }
+      return try format.deserialize(from: data, as: MediaItem.self)
     } catch let error {
       print("error while reading from \(url): \(error)")
     }
     return nil
   }
 
-  private static func writeData(_ data: [MediaItem], to url: URL) -> Bool {
-    let data = NSKeyedArchiver.archivedData(withRootObject: data.map { $0.dataDictionary })
-    return FileManager.default.createFile(atPath: url.path, contents: data)
+  private static func writeData(_ data: [MediaItem], to url: URL, format: DataFormat) -> Bool {
+    do {
+      let data = try format.serialize(data)
+      return FileManager.default.createFile(atPath: url.path, contents: data)
+    } catch {
+      print("error while writing to \(url): \(error)")
+    }
+    return false
   }
 
   func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem] {

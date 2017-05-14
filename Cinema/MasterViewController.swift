@@ -33,7 +33,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     tableView.tableHeaderView = searchController.searchBar
 
     library = FileBasedMediaLibrary(directory: Utils.applicationSupportDirectory(),
-                                    fileName: "cinema.data")
+                                    fileName: "cinema.data",
+                                    dataFormat: KeyedArchivalFormat())
     mediaItems = library.mediaItems(where: { _ in true })
     mediaItems.sort { (left, right) in
       if left.title != right.title {
