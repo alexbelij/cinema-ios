@@ -63,7 +63,7 @@ class DetailViewController: UIViewController {
     }
     group.enter()
     queue.async {
-      let overview = self.movieDb.overview(for: self.detailItem!.id)
+      let overview = self.movieDb.overview(for: self.detailItem!.id) ?? "No overview available."
       DispatchQueue.main.async {
         self.textView.text = overview
         group.leave()
