@@ -73,12 +73,15 @@ class DetailViewController: UIViewController {
     }
     group.enter()
     queue.async {
-      let genreString = self.movieDb.genres(for: self.detailItem!.id).reduce("") { (result, next) in
+      var genreString = self.movieDb.genres(for: self.detailItem!.id).reduce("") { (result, next) in
         if result.isEmpty {
           return next
         } else {
           return "\(result), \(next)"
         }
+      }
+      if genreString.isEmpty {
+        genreString = "No genre available."
       }
       DispatchQueue.main.async {
         self.genreLabel.text = genreString
