@@ -15,7 +15,11 @@ class FileBasedMediaLibrary: MediaLibrary {
     self.fileName = fileName
     self.dataFormat = dataFormat
     let url = directory.appendingPathComponent(fileName)
-    mediaItems = FileBasedMediaLibrary.readData(from: url, format: dataFormat) ?? [MediaItem]()
+    if FileManager.default.fileExists(atPath: url.path) {
+      mediaItems = FileBasedMediaLibrary.readData(from: url, format: dataFormat) ?? [MediaItem]()
+    } else {
+      mediaItems = []
+    }
   }
 
   private static func readData(from url: URL, format: DataFormat) -> [MediaItem]? {
