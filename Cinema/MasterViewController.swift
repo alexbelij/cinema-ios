@@ -10,7 +10,7 @@ import UIKit
 
 class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
-  let library = SampleLibrary()
+  var library: MediaLibrary!
   var mediaItems = [MediaItem]()
   var filteredMediaItems = [MediaItem]()
 
@@ -31,6 +31,10 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     searchController.dimsBackgroundDuringPresentation = false
     definesPresentationContext = true
     tableView.tableHeaderView = searchController.searchBar
+
+    library = FileBasedMediaLibrary(directory: Utils.applicationSupportDirectory(),
+                                    fileName: "cinema.data",
+                                    dataFormat: KeyedArchivalFormat())
     mediaItems = library.mediaItems(where: { _ in true })
     mediaItems.sort { (left, right) in
       if left.title != right.title {
