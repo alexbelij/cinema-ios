@@ -59,6 +59,8 @@ class DetailViewController: UIViewController {
           self.imageView.image = poster
           group.leave()
         }
+      } else {
+        group.leave()
       }
     }
     group.enter()
