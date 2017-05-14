@@ -20,3 +20,9 @@ struct MediaItem {
 enum DiskType: String {
   case dvd, bluRay
 }
+
+public struct PartialMediaItem {
+  let id: Int
+  let title: String
+  let year: Int?
+}

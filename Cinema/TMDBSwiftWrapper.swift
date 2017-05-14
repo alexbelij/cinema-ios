@@ -68,6 +68,38 @@ class TMDBSwiftWrapper: MovieDbClient {
     return movieToReturn
   }
 
+  func searchMovies(searchText: String) -> [PartialMediaItem] {
+    var value = [PartialMediaItem]()
+    waitUntil { done in
+      SearchMDB.movie(TMDBSwiftWrapper.apiKey,
+                      query: searchText,
+                      language: TMDBSwiftWrapper.language,
+                      page: 1,
+                      includeAdult: false,
+                      year: nil,
+                      primaryReleaseYear: nil) {
+        apiReturn, results in
+        if let results = results {
+          value = results.map {
+            PartialMediaItem(id: $0.id!,
+                             title: $0.title!,
+                             year: TMDBSwiftWrapper.extractYear(from: $0.release_date!))
+          }
+        }
+        done()
+      }
+    }
+    return value
+  }
+
+  private static func extractYear(from dateString: String) -> Int {
+    guard !dateString.isEmpty else {
+      return -1
+    }
+    let year = Int(dateString.substring(to: dateString.index(dateString.startIndex, offsetBy: 4)))!
+    return year
+  }
+
   private func waitUntil(_ asyncProcess: (_ done: @escaping () -> Void) -> Void) {
     if Thread.isMainThread {
       fatalError("must not be called on the main thread")
