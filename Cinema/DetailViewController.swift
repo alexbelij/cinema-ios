@@ -115,6 +115,7 @@ class DetailViewController: UIViewController {
     yearLabel?.text = ""
     certificationLabel?.text = ""
     diskLabel?.text = ""
+    textView?.text = ""
     configureView()
     super.viewDidLoad()
   }
