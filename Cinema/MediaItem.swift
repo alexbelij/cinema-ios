@@ -17,6 +17,6 @@ struct MediaItem {
   }
 }
 
-enum DiskType {
+enum DiskType: String {
   case dvd, bluRay
 }
