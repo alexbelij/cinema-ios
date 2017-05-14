@@ -184,6 +184,35 @@
             </objects>
             <point key="canvasLocation" x="706.875" y="127.8169014084507"/>
         </scene>
+        <!--SearchTMDB View Controller-->
+        <scene sceneID="Irz-nF-inq">
+            <objects>
+                <viewController id="lEX-SM-kxr" customClass="SearchTMDBViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="kH3-Mr-z56"/>
+                        <viewControllerLayoutGuide type="bottom" id="Q2x-l1-dNm"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Hfw-gI-ZTd">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="TMDB" translatesAutoresizingMaskIntoConstraints="NO" id="XVX-fX-X5F">
+                                <rect key="frame" x="16" y="72" width="288" height="488"/>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="XVX-fX-X5F" firstAttribute="leading" secondItem="Hfw-gI-ZTd" secondAttribute="leadingMargin" id="8Lj-de-qJ7"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="XVX-fX-X5F" secondAttribute="trailing" id="9kN-35-Z0A"/>
+                            <constraint firstItem="Q2x-l1-dNm" firstAttribute="top" secondItem="XVX-fX-X5F" secondAttribute="bottom" constant="8" symbolic="YES" id="YuK-X7-4jH"/>
+                            <constraint firstItem="XVX-fX-X5F" firstAttribute="top" secondItem="kH3-Mr-z56" secondAttribute="bottom" constant="8" symbolic="YES" id="vPB-Gw-GSK"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="cTT-Yk-ZSf" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1548.75" y="-632.74647887323943"/>
+        </scene>
         <!--Split View Controller-->
         <scene sceneID="Nki-YV-4Qg">
             <objects>
@@ -269,7 +298,13 @@
                             <outlet property="delegate" destination="7bK-jq-Zjz" id="RA6-mI-bju"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Library" id="Zdf-7t-Un8"/>
+                    <navigationItem key="navigationItem" title="Library" id="Zdf-7t-Un8">
+                        <barButtonItem key="rightBarButtonItem" style="done" systemItem="add" id="Reu-zF-sxg">
+                            <connections>
+                                <segue destination="lEX-SM-kxr" kind="show" identifier="addItem" id="8Ui-cq-geC"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Rux-fX-hf1" sceneMemberID="firstResponder"/>
             </objects>
@@ -302,6 +337,7 @@
         <image name="Disk" width="16" height="16"/>
         <image name="GenericPoster-w92" width="92" height="138"/>
         <image name="Masks" width="16" height="16"/>
+        <image name="TMDB" width="146" height="151"/>
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="6S0-TO-JiA"/>

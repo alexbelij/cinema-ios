@@ -70,6 +70,11 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         controller.movieDb = movieDb
       }
     }
+    if segue.identifier == "addItem" {
+      let controller = segue.destination as! SearchTMDBViewController
+      controller.library = library
+      controller.movieDb = movieDb
+    }
   }
 
   // MARK: - Table View
