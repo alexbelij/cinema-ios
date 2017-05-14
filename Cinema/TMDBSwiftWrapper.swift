@@ -100,6 +100,10 @@ class TMDBSwiftWrapper: MovieDbClient {
     return year
   }
 
+  func runtime(for id: Int) -> Int? {
+    return movie(for: id)?.runtime
+  }
+
   private func waitUntil(_ asyncProcess: (_ done: @escaping () -> Void) -> Void) {
     if Thread.isMainThread {
       fatalError("must not be called on the main thread")
