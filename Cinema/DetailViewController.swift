@@ -39,7 +39,9 @@ class DetailViewController: UIViewController {
       } else {
         subtitleLabel.isHidden = true
       }
-      runtimeLabel.text = Utils.formatDuration(mediaItem.runtime)
+      runtimeLabel.text = mediaItem.runtime == -1
+          ? "No runtime available."
+          : Utils.formatDuration(mediaItem.runtime)
       yearLabel.text = "\(mediaItem.year)"
       diskLabel.text = localize(diskType: mediaItem.diskType)
 

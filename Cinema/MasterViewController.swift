@@ -96,7 +96,9 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
       mediaItem = mediaItems[indexPath.row]
     }
     cell.titleLabel!.text = Utils.fullTitle(of: mediaItem)
-    cell.runtimeLabel!.text = Utils.formatDuration(mediaItem.runtime)
+    cell.runtimeLabel!.text = mediaItem.runtime == -1
+        ? "No runtime available."
+        : Utils.formatDuration(mediaItem.runtime)
 
     return cell
   }
