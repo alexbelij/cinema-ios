@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Dispatch
 
 class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
@@ -61,7 +62,9 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         return left.year < right.year
       }
     }
-    tableView.reloadData()
+    DispatchQueue.main.async {
+      self.tableView.reloadData()
+    }
   }
 
   // MARK: - Segues
