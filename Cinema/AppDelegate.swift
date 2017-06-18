@@ -13,6 +13,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
   var window: UIWindow?
 
+  var library: MediaLibrary!
+  var movieDb: MovieDbClient!
+
 
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     // Override point for customization after application launch.
@@ -20,6 +23,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     let navigationController = splitViewController.viewControllers[splitViewController.viewControllers.count-1] as! UINavigationController
     navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
     splitViewController.delegate = self
+
+    library = FileBasedMediaLibrary(directory: Utils.applicationSupportDirectory(),
+                                    fileName: "cinema.data",
+                                    dataFormat: KeyedArchivalFormat())
+    movieDb = TMDBSwiftWrapper(storeFront: .germany)
+    movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
+    movieDb.tryConnect()
+
     return true
   }
 

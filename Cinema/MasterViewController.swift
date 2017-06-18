@@ -35,17 +35,13 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
     tableView.tableHeaderView = searchController.searchBar
 
-    library = FileBasedMediaLibrary(directory: Utils.applicationSupportDirectory(),
-                                    fileName: "cinema.data",
-                                    dataFormat: KeyedArchivalFormat())
+    library = (UIApplication.shared.delegate as! AppDelegate).library
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(reloadLibraryData),
                                            name: .mediaLibraryChangedContent,
                                            object: nil)
     reloadLibraryData()
-    movieDb = TMDBSwiftWrapper(storeFront: .germany)
-    movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
-    movieDb.tryConnect()
+    movieDb = (UIApplication.shared.delegate as! AppDelegate).movieDb
   }
 
   override func viewWillAppear(_ animated: Bool) {
