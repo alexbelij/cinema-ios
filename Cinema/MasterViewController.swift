@@ -35,6 +35,21 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     library = FileBasedMediaLibrary(directory: Utils.applicationSupportDirectory(),
                                     fileName: "cinema.data",
                                     dataFormat: KeyedArchivalFormat())
+    NotificationCenter.default.addObserver(self,
+                                           selector: #selector(reloadLibraryData),
+                                           name: .mediaLibraryChangedContent,
+                                           object: nil)
+    reloadLibraryData()
+    movieDb = TMDBSwiftWrapper()
+    movieDb.tryConnect()
+  }
+
+  override func viewWillAppear(_ animated: Bool) {
+    clearsSelectionOnViewWillAppear = splitViewController!.isCollapsed
+    super.viewWillAppear(animated)
+  }
+
+  @objc private func reloadLibraryData() {
     mediaItems = library.mediaItems(where: { _ in true })
     mediaItems.sort { (left, right) in
       if left.title != right.title {
@@ -43,13 +58,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         return left.year < right.year
       }
     }
-    movieDb = TMDBSwiftWrapper()
-    movieDb.tryConnect()
-  }
-
-  override func viewWillAppear(_ animated: Bool) {
-    clearsSelectionOnViewWillAppear = splitViewController!.isCollapsed
-    super.viewWillAppear(animated)
+    tableView.reloadData()
   }
 
   // MARK: - Segues
