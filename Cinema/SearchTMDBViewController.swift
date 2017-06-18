@@ -53,7 +53,22 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, Searc
   }
 
   private func add(searchItem: PartialMediaItem, diskType: DiskType) {
-    print("adding \(searchItem) as \(diskType)")
+    DispatchQueue.global(qos: .userInitiated).async {
+      let runtime = self.movieDb.runtime(for: searchItem.id)
+      let item = MediaItem(id: searchItem.id,
+                           title: searchItem.title,
+                           runtime: runtime ?? -1,
+                           year: searchItem.year ?? -1,
+                           diskType: diskType)
+      let success = self.library.add(item)
+      DispatchQueue.main.async {
+        let title = success ? "Library successfully updated." : "Library could not be updated."
+        let message = success ? "\(item.title) was added." : nil
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .default))
+        self.present(alert, animated: true)
+      }
+    }
   }
 
 }
