@@ -23,6 +23,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, Searc
     searchController.dimsBackgroundDuringPresentation = false
     definesPresentationContext = true
     searchController.searchBar.sizeToFit()
+    searchController.searchBar.placeholder = NSLocalizedString("addItem.search.placeholder", comment: "")
     searchBarPlaceholder.addSubview(searchController.searchBar)
   }
 

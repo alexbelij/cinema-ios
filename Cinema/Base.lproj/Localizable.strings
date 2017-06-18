@@ -3,6 +3,7 @@
 "addItem.alert.added.success.title" = "Library successfully updated.";
 "addItem.alert.added.failure.dismiss" = "Dismiss";
 "addItem.alert.added.failure.title" = "Library could not be updated.";
+"addItem.search.placeholder" = "Enter the movie title...";
 "cancel" = "Cancel";
 "details.certificationFormat" = "FSK %@";
 "details.missing.certification" = "No certification available.";
@@ -10,5 +11,6 @@
 "details.missing.overview" = "No overview available.";
 "details.missing.runtime" = "No runtime available.";
 "library" = "Library";
+"library.search.placeholder" = "Search titles...";
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";

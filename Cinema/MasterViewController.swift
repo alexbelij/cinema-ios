@@ -31,6 +31,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     searchController.searchResultsUpdater = self
     searchController.dimsBackgroundDuringPresentation = false
     definesPresentationContext = true
+    searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
     tableView.tableHeaderView = searchController.searchBar
 
     library = FileBasedMediaLibrary(directory: Utils.applicationSupportDirectory(),

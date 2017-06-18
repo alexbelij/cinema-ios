@@ -3,6 +3,7 @@
 "addItem.alert.added.success.title" = "Mediathek wurde erfolgreich aktualisiert.";
 "addItem.alert.added.failure.dismiss" = "Schließen";
 "addItem.alert.added.failure.title" = "Mediathek konnte nicht aktualisiert werden.";
+"addItem.search.placeholder" = "Gib den Filmtitel ein...";
 "cancel" = "Abbrechen";
 "details.certificationFormat" = "FSK %@";
 "details.missing.certification" = "Keine Altersfreigabe verfügbar.";
@@ -10,5 +11,6 @@
 "details.missing.overview" = "Keine Beschreibung vorhanden.";
 "details.missing.runtime" = "Keine Laufzeit verfügbar.";
 "library" = "Mediathek";
+"library.search.placeholder" = "Titel durchsuchen...";
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";
