@@ -46,17 +46,30 @@ class FileBasedMediaLibrary: MediaLibrary {
     return mediaItems.filter(predicate)
   }
 
+  func add(_ mediaItem: MediaItem) -> Bool {
+    guard !mediaItems.contains(where: { $0.id == mediaItem.id }) else { return true }
+    mediaItems.append(mediaItem)
+    NotificationCenter.default.post(name: .mediaLibraryChangedContent, object: self)
+    return FileBasedMediaLibrary.writeData(mediaItems,
+                                           to: directory.appendingPathComponent(fileName),
+                                           format: dataFormat)
+  }
+
+}
+
+extension Notification.Name {
+  static let mediaLibraryChangedContent = Notification.Name("mediaLibraryChangedContent")
 }
 
 extension MediaItem: ArchivableStruct {
 
   var dataDictionary: [String: Any] {
     var dictionary: [String: Any] = [
-        "id": self.id,
-        "title": self.title,
-        "runtime": self.runtime,
-        "year": self.year,
-        "diskType": self.diskType.rawValue,
+      "id": self.id,
+      "title": self.title,
+      "runtime": self.runtime,
+      "year": self.year,
+      "diskType": self.diskType.rawValue,
     ]
     if let subtitle = self.subtitle {
       dictionary["subtitle"] = subtitle

@@ -14,6 +14,10 @@ protocol MovieDbClient {
 
   func genres(for id: Int) -> [String]
 
+  func searchMovies(searchText: String) -> [PartialMediaItem]
+
+  func runtime(for id: Int) -> Int?
+
 }
 
 public enum PosterSize: String {
