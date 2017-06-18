@@ -235,6 +235,10 @@ class SampleLibrary: MediaLibrary {
     return false
   }
 
+  func replaceItems(_ mediaItems: [MediaItem]) -> Bool {
+    fatalError()
+  }
+
   func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem] {
     return data.filter(predicate)
   }
