@@ -42,6 +42,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
                                            object: nil)
     reloadLibraryData()
     movieDb = TMDBSwiftWrapper(storeFront: .germany)
+    movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
     movieDb.tryConnect()
   }
 

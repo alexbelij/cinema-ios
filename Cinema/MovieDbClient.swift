@@ -6,6 +6,8 @@ protocol MovieDbClient {
 
   var storeFront: MovieDbStoreFront { get set }
 
+  var language: MovieDbLanguage? { get set }
+
   var isConnected: Bool { get }
 
   func poster(for id: Int, size: PosterSize) -> UIKit.UIImage?
@@ -36,6 +38,10 @@ enum MovieDbStoreFront {
       case .germany: return "DE"
     }
   }
+}
+
+enum MovieDbLanguage: String {
+  case en, de
 }
 
 public enum PosterSize: String {

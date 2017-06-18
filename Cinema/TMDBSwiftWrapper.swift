@@ -10,10 +10,15 @@ class TMDBSwiftWrapper: MovieDbClient {
 
   var storeFront: MovieDbStoreFront
 
+  var language: MovieDbLanguage?
+
   init(storeFront: MovieDbStoreFront) {
     self.storeFront = storeFront
   }
 
+  private func effectiveLanguage() -> String {
+    return language?.rawValue ?? storeFront.language
+  }
 
   func tryConnect() {
     isConnected = true
@@ -22,7 +27,7 @@ class TMDBSwiftWrapper: MovieDbClient {
   private(set) var isConnected: Bool = false
 
   func poster(for id: Int, size: PosterSize) -> UIKit.UIImage? {
-    if let posterPath = movie(for: id)?.poster_path {
+    if let posterPath = movie(for: id, language: storeFront.language)?.poster_path {
       let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
       let image = try! UIImage(data: Data(contentsOf: URL(string: path)!))
       return image
@@ -31,7 +36,7 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   func overview(for id: Int) -> String? {
-    return movie(for: id)?.overview
+    return movie(for: id, language: effectiveLanguage())?.overview
   }
 
   func certification(for id: Int) -> String? {
@@ -53,16 +58,16 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   func genres(for id: Int) -> [String] {
-    if let genres = movie(for: id)?.genres.map({ $0.name! }) {
+    if let genres = movie(for: id, language: effectiveLanguage())?.genres.map({ $0.name! }) {
       return genres
     }
     return []
   }
 
-  private func movie(for id: Int) -> MovieDetailedMDB? {
+  private func movie(for id: Int, language: String) -> MovieDetailedMDB? {
     var movieToReturn: MovieDetailedMDB?
     waitUntil { done in
-      MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: storeFront.language) {
+      MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: language) {
         apiReturn, movie in
         movieToReturn = movie
         done()
@@ -104,7 +109,7 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   func runtime(for id: Int) -> Int? {
-    return movie(for: id)?.runtime
+    return movie(for: id, language: storeFront.language)?.runtime
   }
 
   private func waitUntil(_ asyncProcess: (_ done: @escaping () -> Void) -> Void) {
