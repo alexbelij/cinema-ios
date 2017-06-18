@@ -109,7 +109,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
   func filterContentForSearchText(searchText: String) {
     let lowercasedSearchText = searchText.lowercased()
-    filteredMediaItems = mediaItems.filter({ $0.title.lowercased().contains(lowercasedSearchText) })
+    filteredMediaItems = mediaItems.filter({ Utils.fullTitle(of: $0).lowercased().contains(lowercasedSearchText) })
 
     tableView.reloadData()
   }
