@@ -231,6 +231,10 @@ class SampleLibrary: MediaLibrary {
       MediaItem(id: 269149, title: "Zoomania", subtitle: nil, runtime: 108, year: 2016, diskType: .bluRay)
   ]
 
+  func add(_ mediaItem: MediaItem) -> Bool {
+    return false
+  }
+
   func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem] {
     return data.filter(predicate)
   }
