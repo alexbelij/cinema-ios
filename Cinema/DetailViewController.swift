@@ -56,7 +56,7 @@ class DetailViewController: UIViewController {
     let group = DispatchGroup()
     group.enter()
     queue.async {
-      if let poster = self.movieDb.poster(for: self.detailItem!.id, size: .w185) {
+      if let poster = self.movieDb.poster(for: self.detailItem!.id, size: PosterSize(minWidth: 92)) {
         DispatchQueue.main.async {
           self.imageView.image = poster
           group.leave()
