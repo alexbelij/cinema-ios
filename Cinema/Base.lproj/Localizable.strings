@@ -1,8 +1,9 @@
 "addItem.alert.howToAdd.title" = "How do you want to add the movie?";
-"addItem.alert.added.success.messageFormat" = "%@ was added.";
-"addItem.alert.added.success.title" = "Library successfully updated.";
-"addItem.alert.added.failure.dismiss" = "Dismiss";
-"addItem.alert.added.failure.title" = "Library could not be updated.";
+"addItem.done.failure.messageFormat" = "%@ was not added.";
+"addItem.done.failure.text" = "Update failed.";
+"addItem.done.success.messageFormat" = "Added %@.";
+"addItem.done.success.text" = "Update complete.";
+"addItem.progress.text" = "Updating library...";
 "addItem.search.placeholder" = "Enter the movie title...";
 "cancel" = "Cancel";
 "details.certificationFormat" = "FSK %@";

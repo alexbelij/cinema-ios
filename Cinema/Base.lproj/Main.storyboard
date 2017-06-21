@@ -19,6 +19,10 @@
                         <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
+                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="Fxj-Zy-kp9">
+                        <rect key="frame" x="0.0" y="524" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </toolbar>
                     <connections>
                         <segue destination="7bK-jq-Zjz" kind="relationship" relationship="rootViewController" id="tsl-Nk-0bq"/>
                     </connections>
@@ -255,7 +259,7 @@
                                 <rect key="frame" x="0.0" y="28" width="320" height="55"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="WCw-Qf-5nD" id="37f-cq-3Eg">
-                                    <rect key="frame" x="0.0" y="0.0" width="287" height="54.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="287" height="55"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="Scd-Vo-srV">
@@ -396,6 +400,71 @@
             </objects>
             <point key="canvasLocation" x="2393" y="-631"/>
         </scene>
+        <!--Add Item View Controller-->
+        <scene sceneID="q6N-Wa-AF6">
+            <objects>
+                <viewController storyboardIdentifier="AddItemViewController" id="11G-x7-NBc" customClass="AddItemViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="a2s-zf-Mar"/>
+                        <viewControllerLayoutGuide type="bottom" id="MHu-cM-Jrh"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="pEO-9p-nSK">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="d14-uM-2Yo">
+                                <rect key="frame" x="67.5" y="125.5" width="185" height="318"/>
+                                <subviews>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="GenericPoster-w185" translatesAutoresizingMaskIntoConstraints="NO" id="FBa-Xj-Vp6">
+                                        <rect key="frame" x="0.0" y="0.0" width="185" height="277.5"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" secondItem="FBa-Xj-Vp6" secondAttribute="height" multiplier="2:3" id="ODk-t6-0Rp"/>
+                                            <constraint firstAttribute="width" constant="185" id="nKn-NA-VF1"/>
+                                        </constraints>
+                                    </imageView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="htl-aX-tDB">
+                                        <rect key="frame" x="17.5" y="297.5" width="150.5" height="20.5"/>
+                                        <subviews>
+                                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="nRF-LL-tdG">
+                                                <rect key="frame" x="0.0" y="0.5" width="20" height="20"/>
+                                            </activityIndicatorView>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Updating library" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dc3-nr-9iK">
+                                                <rect key="frame" x="28" y="0.0" width="122.5" height="20.5"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                            </stackView>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Message" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2aB-Z2-hxE">
+                                <rect key="frame" x="16" y="455.5" width="288" height="18"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="d14-uM-2Yo" firstAttribute="centerY" secondItem="pEO-9p-nSK" secondAttribute="centerY" id="8ys-Vd-aBv"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="2aB-Z2-hxE" secondAttribute="trailing" id="U24-gP-Kbw"/>
+                            <constraint firstItem="2aB-Z2-hxE" firstAttribute="leading" secondItem="pEO-9p-nSK" secondAttribute="leadingMargin" id="cop-v8-auC"/>
+                            <constraint firstItem="d14-uM-2Yo" firstAttribute="centerX" secondItem="pEO-9p-nSK" secondAttribute="centerX" id="uLy-iN-6Om"/>
+                            <constraint firstItem="2aB-Z2-hxE" firstAttribute="top" secondItem="d14-uM-2Yo" secondAttribute="bottom" constant="12" id="wjQ-TK-HrJ"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="activityIndicator" destination="nRF-LL-tdG" id="h8A-wR-N2U"/>
+                        <outlet property="label" destination="dc3-nr-9iK" id="ry1-T5-bX7"/>
+                        <outlet property="messageLabel" destination="2aB-Z2-hxE" id="BbI-2u-B43"/>
+                        <outlet property="posterView" destination="FBa-Xj-Vp6" id="eAT-Af-4ZY"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="UFH-Wq-4QO" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3214" y="-633"/>
+        </scene>
         <!--Navigation Controller-->
         <scene sceneID="r7l-gg-dq7">
             <objects>
@@ -421,6 +490,7 @@
         <image name="Certification" width="16" height="16"/>
         <image name="Clock" width="16" height="16"/>
         <image name="Disk" width="16" height="16"/>
+        <image name="GenericPoster-w185" width="185" height="278"/>
         <image name="GenericPoster-w92" width="92" height="138"/>
         <image name="Masks" width="16" height="16"/>
         <image name="TMDB" width="146" height="151"/>
