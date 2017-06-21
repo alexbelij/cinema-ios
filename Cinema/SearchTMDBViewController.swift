@@ -44,38 +44,18 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, Searc
                                   message: nil,
                                   preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: NSLocalizedString("mediaItem.disk.dvd", comment: ""), style: .default) { _ in
-      self.add(searchItem: searchResult, diskType: .dvd)
+      let controller = self.storyboard!.instantiateViewController(withIdentifier: "AddItemViewController") as! AddItemViewController
+      controller.add(item: searchResult, as: .dvd, to: self.library, movieDb: self.movieDb)
+      self.present(controller, animated: true)
     })
     alert.addAction(UIAlertAction(title: NSLocalizedString("mediaItem.disk.bluRay", comment: ""),
                                   style: .default) { _ in
-      self.add(searchItem: searchResult, diskType: .bluRay)
+      let controller = self.storyboard!.instantiateViewController(withIdentifier: "AddItemViewController") as! AddItemViewController
+      controller.add(item: searchResult, as: .bluRay, to: self.library, movieDb: self.movieDb)
+      self.present(controller, animated: true)
     })
     alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     present(alert, animated: true)
-  }
-
-  private func add(searchItem: PartialMediaItem, diskType: DiskType) {
-    DispatchQueue.global(qos: .userInitiated).async {
-      let runtime = self.movieDb.runtime(for: searchItem.id)
-      let item = MediaItem(id: searchItem.id,
-                           title: searchItem.title,
-                           runtime: runtime ?? -1,
-                           year: searchItem.year ?? -1,
-                           diskType: diskType)
-      let success = self.library.add(item)
-      DispatchQueue.main.async {
-        let title = success
-            ? NSLocalizedString("addItem.alert.added.success.title", comment: "")
-            : NSLocalizedString("addItem.alert.added.failure.title", comment: "")
-        let message = success
-            ? String(format: NSLocalizedString("addItem.alert.added.success.messageFormat", comment: ""), item.title)
-            : nil
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: NSLocalizedString("addItem.alert.added.failure.dismiss", comment: ""),
-                                      style: .default))
-        self.present(alert, animated: true)
-      }
-    }
   }
 
 }
