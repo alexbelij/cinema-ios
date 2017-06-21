@@ -8,9 +8,12 @@ class TMDBSwiftWrapper: MovieDbClient {
 
   private static let baseUrl = "https://image.tmdb.org/t/p/";
 
-  private static let language = "de"
+  var storeFront: MovieDbStoreFront
 
-  private static let country = "DE"
+  init(storeFront: MovieDbStoreFront) {
+    self.storeFront = storeFront
+  }
+
 
   func tryConnect() {
     isConnected = true
@@ -38,7 +41,7 @@ class TMDBSwiftWrapper: MovieDbClient {
         apiReturn, releaseDates in
         if let releaseDates = releaseDates {
           for date in releaseDates {
-            if date.iso_3166_1 == TMDBSwiftWrapper.country {
+            if date.iso_3166_1 == self.storeFront.country {
               certification = date.release_dates[0].certification
             }
           }
@@ -59,7 +62,7 @@ class TMDBSwiftWrapper: MovieDbClient {
   private func movie(for id: Int) -> MovieDetailedMDB? {
     var movieToReturn: MovieDetailedMDB?
     waitUntil { done in
-      MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: TMDBSwiftWrapper.language) {
+      MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: storeFront.language) {
         apiReturn, movie in
         movieToReturn = movie
         done()
@@ -73,7 +76,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     waitUntil { done in
       SearchMDB.movie(TMDBSwiftWrapper.apiKey,
                       query: searchText,
-                      language: TMDBSwiftWrapper.language,
+                      language: storeFront.language,
                       page: 1,
                       includeAdult: false,
                       year: nil,

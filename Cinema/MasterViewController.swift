@@ -41,7 +41,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
                                            name: .mediaLibraryChangedContent,
                                            object: nil)
     reloadLibraryData()
-    movieDb = TMDBSwiftWrapper()
+    movieDb = TMDBSwiftWrapper(storeFront: .de_DE)
     movieDb.tryConnect()
   }
 

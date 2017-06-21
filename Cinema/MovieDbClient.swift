@@ -4,6 +4,8 @@ protocol MovieDbClient {
 
   func tryConnect()
 
+  var storeFront: MovieDbStoreFront { get set }
+
   var isConnected: Bool { get }
 
   func poster(for id: Int, size: PosterSize) -> UIKit.UIImage?
@@ -18,6 +20,22 @@ protocol MovieDbClient {
 
   func runtime(for id: Int) -> Int?
 
+}
+
+enum MovieDbStoreFront {
+  case de_DE
+
+  var language: String {
+    switch self {
+      case .de_DE: return "de"
+    }
+  }
+
+  var country: String {
+    switch self {
+      case .de_DE: return "DE"
+    }
+  }
 }
 
 public enum PosterSize: String {
