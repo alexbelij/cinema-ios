@@ -67,6 +67,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
       }
       return false
   }
+  
+  public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
+    let alert = UIAlertController(title: NSLocalizedString("replaceLibrary.alert.title", comment: ""),
+                                  message: nil,
+                                  preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: NSLocalizedString("yes", comment: ""), style: .destructive, handler: {
+      action in
+      let controller = UIStoryboard(name: "Main", bundle: nil)
+        .instantiateViewController(withIdentifier: "ReplaceLibraryViewController") as! ReplaceLibraryViewController
+      controller.replaceLibraryContent(of: self.library, withContentOf: url)
+      UIApplication.shared.keyWindow!.rootViewController!.present(controller, animated: true)
+    }))
+    alert.addAction(UIAlertAction(title: NSLocalizedString("no", comment: ""), style: .default))
+    UIApplication.shared.keyWindow!.rootViewController!.present(alert, animated: true)
+    return true
+  }
 
 }
 

@@ -15,3 +15,9 @@
 "library.search.placeholder" = "Titel durchsuchen...";
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";
+"no" = "Nein";
+"replaceLibrary.alert.title" = "Wollen Sie wirklich die Mediathek ersetzen?";
+"replaceLibrary.done.failure.text" = "Mediathek konnte nicht ersetzt werden.";
+"replaceLibrary.done.success.text" = "Mediathek wurde ersetzt.";
+"replaceLibrary.progress.text" = "Mediathek wird ersetzt...";
+"yes" = "Ja";
