@@ -1,0 +1,13 @@
+"addItem.alert.howToAdd.title" = "How do you want to add the movie?";
+"addItem.alert.added.success.messageFormat" = "%@ was added.";
+"addItem.alert.added.success.title" = "Library successfully updated.";
+"addItem.alert.added.failure.dismiss" = "Dismiss";
+"addItem.alert.added.failure.title" = "Library could not be updated.";
+"cancel" = "Cancel";
+"details.certificationFormat" = "FSK %@";
+"details.missing.certification" = "No certification available.";
+"details.missing.genre" = "No genre available.";
+"details.missing.overview" = "No overview available.";
+"details.missing.runtime" = "No runtime available.";
+"mediaItem.disk.bluRay" = "Blu-ray";
+"mediaItem.disk.dvd" = "DVD";
