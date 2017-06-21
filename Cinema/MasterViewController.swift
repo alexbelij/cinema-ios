@@ -27,9 +27,11 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
           controllers.count - 1
           ] as! UINavigationController).topViewController as? DetailViewController
     }
+    title = NSLocalizedString("library", comment: "")
     searchController.searchResultsUpdater = self
     searchController.dimsBackgroundDuringPresentation = false
     definesPresentationContext = true
+    searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
     tableView.tableHeaderView = searchController.searchBar
 
     library = FileBasedMediaLibrary(directory: Utils.applicationSupportDirectory(),
@@ -40,7 +42,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
                                            name: .mediaLibraryChangedContent,
                                            object: nil)
     reloadLibraryData()
-    movieDb = TMDBSwiftWrapper()
+    movieDb = TMDBSwiftWrapper(storeFront: .germany)
+    movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
     movieDb.tryConnect()
   }
 
@@ -111,7 +114,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     }
     cell.titleLabel!.text = Utils.fullTitle(of: mediaItem)
     cell.runtimeLabel!.text = mediaItem.runtime == -1
-        ? "No runtime available."
+        ? NSLocalizedString("details.missing.runtime", comment: "")
         : Utils.formatDuration(mediaItem.runtime)
 
     return cell

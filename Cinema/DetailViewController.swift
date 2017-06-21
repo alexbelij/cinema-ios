@@ -40,7 +40,7 @@ class DetailViewController: UIViewController {
         subtitleLabel.isHidden = true
       }
       runtimeLabel.text = mediaItem.runtime == -1
-          ? "No runtime available."
+          ? NSLocalizedString("details.missing.runtime", comment: "")
           : Utils.formatDuration(mediaItem.runtime)
       yearLabel.text = "\(mediaItem.year)"
       diskLabel.text = localize(diskType: mediaItem.diskType)
@@ -56,7 +56,7 @@ class DetailViewController: UIViewController {
     let group = DispatchGroup()
     group.enter()
     queue.async {
-      if let poster = self.movieDb.poster(for: self.detailItem!.id, size: .w185) {
+      if let poster = self.movieDb.poster(for: self.detailItem!.id, size: PosterSize(minWidth: 92)) {
         DispatchQueue.main.async {
           self.imageView.image = poster
           group.leave()
@@ -67,7 +67,8 @@ class DetailViewController: UIViewController {
     }
     group.enter()
     queue.async {
-      let overview = self.movieDb.overview(for: self.detailItem!.id) ?? "No overview available."
+      let overview = self.movieDb.overview(for: self.detailItem!.id)
+                     ?? NSLocalizedString("details.missing.overview", comment: "")
       DispatchQueue.main.async {
         self.textView.text = overview
         group.leave()
@@ -83,7 +84,7 @@ class DetailViewController: UIViewController {
         }
       }
       if genreString.isEmpty {
-        genreString = "No genre available."
+        genreString = NSLocalizedString("details.missing.genre", comment: "")
       }
       DispatchQueue.main.async {
         self.genreLabel.text = genreString
@@ -94,9 +95,10 @@ class DetailViewController: UIViewController {
     queue.async {
       let text: String
       if let certification = self.movieDb.certification(for: self.detailItem!.id) {
-        text = "FSK \(certification)"
+        let format = NSLocalizedString("details.certificationFormat", comment: "")
+        text = String(format: format, certification)
       } else {
-        text = "No certification available."
+        text = NSLocalizedString("details.missing.certification", comment: "")
       }
       DispatchQueue.main.async {
         self.certificationLabel.text = text
@@ -110,8 +112,8 @@ class DetailViewController: UIViewController {
 
   private func localize(diskType: DiskType) -> String {
     switch diskType {
-      case .dvd: return "DVD"
-      case .bluRay: return "Blu-ray"
+      case .dvd: return NSLocalizedString("mediaItem.disk.dvd", comment: "")
+      case .bluRay: return NSLocalizedString("mediaItem.disk.bluRay", comment: "")
     }
   }
 
