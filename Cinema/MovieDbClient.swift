@@ -23,17 +23,17 @@ protocol MovieDbClient {
 }
 
 enum MovieDbStoreFront {
-  case de_DE
+  case germany
 
   var language: String {
     switch self {
-      case .de_DE: return "de"
+      case .germany: return "de"
     }
   }
 
   var country: String {
     switch self {
-      case .de_DE: return "DE"
+      case .germany: return "DE"
     }
   }
 }
