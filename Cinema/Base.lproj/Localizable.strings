@@ -9,5 +9,6 @@
 "details.missing.genre" = "No genre available.";
 "details.missing.overview" = "No overview available.";
 "details.missing.runtime" = "No runtime available.";
+"library" = "Library";
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";

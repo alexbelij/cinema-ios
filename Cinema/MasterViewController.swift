@@ -27,6 +27,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
           controllers.count - 1
           ] as! UINavigationController).topViewController as? DetailViewController
     }
+    title = NSLocalizedString("library", comment: "")
     searchController.searchResultsUpdater = self
     searchController.dimsBackgroundDuringPresentation = false
     definesPresentationContext = true
