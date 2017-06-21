@@ -13,6 +13,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
   var window: UIWindow?
 
+  var library: MediaLibrary!
+  var movieDb: MovieDbClient!
+
 
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     // Override point for customization after application launch.
@@ -20,6 +23,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     let navigationController = splitViewController.viewControllers[splitViewController.viewControllers.count-1] as! UINavigationController
     navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
     splitViewController.delegate = self
+
+    library = FileBasedMediaLibrary(directory: Utils.applicationSupportDirectory(),
+                                    fileName: "cinema.data",
+                                    dataFormat: KeyedArchivalFormat())
+    movieDb = TMDBSwiftWrapper(storeFront: .germany)
+    movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
+    movieDb.tryConnect()
+
     return true
   }
 
@@ -55,6 +66,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
           return true
       }
       return false
+  }
+  
+  public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
+    let alert = UIAlertController(title: NSLocalizedString("replaceLibrary.alert.title", comment: ""),
+                                  message: nil,
+                                  preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: NSLocalizedString("yes", comment: ""), style: .destructive, handler: {
+      action in
+      let controller = UIStoryboard(name: "Main", bundle: nil)
+        .instantiateViewController(withIdentifier: "ReplaceLibraryViewController") as! ReplaceLibraryViewController
+      controller.replaceLibraryContent(of: self.library, withContentOf: url)
+      UIApplication.shared.keyWindow!.rootViewController!.present(controller, animated: true)
+    }))
+    alert.addAction(UIAlertAction(title: NSLocalizedString("no", comment: ""), style: .default))
+    UIApplication.shared.keyWindow!.rootViewController!.present(alert, animated: true)
+    return true
   }
 
 }

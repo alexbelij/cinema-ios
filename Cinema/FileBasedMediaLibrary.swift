@@ -55,6 +55,14 @@ class FileBasedMediaLibrary: MediaLibrary {
                                            format: dataFormat)
   }
 
+  func replaceItems(_ mediaItems: [MediaItem]) -> Bool {
+    self.mediaItems = mediaItems
+    NotificationCenter.default.post(name: .mediaLibraryChangedContent, object: self)
+    return FileBasedMediaLibrary.writeData(mediaItems,
+                                           to: directory.appendingPathComponent(fileName),
+                                           format: dataFormat)
+  }
+
 }
 
 extension Notification.Name {

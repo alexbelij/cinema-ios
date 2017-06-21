@@ -4,4 +4,6 @@ protocol MediaLibrary {
 
   func add(_ mediaItem: MediaItem) -> Bool;
 
+  func replaceItems(_ mediaItems: [MediaItem]) -> Bool;
+
 }
