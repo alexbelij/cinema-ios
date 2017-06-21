@@ -21,6 +21,9 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   private var movieDb: MovieDbClient!
 
   override func viewDidLoad() {
+    library = (UIApplication.shared.delegate as! AppDelegate).library
+    movieDb = (UIApplication.shared.delegate as! AppDelegate).movieDb
+    fetchLibraryData()
     super.viewDidLoad()
     if let split = splitViewController {
       let controllers = split.viewControllers
@@ -35,13 +38,10 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
     tableView.tableHeaderView = searchController.searchBar
 
-    library = (UIApplication.shared.delegate as! AppDelegate).library
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(reloadLibraryData),
                                            name: .mediaLibraryChangedContent,
                                            object: nil)
-    reloadLibraryData()
-    movieDb = (UIApplication.shared.delegate as! AppDelegate).movieDb
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -49,7 +49,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     super.viewWillAppear(animated)
   }
 
-  @objc private func reloadLibraryData() {
+  private func fetchLibraryData() {
     mediaItems = library.mediaItems(where: { _ in true })
     mediaItems.sort { (left, right) in
       if left.title != right.title {
@@ -58,6 +58,10 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         return left.year < right.year
       }
     }
+  }
+
+  @objc private func reloadLibraryData() {
+    fetchLibraryData()
     DispatchQueue.main.async {
       self.tableView.reloadData()
     }
