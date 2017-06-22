@@ -5,7 +5,7 @@ struct TitleSortingPolicy: SortingPolicy {
   private let allSectionIndexTitles = ["#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
                                        "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
-  func sectionTitle(for item: MediaItem) -> String {
+  func sectionIndexTitle(for item: MediaItem) -> String {
     let firstCharacter = String(item.title[item.title.startIndex])
     if firstCharacter.rangeOfCharacter(from: .letters) != nil {
       return firstCharacter.uppercased()
@@ -18,7 +18,7 @@ struct TitleSortingPolicy: SortingPolicy {
     return allSectionIndexTitles
   }
 
-  func sectionTitleSorting(left: String, right: String) -> Bool {
+  func sectionIndexTitleSorting(left: String, right: String) -> Bool {
     return left < right
   }
 

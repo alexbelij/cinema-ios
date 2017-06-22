@@ -2,10 +2,10 @@ import Foundation
 
 protocol SortingPolicy {
 
-  func sectionTitle(for item: MediaItem) -> String
+  func sectionIndexTitle(for item: MediaItem) -> String
   func completeSectionIndexTitles(_: [String]) -> [String]
 
-  func sectionTitleSorting(left: String, right: String) -> Bool
+  func sectionIndexTitleSorting(left: String, right: String) -> Bool
   func itemSorting(left: MediaItem, right: MediaItem) -> Bool
 
 }

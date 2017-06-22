@@ -18,8 +18,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   private var filteredMediaItems = [MediaItem]()
 
   private var sectionItems = [String: [MediaItem]]()
-  private var sectionTitles = [String]()
   private var sectionIndexTitles = [String]()
+  private var visibleSectionIndexTitles = [String]()
 
   private var detailViewController: DetailViewController? = nil
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
@@ -63,19 +63,20 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     allItems = library.mediaItems(where: { _ in true })
     sectionItems = [String: [MediaItem]]()
     for item in allItems {
-      let sectionTitle = sortingPolicy.sectionTitle(for: item)
-      if sectionItems[sectionTitle] == nil {
-        sectionItems[sectionTitle] = [MediaItem]()
+      let sectionIndexTitle = sortingPolicy.sectionIndexTitle(for: item)
+      if sectionItems[sectionIndexTitle] == nil {
+        sectionItems[sectionIndexTitle] = [MediaItem]()
       }
-      sectionItems[sectionTitle]!.append(item)
+      sectionItems[sectionIndexTitle]!.append(item)
     }
     for key in sectionItems.keys {
       sectionItems[key]!.sort(by: sortingPolicy.itemSorting)
     }
-    sectionTitles = Array(sectionItems.keys)
-    sectionTitles.sort(by: sortingPolicy.sectionTitleSorting)
-    sectionIndexTitles = [UITableViewIndexSearch] + sortingPolicy.completeSectionIndexTitles(sectionTitles)
-    let missingElements = Set(sectionTitles).subtracting(Set(sectionIndexTitles))
+    sectionIndexTitles = Array(sectionItems.keys)
+    sectionIndexTitles.sort(by: sortingPolicy.sectionIndexTitleSorting)
+    visibleSectionIndexTitles = [UITableViewIndexSearch] + sortingPolicy.completeSectionIndexTitles(
+        sectionIndexTitles)
+    let missingElements = Set(sectionIndexTitles).subtracting(Set(visibleSectionIndexTitles))
     if !missingElements.isEmpty {
       preconditionFailure("SortingPolicy.completeSectionIndexTitles(_) must not remove sections \(missingElements)")
     }
@@ -97,7 +98,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         if (searchController.isActive && searchController.searchBar.text != "") {
           selectedItem = filteredMediaItems[indexPath.row]
         } else {
-          selectedItem = sectionItems[sectionTitles[indexPath.section]]![indexPath.row]
+          selectedItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
         }
         let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
         controller.detailItem = selectedItem
@@ -131,11 +132,11 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   // MARK: - Table View
 
   override func numberOfSections(in tableView: UITableView) -> Int {
-    return searchController.isActive ? 1 : sectionTitles.count
+    return searchController.isActive ? 1 : sectionIndexTitles.count
   }
 
   public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    return searchController.isActive ? nil : sectionTitles[section]
+    return searchController.isActive ? nil : sectionIndexTitles[section]
   }
 
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -146,7 +147,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         return filteredMediaItems.count
       }
     } else {
-      return sectionItems[sectionTitles[section]]!.count
+      return sectionItems[sectionIndexTitles[section]]!.count
     }
   }
 
@@ -161,7 +162,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         mediaItem = allItems[indexPath.row]
       }
     } else {
-      mediaItem = sectionItems[sectionTitles[indexPath.section]]![indexPath.row]
+      mediaItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
     }
     cell.titleLabel!.text = Utils.fullTitle(of: mediaItem)
     cell.runtimeLabel!.text = mediaItem.runtime == -1
@@ -176,7 +177,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
-    return searchController.isActive ? nil : sectionIndexTitles
+    return searchController.isActive ? nil : visibleSectionIndexTitles
   }
 
   public override func tableView(_ tableView: UITableView,

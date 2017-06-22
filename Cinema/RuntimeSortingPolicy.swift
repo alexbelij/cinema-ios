@@ -2,7 +2,7 @@ import Foundation
 
 struct RuntimeSortingPolicy: SortingPolicy {
 
-  func sectionTitle(for item: MediaItem) -> String {
+  func sectionIndexTitle(for item: MediaItem) -> String {
     return String(item.runtime / 10 * 10)
   }
 
@@ -16,7 +16,7 @@ struct RuntimeSortingPolicy: SortingPolicy {
     }
   }
 
-  func sectionTitleSorting(left: String, right: String) -> Bool {
+  func sectionIndexTitleSorting(left: String, right: String) -> Bool {
     return Int(left)! <= Int(right)!
   }
 

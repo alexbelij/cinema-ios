@@ -1,6 +1,6 @@
 struct YearSortingPolicy: SortingPolicy {
 
-  func sectionTitle(for item: MediaItem) -> String {
+  func sectionIndexTitle(for item: MediaItem) -> String {
     if item.year < 2010 {
       return String(item.year / 10 * 10)
     } else {
@@ -8,7 +8,7 @@ struct YearSortingPolicy: SortingPolicy {
     }
   }
 
-  func sectionTitleSorting(left: String, right: String) -> Bool {
+  func sectionIndexTitleSorting(left: String, right: String) -> Bool {
     return Int(left)! >= Int(right)!
   }
 
