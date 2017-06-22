@@ -11,12 +11,12 @@ import Dispatch
 
 class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
-  var library: MediaLibrary!
-  var mediaItems = [MediaItem]()
-  var filteredMediaItems = [MediaItem]()
+  private var library: MediaLibrary!
+  private var mediaItems = [MediaItem]()
+  private var filteredMediaItems = [MediaItem]()
 
-  var detailViewController: DetailViewController? = nil
-  let searchController: UISearchController = UISearchController(searchResultsController: nil)
+  private var detailViewController: DetailViewController? = nil
+  private let searchController: UISearchController = UISearchController(searchResultsController: nil)
 
   private var movieDb: MovieDbClient!
 
