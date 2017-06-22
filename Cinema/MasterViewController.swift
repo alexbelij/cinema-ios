@@ -19,6 +19,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
   private var sectionItems = [String: [MediaItem]]()
   private var sectionTitles = [String]()
+  private var sectionIndexTitles = [String]()
 
   private var detailViewController: DetailViewController? = nil
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
@@ -70,6 +71,11 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     }
     sectionTitles = Array(sectionItems.keys)
     sectionTitles.sort(by: sortingPolicy.sectionTitleSorting)
+    sectionIndexTitles = sortingPolicy.completeSectionIndexTitles(sectionTitles)
+    let missingElements = Set(sectionTitles).subtracting(Set(sectionIndexTitles))
+    if !missingElements.isEmpty {
+      preconditionFailure("SortingPolicy.completeSectionIndexTitles(_) must not remove sections \(missingElements)")
+    }
   }
 
   @objc private func reloadLibraryData() {
@@ -152,7 +158,13 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
-    return searchController.isActive ? nil : sectionTitles
+    return searchController.isActive ? nil : sectionIndexTitles
+  }
+
+  public override func tableView(_ tableView: UITableView,
+                                 sectionForSectionIndexTitle title: String,
+                                 at index: Int) -> Int {
+    return sectionTitles.index(of: title) ?? -1
   }
 
   func filterContentForSearchText(searchText: String) {
