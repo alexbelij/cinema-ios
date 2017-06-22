@@ -106,16 +106,20 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   // MARK: - Table View
 
   override func numberOfSections(in tableView: UITableView) -> Int {
-    return sectionTitles.count
+    return searchController.isActive ? 1 : sectionTitles.count
   }
 
   public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    return sectionTitles[section]
+    return searchController.isActive ? nil : sectionTitles[section]
   }
 
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    if (searchController.isActive && searchController.searchBar.text != "") {
-      return filteredMediaItems.count
+    if (searchController.isActive) {
+      if searchController.searchBar.text == "" {
+        return allItems.count
+      } else {
+        return filteredMediaItems.count
+      }
     } else {
       return sectionItems[sectionTitles[section]]!.count
     }
@@ -125,8 +129,12 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! MyTableCell
 
     let mediaItem: MediaItem
-    if (searchController.isActive && searchController.searchBar.text != "") {
-      mediaItem = filteredMediaItems[indexPath.row]
+    if (searchController.isActive) {
+      if searchController.searchBar.text != "" {
+        mediaItem = filteredMediaItems[indexPath.row]
+      } else {
+        mediaItem = allItems[indexPath.row]
+      }
     } else {
       mediaItem = sectionItems[sectionTitles[indexPath.section]]![indexPath.row]
     }
