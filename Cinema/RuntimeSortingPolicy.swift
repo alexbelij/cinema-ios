@@ -16,6 +16,14 @@ struct RuntimeSortingPolicy: SortingPolicy {
     }
   }
 
+  func sectionTitle(for sectionIndexTitle: String) -> String {
+    let runtime = DateComponents(minute: Int(sectionIndexTitle)!)
+    let formatter = DateComponentsFormatter()
+    formatter.unitsStyle = .full
+    formatter.allowedUnits = [.minute]
+    return formatter.string(from: runtime)!
+  }
+
   func sectionIndexTitleSorting(left: String, right: String) -> Bool {
     return Int(left)! <= Int(right)!
   }

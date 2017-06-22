@@ -5,6 +5,8 @@ protocol SortingPolicy {
   func sectionIndexTitle(for item: MediaItem) -> String
   func completeSectionIndexTitles(_: [String]) -> [String]
 
+  func sectionTitle(for sectionIndexTitle: String) -> String
+
   func sectionIndexTitleSorting(left: String, right: String) -> Bool
   func itemSorting(left: MediaItem, right: MediaItem) -> Bool
 
@@ -13,5 +15,9 @@ protocol SortingPolicy {
 extension SortingPolicy {
   func completeSectionIndexTitles(_ sections: [String]) -> [String] {
     return sections
+  }
+
+  func sectionTitle(for sectionIndexTitle: String) -> String {
+    return sectionIndexTitle
   }
 }

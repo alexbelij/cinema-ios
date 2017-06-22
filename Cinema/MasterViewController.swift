@@ -20,6 +20,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   private var sectionItems = [String: [MediaItem]]()
   private var sectionIndexTitles = [String]()
   private var visibleSectionIndexTitles = [String]()
+  private var sectionTitles = [String]()
 
   private var detailViewController: DetailViewController? = nil
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
@@ -80,6 +81,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     if !missingElements.isEmpty {
       preconditionFailure("SortingPolicy.completeSectionIndexTitles(_) must not remove sections \(missingElements)")
     }
+    sectionTitles = sectionIndexTitles.map { sortingPolicy.sectionTitle(for: $0) }
   }
 
   @objc private func reloadLibraryData() {
@@ -136,7 +138,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    return searchController.isActive ? nil : sectionIndexTitles[section]
+    return searchController.isActive ? nil : sectionTitles[section]
   }
 
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
