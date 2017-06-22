@@ -44,6 +44,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
     tableView.tableHeaderView = searchController.searchBar
     tableView.sectionIndexBackgroundColor = UIColor.clear
+    tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
 
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(reloadLibraryData),
