@@ -7,8 +7,9 @@ struct TitleSortingPolicy: SortingPolicy {
 
   func sectionIndexTitle(for item: MediaItem) -> String {
     let firstCharacter = String(item.title[item.title.startIndex])
-    if firstCharacter.rangeOfCharacter(from: .letters) != nil {
-      return firstCharacter.uppercased()
+    let folded = firstCharacter.folding(options: .diacriticInsensitive, locale: Locale.current)
+    if folded.rangeOfCharacter(from: .letters) != nil {
+      return folded.uppercased()
     } else {
       return "#"
     }
@@ -19,14 +20,18 @@ struct TitleSortingPolicy: SortingPolicy {
   }
 
   func sectionIndexTitleSorting(left: String, right: String) -> Bool {
-    return left < right
+    switch left.compare(right) {
+      case .orderedSame: fallthrough
+      case .orderedAscending: return true
+      case .orderedDescending: return false
+    }
   }
 
   func itemSorting(left: MediaItem, right: MediaItem) -> Bool {
-    if left.title != right.title {
-      return left.title < right.title
-    } else {
-      return left.year < right.year
+    switch left.title.compare(right.title, options: [.diacriticInsensitive, .caseInsensitive]) {
+      case .orderedSame: return left.year <= right.year
+      case .orderedAscending: return true
+      case .orderedDescending: return false
     }
   }
 

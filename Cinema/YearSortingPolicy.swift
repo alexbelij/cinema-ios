@@ -13,6 +13,10 @@ struct YearSortingPolicy: SortingPolicy {
   }
 
   func itemSorting(left: MediaItem, right: MediaItem) -> Bool {
-    return left.title < right.title
+    switch left.title.compare(right.title, options: [.diacriticInsensitive, .caseInsensitive]) {
+      case .orderedSame: fallthrough
+      case .orderedAscending: return true
+      case .orderedDescending: return false
+    }
   }
 }
