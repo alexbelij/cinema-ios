@@ -17,6 +17,9 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   private var allItems = [MediaItem]()
   private var filteredMediaItems = [MediaItem]()
 
+  private var sectionItems = [String: [MediaItem]]()
+  private var sectionTitles = [String]()
+
   private var detailViewController: DetailViewController? = nil
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
 
@@ -51,13 +54,31 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
   private func fetchLibraryData() {
     allItems = library.mediaItems(where: { _ in true })
-    allItems.sort { (left, right) in
-      if left.title != right.title {
-        return left.title < right.title
+    sectionItems = [String: [MediaItem]]()
+    for item in allItems {
+      let firstCharacter = String(item.title[item.title.startIndex])
+      let sectionTitle: String
+      if firstCharacter.rangeOfCharacter(from: .letters) != nil {
+        sectionTitle = firstCharacter.uppercased()
       } else {
-        return left.year < right.year
+        sectionTitle = "#"
+      }
+      if sectionItems[sectionTitle] == nil {
+        sectionItems[sectionTitle] = [MediaItem]()
+      }
+      sectionItems[sectionTitle]!.append(item)
+    }
+    for key in sectionItems.keys {
+      sectionItems[key]!.sort { left, right in
+        if left.title != right.title {
+          return left.title < right.title
+        } else {
+          return left.year < right.year
+        }
       }
     }
+    sectionTitles = Array(sectionItems.keys)
+    sectionTitles.sort(by: <)
   }
 
   @objc private func reloadLibraryData() {
@@ -76,7 +97,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         if (searchController.isActive && searchController.searchBar.text != "") {
           selectedItem = filteredMediaItems[indexPath.row]
         } else {
-          selectedItem = allItems[indexPath.row]
+          selectedItem = sectionItems[sectionTitles[indexPath.section]]![indexPath.row]
         }
         let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
         controller.detailItem = selectedItem
@@ -95,14 +116,18 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   // MARK: - Table View
 
   override func numberOfSections(in tableView: UITableView) -> Int {
-    return 1
+    return sectionTitles.count
+  }
+
+  public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    return sectionTitles[section]
   }
 
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     if (searchController.isActive && searchController.searchBar.text != "") {
       return filteredMediaItems.count
     } else {
-      return allItems.count
+      return sectionItems[sectionTitles[section]]!.count
     }
   }
 
@@ -113,7 +138,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     if (searchController.isActive && searchController.searchBar.text != "") {
       mediaItem = filteredMediaItems[indexPath.row]
     } else {
-      mediaItem = allItems[indexPath.row]
+      mediaItem = sectionItems[sectionTitles[indexPath.section]]![indexPath.row]
     }
     cell.titleLabel!.text = Utils.fullTitle(of: mediaItem)
     cell.runtimeLabel!.text = mediaItem.runtime == -1
