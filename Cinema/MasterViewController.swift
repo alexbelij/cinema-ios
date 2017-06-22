@@ -12,13 +12,13 @@ import Dispatch
 class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
   private var library: MediaLibrary!
+  private var movieDb: MovieDbClient!
+
   private var mediaItems = [MediaItem]()
   private var filteredMediaItems = [MediaItem]()
 
   private var detailViewController: DetailViewController? = nil
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
-
-  private var movieDb: MovieDbClient!
 
   override func viewDidLoad() {
     library = (UIApplication.shared.delegate as! AppDelegate).library
