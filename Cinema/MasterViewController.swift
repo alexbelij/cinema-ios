@@ -24,7 +24,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   private var detailViewController: DetailViewController? = nil
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
 
-  private var sortingPolicy: SortingPolicy = TitleSortingPolicy()
+  private let sortingPolicies: [SortingPolicy] = [TitleSortingPolicy()]
+  private var sortingPolicyIndex = 0
 
   override func viewDidLoad() {
     library = (UIApplication.shared.delegate as! AppDelegate).library
@@ -58,6 +59,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   private func fetchLibraryData() {
+    let sortingPolicy = sortingPolicies[sortingPolicyIndex]
     allItems = library.mediaItems(where: { _ in true })
     sectionItems = [String: [MediaItem]]()
     for item in allItems {
@@ -108,6 +110,20 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
       let controller = segue.destination as! SearchTMDBViewController
       controller.library = library
       controller.movieDb = movieDb
+    }
+    if segue.identifier == "options" {
+      let navigationController = segue.destination as! UINavigationController
+      let controller = (navigationController).childViewControllers.last! as! StringOptionsTableViewController
+      controller.configure(options: [
+        (
+            NSLocalizedString("sort.by", comment: ""),
+            [NSLocalizedString("sort.by.title", comment: "")],
+            sortingPolicyIndex
+        )
+      ]) { selectedIndices in
+        self.sortingPolicyIndex = selectedIndices[0]!
+        self.reloadLibraryData()
+      }
     }
   }
 

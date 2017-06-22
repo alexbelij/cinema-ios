@@ -20,4 +20,6 @@
 "replaceLibrary.done.failure.text" = "Mediathek konnte nicht ersetzt werden.";
 "replaceLibrary.done.success.text" = "Mediathek wurde ersetzt.";
 "replaceLibrary.progress.text" = "Mediathek wird ersetzt...";
+"sort.by" = "Sortieren nach";
+"sort.by.title" = "Titel";
 "yes" = "Ja";
