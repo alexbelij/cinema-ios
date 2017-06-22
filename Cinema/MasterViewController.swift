@@ -14,7 +14,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   private var library: MediaLibrary!
   private var movieDb: MovieDbClient!
 
-  private var mediaItems = [MediaItem]()
+  private var allItems = [MediaItem]()
   private var filteredMediaItems = [MediaItem]()
 
   private var detailViewController: DetailViewController? = nil
@@ -50,8 +50,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   private func fetchLibraryData() {
-    mediaItems = library.mediaItems(where: { _ in true })
-    mediaItems.sort { (left, right) in
+    allItems = library.mediaItems(where: { _ in true })
+    allItems.sort { (left, right) in
       if left.title != right.title {
         return left.title < right.title
       } else {
@@ -76,7 +76,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         if (searchController.isActive && searchController.searchBar.text != "") {
           selectedItem = filteredMediaItems[indexPath.row]
         } else {
-          selectedItem = mediaItems[indexPath.row]
+          selectedItem = allItems[indexPath.row]
         }
         let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
         controller.detailItem = selectedItem
@@ -102,7 +102,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     if (searchController.isActive && searchController.searchBar.text != "") {
       return filteredMediaItems.count
     } else {
-      return mediaItems.count
+      return allItems.count
     }
   }
 
@@ -113,7 +113,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     if (searchController.isActive && searchController.searchBar.text != "") {
       mediaItem = filteredMediaItems[indexPath.row]
     } else {
-      mediaItem = mediaItems[indexPath.row]
+      mediaItem = allItems[indexPath.row]
     }
     cell.titleLabel!.text = Utils.fullTitle(of: mediaItem)
     cell.runtimeLabel!.text = mediaItem.runtime == -1
@@ -129,7 +129,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
   func filterContentForSearchText(searchText: String) {
     let lowercasedSearchText = searchText.lowercased()
-    filteredMediaItems = mediaItems.filter({ Utils.fullTitle(of: $0).lowercased().contains(lowercasedSearchText) })
+    filteredMediaItems = allItems.filter({ Utils.fullTitle(of: $0).lowercased().contains(lowercasedSearchText) })
 
     tableView.reloadData()
   }
