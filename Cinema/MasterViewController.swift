@@ -42,6 +42,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     definesPresentationContext = true
     searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
     tableView.tableHeaderView = searchController.searchBar
+    tableView.sectionIndexBackgroundColor = UIColor.clear
 
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(reloadLibraryData),
