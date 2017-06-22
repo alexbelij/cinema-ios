@@ -71,7 +71,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     }
     sectionTitles = Array(sectionItems.keys)
     sectionTitles.sort(by: sortingPolicy.sectionTitleSorting)
-    sectionIndexTitles = sortingPolicy.completeSectionIndexTitles(sectionTitles)
+    sectionIndexTitles = [UITableViewIndexSearch] + sortingPolicy.completeSectionIndexTitles(sectionTitles)
     let missingElements = Set(sectionTitles).subtracting(Set(sectionIndexTitles))
     if !missingElements.isEmpty {
       preconditionFailure("SortingPolicy.completeSectionIndexTitles(_) must not remove sections \(missingElements)")
@@ -164,7 +164,13 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   public override func tableView(_ tableView: UITableView,
                                  sectionForSectionIndexTitle title: String,
                                  at index: Int) -> Int {
-    return sectionTitles.index(of: title) ?? -1
+    if title == UITableViewIndexSearch {
+      let frame = searchController.searchBar.frame
+      tableView.scrollRectToVisible(frame, animated: false)
+      return -1
+    } else {
+      return sectionIndexTitles.index(of: title) ?? -1
+    }
   }
 
   func filterContentForSearchText(searchText: String) {
