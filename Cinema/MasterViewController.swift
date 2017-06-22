@@ -23,6 +23,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   private var detailViewController: DetailViewController? = nil
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
 
+  private var sortingPolicy: SortingPolicy = TitleSortingPolicy()
+
   override func viewDidLoad() {
     library = (UIApplication.shared.delegate as! AppDelegate).library
     movieDb = (UIApplication.shared.delegate as! AppDelegate).movieDb
@@ -56,29 +58,17 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     allItems = library.mediaItems(where: { _ in true })
     sectionItems = [String: [MediaItem]]()
     for item in allItems {
-      let firstCharacter = String(item.title[item.title.startIndex])
-      let sectionTitle: String
-      if firstCharacter.rangeOfCharacter(from: .letters) != nil {
-        sectionTitle = firstCharacter.uppercased()
-      } else {
-        sectionTitle = "#"
-      }
+      let sectionTitle = sortingPolicy.sectionTitle(for: item)
       if sectionItems[sectionTitle] == nil {
         sectionItems[sectionTitle] = [MediaItem]()
       }
       sectionItems[sectionTitle]!.append(item)
     }
     for key in sectionItems.keys {
-      sectionItems[key]!.sort { left, right in
-        if left.title != right.title {
-          return left.title < right.title
-        } else {
-          return left.year < right.year
-        }
-      }
+      sectionItems[key]!.sort(by: sortingPolicy.itemSorting)
     }
     sectionTitles = Array(sectionItems.keys)
-    sectionTitles.sort(by: <)
+    sectionTitles.sort(by: sortingPolicy.sectionTitleSorting)
   }
 
   @objc private func reloadLibraryData() {
