@@ -24,7 +24,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   private var detailViewController: DetailViewController? = nil
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
 
-  private let sortingPolicies: [SortingPolicy] = [TitleSortingPolicy()]
+  private let sortingPolicies: [SortingPolicy] =  [TitleSortingPolicy(), RuntimeSortingPolicy(), YearSortingPolicy()]
   private var sortingPolicyIndex = 0
 
   override func viewDidLoad() {
@@ -117,7 +117,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
       controller.configure(options: [
         (
             NSLocalizedString("sort.by", comment: ""),
-            [NSLocalizedString("sort.by.title", comment: "")],
+            [NSLocalizedString("sort.by.title", comment: ""), NSLocalizedString("sort.by.runtime", comment: ""),
+             NSLocalizedString("sort.by.year", comment: "")],
             sortingPolicyIndex
         )
       ]) { selectedIndices in

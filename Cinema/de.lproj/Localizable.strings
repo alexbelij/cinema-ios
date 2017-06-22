@@ -21,5 +21,7 @@
 "replaceLibrary.done.success.text" = "Mediathek wurde ersetzt.";
 "replaceLibrary.progress.text" = "Mediathek wird ersetzt...";
 "sort.by" = "Sortieren nach";
+"sort.by.runtime" = "Laufzeit";
 "sort.by.title" = "Titel";
+"sort.by.year" = "Erscheinungsjahr";
 "yes" = "Ja";

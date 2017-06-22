@@ -21,6 +21,8 @@
 "replaceLibrary.done.success.text" = "Library was replaced.";
 "replaceLibrary.progress.text" = "Replacing library...";
 "sort.by" = "Sort by";
+"sort.by.runtime" = "Runtime";
 "sort.by.title" = "Title";
+"sort.by.year" = "Year";
 "yes" = "Yes";
 
