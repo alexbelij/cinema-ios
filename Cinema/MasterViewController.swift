@@ -150,6 +150,10 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     return 55
   }
 
+  public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+    return searchController.isActive ? nil : sectionTitles
+  }
+
   func filterContentForSearchText(searchText: String) {
     let lowercasedSearchText = searchText.lowercased()
     filteredMediaItems = allItems.filter({ Utils.fullTitle(of: $0).lowercased().contains(lowercasedSearchText) })
