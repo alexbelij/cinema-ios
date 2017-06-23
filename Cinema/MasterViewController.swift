@@ -11,16 +11,27 @@ import Dispatch
 
 class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
-  var library: MediaLibrary!
-  var mediaItems = [MediaItem]()
-  var filteredMediaItems = [MediaItem]()
-
-  var detailViewController: DetailViewController? = nil
-  let searchController: UISearchController = UISearchController(searchResultsController: nil)
-
+  private var library: MediaLibrary!
   private var movieDb: MovieDbClient!
 
+  private var allItems = [MediaItem]()
+  private var filteredMediaItems = [MediaItem]()
+
+  private var sectionItems = [String: [MediaItem]]()
+  private var sectionIndexTitles = [String]()
+  private var visibleSectionIndexTitles = [String]()
+  private var sectionTitles = [String]()
+
+  private var detailViewController: DetailViewController? = nil
+  private let searchController: UISearchController = UISearchController(searchResultsController: nil)
+
+  private let sortingPolicies: [SortingPolicy] =  [TitleSortingPolicy(), RuntimeSortingPolicy(), YearSortingPolicy()]
+  private var sortingPolicyIndex = 0
+
   override func viewDidLoad() {
+    library = (UIApplication.shared.delegate as! AppDelegate).library
+    movieDb = (UIApplication.shared.delegate as! AppDelegate).movieDb
+    fetchLibraryData()
     super.viewDidLoad()
     if let split = splitViewController {
       let controllers = split.viewControllers
@@ -34,14 +45,13 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     definesPresentationContext = true
     searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
     tableView.tableHeaderView = searchController.searchBar
+    tableView.sectionIndexBackgroundColor = UIColor.clear
+    tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
 
-    library = (UIApplication.shared.delegate as! AppDelegate).library
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(reloadLibraryData),
                                            name: .mediaLibraryChangedContent,
                                            object: nil)
-    reloadLibraryData()
-    movieDb = (UIApplication.shared.delegate as! AppDelegate).movieDb
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -49,15 +59,33 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     super.viewWillAppear(animated)
   }
 
-  @objc private func reloadLibraryData() {
-    mediaItems = library.mediaItems(where: { _ in true })
-    mediaItems.sort { (left, right) in
-      if left.title != right.title {
-        return left.title < right.title
-      } else {
-        return left.year < right.year
+  private func fetchLibraryData() {
+    let sortingPolicy = sortingPolicies[sortingPolicyIndex]
+    allItems = library.mediaItems(where: { _ in true })
+    sectionItems = [String: [MediaItem]]()
+    for item in allItems {
+      let sectionIndexTitle = sortingPolicy.sectionIndexTitle(for: item)
+      if sectionItems[sectionIndexTitle] == nil {
+        sectionItems[sectionIndexTitle] = [MediaItem]()
       }
+      sectionItems[sectionIndexTitle]!.append(item)
     }
+    for key in sectionItems.keys {
+      sectionItems[key]!.sort(by: sortingPolicy.itemSorting)
+    }
+    sectionIndexTitles = Array(sectionItems.keys)
+    sectionIndexTitles.sort(by: sortingPolicy.sectionIndexTitleSorting)
+    visibleSectionIndexTitles = [UITableViewIndexSearch] + sortingPolicy.completeSectionIndexTitles(
+        sectionIndexTitles)
+    let missingElements = Set(sectionIndexTitles).subtracting(Set(visibleSectionIndexTitles))
+    if !missingElements.isEmpty {
+      preconditionFailure("SortingPolicy.completeSectionIndexTitles(_) must not remove sections \(missingElements)")
+    }
+    sectionTitles = sectionIndexTitles.map { sortingPolicy.sectionTitle(for: $0) }
+  }
+
+  @objc private func reloadLibraryData() {
+    fetchLibraryData()
     DispatchQueue.main.async {
       self.tableView.reloadData()
     }
@@ -72,7 +100,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         if (searchController.isActive && searchController.searchBar.text != "") {
           selectedItem = filteredMediaItems[indexPath.row]
         } else {
-          selectedItem = mediaItems[indexPath.row]
+          selectedItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
         }
         let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
         controller.detailItem = selectedItem
@@ -86,19 +114,42 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
       controller.library = library
       controller.movieDb = movieDb
     }
+    if segue.identifier == "options" {
+      let navigationController = segue.destination as! UINavigationController
+      let controller = (navigationController).childViewControllers.last! as! StringOptionsTableViewController
+      controller.configure(options: [
+        (
+            NSLocalizedString("sort.by", comment: ""),
+            [NSLocalizedString("sort.by.title", comment: ""), NSLocalizedString("sort.by.runtime", comment: ""),
+             NSLocalizedString("sort.by.year", comment: "")],
+            sortingPolicyIndex
+        )
+      ]) { selectedIndices in
+        self.sortingPolicyIndex = selectedIndices[0]!
+        self.reloadLibraryData()
+      }
+    }
   }
 
   // MARK: - Table View
 
   override func numberOfSections(in tableView: UITableView) -> Int {
-    return 1
+    return searchController.isActive ? 1 : sectionIndexTitles.count
+  }
+
+  public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    return searchController.isActive ? nil : sectionTitles[section]
   }
 
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    if (searchController.isActive && searchController.searchBar.text != "") {
-      return filteredMediaItems.count
+    if (searchController.isActive) {
+      if searchController.searchBar.text == "" {
+        return allItems.count
+      } else {
+        return filteredMediaItems.count
+      }
     } else {
-      return mediaItems.count
+      return sectionItems[sectionIndexTitles[section]]!.count
     }
   }
 
@@ -106,10 +157,14 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! MyTableCell
 
     let mediaItem: MediaItem
-    if (searchController.isActive && searchController.searchBar.text != "") {
-      mediaItem = filteredMediaItems[indexPath.row]
+    if (searchController.isActive) {
+      if searchController.searchBar.text != "" {
+        mediaItem = filteredMediaItems[indexPath.row]
+      } else {
+        mediaItem = allItems[indexPath.row]
+      }
     } else {
-      mediaItem = mediaItems[indexPath.row]
+      mediaItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
     }
     cell.titleLabel!.text = Utils.fullTitle(of: mediaItem)
     cell.runtimeLabel!.text = mediaItem.runtime == -1
@@ -123,9 +178,25 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     return 55
   }
 
+  public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+    return searchController.isActive ? nil : visibleSectionIndexTitles
+  }
+
+  public override func tableView(_ tableView: UITableView,
+                                 sectionForSectionIndexTitle title: String,
+                                 at index: Int) -> Int {
+    if title == UITableViewIndexSearch {
+      let frame = searchController.searchBar.frame
+      tableView.scrollRectToVisible(frame, animated: false)
+      return -1
+    } else {
+      return sectionIndexTitles.index(of: title) ?? -1
+    }
+  }
+
   func filterContentForSearchText(searchText: String) {
     let lowercasedSearchText = searchText.lowercased()
-    filteredMediaItems = mediaItems.filter({ Utils.fullTitle(of: $0).lowercased().contains(lowercasedSearchText) })
+    filteredMediaItems = allItems.filter({ Utils.fullTitle(of: $0).lowercased().contains(lowercasedSearchText) })
 
     tableView.reloadData()
   }
