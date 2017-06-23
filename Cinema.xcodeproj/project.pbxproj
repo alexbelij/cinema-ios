@@ -141,7 +141,7 @@
 				816BF3F0221A8D8A901EB889 /* TitleSortingPolicy.swift */,
 				816BF489597C00AF26CF0F60 /* RuntimeSortingPolicy.swift */,
 				816BF0DFECD6649ABD52F1C4 /* YearSortingPolicy.swift */,
-        816BF6385F8102579B1288F3 /* StringOptionsTableViewController.swift */,
+				816BF6385F8102579B1288F3 /* StringOptionsTableViewController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -231,7 +231,7 @@
 				TargetAttributes = {
 					CBB569621EA4D6A2005F7BA7 = {
 						CreatedOnToolsVersion = 8.3;
-						DevelopmentTeam = 7CFLE92E2A;
+						DevelopmentTeam = 77DM9DN8P3;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -484,10 +484,10 @@
 			baseConfigurationReference = BD6BB3A3319A0BF4E8E46CA9 /* Pods-Cinema.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = 7CFLE92E2A;
+				DEVELOPMENT_TEAM = 77DM9DN8P3;
 				INFOPLIST_FILE = Cinema/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = martinbauer.Cinema;
+				PRODUCT_BUNDLE_IDENTIFIER = de.martinbauer.cinema;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -499,10 +499,10 @@
 			baseConfigurationReference = 7EFA6A072B4111F2406B5151 /* Pods-Cinema.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = 7CFLE92E2A;
+				DEVELOPMENT_TEAM = 77DM9DN8P3;
 				INFOPLIST_FILE = Cinema/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = martinbauer.Cinema;
+				PRODUCT_BUNDLE_IDENTIFIER = de.martinbauer.cinema;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = 1;
