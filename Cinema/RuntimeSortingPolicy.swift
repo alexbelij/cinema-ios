@@ -6,7 +6,7 @@ struct RuntimeSortingPolicy: SortingPolicy {
     return String(item.runtime / 10 * 10)
   }
 
-  func completeSectionIndexTitles(_ sections: [String]) -> [String] {
+  func refineSectionIndexTitles(_ sections: [String]) -> [String] {
     let min = Int(sections.first!)!
     let max = Int(sections.last!)!
     if min == max {

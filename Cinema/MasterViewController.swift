@@ -75,12 +75,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     }
     sectionIndexTitles = Array(sectionItems.keys)
     sectionIndexTitles.sort(by: sortingPolicy.sectionIndexTitleSorting)
-    visibleSectionIndexTitles = [UITableViewIndexSearch] + sortingPolicy.completeSectionIndexTitles(
+    visibleSectionIndexTitles = [UITableViewIndexSearch] + sortingPolicy.refineSectionIndexTitles(
         sectionIndexTitles)
-    let missingElements = Set(sectionIndexTitles).subtracting(Set(visibleSectionIndexTitles))
-    if !missingElements.isEmpty {
-      preconditionFailure("SortingPolicy.completeSectionIndexTitles(_) must not remove sections \(missingElements)")
-    }
     sectionTitles = sectionIndexTitles.map { sortingPolicy.sectionTitle(for: $0) }
   }
 

@@ -15,7 +15,7 @@ struct TitleSortingPolicy: SortingPolicy {
     }
   }
 
-  func completeSectionIndexTitles(_ sections: [String]) -> [String] {
+  func refineSectionIndexTitles(_ sections: [String]) -> [String] {
     return allSectionIndexTitles
   }
 
