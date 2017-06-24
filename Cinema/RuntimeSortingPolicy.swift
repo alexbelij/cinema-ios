@@ -27,6 +27,7 @@ struct RuntimeSortingPolicy: SortingPolicy {
   func sectionTitle(for sectionIndexTitle: String) -> String {
     switch sectionIndexTitle {
       case unknownSymbol: return NSLocalizedString("sort.by.runtime.unknownHeader", comment: "")
+      case "0": return NSLocalizedString("sort.by.runtime.lessThanTenMinutes", comment: "")
       default:
         let runtime = DateComponents(minute: Int(sectionIndexTitle)!)
         let formatter = DateComponentsFormatter()
