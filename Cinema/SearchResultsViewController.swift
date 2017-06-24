@@ -38,6 +38,7 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
 
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     delegate?.didSelectSearchResult(searchResults[indexPath.row])
+    tableView.deselectRow(at: indexPath, animated: true)
   }
 
 }
