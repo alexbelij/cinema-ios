@@ -175,6 +175,9 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+    guard visibleSectionIndexTitles.count > 2 else {
+      return nil
+    }
     return searchController.isActive ? nil : visibleSectionIndexTitles
   }
 
