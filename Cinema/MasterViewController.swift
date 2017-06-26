@@ -21,15 +21,17 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   private var sortingPolicyIndex = 0
 
   override func viewDidLoad() {
+    // swiftlint:disable:next force_cast
     library = (UIApplication.shared.delegate as! AppDelegate).library
+    // swiftlint:disable:next force_cast
     movieDb = (UIApplication.shared.delegate as! AppDelegate).movieDb
     fetchLibraryData()
     super.viewDidLoad()
     if let split = splitViewController {
       let controllers = split.viewControllers
-      detailViewController = (controllers[
-          controllers.count - 1
-          ] as! UINavigationController).topViewController as? DetailViewController
+      // swiftlint:disable:next force_cast
+      detailViewController = (controllers[controllers.count - 1] as! UINavigationController)
+          .topViewController as? DetailViewController
     }
     title = NSLocalizedString("library", comment: "")
     searchController.searchResultsUpdater = self
@@ -82,6 +84,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   // MARK: - Segues
 
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    // swiftlint:disable force_cast
     if segue.identifier == "showDetail" {
       if let indexPath = tableView.indexPathForSelectedRow {
         let selectedItem: MediaItem
@@ -117,6 +120,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         self.reloadLibraryData()
       }
     }
+    // swiftlint:enable force_cast
   }
 
   // MARK: - Table View
@@ -142,6 +146,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    // swiftlint:disable:next force_cast
     let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! MyTableCell
 
     let mediaItem: MediaItem

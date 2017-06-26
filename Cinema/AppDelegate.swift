@@ -10,11 +10,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
   func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-    // Override point for customization after application launch.
+    // swiftlint:disable:next force_cast
     let splitViewController = window!.rootViewController as! UISplitViewController
-    let navigationController = splitViewController.viewControllers[
-        splitViewController.viewControllers.count - 1
-        ] as! UINavigationController
+    let navigationController = splitViewController
+    // swiftlint:disable:next force_cast
+        .viewControllers[splitViewController.viewControllers.count - 1] as! UINavigationController
     navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
     splitViewController.delegate = self
 
@@ -50,6 +50,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
                                   preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: NSLocalizedString("yes", comment: ""), style: .destructive, handler: { _ in
       let controller = UIStoryboard(name: "Main", bundle: nil)
+          // swiftlint:disable:next force_cast
           .instantiateViewController(withIdentifier: "ReplaceLibraryViewController") as! ReplaceLibraryViewController
       controller.replaceLibraryContent(of: self.library, withContentOf: url)
       UIApplication.shared.keyWindow!.rootViewController!.present(controller, animated: true)

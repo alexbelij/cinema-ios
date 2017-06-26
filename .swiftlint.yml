@@ -3,6 +3,7 @@ opt_in_rules: # some rules are only opt-in
 included: # paths to include during linting. `--path` is ignored if present.
   - Cinema
 
+force_cast: warning
 type_name:
   min_length:
     warning: 2

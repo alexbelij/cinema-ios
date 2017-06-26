@@ -16,6 +16,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, Searc
   override func viewDidLoad() {
     super.viewDidLoad()
     searchResultsController = storyboard!
+    // swiftlint:disable:next force_cast
         .instantiateViewController(withIdentifier: "ResultsViewController") as! SearchResultsController
     searchResultsController.delegate = self
     searchController = UISearchController(searchResultsController: searchResultsController)
@@ -46,6 +47,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, Searc
                                   preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: NSLocalizedString("mediaItem.disk.dvd", comment: ""), style: .default) { _ in
       let controller = self.storyboard!
+      // swiftlint:disable:next force_cast
           .instantiateViewController(withIdentifier: "AddItemViewController") as! AddItemViewController
       controller.add(item: searchResult, as: .dvd, to: self.library, movieDb: self.movieDb)
       self.present(controller, animated: true)
@@ -53,6 +55,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, Searc
     alert.addAction(UIAlertAction(title: NSLocalizedString("mediaItem.disk.bluRay", comment: ""),
                                   style: .default) { _ in
       let controller = self.storyboard!
+      // swiftlint:disable:next force_cast
           .instantiateViewController(withIdentifier: "AddItemViewController") as! AddItemViewController
       controller.add(item: searchResult, as: .bluRay, to: self.library, movieDb: self.movieDb)
       self.present(controller, animated: true)

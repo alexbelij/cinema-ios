@@ -26,6 +26,7 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
   }
 
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    // swiftlint:disable:next force_cast
     let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemCell", for: indexPath) as! SearchItemCell
 
     let searchItem = searchResults[indexPath.row]
