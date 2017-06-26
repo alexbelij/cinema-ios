@@ -1,11 +1,3 @@
-//
-//  DemoLibrary.swift
-//  Cinema
-//
-//  Created by Martin Bauer on 26/03/2017.
-//  Copyright © 2017 martinbauer. All rights reserved.
-//
-
 class SampleLibrary: MediaLibrary {
 
   private let data: [MediaItem] = [
