@@ -1,5 +1,3 @@
-import Foundation
-
 protocol SortingPolicy {
 
   func sectionIndexTitle(for item: MediaItem) -> String
