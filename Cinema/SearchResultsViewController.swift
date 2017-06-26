@@ -11,7 +11,7 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
       }
     }
   }
-  var delegate: SearchResultsSelectionDelegate!
+  weak var delegate: SearchResultsSelectionDelegate?
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -43,6 +43,6 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
 
 }
 
-protocol SearchResultsSelectionDelegate {
+protocol SearchResultsSelectionDelegate: class {
   func didSelectSearchResult(_ searchResult: PartialMediaItem)
 }

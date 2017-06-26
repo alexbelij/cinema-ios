@@ -1,6 +1,6 @@
 import UIKit
 
-class MyTableCell : UITableViewCell {
+class MyTableCell: UITableViewCell {
   @IBOutlet weak var titleLabel: UILabel!
   @IBOutlet weak var runtimeLabel: UILabel!
 }

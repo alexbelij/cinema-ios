@@ -6,7 +6,7 @@ class TMDBSwiftWrapper: MovieDbClient {
 
   private static let apiKey = "ace1ea1cb456b8d6fe092a0ec923e30c"
 
-  private static let baseUrl = "https://image.tmdb.org/t/p/";
+  private static let baseUrl = "https://image.tmdb.org/t/p/"
 
   var storeFront: MovieDbStoreFront
 
@@ -29,8 +29,9 @@ class TMDBSwiftWrapper: MovieDbClient {
   func poster(for id: Int, size: PosterSize) -> UIKit.UIImage? {
     if let posterPath = movie(for: id, language: storeFront.language)?.poster_path {
       let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
-      let image = try! UIImage(data: Data(contentsOf: URL(string: path)!))
-      return image
+      if let data = try? Data(contentsOf: URL(string: path)!) {
+        return UIImage(data: data)
+      }
     }
     return nil
   }
@@ -42,13 +43,10 @@ class TMDBSwiftWrapper: MovieDbClient {
   func certification(for id: Int) -> String? {
     var certification: String?
     waitUntil { done in
-      MovieMDB.release_dates(TMDBSwiftWrapper.apiKey, movieID: id) {
-        apiReturn, releaseDates in
+      MovieMDB.release_dates(TMDBSwiftWrapper.apiKey, movieID: id) { _, releaseDates in
         if let releaseDates = releaseDates {
-          for date in releaseDates {
-            if date.iso_3166_1 == self.storeFront.country {
-              certification = date.release_dates[0].certification
-            }
+          for date in releaseDates where date.iso_3166_1 == self.storeFront.country {
+            certification = date.release_dates[0].certification
           }
         }
         done()
@@ -67,8 +65,7 @@ class TMDBSwiftWrapper: MovieDbClient {
   private func movie(for id: Int, language: String) -> MovieDetailedMDB? {
     var movieToReturn: MovieDetailedMDB?
     waitUntil { done in
-      MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: language) {
-        apiReturn, movie in
+      MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: language) { _, movie in
         movieToReturn = movie
         done()
       }
@@ -85,8 +82,7 @@ class TMDBSwiftWrapper: MovieDbClient {
                       page: 1,
                       includeAdult: false,
                       year: nil,
-                      primaryReleaseYear: nil) {
-        apiReturn, results in
+                      primaryReleaseYear: nil) { _, results in
         if let results = results {
           value = results.map {
             PartialMediaItem(id: $0.id!,

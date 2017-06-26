@@ -8,11 +8,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
   var library: MediaLibrary!
   var movieDb: MovieDbClient!
 
-
-  func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+  func application(_ application: UIApplication,
+                   didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     // Override point for customization after application launch.
     let splitViewController = window!.rootViewController as! UISplitViewController
-    let navigationController = splitViewController.viewControllers[splitViewController.viewControllers.count-1] as! UINavigationController
+    let navigationController = splitViewController.viewControllers[
+        splitViewController.viewControllers.count - 1
+        ] as! UINavigationController
     navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
     splitViewController.delegate = self
 
@@ -28,24 +30,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
   // MARK: - Split view
 
-  func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController:UIViewController, onto primaryViewController:UIViewController) -> Bool {
-      guard let secondaryAsNavController = secondaryViewController as? UINavigationController else { return false }
-      guard let topAsDetailController = secondaryAsNavController.topViewController as? DetailViewController else { return false }
-      if topAsDetailController.detailItem == nil {
-          // Return true to indicate that we have handled the collapse by doing nothing; the secondary controller will be discarded.
-          return true
-      }
-      return false
+  func splitViewController(_ splitViewController: UISplitViewController,
+                           collapseSecondary secondaryViewController: UIViewController,
+                           onto primaryViewController: UIViewController) -> Bool {
+    guard let secondaryAsNavController = secondaryViewController as? UINavigationController else { return false }
+    guard let topAsDetailController = secondaryAsNavController.topViewController as? DetailViewController
+        else { return false }
+    if topAsDetailController.detailItem == nil {
+      // Return true to indicate that we have handled the collapse by doing nothing;
+      // the secondary controller will be discarded.
+      return true
+    }
+    return false
   }
-  
+
   public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
     let alert = UIAlertController(title: NSLocalizedString("replaceLibrary.alert.title", comment: ""),
                                   message: nil,
                                   preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: NSLocalizedString("yes", comment: ""), style: .destructive, handler: {
-      action in
+    alert.addAction(UIAlertAction(title: NSLocalizedString("yes", comment: ""), style: .destructive, handler: { _ in
       let controller = UIStoryboard(name: "Main", bundle: nil)
-        .instantiateViewController(withIdentifier: "ReplaceLibraryViewController") as! ReplaceLibraryViewController
+          .instantiateViewController(withIdentifier: "ReplaceLibraryViewController") as! ReplaceLibraryViewController
       controller.replaceLibraryContent(of: self.library, withContentOf: url)
       UIApplication.shared.keyWindow!.rootViewController!.present(controller, animated: true)
     }))
@@ -55,4 +60,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
   }
 
 }
-

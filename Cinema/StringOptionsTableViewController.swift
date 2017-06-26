@@ -7,7 +7,7 @@ class StringOptionsTableViewController: UITableViewController {
   private var selectedIndices: [Int: Int]!
   private var callback: (([Int: Int]) -> Void)!
 
-  func configure(options: [(String,[String],Int?)], callback: @escaping ([Int: Int]) -> Void) {
+  func configure(options: [(String, [String], Int?)], callback: @escaping ([Int: Int]) -> Void) {
     self.sectionHeaders = options.map({ $0.0 })
     self.sectionText = options.map({ $0.1 })
     self.selectedIndices = [:]

@@ -14,7 +14,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   private var visibleSectionIndexTitles = [String]()
   private var sectionTitles = [String]()
 
-  private var detailViewController: DetailViewController? = nil
+  private var detailViewController: DetailViewController?
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
 
   private let sortingPolicies: [SortingPolicy] =  [TitleSortingPolicy(), RuntimeSortingPolicy(), YearSortingPolicy()]
@@ -85,7 +85,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     if segue.identifier == "showDetail" {
       if let indexPath = tableView.indexPathForSelectedRow {
         let selectedItem: MediaItem
-        if (searchController.isActive && searchController.searchBar.text != "") {
+        if searchController.isActive && searchController.searchBar.text != "" {
           selectedItem = filteredMediaItems[indexPath.row]
         } else {
           selectedItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
@@ -130,7 +130,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    if (searchController.isActive) {
+    if searchController.isActive {
       if searchController.searchBar.text == "" {
         return allItems.count
       } else {
@@ -145,7 +145,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! MyTableCell
 
     let mediaItem: MediaItem
-    if (searchController.isActive) {
+    if searchController.isActive {
       if searchController.searchBar.text != "" {
         mediaItem = filteredMediaItems[indexPath.row]
       } else {
@@ -197,4 +197,3 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
 }
-

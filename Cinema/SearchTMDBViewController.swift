@@ -15,7 +15,8 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, Searc
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    searchResultsController = storyboard!.instantiateViewController(withIdentifier: "ResultsViewController") as! SearchResultsController
+    searchResultsController = storyboard!
+        .instantiateViewController(withIdentifier: "ResultsViewController") as! SearchResultsController
     searchResultsController.delegate = self
     searchController = UISearchController(searchResultsController: searchResultsController)
     searchController.searchResultsUpdater = self
@@ -44,13 +45,15 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, Searc
                                   message: nil,
                                   preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: NSLocalizedString("mediaItem.disk.dvd", comment: ""), style: .default) { _ in
-      let controller = self.storyboard!.instantiateViewController(withIdentifier: "AddItemViewController") as! AddItemViewController
+      let controller = self.storyboard!
+          .instantiateViewController(withIdentifier: "AddItemViewController") as! AddItemViewController
       controller.add(item: searchResult, as: .dvd, to: self.library, movieDb: self.movieDb)
       self.present(controller, animated: true)
     })
     alert.addAction(UIAlertAction(title: NSLocalizedString("mediaItem.disk.bluRay", comment: ""),
                                   style: .default) { _ in
-      let controller = self.storyboard!.instantiateViewController(withIdentifier: "AddItemViewController") as! AddItemViewController
+      let controller = self.storyboard!
+          .instantiateViewController(withIdentifier: "AddItemViewController") as! AddItemViewController
       controller.add(item: searchResult, as: .bluRay, to: self.library, movieDb: self.movieDb)
       self.present(controller, animated: true)
     })

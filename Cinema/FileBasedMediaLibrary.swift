@@ -77,7 +77,7 @@ extension MediaItem: ArchivableStruct {
       "title": self.title,
       "runtime": self.runtime,
       "year": self.year,
-      "diskType": self.diskType.rawValue,
+      "diskType": self.diskType.rawValue
     ]
     if let subtitle = self.subtitle {
       dictionary["subtitle"] = subtitle
