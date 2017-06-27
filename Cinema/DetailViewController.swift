@@ -1,11 +1,3 @@
-//
-//  DetailViewController.swift
-//  Cinema
-//
-//  Created by Martin Bauer on 17.04.17.
-//  Copyright © 2017 Martin Bauer. All rights reserved.
-//
-
 import Dispatch
 import UIKit
 
@@ -133,4 +125,3 @@ class DetailViewController: UIViewController {
     super.viewDidLoad()
   }
 }
-

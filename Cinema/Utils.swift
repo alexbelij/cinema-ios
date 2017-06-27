@@ -1,8 +1,3 @@
-//
-// Created by Martin Bauer on 17.04.17.
-// Copyright (c) 2017 Martin Bauer. All rights reserved.
-//
-
 import Foundation
 
 class Utils {

@@ -11,7 +11,7 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
       }
     }
   }
-  var delegate: SearchResultsSelectionDelegate!
+  weak var delegate: SearchResultsSelectionDelegate?
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -26,6 +26,7 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
   }
 
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    // swiftlint:disable:next force_cast
     let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemCell", for: indexPath) as! SearchItemCell
 
     let searchItem = searchResults[indexPath.row]
@@ -43,6 +44,6 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
 
 }
 
-protocol SearchResultsSelectionDelegate {
+protocol SearchResultsSelectionDelegate: class {
   func didSelectSearchResult(_ searchResult: PartialMediaItem)
 }
