@@ -1,9 +1,7 @@
-import Foundation
-
 protocol SortingPolicy {
 
   func sectionIndexTitle(for item: MediaItem) -> String
-  func completeSectionIndexTitles(_: [String]) -> [String]
+  func refineSectionIndexTitles(_: [String]) -> [String]
 
   func sectionTitle(for sectionIndexTitle: String) -> String
 
@@ -13,7 +11,7 @@ protocol SortingPolicy {
 }
 
 extension SortingPolicy {
-  func completeSectionIndexTitles(_ sections: [String]) -> [String] {
+  func refineSectionIndexTitles(_ sections: [String]) -> [String] {
     return sections
   }
 

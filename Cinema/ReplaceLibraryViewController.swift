@@ -18,7 +18,7 @@ class ReplaceLibraryViewController: UIViewController {
     super.viewWillAppear(animated)
     label.text = NSLocalizedString("replaceLibrary.progress.text", comment: "")
   }
-  
+
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     activityIndicator.startAnimating()

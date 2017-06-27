@@ -223,7 +223,7 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Options" id="DFz-he-x03">
-                        <barButtonItem key="rightBarButtonItem" style="plain" systemItem="done" id="9Ai-UC-VMK">
+                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="9Ai-UC-VMK">
                             <connections>
                                 <action selector="saveOptionsWithSegue:" destination="hju-Is-PHL" id="8uK-QM-aBy"/>
                             </connections>

@@ -1,11 +1,3 @@
-//
-//  MasterViewController.swift
-//  Cinema
-//
-//  Created by Martin Bauer on 17.04.17.
-//  Copyright © 2017 Martin Bauer. All rights reserved.
-//
-
 import UIKit
 import Dispatch
 
@@ -22,22 +14,24 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   private var visibleSectionIndexTitles = [String]()
   private var sectionTitles = [String]()
 
-  private var detailViewController: DetailViewController? = nil
+  private var detailViewController: DetailViewController?
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
 
   private let sortingPolicies: [SortingPolicy] =  [TitleSortingPolicy(), RuntimeSortingPolicy(), YearSortingPolicy()]
   private var sortingPolicyIndex = 0
 
   override func viewDidLoad() {
+    // swiftlint:disable:next force_cast
     library = (UIApplication.shared.delegate as! AppDelegate).library
+    // swiftlint:disable:next force_cast
     movieDb = (UIApplication.shared.delegate as! AppDelegate).movieDb
     fetchLibraryData()
     super.viewDidLoad()
     if let split = splitViewController {
       let controllers = split.viewControllers
-      detailViewController = (controllers[
-          controllers.count - 1
-          ] as! UINavigationController).topViewController as? DetailViewController
+      // swiftlint:disable:next force_cast
+      detailViewController = (controllers[controllers.count - 1] as! UINavigationController)
+          .topViewController as? DetailViewController
     }
     title = NSLocalizedString("library", comment: "")
     searchController.searchResultsUpdater = self
@@ -75,12 +69,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     }
     sectionIndexTitles = Array(sectionItems.keys)
     sectionIndexTitles.sort(by: sortingPolicy.sectionIndexTitleSorting)
-    visibleSectionIndexTitles = [UITableViewIndexSearch] + sortingPolicy.completeSectionIndexTitles(
+    visibleSectionIndexTitles = [UITableViewIndexSearch] + sortingPolicy.refineSectionIndexTitles(
         sectionIndexTitles)
-    let missingElements = Set(sectionIndexTitles).subtracting(Set(visibleSectionIndexTitles))
-    if !missingElements.isEmpty {
-      preconditionFailure("SortingPolicy.completeSectionIndexTitles(_) must not remove sections \(missingElements)")
-    }
     sectionTitles = sectionIndexTitles.map { sortingPolicy.sectionTitle(for: $0) }
   }
 
@@ -94,10 +84,11 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   // MARK: - Segues
 
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    // swiftlint:disable force_cast
     if segue.identifier == "showDetail" {
       if let indexPath = tableView.indexPathForSelectedRow {
         let selectedItem: MediaItem
-        if (searchController.isActive && searchController.searchBar.text != "") {
+        if searchController.isActive && searchController.searchBar.text != "" {
           selectedItem = filteredMediaItems[indexPath.row]
         } else {
           selectedItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
@@ -129,6 +120,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         self.reloadLibraryData()
       }
     }
+    // swiftlint:enable force_cast
   }
 
   // MARK: - Table View
@@ -142,7 +134,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    if (searchController.isActive) {
+    if searchController.isActive {
       if searchController.searchBar.text == "" {
         return allItems.count
       } else {
@@ -154,10 +146,11 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    // swiftlint:disable:next force_cast
     let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! MyTableCell
 
     let mediaItem: MediaItem
-    if (searchController.isActive) {
+    if searchController.isActive {
       if searchController.searchBar.text != "" {
         mediaItem = filteredMediaItems[indexPath.row]
       } else {
@@ -179,6 +172,9 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+    guard visibleSectionIndexTitles.count > 2 else {
+      return nil
+    }
     return searchController.isActive ? nil : visibleSectionIndexTitles
   }
 
@@ -206,4 +202,3 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
 }
-

@@ -1,11 +1,3 @@
-//
-//  DetailViewController.swift
-//  Cinema
-//
-//  Created by Martin Bauer on 17.04.17.
-//  Copyright © 2017 Martin Bauer. All rights reserved.
-//
-
 import Dispatch
 import UIKit
 
@@ -67,10 +59,14 @@ class DetailViewController: UIViewController {
     }
     group.enter()
     queue.async {
-      let overview = self.movieDb.overview(for: self.detailItem!.id)
-                     ?? NSLocalizedString("details.missing.overview", comment: "")
+      let text: String
+      if let overview  = self.movieDb.overview(for: self.detailItem!.id), !overview.isEmpty {
+        text = overview
+      } else {
+        text = NSLocalizedString("details.missing.overview", comment: "")
+      }
       DispatchQueue.main.async {
-        self.textView.text = overview
+        self.textView.text = text
         group.leave()
       }
     }
@@ -94,7 +90,7 @@ class DetailViewController: UIViewController {
     group.enter()
     queue.async {
       let text: String
-      if let certification = self.movieDb.certification(for: self.detailItem!.id) {
+      if let certification = self.movieDb.certification(for: self.detailItem!.id), !certification.isEmpty {
         let format = NSLocalizedString("details.certificationFormat", comment: "")
         text = String(format: format, certification)
       } else {
@@ -129,4 +125,3 @@ class DetailViewController: UIViewController {
     super.viewDidLoad()
   }
 }
-
