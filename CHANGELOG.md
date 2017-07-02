@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unpublished
 
+### Changed
+-   border for posters
 
 ## v1.0.1 - 2017-06-27
 
