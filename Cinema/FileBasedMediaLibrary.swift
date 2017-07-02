@@ -16,30 +16,15 @@ class FileBasedMediaLibrary: MediaLibrary {
     self.dataFormat = dataFormat
     let url = directory.appendingPathComponent(fileName)
     if FileManager.default.fileExists(atPath: url.path) {
-      mediaItems = FileBasedMediaLibrary.readData(from: url, format: dataFormat) ?? [MediaItem]()
+      do {
+        let data = try Data(contentsOf: URL(fileURLWithPath: url.path))
+        mediaItems = try dataFormat.deserialize(from: data)
+      } catch {
+        mediaItems = []
+      }
     } else {
       mediaItems = []
     }
-  }
-
-  private static func readData(from url: URL, format: DataFormat) -> [MediaItem]? {
-    do {
-      let data = try Data(contentsOf: URL(fileURLWithPath: url.path))
-      return try format.deserialize(from: data)
-    } catch let error {
-      print("error while reading from \(url): \(error)")
-    }
-    return nil
-  }
-
-  private static func writeData(_ data: [MediaItem], to url: URL, format: DataFormat) -> Bool {
-    do {
-      let data = try format.serialize(data)
-      return FileManager.default.createFile(atPath: url.path, contents: data)
-    } catch {
-      print("error while writing to \(url): \(error)")
-    }
-    return false
   }
 
   func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem] {
@@ -49,18 +34,23 @@ class FileBasedMediaLibrary: MediaLibrary {
   func add(_ mediaItem: MediaItem) -> Bool {
     guard !mediaItems.contains(where: { $0.id == mediaItem.id }) else { return true }
     mediaItems.append(mediaItem)
-    NotificationCenter.default.post(name: .mediaLibraryChangedContent, object: self)
-    return FileBasedMediaLibrary.writeData(mediaItems,
-                                           to: directory.appendingPathComponent(fileName),
-                                           format: dataFormat)
+    return saveData()
   }
 
   func replaceItems(_ mediaItems: [MediaItem]) -> Bool {
     self.mediaItems = mediaItems
     NotificationCenter.default.post(name: .mediaLibraryChangedContent, object: self)
-    return FileBasedMediaLibrary.writeData(mediaItems,
-                                           to: directory.appendingPathComponent(fileName),
-                                           format: dataFormat)
+    return saveData()
+  }
+
+  private func saveData() -> Bool {
+    NotificationCenter.default.post(name: .mediaLibraryChangedContent, object: self)
+    do {
+      let data = try dataFormat.serialize(mediaItems)
+      return FileManager.default.createFile(atPath: directory.appendingPathComponent(fileName).path, contents: data)
+    } catch {
+      return false
+    }
   }
 
 }
