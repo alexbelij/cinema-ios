@@ -165,6 +165,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         ? NSLocalizedString("details.missing.runtime", comment: "")
         : Utils.formatDuration(mediaItem.runtime)
     cell.posterView.image = #imageLiteral(resourceName:"GenericPoster-w92")
+    cell.posterView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
+    cell.posterView.layer.borderWidth = 0.5
     DispatchQueue.global(qos: .userInteractive).async {
       if let poster = self.movieDb.poster(for: mediaItem.id, size: PosterSize(minWidth: 46)) {
         DispatchQueue.main.async {
