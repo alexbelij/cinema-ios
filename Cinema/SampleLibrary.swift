@@ -230,6 +230,10 @@ class SampleLibrary: MediaLibrary {
     throw MediaLibraryError.storageError
   }
 
+  func update(_ mediaItem: MediaItem) throws {
+    throw MediaLibraryError.storageError
+  }
+
   func replaceItems(_ mediaItems: [MediaItem]) throws {
     throw MediaLibraryError.storageError
   }
