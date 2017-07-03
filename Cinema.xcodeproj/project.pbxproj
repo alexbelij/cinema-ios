@@ -12,7 +12,7 @@
 		816BF2B0528D0B40917F1CB1 /* SortingPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF2663F21F363DFAAFEDD /* SortingPolicy.swift */; };
 		816BF3E5F4BC47B998CE15A6 /* TMDBSwiftWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFC9CFD7B36183A006B9A /* TMDBSwiftWrapper.swift */; };
 		816BF40FCCC10885A4DACB13 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFC4887FE2604E5FB8233 /* Utils.swift */; };
-		816BF4CAE785F4B760998027 /* LibraryDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFB1419E9717672FFE459 /* LibraryDecoder.swift */; };
+		816BF52DDE5A95DE54EE1FEF /* JSONFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFB35827AAE8FBEE17E66 /* JSONFormat.swift */; };
 		816BF78402385BCBF434A807 /* FileBasedMediaLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFA309BDAC4DB9673DA9D /* FileBasedMediaLibrary.swift */; };
 		816BF7D086425186B332D979 /* YearSortingPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF0DFECD6649ABD52F1C4 /* YearSortingPolicy.swift */; };
 		816BF8BB8BDB78343CB68967 /* MyTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFC6B85744C53AD5A5ED5 /* MyTableCell.swift */; };
@@ -20,7 +20,6 @@
 		816BFA30AFFD31F1A07CD0B6 /* KeyedArchivalFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFF4C36540A18EF3BBC17 /* KeyedArchivalFormat.swift */; };
 		816BFB7761CD201D15A7F175 /* RuntimeSortingPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF489597C00AF26CF0F60 /* RuntimeSortingPolicy.swift */; };
 		816BFC89C1314107178103C8 /* TitleSortingPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF3F0221A8D8A901EB889 /* TitleSortingPolicy.swift */; };
-		816BFCDE3AF375164636204A /* JSONDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFC0731576C22056E3A4F /* JSONDecoder.swift */; };
 		816BFEC37D6B7C1E0487B49F /* StringOptionsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF6385F8102579B1288F3 /* StringOptionsTableViewController.swift */; };
 		816BFFC1026534FCA7432523 /* DataFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFE92A74C1A209F3908F4 /* DataFormat.swift */; };
 		CB6617F11EC8B1F900D0A60F /* SearchTMDBViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB6617F01EC8B1F900D0A60F /* SearchTMDBViewController.swift */; };
@@ -48,8 +47,7 @@
 		816BF489597C00AF26CF0F60 /* RuntimeSortingPolicy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RuntimeSortingPolicy.swift; sourceTree = "<group>"; };
 		816BF6385F8102579B1288F3 /* StringOptionsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringOptionsTableViewController.swift; sourceTree = "<group>"; };
 		816BFA309BDAC4DB9673DA9D /* FileBasedMediaLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileBasedMediaLibrary.swift; sourceTree = "<group>"; };
-		816BFB1419E9717672FFE459 /* LibraryDecoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LibraryDecoder.swift; sourceTree = "<group>"; };
-		816BFC0731576C22056E3A4F /* JSONDecoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONDecoder.swift; sourceTree = "<group>"; };
+		816BFB35827AAE8FBEE17E66 /* JSONFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONFormat.swift; sourceTree = "<group>"; };
 		816BFC438404569118434DC2 /* SearchItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchItemCell.swift; sourceTree = "<group>"; };
 		816BFC4887FE2604E5FB8233 /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		816BFC6B85744C53AD5A5ED5 /* MyTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyTableCell.swift; sourceTree = "<group>"; };
@@ -107,8 +105,7 @@
 				816BFA309BDAC4DB9673DA9D /* FileBasedMediaLibrary.swift */,
 				816BFE92A74C1A209F3908F4 /* DataFormat.swift */,
 				816BFF4C36540A18EF3BBC17 /* KeyedArchivalFormat.swift */,
-				816BFB1419E9717672FFE459 /* LibraryDecoder.swift */,
-				816BFC0731576C22056E3A4F /* JSONDecoder.swift */,
+				816BFB35827AAE8FBEE17E66 /* JSONFormat.swift */,
 			);
 			name = MediaLibrary;
 			sourceTree = "<group>";
@@ -337,13 +334,12 @@
 				816BFA30AFFD31F1A07CD0B6 /* KeyedArchivalFormat.swift in Sources */,
 				CB6617F11EC8B1F900D0A60F /* SearchTMDBViewController.swift in Sources */,
 				816BF08147407F0A19973059 /* SearchItemCell.swift in Sources */,
-				816BF4CAE785F4B760998027 /* LibraryDecoder.swift in Sources */,
-				816BFCDE3AF375164636204A /* JSONDecoder.swift in Sources */,
 				816BF2B0528D0B40917F1CB1 /* SortingPolicy.swift in Sources */,
 				816BFC89C1314107178103C8 /* TitleSortingPolicy.swift in Sources */,
 				816BFB7761CD201D15A7F175 /* RuntimeSortingPolicy.swift in Sources */,
 				816BF7D086425186B332D979 /* YearSortingPolicy.swift in Sources */,
 				816BFEC37D6B7C1E0487B49F /* StringOptionsTableViewController.swift in Sources */,
+				816BF52DDE5A95DE54EE1FEF /* JSONFormat.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
