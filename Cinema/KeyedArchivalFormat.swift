@@ -19,17 +19,31 @@ class KeyedArchivalFormat: DataFormat {
     return NSKeyedArchiver.archivedData(withRootObject: rootObject)
   }
 
-  func deserialize(from data: Data) -> [MediaItem] {
-    let array = NSKeyedUnarchiver.unarchiveObject(with: data) as! [[String: Any]]
-    return array.map { dict in
-      let id = dict["id"] as! Int
-      let title = dict["title"] as! String
-      let subtitle = dict["subtitle"] as? String
-      let runtime = dict["runtime"] as! Int
-      let year = dict["year"] as! Int
-      let diskType = DiskType(rawValue: dict["diskType"] as! String)!
-      return MediaItem(id: id, title: title, subtitle: subtitle, runtime: runtime, year: year, diskType:  diskType)
+  func deserialize(from data: Data) throws -> [MediaItem] {
+    guard let array = NSKeyedUnarchiver.unarchiveObject(with: data) as? [[String: Any]] else {
+      throw DataFormatError.invalidDataFormat
     }
+    var items = [MediaItem]()
+    for dict in array {
+      let id = dict["id"] as? Int
+      let title = dict["title"] as? String
+      let subtitle = dict["subtitle"] as? String
+      let runtime = dict["runtime"] as? Int
+      let year = dict["year"] as? Int
+      let diskType = DiskType(rawValue: dict["diskType"] as? String ?? "")
+      if let id = id, let title = title, let runtime = runtime, let year = year, let diskType = diskType {
+        let mediaItem = MediaItem(id: id,
+                                  title: title,
+                                  subtitle: subtitle,
+                                  runtime: runtime,
+                                  year: year,
+                                  diskType: diskType)
+        items.append(mediaItem)
+      } else {
+        throw DataFormatError.invalidDataFormat
+      }
+    }
+    return items
   }
 
 }

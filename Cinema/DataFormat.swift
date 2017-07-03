@@ -7,3 +7,7 @@ protocol DataFormat {
   func deserialize(from data: Data) throws -> [MediaItem]
 
 }
+
+enum DataFormatError: Error {
+  case invalidDataFormat
+}
