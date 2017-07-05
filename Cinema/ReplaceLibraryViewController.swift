@@ -26,7 +26,8 @@ class ReplaceLibraryViewController: UIViewController {
       let success: Bool
       do {
         let mediaItems = try JSONFormat().deserialize(from: Data(contentsOf: self.newLibraryUrl))
-        success = self.library.replaceItems(mediaItems)
+        try self.library.replaceItems(mediaItems)
+        success = true
       } catch {
         success = false
       }

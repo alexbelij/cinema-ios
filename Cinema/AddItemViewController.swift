@@ -47,7 +47,13 @@ class AddItemViewController: UIViewController {
                            runtime: self.movieDb.runtime(for: self.itemToAdd.id) ?? -1,
                            year: self.itemToAdd.year ?? -1,
                            diskType: self.diskType)
-      let success = self.library.add(item)
+      let success: Bool
+      do {
+        try self.library.add(item)
+        success = true
+      } catch {
+        success = false
+      }
       DispatchQueue.main.async {
         self.activityIndicator.stopAnimating()
         if success {

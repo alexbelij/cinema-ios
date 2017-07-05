@@ -18,9 +18,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
     splitViewController.delegate = self
 
-    library = FileBasedMediaLibrary(directory: Utils.applicationSupportDirectory(),
-                                    fileName: "cinema.data",
-                                    dataFormat: KeyedArchivalFormat())
+    do {
+      library = try FileBasedMediaLibrary(directory: Utils.applicationSupportDirectory(),
+                                          fileName: "cinema.data",
+                                          dataFormat: KeyedArchivalFormat())
+    } catch let error {
+      fatalError("Library could not be instantiated: \(error)")
+    }
+
     movieDb = TMDBSwiftWrapper(storeFront: .germany)
     movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
     movieDb.tryConnect()
