@@ -281,6 +281,45 @@
                                     </tableViewCell>
                                 </cells>
                             </tableViewSection>
+                            <tableViewSection id="PSO-xR-cbZ">
+                                <cells>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="Yew-In-DJY">
+                                        <rect key="frame" x="0.0" y="236" width="320" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Yew-In-DJY" id="M43-MT-e44">
+                                            <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="b30-k7-5Ve">
+                                                    <rect key="frame" x="8" y="8" width="304" height="27.5"/>
+                                                    <nil key="textColor"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                    <textInputTraits key="textInputTraits"/>
+                                                </textField>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uxz-nq-J40">
+                                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
+                                                    <state key="normal" title="Delete Movie">
+                                                        <color key="titleColor" red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="calibratedRGB"/>
+                                                    </state>
+                                                    <connections>
+                                                        <action selector="deleteButtonClicked" destination="dNn-o6-z2I" eventType="touchUpInside" id="yZT-hp-pkD"/>
+                                                    </connections>
+                                                </button>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="uxz-nq-J40" firstAttribute="leading" secondItem="M43-MT-e44" secondAttribute="leading" id="Ai3-9Z-O0o"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="b30-k7-5Ve" secondAttribute="bottom" id="F6Z-PQ-4D1"/>
+                                                <constraint firstItem="b30-k7-5Ve" firstAttribute="top" secondItem="M43-MT-e44" secondAttribute="topMargin" id="U1j-Nk-NfL"/>
+                                                <constraint firstAttribute="trailing" secondItem="uxz-nq-J40" secondAttribute="trailing" id="Uox-Qy-BDh"/>
+                                                <constraint firstItem="b30-k7-5Ve" firstAttribute="leading" secondItem="M43-MT-e44" secondAttribute="leadingMargin" id="XPR-lB-LlE"/>
+                                                <constraint firstItem="uxz-nq-J40" firstAttribute="top" secondItem="M43-MT-e44" secondAttribute="top" id="lSM-Ug-E8O"/>
+                                                <constraint firstAttribute="bottom" secondItem="uxz-nq-J40" secondAttribute="bottom" id="rwq-TE-hfM"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="b30-k7-5Ve" secondAttribute="trailing" id="zxA-SX-bFn"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </cells>
+                            </tableViewSection>
                         </sections>
                         <connections>
                             <outlet property="dataSource" destination="dNn-o6-z2I" id="9Kv-gM-Msl"/>
@@ -303,6 +342,7 @@
                     </navigationItem>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
+                        <outlet property="deleteMovieButton" destination="uxz-nq-J40" id="B2h-V9-lf2"/>
                         <outlet property="subtitleTextField" destination="q3T-fm-Jvh" id="SMt-Nd-IN2"/>
                         <outlet property="titleTextField" destination="mta-YJ-VEu" id="qdN-DJ-x5z"/>
                     </connections>
@@ -349,7 +389,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Orx-6F-gGp">
-                                            <rect key="frame" x="16" y="0.0" width="289" height="43.5"/>
+                                            <rect key="frame" x="15" y="0.0" width="290" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>

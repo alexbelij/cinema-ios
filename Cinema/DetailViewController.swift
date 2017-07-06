@@ -22,6 +22,8 @@ class DetailViewController: UIViewController {
   var movieDb: MovieDbClient!
   var library: MediaLibrary!
 
+  private var popAfterDidAppear = false
+
   func configureView() {
     guard isViewLoaded else { return }
     if let mediaItem = detailItem {
@@ -135,7 +137,20 @@ class DetailViewController: UIViewController {
   @objc private func reloadDetailItem() {
     DispatchQueue.main.async {
       let items = self.library.mediaItems(where: { $0.id == self.detailItem!.id })
-      self.detailItem = items.first!
+      if let updatedItem = items.first {
+        self.detailItem = updatedItem
+      } else {
+        // item was deleted
+        self.popAfterDidAppear = true
+      }
+    }
+  }
+
+  open override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    if popAfterDidAppear {
+      self.navigationController!.navigationController!.popViewController(animated: true)
+      popAfterDidAppear = false
     }
   }
 

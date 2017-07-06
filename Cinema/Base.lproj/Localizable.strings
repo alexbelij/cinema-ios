@@ -10,6 +10,7 @@
 "details.missing.genre" = "No genre available.";
 "details.missing.overview" = "No overview available.";
 "details.missing.runtime" = "No runtime available.";
+"edit.deleteMovie" = "Delete Movie";
 "edit.noTitleAlert" = "A movie must have a title.";
 "edit.sectionHeader.subtitle" = "Subtitle (optional)";
 "edit.sectionHeader.title" = "Title";
