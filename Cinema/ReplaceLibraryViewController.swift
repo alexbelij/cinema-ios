@@ -25,7 +25,7 @@ class ReplaceLibraryViewController: UIViewController {
     DispatchQueue.global(qos: .userInitiated).async {
       let success: Bool
       do {
-        let mediaItems = try JSONDecoder().decode(fromString: try String(contentsOf: self.newLibraryUrl))
+        let mediaItems = try JSONFormat().deserialize(from: Data(contentsOf: self.newLibraryUrl))
         success = self.library.replaceItems(mediaItems)
       } catch {
         success = false

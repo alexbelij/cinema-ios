@@ -25,7 +25,7 @@ class FileBasedMediaLibrary: MediaLibrary {
   private static func readData(from url: URL, format: DataFormat) -> [MediaItem]? {
     do {
       let data = try Data(contentsOf: URL(fileURLWithPath: url.path))
-      return try format.deserialize(from: data, as: MediaItem.self)
+      return try format.deserialize(from: data)
     } catch let error {
       print("error while reading from \(url): \(error)")
     }
@@ -67,31 +67,4 @@ class FileBasedMediaLibrary: MediaLibrary {
 
 extension Notification.Name {
   static let mediaLibraryChangedContent = Notification.Name("mediaLibraryChangedContent")
-}
-
-extension MediaItem: ArchivableStruct {
-
-  var dataDictionary: [String: Any] {
-    var dictionary: [String: Any] = [
-      "id": self.id,
-      "title": self.title,
-      "runtime": self.runtime,
-      "year": self.year,
-      "diskType": self.diskType.rawValue
-    ]
-    if let subtitle = self.subtitle {
-      dictionary["subtitle"] = subtitle
-    }
-    return dictionary
-  }
-
-  init(dataDictionary dict: [String: Any]) {
-    self.id = dict["id"] as! Int
-    self.title = dict["title"] as! String
-    self.subtitle = dict["subtitle"] as? String
-    self.runtime = dict["runtime"] as! Int
-    self.year = dict["year"] as! Int
-    self.diskType = DiskType(rawValue: dict["diskType"] as! String)!
-  }
-
 }
