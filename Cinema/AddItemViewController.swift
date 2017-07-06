@@ -47,17 +47,26 @@ class AddItemViewController: UIViewController {
                            runtime: self.movieDb.runtime(for: self.itemToAdd.id) ?? -1,
                            year: self.itemToAdd.year ?? -1,
                            diskType: self.diskType)
-      let success = self.library.add(item)
+      var libraryError: Error? = nil
+      do {
+        try self.library.add(item)
+      } catch {
+        libraryError = error
+      }
       DispatchQueue.main.async {
         self.activityIndicator.stopAnimating()
-        if success {
+        if libraryError == nil {
           self.label.text = NSLocalizedString("addItem.done.success.text", comment: "")
           self.messageLabel.text = String(format: NSLocalizedString("addItem.done.success.messageFormat", comment: ""),
                                           item.title)
         } else {
-          self.label.text = NSLocalizedString("addItem.done.success.text", comment: "")
-          self.messageLabel.text = String(format: NSLocalizedString("addItem.done.failure.messageFormat", comment: ""),
-                                          item.title)
+          self.label.text = NSLocalizedString("addItem.done.failure.text", comment: "")
+          switch libraryError! {
+            case MediaLibraryError.storageError:
+              self.messageLabel.text = NSLocalizedString("error.storageError", comment: "")
+            default:
+              self.messageLabel.text = NSLocalizedString("error.genericError", comment: "")
+          }
         }
         self.messageLabel.isHidden = false
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
