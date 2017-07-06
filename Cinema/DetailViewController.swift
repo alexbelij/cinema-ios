@@ -20,6 +20,7 @@ class DetailViewController: UIViewController {
   @IBOutlet weak var textView: UITextView!
 
   var movieDb: MovieDbClient!
+  var library: MediaLibrary!
 
   func configureView() {
     guard isViewLoaded else { return }
@@ -125,5 +126,13 @@ class DetailViewController: UIViewController {
     textView?.text = ""
     configureView()
     super.viewDidLoad()
+  }
+
+  open override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    if let navigationController = segue.destination as? UINavigationController,
+       let editController = (navigationController).childViewControllers.last! as? EditItemTableViewController {
+      editController.item = detailItem
+      editController.library = library
+    }
   }
 }

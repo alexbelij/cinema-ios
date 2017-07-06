@@ -10,6 +10,9 @@
 "details.missing.genre" = "Kein Genre verfügbar.";
 "details.missing.overview" = "Keine Beschreibung vorhanden.";
 "details.missing.runtime" = "Keine Laufzeit verfügbar.";
+"edit.noTitleAlert" = "Ein Film braucht einen Titel.";
+"edit.sectionHeader.subtitle" = "Untertitel (optional)";
+"edit.sectionHeader.title" = "Titel";
 "error.genericError" = "Es ist ein unbekannter Fehler aufgetreten.";
 "error.invalidDataFormat" = "Datei besitzt falsches Format.";
 "error.storageError" = "Mediathek konnte nicht gespeichert werden.";
@@ -18,6 +21,7 @@
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";
 "no" = "Nein";
+"ok" = "OK";
 "replaceLibrary.alert.title" = "Wollen Sie wirklich die Mediathek ersetzen?";
 "replaceLibrary.done.success.text" = "Mediathek wurde ersetzt.";
 "replaceLibrary.progress.text" = "Mediathek wird ersetzt...";
