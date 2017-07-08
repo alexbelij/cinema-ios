@@ -3,7 +3,8 @@ import Foundation
 import UIKit
 import Dispatch
 
-class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, SearchResultsSelectionDelegate {
+class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISearchControllerDelegate,
+    SearchResultsSelectionDelegate {
 
   private var searchController: UISearchController!
   @IBOutlet weak var searchBarPlaceholder: UIView!
@@ -20,6 +21,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, Searc
         .instantiateViewController(withIdentifier: "ResultsViewController") as! SearchResultsController
     searchResultsController.delegate = self
     searchController = UISearchController(searchResultsController: searchResultsController)
+    searchController.delegate = self
     searchController.searchResultsUpdater = self
     searchController.hidesNavigationBarDuringPresentation = false
     searchController.dimsBackgroundDuringPresentation = false
@@ -27,6 +29,11 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, Searc
     searchController.searchBar.sizeToFit()
     searchController.searchBar.placeholder = NSLocalizedString("addItem.search.placeholder", comment: "")
     searchBarPlaceholder.addSubview(searchController.searchBar)
+    searchController.isActive = true
+  }
+
+  func didPresentSearchController(_ searchController: UISearchController) {
+    searchController.searchBar.becomeFirstResponder()
   }
 
   public func updateSearchResults(for searchController: UISearchController) {

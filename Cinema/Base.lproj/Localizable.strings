@@ -1,5 +1,4 @@
 "addItem.alert.howToAdd.title" = "How do you want to add the movie?";
-"addItem.done.failure.messageFormat" = "%@ was not added.";
 "addItem.done.failure.text" = "Update failed.";
 "addItem.done.success.messageFormat" = "Added %@.";
 "addItem.done.success.text" = "Update complete.";
@@ -11,13 +10,20 @@
 "details.missing.genre" = "No genre available.";
 "details.missing.overview" = "No overview available.";
 "details.missing.runtime" = "No runtime available.";
+"edit.deleteMovie" = "Delete Movie";
+"edit.noTitleAlert" = "A movie must have a title.";
+"edit.sectionHeader.subtitle" = "Subtitle (optional)";
+"edit.sectionHeader.title" = "Title";
+"error.genericError" = "An unknown error occurred.";
+"error.invalidDataFormat" = "File has invalid format.";
+"error.storageError" = "Library could not be saved.";
 "library" = "Library";
 "library.search.placeholder" = "Search titles...";
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";
 "no" = "No";
+"ok" = "OK";
 "replaceLibrary.alert.title" = "Do you really want to replace your library?";
-"replaceLibrary.done.failure.text" = "Library could not be replaced.";
 "replaceLibrary.done.success.text" = "Library was replaced.";
 "replaceLibrary.progress.text" = "Replacing library...";
 "sort.by" = "Sort by";

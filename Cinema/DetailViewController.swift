@@ -20,6 +20,9 @@ class DetailViewController: UIViewController {
   @IBOutlet weak var textView: UITextView!
 
   var movieDb: MovieDbClient!
+  var library: MediaLibrary!
+
+  private var popAfterDidAppear = false
 
   func configureView() {
     guard isViewLoaded else { return }
@@ -115,6 +118,8 @@ class DetailViewController: UIViewController {
 
   override func viewDidLoad() {
     UIApplication.shared.isNetworkActivityIndicatorVisible = true
+    imageView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
+    imageView.layer.borderWidth = 0.5
     genreLabel?.text = ""
     runtimeLabel?.text = ""
     yearLabel?.text = ""
@@ -123,5 +128,41 @@ class DetailViewController: UIViewController {
     textView?.text = ""
     configureView()
     super.viewDidLoad()
+    NotificationCenter.default.addObserver(self,
+                                           selector: #selector(reloadDetailItem),
+                                           name: .mediaLibraryChangedContent,
+                                           object: nil)
+  }
+
+  @objc private func reloadDetailItem() {
+    DispatchQueue.main.async {
+      let items = self.library.mediaItems(where: { $0.id == self.detailItem!.id })
+      if let updatedItem = items.first {
+        self.detailItem = updatedItem
+      } else {
+        // item was deleted
+        self.popAfterDidAppear = true
+      }
+    }
+  }
+
+  open override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    if popAfterDidAppear {
+      self.navigationController!.navigationController!.popViewController(animated: true)
+      popAfterDidAppear = false
+    }
+  }
+
+  open override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    if let navigationController = segue.destination as? UINavigationController,
+       let editController = (navigationController).childViewControllers.last! as? EditItemTableViewController {
+      editController.item = detailItem
+      editController.library = library
+    }
+  }
+
+  deinit {
+    NotificationCenter.default.removeObserver(self)
   }
 }

@@ -226,12 +226,20 @@ class SampleLibrary: MediaLibrary {
   ]
   // swiftlint:enable line_length
 
-  func add(_ mediaItem: MediaItem) -> Bool {
-    return false
+  func add(_ mediaItem: MediaItem) throws {
+    throw MediaLibraryError.storageError
   }
 
-  func replaceItems(_ mediaItems: [MediaItem]) -> Bool {
-    fatalError()
+  func update(_ mediaItem: MediaItem) throws {
+    throw MediaLibraryError.storageError
+  }
+
+  func remove(_ mediaItem: MediaItem) throws {
+    throw MediaLibraryError.storageError
+  }
+
+  func replaceItems(_ mediaItems: [MediaItem]) throws {
+    throw MediaLibraryError.storageError
   }
 
   func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem] {

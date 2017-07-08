@@ -1,9 +1,10 @@
 import Foundation
+import SwiftyJSON
 
-class KeyedArchivalFormat: DataFormat {
+class JSONFormat: DataFormat {
 
-  func serialize(_ elements: [MediaItem]) -> Data {
-    let rootObject: [[String: Any]] = elements.map { item in
+  func serialize(_ elements: [MediaItem]) throws -> Data {
+    let jsonArray: [JSON] = elements.map { item in
       var dictionary: [String: Any] = [
         "id": item.id,
         "title": item.title,
@@ -14,23 +15,21 @@ class KeyedArchivalFormat: DataFormat {
       if let subtitle = item.subtitle {
         dictionary["subtitle"] = subtitle
       }
-      return dictionary
+      return JSON(dictionary)
     }
-    return NSKeyedArchiver.archivedData(withRootObject: rootObject)
+    return try JSON(array: jsonArray).rawData(options: .prettyPrinted)
   }
 
   func deserialize(from data: Data) throws -> [MediaItem] {
-    guard let array = NSKeyedUnarchiver.unarchiveObject(with: data) as? [[String: Any]] else {
-      throw DataFormatError.invalidDataFormat
-    }
     var items = [MediaItem]()
-    for dict in array {
-      let id = dict["id"] as? Int
-      let title = dict["title"] as? String
-      let subtitle = dict["subtitle"] as? String
-      let runtime = dict["runtime"] as? Int
-      let year = dict["year"] as? Int
-      let diskType = DiskType(rawValue: dict["diskType"] as? String ?? "")
+    let jsonData = JSON(data: data).arrayValue
+    for jsonItem in jsonData {
+      let id = jsonItem["id"].int
+      let title = jsonItem["title"].string
+      let subtitle = jsonItem["subtitle"].string
+      let runtime = jsonItem["runtime"].int
+      let year = jsonItem["year"].int
+      let diskType = DiskType(rawValue: jsonItem["diskType"].string ?? "")
       if let id = id, let title = title, let runtime = runtime, let year = year, let diskType = diskType {
         let mediaItem = MediaItem(id: id,
                                   title: title,

@@ -98,6 +98,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
         controller.navigationItem.leftItemsSupplementBackButton = true
         controller.movieDb = movieDb
+        controller.library = library
       }
     }
     if segue.identifier == "addItem" {
@@ -147,7 +148,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     // swiftlint:disable:next force_cast
-    let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! MyTableCell
+    let cell = tableView.dequeueReusableCell(withIdentifier: "MovieTableCell", for: indexPath) as! MovieTableCell
 
     let mediaItem: MediaItem
     if searchController.isActive {
@@ -163,12 +164,22 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     cell.runtimeLabel!.text = mediaItem.runtime == -1
         ? NSLocalizedString("details.missing.runtime", comment: "")
         : Utils.formatDuration(mediaItem.runtime)
+    cell.posterView.image = #imageLiteral(resourceName:"GenericPoster-w92")
+    cell.posterView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
+    cell.posterView.layer.borderWidth = 0.5
+    DispatchQueue.global(qos: .userInteractive).async {
+      if let poster = self.movieDb.poster(for: mediaItem.id, size: PosterSize(minWidth: 46)) {
+        DispatchQueue.main.async {
+          (tableView.cellForRow(at: indexPath) as? MovieTableCell)?.posterView.image = poster
+        }
+      }
+    }
 
     return cell
   }
 
   public override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-    return 55
+    return 75
   }
 
   public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {

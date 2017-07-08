@@ -2,8 +2,17 @@ protocol MediaLibrary {
 
   func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem]
 
-  func add(_ mediaItem: MediaItem) -> Bool
+  func add(_ mediaItem: MediaItem) throws
 
-  func replaceItems(_ mediaItems: [MediaItem]) -> Bool
+  func update(_ mediaItem: MediaItem) throws
 
+  func remove(_ mediaItem: MediaItem) throws
+
+  func replaceItems(_ mediaItems: [MediaItem]) throws
+
+}
+
+enum MediaLibraryError: Error {
+  case storageError
+  case itemDoesNotExist(id: Int)
 }

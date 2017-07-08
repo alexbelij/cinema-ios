@@ -1,5 +1,4 @@
 "addItem.alert.howToAdd.title" = "Wie willst du den Film hinzufügen?";
-"addItem.done.failure.messageFormat" = "%@ konnte nicht hinzugefügt werden.";
 "addItem.done.failure.text" = "Aktualisierung fehlgeschlagen.";
 "addItem.done.success.messageFormat" = "%@ wurde hinzugefügt.";
 "addItem.done.success.text" = "Aktualisierung abgeschlossen.";
@@ -11,13 +10,20 @@
 "details.missing.genre" = "Kein Genre verfügbar.";
 "details.missing.overview" = "Keine Beschreibung vorhanden.";
 "details.missing.runtime" = "Keine Laufzeit verfügbar.";
+"edit.deleteMovie" = "Film löschen";
+"edit.noTitleAlert" = "Ein Film braucht einen Titel.";
+"edit.sectionHeader.subtitle" = "Untertitel (optional)";
+"edit.sectionHeader.title" = "Titel";
+"error.genericError" = "Es ist ein unbekannter Fehler aufgetreten.";
+"error.invalidDataFormat" = "Datei besitzt falsches Format.";
+"error.storageError" = "Mediathek konnte nicht gespeichert werden.";
 "library" = "Mediathek";
 "library.search.placeholder" = "Titel durchsuchen...";
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";
 "no" = "Nein";
+"ok" = "OK";
 "replaceLibrary.alert.title" = "Wollen Sie wirklich die Mediathek ersetzen?";
-"replaceLibrary.done.failure.text" = "Mediathek konnte nicht ersetzt werden.";
 "replaceLibrary.done.success.text" = "Mediathek wurde ersetzt.";
 "replaceLibrary.progress.text" = "Mediathek wird ersetzt...";
 "sort.by" = "Sortieren nach";

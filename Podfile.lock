@@ -1,15 +1,21 @@
 PODS:
+  - Cache (3.3.0):
+    - SwiftHash (~> 1.4.0)
+  - SwiftHash (1.4.0)
   - SwiftyJSON (3.1.4)
   - TMDBSwift (0.3.0)
 
 DEPENDENCIES:
+  - Cache (~> 3.3)
   - SwiftyJSON
   - TMDBSwift
 
 SPEC CHECKSUMS:
+  Cache: 871805a8a7268feac34f5c10c54506801f0bd4cd
+  SwiftHash: acf0f29032309a5c7a7f625595eade1aca97aca2
   SwiftyJSON: c2842d878f95482ffceec5709abc3d05680c0220
   TMDBSwift: 47fe9253d0b9bbad8120a6378da2162c8d428bab
 
-PODFILE CHECKSUM: f9b5bb1e42f508f7d2808a47c73bc12cbed4cce0
+PODFILE CHECKSUM: 237756626de04683e375970c298b5889ea123165
 
 COCOAPODS: 1.2.1

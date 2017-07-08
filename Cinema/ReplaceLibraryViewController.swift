@@ -23,12 +23,12 @@ class ReplaceLibraryViewController: UIViewController {
     super.viewDidAppear(animated)
     activityIndicator.startAnimating()
     DispatchQueue.global(qos: .userInitiated).async {
-      let success: Bool
+      var libraryError: Error? = nil
       do {
-        let mediaItems = try JSONDecoder().decode(fromString: try String(contentsOf: self.newLibraryUrl))
-        success = self.library.replaceItems(mediaItems)
-      } catch {
-        success = false
+        let mediaItems = try JSONFormat().deserialize(from: Data(contentsOf: self.newLibraryUrl))
+        try self.library.replaceItems(mediaItems)
+      } catch let error {
+        libraryError = error
       }
       do {
         try FileManager.default.removeItem(at: self.newLibraryUrl)
@@ -37,10 +37,17 @@ class ReplaceLibraryViewController: UIViewController {
       }
       DispatchQueue.main.async {
         self.activityIndicator.stopAnimating()
-        if success {
+        if libraryError == nil {
           self.label.text = NSLocalizedString("replaceLibrary.done.success.text", comment: "")
         } else {
-          self.label.text = NSLocalizedString("replaceLibrary.done.failure.text", comment: "")
+          switch libraryError! {
+            case DataFormatError.invalidDataFormat:
+              self.label.text = NSLocalizedString("error.invalidDataFormat", comment: "")
+            case MediaLibraryError.storageError:
+              self.label.text = NSLocalizedString("error.storageError", comment: "")
+            default:
+              self.label.text = NSLocalizedString("error.genericError", comment: "")
+          }
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
           self.dismiss(animated: true)
