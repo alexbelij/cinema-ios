@@ -148,7 +148,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     // swiftlint:disable:next force_cast
-    let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! MyTableCell
+    let cell = tableView.dequeueReusableCell(withIdentifier: "MovieTableCell", for: indexPath) as! MovieTableCell
 
     let mediaItem: MediaItem
     if searchController.isActive {
@@ -168,7 +168,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     DispatchQueue.global(qos: .userInteractive).async {
       if let poster = self.movieDb.poster(for: mediaItem.id, size: PosterSize(minWidth: 46)) {
         DispatchQueue.main.async {
-          (tableView.cellForRow(at: indexPath) as? MyTableCell)?.posterView.image = poster
+          (tableView.cellForRow(at: indexPath) as? MovieTableCell)?.posterView.image = poster
         }
       }
     }
