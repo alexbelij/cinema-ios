@@ -7,6 +7,7 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
 
   @IBOutlet weak var titleTextField: UITextField!
   @IBOutlet weak var subtitleTextField: UITextField!
+  @IBOutlet weak var deleteMovieButton: UIButton!
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -14,6 +15,7 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
     titleTextField.delegate = self
     subtitleTextField.text = item.subtitle
     subtitleTextField.delegate = self
+    deleteMovieButton.setTitle(NSLocalizedString("edit.deleteMovie", comment: ""), for: .normal)
   }
 
   @IBAction func cancelButtonClicked() {
@@ -22,6 +24,17 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
 
   @IBAction func doneButtonClicked() {
     self.acceptEdits()
+  }
+
+  @IBAction func deleteButtonClicked() {
+    let alertController = UIAlertController(title: nil,
+                                            message: nil,
+                                            preferredStyle: .actionSheet)
+    alertController.addAction(UIAlertAction(title: NSLocalizedString("edit.deleteMovie", comment: ""),
+                                            style: .destructive,
+                                            handler: { _ in self.deleteItem() }))
+    alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
+    self.present(alertController, animated: true)
   }
 
   private func acceptEdits() {
@@ -104,6 +117,31 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
         textField.resignFirstResponder()
       }
       return false
+  }
+
+  private func deleteItem() {
+    DispatchQueue.global(qos: .userInitiated).async {
+      var libraryError: Error? = nil
+      do {
+        try self.library.remove(self.item)
+      } catch let error {
+        libraryError = error
+      }
+      DispatchQueue.main.async {
+        if libraryError == nil {
+          self.dismiss(animated: true)
+        } else {
+          switch libraryError! {
+            case MediaLibraryError.itemDoesNotExist:
+              fatalError("updating non-existing item \(self.item)")
+            case MediaLibraryError.storageError:
+              self.showCancelOrDiscardAlert(title: NSLocalizedString("error.storageError", comment: ""))
+            default:
+              self.showCancelOrDiscardAlert(title: NSLocalizedString("error.genericError", comment: ""))
+          }
+        }
+      }
+    }
   }
 
   // MARK: - Table View

@@ -48,6 +48,14 @@ class FileBasedMediaLibrary: MediaLibrary {
     try saveData()
   }
 
+  func remove(_ mediaItem: MediaItem) throws {
+    guard let index = mediaItems.index(where: { $0.id == mediaItem.id }) else {
+      throw MediaLibraryError.itemDoesNotExist(id: mediaItem.id)
+    }
+    mediaItems.remove(at: index)
+    try saveData()
+  }
+
   func replaceItems(_ mediaItems: [MediaItem]) throws {
     self.mediaItems = mediaItems
     try saveData()

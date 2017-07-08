@@ -6,6 +6,8 @@ protocol MediaLibrary {
 
   func update(_ mediaItem: MediaItem) throws
 
+  func remove(_ mediaItem: MediaItem) throws
+
   func replaceItems(_ mediaItems: [MediaItem]) throws
 
 }
