@@ -9,7 +9,9 @@ class CachingMovieDbClient: MovieDbClient {
 
   init(backingClient: MovieDbClient) {
     self.backingClient = backingClient
-    posterCache = SpecializedCache<UIImage>(name: "PosterCache")
+    posterCache = SpecializedCache<UIImage>(name: "PosterCache",
+                                            config: Config(expiry: .never,
+                                                           maxDiskSize: 30 * 1000 * 1000)) // about 1000 movies
   }
 
   func tryConnect() {
