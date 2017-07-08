@@ -20,6 +20,7 @@ class DetailViewController: UIViewController {
   @IBOutlet weak var textView: UITextView!
 
   var movieDb: MovieDbClient!
+  var library: MediaLibrary!
 
   func configureView() {
     guard isViewLoaded else { return }
@@ -125,5 +126,28 @@ class DetailViewController: UIViewController {
     textView?.text = ""
     configureView()
     super.viewDidLoad()
+    NotificationCenter.default.addObserver(self,
+                                           selector: #selector(reloadDetailItem),
+                                           name: .mediaLibraryChangedContent,
+                                           object: nil)
+  }
+
+  @objc private func reloadDetailItem() {
+    DispatchQueue.main.async {
+      let items = self.library.mediaItems(where: { $0.id == self.detailItem!.id })
+      self.detailItem = items.first!
+    }
+  }
+
+  open override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    if let navigationController = segue.destination as? UINavigationController,
+       let editController = (navigationController).childViewControllers.last! as? EditItemTableViewController {
+      editController.item = detailItem
+      editController.library = library
+    }
+  }
+
+  deinit {
+    NotificationCenter.default.removeObserver(self)
   }
 }

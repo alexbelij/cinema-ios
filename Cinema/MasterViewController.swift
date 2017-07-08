@@ -98,6 +98,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
         controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
         controller.navigationItem.leftItemsSupplementBackButton = true
         controller.movieDb = movieDb
+        controller.library = library
       }
     }
     if segue.identifier == "addItem" {
