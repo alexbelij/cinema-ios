@@ -227,6 +227,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                        <gestureRecognizers/>
                         <sections>
                             <tableViewSection headerTitle="Title" id="adZ-UY-g9B">
                                 <cells>
@@ -284,6 +285,7 @@
                         <connections>
                             <outlet property="dataSource" destination="dNn-o6-z2I" id="9Kv-gM-Msl"/>
                             <outlet property="delegate" destination="dNn-o6-z2I" id="wlb-Qf-d29"/>
+                            <outletCollection property="gestureRecognizers" destination="Qlt-Fw-IhL" appends="YES" id="0Od-wW-lAW"/>
                         </connections>
                     </tableView>
                     <toolbarItems/>
@@ -306,6 +308,11 @@
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VD9-lR-dXN" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="Qlt-Fw-IhL">
+                    <connections>
+                        <action selector="dismissKeyboard" destination="dNn-o6-z2I" id="gFQ-PF-xGP"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="2392.5" y="127.8169014084507"/>
         </scene>

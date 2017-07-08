@@ -93,6 +93,10 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
     self.present(alertController, animated: true)
   }
 
+  @IBAction private func dismissKeyboard() {
+    self.view?.endEditing(false)
+  }
+
   func textFieldShouldReturn(_ textField: UITextField) -> Bool {
       if let nextField = self.view.viewWithTag(textField.tag + 1) as? UITextField {
         nextField.becomeFirstResponder()
