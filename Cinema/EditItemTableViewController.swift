@@ -1,6 +1,6 @@
 import UIKit
 
-class EditItemTableViewController: UITableViewController {
+class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
 
   var item: MediaItem!
   var library: MediaLibrary!
@@ -11,7 +11,9 @@ class EditItemTableViewController: UITableViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     titleTextField.text = item.title
+    titleTextField.delegate = self
     subtitleTextField.text = item.subtitle
+    subtitleTextField.delegate = self
   }
 
   @IBAction func cancelButtonClicked() {
@@ -89,6 +91,15 @@ class EditItemTableViewController: UITableViewController {
                                               self.dismiss(animated: true)
                                             }))
     self.present(alertController, animated: true)
+  }
+
+  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+      if let nextField = self.view.viewWithTag(textField.tag + 1) as? UITextField {
+        nextField.becomeFirstResponder()
+      } else {
+        textField.resignFirstResponder()
+      }
+      return false
   }
 
   // MARK: - Table View
