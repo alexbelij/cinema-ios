@@ -164,12 +164,20 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     cell.runtimeLabel!.text = mediaItem.runtime == -1
         ? NSLocalizedString("details.missing.runtime", comment: "")
         : Utils.formatDuration(mediaItem.runtime)
+    cell.posterView.image = #imageLiteral(resourceName:"GenericPoster-w92")
+    DispatchQueue.global(qos: .userInteractive).async {
+      if let poster = self.movieDb.poster(for: mediaItem.id, size: PosterSize(minWidth: 46)) {
+        DispatchQueue.main.async {
+          (tableView.cellForRow(at: indexPath) as? MyTableCell)?.posterView.image = poster
+        }
+      }
+    }
 
     return cell
   }
 
   public override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-    return 55
+    return 75
   }
 
   public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
