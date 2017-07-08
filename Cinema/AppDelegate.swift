@@ -26,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
       fatalError("Library could not be instantiated: \(error)")
     }
 
-    movieDb = TMDBSwiftWrapper(storeFront: .germany)
+    movieDb = CachingMovieDbClient(backingClient: TMDBSwiftWrapper(storeFront: .germany))
     movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
     movieDb.tryConnect()
 
