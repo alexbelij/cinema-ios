@@ -39,7 +39,7 @@ class SortDescriptorViewController: UITableViewController {
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     guard indexPath.section == 0 else { fatalError("TableView should only have one section ") }
 
-    let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+    let cell = tableView.dequeueReusableCell(withIdentifier: "SortDescriptorCell", for: indexPath)
     cell.textLabel!.text = localizedTitle(for: sortDescriptors[indexPath.row])
     if selectedDescriptorIndex == indexPath.row {
       cell.accessoryType = .checkmark
