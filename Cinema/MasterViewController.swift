@@ -16,8 +16,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
 
-  private let sortDescriptors =  [SortDescriptor.title, .runtime, .year]
-  private var sortDescriptorIndex = 0
+  private var sortDescriptor = SortDescriptor.title
 
   override func viewDidLoad() {
     // swiftlint:disable:next force_cast
@@ -47,7 +46,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   private func fetchLibraryData() {
-    let strategy = sortDescriptors[sortDescriptorIndex].tableViewStrategy
+    let strategy = sortDescriptor.tableViewStrategy
     allItems = library.mediaItems(where: { _ in true })
     sectionItems = [String: [MediaItem]]()
     for item in allItems {
@@ -103,15 +102,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
       let navigationController = segue.destination as! UINavigationController
       let controller = (navigationController).childViewControllers.last! as! SortDescriptorViewController
       controller.title = NSLocalizedString("options", comment: "")
-      controller.configure(options:
-        (
-            NSLocalizedString("sort.by", comment: ""),
-            [NSLocalizedString("sort.by.title", comment: ""), NSLocalizedString("sort.by.runtime", comment: ""),
-             NSLocalizedString("sort.by.year", comment: "")],
-            sortDescriptorIndex
-        )
-      ) { selectedIndex in
-        self.sortDescriptorIndex = selectedIndex
+      controller.configure(selectedDescriptor: self.sortDescriptor) { descriptor in
+        self.sortDescriptor = descriptor
         self.reloadLibraryData()
       }
     }
