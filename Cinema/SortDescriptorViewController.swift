@@ -1,6 +1,6 @@
 import UIKit
 
-class StringOptionsTableViewController: UITableViewController {
+class SortDescriptorViewController: UITableViewController {
 
   private var sectionHeader: String!
   private var sectionText: [String]!

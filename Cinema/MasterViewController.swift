@@ -99,9 +99,9 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
       controller.library = library
       controller.movieDb = movieDb
     }
-    if segue.identifier == "options" {
+    if segue.identifier == "selectSortDescriptor" {
       let navigationController = segue.destination as! UINavigationController
-      let controller = (navigationController).childViewControllers.last! as! StringOptionsTableViewController
+      let controller = (navigationController).childViewControllers.last! as! SortDescriptorViewController
       controller.title = NSLocalizedString("options", comment: "")
       controller.configure(options:
         (

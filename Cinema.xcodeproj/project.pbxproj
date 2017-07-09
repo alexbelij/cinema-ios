@@ -19,7 +19,7 @@
 		816BF9965330281626DFEB45 /* MovieDbClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF2612290416EB1BFCA59 /* MovieDbClient.swift */; };
 		816BFA30AFFD31F1A07CD0B6 /* KeyedArchivalFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFF4C36540A18EF3BBC17 /* KeyedArchivalFormat.swift */; };
 		816BFAC7A457EF6793B3548E /* SortDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF56BD6ED8C73627653DE /* SortDescriptor.swift */; };
-		816BFEC37D6B7C1E0487B49F /* StringOptionsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF6385F8102579B1288F3 /* StringOptionsTableViewController.swift */; };
+		816BFEC37D6B7C1E0487B49F /* SortDescriptorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF6385F8102579B1288F3 /* SortDescriptorViewController.swift */; };
 		816BFFC1026534FCA7432523 /* DataFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFE92A74C1A209F3908F4 /* DataFormat.swift */; };
 		CB0547CE1F0937C7007ED2BE /* EditItemTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0547CD1F0937C7007ED2BE /* EditItemTableViewController.swift */; };
 		CB6617F11EC8B1F900D0A60F /* SearchTMDBViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB6617F01EC8B1F900D0A60F /* SearchTMDBViewController.swift */; };
@@ -44,7 +44,7 @@
 		816BF2663F21F363DFAAFEDD /* TableViewSortingStrategy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewSortingStrategy.swift; sourceTree = "<group>"; };
 		816BF56BD6ED8C73627653DE /* SortDescriptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SortDescriptor.swift; sourceTree = "<group>"; };
 		816BF5C718FFB699B6469790 /* CachingMovieDbClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CachingMovieDbClient.swift; sourceTree = "<group>"; };
-		816BF6385F8102579B1288F3 /* StringOptionsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringOptionsTableViewController.swift; sourceTree = "<group>"; };
+		816BF6385F8102579B1288F3 /* SortDescriptorViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SortDescriptorViewController.swift; sourceTree = "<group>"; };
 		816BFA309BDAC4DB9673DA9D /* FileBasedMediaLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileBasedMediaLibrary.swift; sourceTree = "<group>"; };
 		816BFB35827AAE8FBEE17E66 /* JSONFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONFormat.swift; sourceTree = "<group>"; };
 		816BFC438404569118434DC2 /* SearchItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchItemCell.swift; sourceTree = "<group>"; };
@@ -132,7 +132,7 @@
 				CB6617F01EC8B1F900D0A60F /* SearchTMDBViewController.swift */,
 				CB6617F21EC8D64E00D0A60F /* SearchResultsViewController.swift */,
 				816BF2663F21F363DFAAFEDD /* TableViewSortingStrategy.swift */,
-				816BF6385F8102579B1288F3 /* StringOptionsTableViewController.swift */,
+				816BF6385F8102579B1288F3 /* SortDescriptorViewController.swift */,
 				CB0547CD1F0937C7007ED2BE /* EditItemTableViewController.swift */,
 				816BF56BD6ED8C73627653DE /* SortDescriptor.swift */,
 			);
@@ -336,7 +336,7 @@
 				816BF08147407F0A19973059 /* SearchItemCell.swift in Sources */,
 				816BF2B0528D0B40917F1CB1 /* TableViewSortingStrategy.swift in Sources */,
 				CB0547CE1F0937C7007ED2BE /* EditItemTableViewController.swift in Sources */,
-				816BFEC37D6B7C1E0487B49F /* StringOptionsTableViewController.swift in Sources */,
+				816BFEC37D6B7C1E0487B49F /* SortDescriptorViewController.swift in Sources */,
 				816BF52DDE5A95DE54EE1FEF /* JSONFormat.swift in Sources */,
 				816BF004BC16AF0115D05088 /* CachingMovieDbClient.swift in Sources */,
 				816BFAC7A457EF6793B3548E /* SortDescriptor.swift in Sources */,
