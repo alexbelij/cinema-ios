@@ -19,7 +19,7 @@ class SortDescriptorViewController: UITableViewController {
     super.viewDidLoad()
   }
 
-  @IBAction func saveOptions(segue: UIStoryboardSegue) {
+  @IBAction private func saveOptions(segue: UIStoryboardSegue) {
     self.dismiss(animated: true)
   }
 
@@ -68,12 +68,12 @@ class SortDescriptorViewController: UITableViewController {
     guard indexPath.section == 0 else { fatalError("TableView should only have one section ") }
 
     tableView.deselectRow(at: indexPath, animated: true)
-    if let previousSelection = selectedDescriptorIndex {
-      tableView.cellForRow(at: IndexPath(row: previousSelection, section: indexPath.section))!.accessoryType = .none
-    }
-    selectedDescriptor = sortDescriptors[indexPath.row]
 
+    guard selectedDescriptorIndex != indexPath.row else { return }
+
+    tableView.cellForRow(at: IndexPath(row: selectedDescriptorIndex, section: 0))!.accessoryType = .none
     tableView.cellForRow(at: indexPath)!.accessoryType = .checkmark
+    selectedDescriptor = sortDescriptors[indexPath.row]
 
     delegate?.sortDescriptorDidChange(to: selectedDescriptor!)
   }
