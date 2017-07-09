@@ -103,15 +103,15 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
       let navigationController = segue.destination as! UINavigationController
       let controller = (navigationController).childViewControllers.last! as! StringOptionsTableViewController
       controller.title = NSLocalizedString("options", comment: "")
-      controller.configure(options: [
+      controller.configure(options:
         (
             NSLocalizedString("sort.by", comment: ""),
             [NSLocalizedString("sort.by.title", comment: ""), NSLocalizedString("sort.by.runtime", comment: ""),
              NSLocalizedString("sort.by.year", comment: "")],
             sortDescriptorIndex
         )
-      ]) { selectedIndices in
-        self.sortDescriptorIndex = selectedIndices[0]!
+      ) { selectedIndex in
+        self.sortDescriptorIndex = selectedIndex
         self.reloadLibraryData()
       }
     }
