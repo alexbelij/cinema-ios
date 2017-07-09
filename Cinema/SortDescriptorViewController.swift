@@ -3,17 +3,20 @@ import UIKit
 class SortDescriptorViewController: UITableViewController {
 
   private let sortDescriptors: [SortDescriptor] = [.title, .runtime, .year]
-  private var selectedDescriptor: SortDescriptor! {
+  var selectedDescriptor: SortDescriptor? {
     didSet {
-      selectedDescriptorIndex = sortDescriptors.index(of: selectedDescriptor)
+      if let descriptor = selectedDescriptor {
+        selectedDescriptorIndex = sortDescriptors.index(of: descriptor)
+      }
+      self.tableView?.reloadData()
     }
   }
   private var selectedDescriptorIndex: Int!
   weak var delegate: SortDescriptorViewControllerDelegate?
 
-  func configure(selectedDescriptor: SortDescriptor) {
-    self.selectedDescriptor = selectedDescriptor
-    tableView.reloadData()
+  override func viewDidLoad() {
+    guard selectedDescriptor != nil else { fatalError("selectedDescriptor was not set") }
+    super.viewDidLoad()
   }
 
   @IBAction func saveOptions(segue: UIStoryboardSegue) {
@@ -72,7 +75,7 @@ class SortDescriptorViewController: UITableViewController {
 
     tableView.cellForRow(at: indexPath)!.accessoryType = .checkmark
 
-    delegate?.sortDescriptorDidChange(to: selectedDescriptor)
+    delegate?.sortDescriptorDidChange(to: selectedDescriptor!)
   }
 }
 

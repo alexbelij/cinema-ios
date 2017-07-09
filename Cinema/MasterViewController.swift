@@ -101,7 +101,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
     if segue.identifier == "selectSortDescriptor" {
       let navigationController = segue.destination as! UINavigationController
       let controller = (navigationController).childViewControllers.last! as! SortDescriptorViewController
-      controller.configure(selectedDescriptor: self.sortDescriptor)
+      controller.selectedDescriptor = self.sortDescriptor
       controller.delegate = self
     }
     // swiftlint:enable force_cast
