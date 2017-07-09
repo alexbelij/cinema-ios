@@ -9,16 +9,14 @@ class SortDescriptorViewController: UITableViewController {
     }
   }
   private var selectedDescriptorIndex: Int!
-  private var callback: ((SortDescriptor) -> Void)!
+  weak var delegate: SortDescriptorViewControllerDelegate?
 
-  func configure(selectedDescriptor: SortDescriptor, callback: @escaping (SortDescriptor) -> Void) {
+  func configure(selectedDescriptor: SortDescriptor) {
     self.selectedDescriptor = selectedDescriptor
-    self.callback = callback
     tableView.reloadData()
   }
 
   @IBAction func saveOptions(segue: UIStoryboardSegue) {
-    callback!(selectedDescriptor)
     self.dismiss(animated: true)
   }
 
@@ -73,5 +71,11 @@ class SortDescriptorViewController: UITableViewController {
     selectedDescriptor = sortDescriptors[indexPath.row]
 
     tableView.cellForRow(at: indexPath)!.accessoryType = .checkmark
+
+    delegate?.sortDescriptorDidChange(to: selectedDescriptor)
   }
+}
+
+protocol SortDescriptorViewControllerDelegate: class {
+  func sortDescriptorDidChange(to descriptor: SortDescriptor)
 }

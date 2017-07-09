@@ -1,7 +1,7 @@
 import UIKit
 import Dispatch
 
-class MasterViewController: UITableViewController, UISearchResultsUpdating {
+class MasterViewController: UITableViewController, UISearchResultsUpdating, SortDescriptorViewControllerDelegate {
 
   private var library: MediaLibrary!
   private var movieDb: MovieDbClient!
@@ -101,13 +101,15 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     if segue.identifier == "selectSortDescriptor" {
       let navigationController = segue.destination as! UINavigationController
       let controller = (navigationController).childViewControllers.last! as! SortDescriptorViewController
-      controller.title = NSLocalizedString("options", comment: "")
-      controller.configure(selectedDescriptor: self.sortDescriptor) { descriptor in
-        self.sortDescriptor = descriptor
-        self.reloadLibraryData()
-      }
+      controller.configure(selectedDescriptor: self.sortDescriptor)
+      controller.delegate = self
     }
     // swiftlint:enable force_cast
+  }
+
+  func sortDescriptorDidChange(to descriptor: SortDescriptor) {
+    self.sortDescriptor = descriptor
+    DispatchQueue.global(qos: .userInitiated).async { self.reloadLibraryData() }
   }
 
   // MARK: - Table View
