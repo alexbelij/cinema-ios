@@ -23,6 +23,7 @@
 "mediaItem.disk.dvd" = "DVD";
 "no" = "No";
 "ok" = "OK";
+"options" = "Options";
 "replaceLibrary.alert.title" = "Do you really want to replace your library?";
 "replaceLibrary.done.success.text" = "Library was replaced.";
 "replaceLibrary.progress.text" = "Replacing library...";

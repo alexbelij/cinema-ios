@@ -23,6 +23,7 @@
 "mediaItem.disk.dvd" = "DVD";
 "no" = "Nein";
 "ok" = "OK";
+"options" = "Optionen";
 "replaceLibrary.alert.title" = "Wollen Sie wirklich die Mediathek ersetzen?";
 "replaceLibrary.done.success.text" = "Mediathek wurde ersetzt.";
 "replaceLibrary.progress.text" = "Mediathek wird ersetzt...";

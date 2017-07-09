@@ -109,6 +109,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     if segue.identifier == "options" {
       let navigationController = segue.destination as! UINavigationController
       let controller = (navigationController).childViewControllers.last! as! StringOptionsTableViewController
+      controller.title = NSLocalizedString("options", comment: "")
       controller.configure(options: [
         (
             NSLocalizedString("sort.by", comment: ""),
