@@ -16,10 +16,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
 
-  private let sortingStrategies: [TableViewSortingStrategy] = [TitleSortingStrategy(),
-                                                               RuntimeSortingStrategy(),
-                                                               YearSortingStrategy()]
-  private var sortingStrategyIndex = 0
+  private let sortDescriptors =  [SortDescriptor.title, .runtime, .year]
+  private var sortDescriptorIndex = 0
 
   override func viewDidLoad() {
     // swiftlint:disable:next force_cast
@@ -49,24 +47,24 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   private func fetchLibraryData() {
-    let sortingStrategy = sortingStrategies[sortingStrategyIndex]
+    let strategy = sortDescriptors[sortDescriptorIndex].tableViewStrategy
     allItems = library.mediaItems(where: { _ in true })
     sectionItems = [String: [MediaItem]]()
     for item in allItems {
-      let sectionIndexTitle = sortingStrategy.sectionIndexTitle(for: item)
+      let sectionIndexTitle = strategy.sectionIndexTitle(for: item)
       if sectionItems[sectionIndexTitle] == nil {
         sectionItems[sectionIndexTitle] = [MediaItem]()
       }
       sectionItems[sectionIndexTitle]!.append(item)
     }
     for key in sectionItems.keys {
-      sectionItems[key]!.sort(by: sortingStrategy.itemSorting)
+      sectionItems[key]!.sort(by: strategy.itemSorting)
     }
     sectionIndexTitles = Array(sectionItems.keys)
-    sectionIndexTitles.sort(by: sortingStrategy.sectionIndexTitleSorting)
-    visibleSectionIndexTitles = [UITableViewIndexSearch] + sortingStrategy.refineSectionIndexTitles(
+    sectionIndexTitles.sort(by: strategy.sectionIndexTitleSorting)
+    visibleSectionIndexTitles = [UITableViewIndexSearch] + strategy.refineSectionIndexTitles(
         sectionIndexTitles)
-    sectionTitles = sectionIndexTitles.map { sortingStrategy.sectionTitle(for: $0) }
+    sectionTitles = sectionIndexTitles.map { strategy.sectionTitle(for: $0) }
   }
 
   @objc private func reloadLibraryData() {
@@ -110,10 +108,10 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
             NSLocalizedString("sort.by", comment: ""),
             [NSLocalizedString("sort.by.title", comment: ""), NSLocalizedString("sort.by.runtime", comment: ""),
              NSLocalizedString("sort.by.year", comment: "")],
-            sortingStrategyIndex
+            sortDescriptorIndex
         )
       ]) { selectedIndices in
-        self.sortingStrategyIndex = selectedIndices[0]!
+        self.sortDescriptorIndex = selectedIndices[0]!
         self.reloadLibraryData()
       }
     }

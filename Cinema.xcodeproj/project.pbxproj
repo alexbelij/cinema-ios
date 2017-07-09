@@ -19,6 +19,7 @@
 		816BF8BB8BDB78343CB68967 /* MyTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFC6B85744C53AD5A5ED5 /* MyTableCell.swift */; };
 		816BF9965330281626DFEB45 /* MovieDbClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF2612290416EB1BFCA59 /* MovieDbClient.swift */; };
 		816BFA30AFFD31F1A07CD0B6 /* KeyedArchivalFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFF4C36540A18EF3BBC17 /* KeyedArchivalFormat.swift */; };
+		816BFAC7A457EF6793B3548E /* SortDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF56BD6ED8C73627653DE /* SortDescriptor.swift */; };
 		816BFB7761CD201D15A7F175 /* RuntimeSortingStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF489597C00AF26CF0F60 /* RuntimeSortingStrategy.swift */; };
 		816BFC89C1314107178103C8 /* TitleSortingStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF3F0221A8D8A901EB889 /* TitleSortingStrategy.swift */; };
 		816BFEC37D6B7C1E0487B49F /* StringOptionsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF6385F8102579B1288F3 /* StringOptionsTableViewController.swift */; };
@@ -47,6 +48,7 @@
 		816BF2663F21F363DFAAFEDD /* TableViewSortingStrategy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewSortingStrategy.swift; sourceTree = "<group>"; };
 		816BF3F0221A8D8A901EB889 /* TitleSortingStrategy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TitleSortingStrategy.swift; sourceTree = "<group>"; };
 		816BF489597C00AF26CF0F60 /* RuntimeSortingStrategy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RuntimeSortingStrategy.swift; sourceTree = "<group>"; };
+		816BF56BD6ED8C73627653DE /* SortDescriptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SortDescriptor.swift; sourceTree = "<group>"; };
 		816BF5C718FFB699B6469790 /* CachingMovieDbClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CachingMovieDbClient.swift; sourceTree = "<group>"; };
 		816BF6385F8102579B1288F3 /* StringOptionsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringOptionsTableViewController.swift; sourceTree = "<group>"; };
 		816BFA309BDAC4DB9673DA9D /* FileBasedMediaLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileBasedMediaLibrary.swift; sourceTree = "<group>"; };
@@ -141,6 +143,7 @@
 				816BF0DFECD6649ABD52F1C4 /* YearSortingStrategy.swift */,
 				816BF6385F8102579B1288F3 /* StringOptionsTableViewController.swift */,
 				CB0547CD1F0937C7007ED2BE /* EditItemTableViewController.swift */,
+				816BF56BD6ED8C73627653DE /* SortDescriptor.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -348,6 +351,7 @@
 				816BFEC37D6B7C1E0487B49F /* StringOptionsTableViewController.swift in Sources */,
 				816BF52DDE5A95DE54EE1FEF /* JSONFormat.swift in Sources */,
 				816BF004BC16AF0115D05088 /* CachingMovieDbClient.swift in Sources */,
+				816BFAC7A457EF6793B3548E /* SortDescriptor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
