@@ -1,7 +1,7 @@
 import UIKit
 import Dispatch
 
-class MasterViewController: UITableViewController, UISearchResultsUpdating {
+class MasterViewController: UITableViewController, UISearchResultsUpdating, SortDescriptorViewControllerDelegate {
 
   private var library: MediaLibrary!
   private var movieDb: MovieDbClient!
@@ -16,8 +16,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
 
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
 
-  private let sortingPolicies: [SortingPolicy] =  [TitleSortingPolicy(), RuntimeSortingPolicy(), YearSortingPolicy()]
-  private var sortingPolicyIndex = 0
+  private var sortDescriptor = SortDescriptor.title
 
   override func viewDidLoad() {
     // swiftlint:disable:next force_cast
@@ -47,24 +46,24 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   }
 
   private func fetchLibraryData() {
-    let sortingPolicy = sortingPolicies[sortingPolicyIndex]
+    let strategy = sortDescriptor.tableViewStrategy
     allItems = library.mediaItems(where: { _ in true })
     sectionItems = [String: [MediaItem]]()
     for item in allItems {
-      let sectionIndexTitle = sortingPolicy.sectionIndexTitle(for: item)
+      let sectionIndexTitle = strategy.sectionIndexTitle(for: item)
       if sectionItems[sectionIndexTitle] == nil {
         sectionItems[sectionIndexTitle] = [MediaItem]()
       }
       sectionItems[sectionIndexTitle]!.append(item)
     }
     for key in sectionItems.keys {
-      sectionItems[key]!.sort(by: sortingPolicy.itemSorting)
+      sectionItems[key]!.sort(by: strategy.itemSorting)
     }
     sectionIndexTitles = Array(sectionItems.keys)
-    sectionIndexTitles.sort(by: sortingPolicy.sectionIndexTitleSorting)
-    visibleSectionIndexTitles = [UITableViewIndexSearch] + sortingPolicy.refineSectionIndexTitles(
+    sectionIndexTitles.sort(by: strategy.sectionIndexTitleSorting)
+    visibleSectionIndexTitles = [UITableViewIndexSearch] + strategy.refineSectionIndexTitles(
         sectionIndexTitles)
-    sectionTitles = sectionIndexTitles.map { sortingPolicy.sectionTitle(for: $0) }
+    sectionTitles = sectionIndexTitles.map { strategy.sectionTitle(for: $0) }
   }
 
   @objc private func reloadLibraryData() {
@@ -99,23 +98,18 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
       controller.library = library
       controller.movieDb = movieDb
     }
-    if segue.identifier == "options" {
+    if segue.identifier == "selectSortDescriptor" {
       let navigationController = segue.destination as! UINavigationController
-      let controller = (navigationController).childViewControllers.last! as! StringOptionsTableViewController
-      controller.title = NSLocalizedString("options", comment: "")
-      controller.configure(options: [
-        (
-            NSLocalizedString("sort.by", comment: ""),
-            [NSLocalizedString("sort.by.title", comment: ""), NSLocalizedString("sort.by.runtime", comment: ""),
-             NSLocalizedString("sort.by.year", comment: "")],
-            sortingPolicyIndex
-        )
-      ]) { selectedIndices in
-        self.sortingPolicyIndex = selectedIndices[0]!
-        self.reloadLibraryData()
-      }
+      let controller = (navigationController).childViewControllers.last! as! SortDescriptorViewController
+      controller.selectedDescriptor = self.sortDescriptor
+      controller.delegate = self
     }
     // swiftlint:enable force_cast
+  }
+
+  func sortDescriptorDidChange(to descriptor: SortDescriptor) {
+    self.sortDescriptor = descriptor
+    DispatchQueue.global(qos: .userInitiated).async { self.reloadLibraryData() }
   }
 
   // MARK: - Table View

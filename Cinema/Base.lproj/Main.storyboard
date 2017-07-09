@@ -375,13 +375,13 @@
         <!--Options-->
         <scene sceneID="nvg-nd-5mY">
             <objects>
-                <tableViewController id="hju-Is-PHL" customClass="StringOptionsTableViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController id="hju-Is-PHL" customClass="SortDescriptorViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" allowsMultipleSelection="YES" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="YC8-HZ-ojI">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Cell" textLabel="Orx-6F-gGp" style="IBUITableViewCellStyleDefault" id="Pbz-KK-Gnz">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="SortDescriptorCell" textLabel="Orx-6F-gGp" style="IBUITableViewCellStyleDefault" id="Pbz-KK-Gnz">
                                 <rect key="frame" x="0.0" y="56" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Pbz-KK-Gnz" id="wAl-Gk-zWG">
@@ -389,7 +389,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Orx-6F-gGp">
-                                            <rect key="frame" x="15" y="0.0" width="290" height="43.5"/>
+                                            <rect key="frame" x="16" y="0.0" width="289" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
@@ -608,7 +608,7 @@
                     <navigationItem key="navigationItem" title="Library" id="Zdf-7t-Un8">
                         <barButtonItem key="leftBarButtonItem" image="Sort" style="done" id="xa6-xy-PhH">
                             <connections>
-                                <segue destination="Ai1-48-Rfn" kind="presentation" identifier="options" id="BXs-Cp-uOM"/>
+                                <segue destination="Ai1-48-Rfn" kind="presentation" identifier="selectSortDescriptor" id="BXs-Cp-uOM"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" style="done" systemItem="add" id="Reu-zF-sxg">
@@ -643,7 +643,7 @@
                                         <rect key="frame" x="0.0" y="28" width="320" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Vkv-NN-6ZG" id="pbP-yL-Ru6">
-                                            <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="2017" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="u1l-5F-RDe">
