@@ -14,7 +14,6 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
   private var visibleSectionIndexTitles = [String]()
   private var sectionTitles = [String]()
 
-  private var detailViewController: DetailViewController?
   private let searchController: UISearchController = UISearchController(searchResultsController: nil)
 
   private let sortingPolicies: [SortingPolicy] =  [TitleSortingPolicy(), RuntimeSortingPolicy(), YearSortingPolicy()]
@@ -27,12 +26,6 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating {
     movieDb = (UIApplication.shared.delegate as! AppDelegate).movieDb
     fetchLibraryData()
     super.viewDidLoad()
-    if let split = splitViewController {
-      let controllers = split.viewControllers
-      // swiftlint:disable:next force_cast
-      detailViewController = (controllers[controllers.count - 1] as! UINavigationController)
-          .topViewController as? DetailViewController
-    }
     title = NSLocalizedString("library", comment: "")
     searchController.searchResultsUpdater = self
     searchController.dimsBackgroundDuringPresentation = false
