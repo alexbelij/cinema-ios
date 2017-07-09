@@ -1,6 +1,6 @@
 import Foundation
 
-struct RuntimeSortingPolicy: SortingPolicy {
+struct RuntimeSortingStrategy: TableViewSortingStrategy {
 
   private let unknownSymbol = "?"
 

@@ -1,4 +1,4 @@
-struct YearSortingPolicy: SortingPolicy {
+struct YearSortingStrategy: TableViewSortingStrategy {
 
   func sectionIndexTitle(for item: MediaItem) -> String {
     if item.year < 2010 {
