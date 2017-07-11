@@ -48,6 +48,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
   private func fetchLibraryData() {
     let strategy = sortDescriptor.tableViewStrategy
     allItems = library.mediaItems(where: { _ in true })
+    allItems.sort(by: SortDescriptor.title.tableViewStrategy.itemSorting)
     sectionItems = [String: [MediaItem]]()
     for item in allItems {
       let sectionIndexTitle = strategy.sectionIndexTitle(for: item)
