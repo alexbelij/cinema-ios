@@ -36,6 +36,7 @@
 		CBB5697F1EA4D6C3005F7BA7 /* SampleLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB5697A1EA4D6C3005F7BA7 /* SampleLibrary.swift */; };
 		CBB569801EA4D6C3005F7BA7 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB5697B1EA4D6C3005F7BA7 /* MediaItem.swift */; };
 		CBB569811EA4D6C3005F7BA7 /* MediaLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB5697C1EA4D6C3005F7BA7 /* MediaLibrary.swift */; };
+		CBE5F7B41F1505D30009F02B /* SearchItemAddedCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE5F7B31F1505D30009F02B /* SearchItemAddedCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -73,6 +74,7 @@
 		CBB5697A1EA4D6C3005F7BA7 /* SampleLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleLibrary.swift; sourceTree = "<group>"; };
 		CBB5697B1EA4D6C3005F7BA7 /* MediaItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
 		CBB5697C1EA4D6C3005F7BA7 /* MediaLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaLibrary.swift; sourceTree = "<group>"; };
+		CBE5F7B31F1505D30009F02B /* SearchItemAddedCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchItemAddedCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 				CBB569711EA4D6A2005F7BA7 /* LaunchScreen.storyboard */,
 				816BFC6B85744C53AD5A5ED5 /* MovieTableCell.swift */,
 				816BFC438404569118434DC2 /* SearchItemCell.swift */,
+				CBE5F7B31F1505D30009F02B /* SearchItemAddedCell.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -333,6 +336,7 @@
 				816BFFC1026534FCA7432523 /* DataFormat.swift in Sources */,
 				816BFA30AFFD31F1A07CD0B6 /* KeyedArchivalFormat.swift in Sources */,
 				CB6617F11EC8B1F900D0A60F /* SearchTMDBViewController.swift in Sources */,
+				CBE5F7B41F1505D30009F02B /* SearchItemAddedCell.swift in Sources */,
 				816BF08147407F0A19973059 /* SearchItemCell.swift in Sources */,
 				816BF2B0528D0B40917F1CB1 /* TableViewSortingStrategy.swift in Sources */,
 				CB0547CE1F0937C7007ED2BE /* EditItemTableViewController.swift in Sources */,

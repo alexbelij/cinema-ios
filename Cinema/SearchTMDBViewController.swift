@@ -19,6 +19,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
     searchResultsController = storyboard!
     // swiftlint:disable:next force_cast
         .instantiateViewController(withIdentifier: "ResultsViewController") as! SearchResultsController
+    searchResultsController.library = library
     searchResultsController.delegate = self
     searchController = UISearchController(searchResultsController: searchResultsController)
     searchController.delegate = self
