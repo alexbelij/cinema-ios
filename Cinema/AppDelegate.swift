@@ -10,14 +10,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
   func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-    // swiftlint:disable:next force_cast
-    let splitViewController = window!.rootViewController as! UISplitViewController
-    let navigationController = splitViewController
-    // swiftlint:disable:next force_cast
-        .viewControllers[splitViewController.viewControllers.count - 1] as! UINavigationController
-    navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
-    splitViewController.delegate = self
-
     do {
       library = try FileBasedMediaLibrary(directory: Utils.applicationSupportDirectory(),
                                           fileName: "cinema.data",
@@ -29,6 +21,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     movieDb = CachingMovieDbClient(backingClient: TMDBSwiftWrapper(storeFront: .germany))
     movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
     movieDb.tryConnect()
+
+    // swiftlint:disable force_cast
+    let splitViewController = window!.rootViewController as! UISplitViewController
+    splitViewController.delegate = self
+
+    let primaryNavController = splitViewController.viewControllers.first as! UINavigationController
+    let masterViewController = (primaryNavController).topViewController! as! MasterViewController
+    masterViewController.library = library
+    masterViewController.movieDb = movieDb
+
+    let secondaryNavController = splitViewController.viewControllers[1] as! UINavigationController
+    let detailViewController = secondaryNavController.topViewController! as! DetailViewController
+    detailViewController.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
+    // swiftlint:enable force_cast
 
     return true
   }
