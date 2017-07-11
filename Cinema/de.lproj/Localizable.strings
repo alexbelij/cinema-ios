@@ -25,6 +25,7 @@
 "ok" = "OK";
 "options" = "Optionen";
 "replaceLibrary.alert.title" = "Wollen Sie wirklich die Mediathek ersetzen?";
+"replaceLibrary.done.failure.text" = "Mediathek wurde nicht ersetzt.";
 "replaceLibrary.done.success.text" = "Mediathek wurde ersetzt.";
 "replaceLibrary.progress.text" = "Mediathek wird ersetzt...";
 "sort.by" = "Sortieren nach";

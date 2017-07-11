@@ -25,6 +25,7 @@
 "ok" = "OK";
 "options" = "Options";
 "replaceLibrary.alert.title" = "Do you really want to replace your library?";
+"replaceLibrary.done.failure.text" = "Library was not replaced.";
 "replaceLibrary.done.success.text" = "Library was replaced.";
 "replaceLibrary.progress.text" = "Replacing library...";
 "sort.by" = "Sort by";

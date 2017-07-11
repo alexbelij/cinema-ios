@@ -8,6 +8,7 @@ class ReplaceLibraryViewController: UIViewController {
 
   @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
   @IBOutlet weak var label: UILabel!
+  @IBOutlet weak var errorLabel: UILabel!
 
   func replaceLibraryContent(of library: MediaLibrary, withContentOf url: URL) {
     self.library = library
@@ -40,14 +41,16 @@ class ReplaceLibraryViewController: UIViewController {
         if libraryError == nil {
           self.label.text = NSLocalizedString("replaceLibrary.done.success.text", comment: "")
         } else {
+          self.label.text = NSLocalizedString("replaceLibrary.done.failure.text", comment: "")
           switch libraryError! {
             case DataFormatError.invalidDataFormat:
-              self.label.text = NSLocalizedString("error.invalidDataFormat", comment: "")
+              self.errorLabel.text = NSLocalizedString("error.invalidDataFormat", comment: "")
             case MediaLibraryError.storageError:
-              self.label.text = NSLocalizedString("error.storageError", comment: "")
+              self.errorLabel.text = NSLocalizedString("error.storageError", comment: "")
             default:
-              self.label.text = NSLocalizedString("error.genericError", comment: "")
+              self.errorLabel.text = NSLocalizedString("error.genericError", comment: "")
           }
+          self.errorLabel.isHidden = false
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
           self.dismiss(animated: true)

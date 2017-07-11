@@ -508,15 +508,25 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Message" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wmn-P8-AlH">
+                                <rect key="frame" x="16" y="361.5" width="288" height="18"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="wmn-P8-AlH" firstAttribute="top" secondItem="cIW-f3-3Oe" secondAttribute="bottom" constant="12" id="1Ob-2R-g4c"/>
+                            <constraint firstItem="wmn-P8-AlH" firstAttribute="leading" secondItem="qFU-uh-eh6" secondAttribute="leadingMargin" id="7bJ-O4-oT9"/>
                             <constraint firstItem="MVT-VT-nJb" firstAttribute="centerX" secondItem="qFU-uh-eh6" secondAttribute="centerX" id="Ie7-Si-eNn"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="wmn-P8-AlH" secondAttribute="trailing" id="MYI-1u-keO"/>
                             <constraint firstItem="MVT-VT-nJb" firstAttribute="centerY" secondItem="qFU-uh-eh6" secondAttribute="centerY" id="nus-u4-8S5"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="activityIndicator" destination="HeS-SB-Gxy" id="2en-hY-QkP"/>
+                        <outlet property="errorLabel" destination="wmn-P8-AlH" id="irn-gp-Lh9"/>
                         <outlet property="label" destination="bwD-rm-A56" id="hpm-d0-WQl"/>
                     </connections>
                 </viewController>
