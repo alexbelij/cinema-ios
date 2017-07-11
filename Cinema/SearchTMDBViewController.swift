@@ -37,6 +37,10 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
     searchController.searchBar.becomeFirstResponder()
   }
 
+  override func viewWillDisappear(_ animated: Bool) {
+    searchController.isActive = false
+  }
+
   public func updateSearchResults(for searchController: UISearchController) {
     let searchText = searchController.searchBar.text!
     if !searchText.isEmpty {
