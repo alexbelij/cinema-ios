@@ -190,15 +190,11 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
     }
   }
 
-  func filterContentForSearchText(searchText: String) {
-    let lowercasedSearchText = searchText.lowercased()
+  public func updateSearchResults(for searchController: UISearchController) {
+    let lowercasedSearchText = searchController.searchBar.text!.lowercased()
     filteredMediaItems = allItems.filter({ Utils.fullTitle(of: $0).lowercased().contains(lowercasedSearchText) })
 
     tableView.reloadData()
-  }
-
-  public func updateSearchResults(for searchController: UISearchController) {
-    filterContentForSearchText(searchText: searchController.searchBar.text!)
   }
 
 }
