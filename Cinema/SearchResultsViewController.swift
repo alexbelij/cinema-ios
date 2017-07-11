@@ -49,6 +49,10 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
     }
   }
 
+  func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+    return resultsInLibrary[indexPath.row] ? nil : indexPath
+  }
+
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     delegate?.didSelectSearchResult(searchResults[indexPath.row])
     tableView.deselectRow(at: indexPath, animated: true)
