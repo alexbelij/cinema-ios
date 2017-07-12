@@ -98,8 +98,8 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
     let alertController = UIAlertController(title: title,
                                             message: nil,
                                             preferredStyle: .alert)
-    alertController.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
-    alertController.addAction(UIAlertAction(title: NSLocalizedString("Discard", comment: ""), style: .destructive,
+    alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
+    alertController.addAction(UIAlertAction(title: NSLocalizedString("discard", comment: ""), style: .destructive,
                                             handler: { _ in
                                               self.dismiss(animated: true)
                                             }))
