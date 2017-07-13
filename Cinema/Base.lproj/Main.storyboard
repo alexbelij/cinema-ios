@@ -682,6 +682,30 @@
                                             <outlet property="yearLabel" destination="u1l-5F-RDe" id="M7j-pp-1Zn"/>
                                         </connections>
                                     </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" accessoryType="checkmark" indentationWidth="10" reuseIdentifier="SearchItemAddedCell" id="sBM-PJ-Cs4" customClass="SearchItemAddedCell" customModule="Cinema" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="72" width="320" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="sBM-PJ-Cs4" id="nle-Aw-JT9">
+                                            <rect key="frame" x="0.0" y="0.0" width="281" height="44"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="U0n-cg-xYo">
+                                                    <rect key="frame" x="8" y="11.5" width="273" height="21"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <color key="textColor" white="0.41999999999999998" alpha="1" colorSpace="calibratedWhite"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="U0n-cg-xYo" firstAttribute="centerY" secondItem="nle-Aw-JT9" secondAttribute="centerY" id="2l1-kU-Xsa"/>
+                                                <constraint firstAttribute="trailing" secondItem="U0n-cg-xYo" secondAttribute="trailing" id="RQ5-XE-VwV"/>
+                                                <constraint firstItem="U0n-cg-xYo" firstAttribute="leading" secondItem="nle-Aw-JT9" secondAttribute="leadingMargin" id="dYP-G6-flC"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="titleLabel" destination="U0n-cg-xYo" id="4w5-TB-duG"/>
+                                        </connections>
+                                    </tableViewCell>
                                 </prototypes>
                             </tableView>
                         </subviews>
