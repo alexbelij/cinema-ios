@@ -130,7 +130,7 @@ class DetailViewController: UIViewController {
     super.viewDidLoad()
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(reloadDetailItem),
-                                           name: .mediaLibraryChangedContent,
+                                           name: .didChangeMediaLibraryContent,
                                            object: nil)
   }
 

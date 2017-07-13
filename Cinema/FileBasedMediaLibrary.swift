@@ -62,7 +62,7 @@ class FileBasedMediaLibrary: MediaLibrary {
   }
 
   private func saveData() throws {
-    NotificationCenter.default.post(name: .mediaLibraryChangedContent, object: self)
+    NotificationCenter.default.post(name: .didChangeMediaLibraryContent, object: self)
     guard let data = try? dataFormat.serialize(mediaItems) else {
       throw MediaLibraryError.storageError
     }
@@ -73,8 +73,4 @@ class FileBasedMediaLibrary: MediaLibrary {
     }
   }
 
-}
-
-extension Notification.Name {
-  static let mediaLibraryChangedContent = Notification.Name("mediaLibraryChangedContent")
 }

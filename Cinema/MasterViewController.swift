@@ -36,7 +36,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
 
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(reloadLibraryData),
-                                           name: .mediaLibraryChangedContent,
+                                           name: .didChangeMediaLibraryContent,
                                            object: nil)
   }
 

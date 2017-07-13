@@ -1,3 +1,5 @@
+import Foundation
+
 protocol MediaLibrary {
 
   func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem]
@@ -15,4 +17,8 @@ protocol MediaLibrary {
 enum MediaLibraryError: Error {
   case storageError
   case itemDoesNotExist(id: Int)
+}
+
+extension Notification.Name {
+  static let didChangeMediaLibraryContent = Notification.Name("didChangeMediaLibraryContent")
 }
