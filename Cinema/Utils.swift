@@ -24,12 +24,4 @@ class Utils {
 
     return formatter.string(from: Double(duration * 60))!
   }
-
-  static func fullTitle(of mediaItem: MediaItem) -> String {
-    if let subtitle = mediaItem.subtitle {
-      return "\(mediaItem.title): \(subtitle)"
-    } else {
-      return mediaItem.title
-    }
-  }
 }

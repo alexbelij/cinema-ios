@@ -15,6 +15,14 @@ struct MediaItem {
     self.year = year
     self.diskType = diskType
   }
+
+  var fullTitle: String {
+    if let subtitle = subtitle {
+      return "\(title): \(subtitle)"
+    } else {
+      return title
+    }
+  }
 }
 
 enum DiskType: String {

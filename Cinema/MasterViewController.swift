@@ -149,7 +149,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
     } else {
       mediaItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
     }
-    cell.titleLabel!.text = Utils.fullTitle(of: mediaItem)
+    cell.titleLabel!.text = mediaItem.fullTitle
     cell.runtimeLabel!.text = mediaItem.runtime == -1
         ? NSLocalizedString("details.missing.runtime", comment: "")
         : Utils.formatDuration(mediaItem.runtime)
@@ -192,7 +192,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
 
   public func updateSearchResults(for searchController: UISearchController) {
     let lowercasedSearchText = searchController.searchBar.text!.lowercased()
-    filteredMediaItems = allItems.filter({ Utils.fullTitle(of: $0).lowercased().contains(lowercasedSearchText) })
+    filteredMediaItems = allItems.filter({ $0.fullTitle.lowercased().contains(lowercasedSearchText) })
 
     tableView.reloadData()
   }
