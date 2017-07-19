@@ -10,15 +10,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
   func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-    do {
-      library = try FileBasedMediaLibrary(directory: Utils.applicationSupportDirectory(),
-                                          fileName: "cinema.data",
-                                          dataFormat: KeyedArchivalFormat())
-    } catch let error {
-      fatalError("Library could not be instantiated: \(error)")
-    }
+    library = Config.initLibrary()
 
-    movieDb = CachingMovieDbClient(backingClient: TMDBSwiftWrapper(storeFront: .germany))
+    movieDb = Config.initMovieDb()
     movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
     movieDb.tryConnect()
 
