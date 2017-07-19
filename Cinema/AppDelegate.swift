@@ -10,9 +10,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
   func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-    library = Config.initLibrary()
+    let arguments = ProcessInfo.processInfo.arguments
 
-    movieDb = Config.initMovieDb()
+    library = Config.initLibrary(launchArguments: arguments)
+
+    movieDb = Config.initMovieDb(launchArguments: arguments)
     movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
     movieDb.tryConnect()
 
