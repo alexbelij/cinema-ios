@@ -10,6 +10,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
   func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    self.window = UIWindow(frame: UIScreen.main.bounds)
+    self.window?.makeKeyAndVisible()
+    self.window!.rootViewController = loadMainViewController()
+    return true
+  }
+
+  private func loadMainViewController() -> UIViewController {
     let arguments = ProcessInfo.processInfo.arguments
 
     library = Config.initLibrary(launchArguments: arguments)
@@ -19,7 +26,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     movieDb.tryConnect()
 
     // swiftlint:disable force_cast
-    let splitViewController = window!.rootViewController as! UISplitViewController
+    let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
+    let splitViewController = mainStoryboard.instantiateViewController(withIdentifier: "SplitViewController")
+    as! UISplitViewController
     splitViewController.delegate = self
 
     let primaryNavController = splitViewController.viewControllers.first as! UINavigationController
@@ -32,7 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     detailViewController.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
     // swiftlint:enable force_cast
 
-    return true
+    return splitViewController
   }
 
   // MARK: - Split view
