@@ -2,7 +2,7 @@ import Foundation
 
 enum Config {
 
-  private static func applicationSupportDirectory() -> URL {
+  private static var applicationSupportDirectory: URL = {
     let fileManager = FileManager.default
     let urls = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)
     if urls.count >= 1 {
@@ -14,7 +14,7 @@ enum Config {
       } catch {}
     }
     fatalError("Could not create Application Support directory")
-  }
+  }()
 
   /// Usage
   /// ```
@@ -33,7 +33,7 @@ enum Config {
         library = SampleLibrary()
       case .fileBased:
         do {
-          library = try FileBasedMediaLibrary(directory: applicationSupportDirectory(),
+          library = try FileBasedMediaLibrary(directory: applicationSupportDirectory,
                                               fileName: "cinema.data",
                                               dataFormat: KeyedArchivalFormat())
         } catch let error {
