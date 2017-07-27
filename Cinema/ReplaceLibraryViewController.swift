@@ -9,6 +9,7 @@ class ReplaceLibraryViewController: UIViewController {
   @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
   @IBOutlet weak var label: UILabel!
   @IBOutlet weak var errorLabel: UILabel!
+  @IBOutlet weak var closeButton: UIButton!
 
   func replaceLibraryContent(of library: MediaLibrary, withContentOf url: URL) {
     self.library = library
@@ -18,6 +19,7 @@ class ReplaceLibraryViewController: UIViewController {
   open override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     label.text = NSLocalizedString("replaceLibrary.progress.text", comment: "")
+    closeButton.setTitle(NSLocalizedString("ok", comment: ""), for: .normal)
   }
 
   override func viewDidAppear(_ animated: Bool) {
@@ -40,6 +42,9 @@ class ReplaceLibraryViewController: UIViewController {
         self.activityIndicator.stopAnimating()
         if libraryError == nil {
           self.label.text = NSLocalizedString("replaceLibrary.done.success.text", comment: "")
+          DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
+            self.dismiss()
+          }
         } else {
           self.label.text = NSLocalizedString("replaceLibrary.done.failure.text", comment: "")
           switch libraryError! {
@@ -51,12 +56,14 @@ class ReplaceLibraryViewController: UIViewController {
               self.errorLabel.text = NSLocalizedString("error.genericError", comment: "")
           }
           self.errorLabel.isHidden = false
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
-          self.dismiss(animated: true)
+          self.closeButton.isHidden = false
         }
       }
     }
+  }
+
+  @IBAction private func dismiss() {
+    self.dismiss(animated: true)
   }
 
   override func viewWillDisappear(_ animated: Bool) {
