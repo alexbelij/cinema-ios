@@ -10,6 +10,7 @@ class ReplaceLibraryViewController: UIViewController {
   @IBOutlet weak var label: UILabel!
   @IBOutlet weak var errorLabel: UILabel!
   @IBOutlet weak var closeButton: UIButton!
+  @IBOutlet weak var centeringConstraint: NSLayoutConstraint!
 
   func replaceLibraryContent(of library: MediaLibrary, withContentOf url: URL) {
     self.library = library
@@ -57,6 +58,12 @@ class ReplaceLibraryViewController: UIViewController {
           }
           self.errorLabel.isHidden = false
           self.closeButton.isHidden = false
+          self.view?.superview?.layoutIfNeeded()
+          let extraHeight = self.closeButton.frame.origin.y - self.errorLabel.frame.origin.y
+          UIView.animate(withDuration: 0.3) {
+            self.centeringConstraint.constant = -extraHeight / 2
+            self.view?.superview?.layoutIfNeeded()
+          }
         }
       }
     }

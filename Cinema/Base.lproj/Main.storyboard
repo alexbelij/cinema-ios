@@ -537,6 +537,7 @@
                     </view>
                     <connections>
                         <outlet property="activityIndicator" destination="HeS-SB-Gxy" id="2en-hY-QkP"/>
+                        <outlet property="centeringConstraint" destination="nus-u4-8S5" id="EJ9-Uk-qVX"/>
                         <outlet property="closeButton" destination="iV8-OI-lxP" id="eVd-Sf-O0l"/>
                         <outlet property="errorLabel" destination="wmn-P8-AlH" id="irn-gp-Lh9"/>
                         <outlet property="label" destination="bwD-rm-A56" id="hpm-d0-WQl"/>
