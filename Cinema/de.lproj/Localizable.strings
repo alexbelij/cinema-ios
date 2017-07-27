@@ -16,8 +16,8 @@
 "edit.sectionHeader.subtitle" = "Untertitel (optional)";
 "edit.sectionHeader.title" = "Titel";
 "error.genericError" = "Es ist ein unbekannter Fehler aufgetreten.";
-"error.invalidDataFormat" = "Datei besitzt falsches Format.";
-"error.storageError" = "Mediathek konnte nicht gespeichert werden.";
+"error.invalidDataFormat" = "Die Datei kann nicht geöffnet werden. Home-Cinema konnte die Datei nicht lesen.";
+"error.storageError" = "Die Mediathek konnte nicht gespeichert werden.";
 "library" = "Mediathek";
 "library.search.placeholder" = "Titel durchsuchen...";
 "mediaItem.disk.bluRay" = "Blu-ray";

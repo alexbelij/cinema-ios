@@ -16,8 +16,8 @@
 "edit.sectionHeader.subtitle" = "Subtitle (optional)";
 "edit.sectionHeader.title" = "Title";
 "error.genericError" = "An unknown error occurred.";
-"error.invalidDataFormat" = "File has invalid format.";
-"error.storageError" = "Library could not be saved.";
+"error.invalidDataFormat" = "The file can\\u2019t be opened. Home-Cinema couldn\\u2019t read the file.";
+"error.storageError" = "The library could not be saved.";
 "library" = "Library";
 "library.search.placeholder" = "Search titles...";
 "mediaItem.disk.bluRay" = "Blu-ray";
