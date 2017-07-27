@@ -22,8 +22,11 @@ class JSONFormat: DataFormat {
 
   func deserialize(from data: Data) throws -> [MediaItem] {
     var items = [MediaItem]()
-    let jsonData = JSON(data: data).arrayValue
-    for jsonItem in jsonData {
+    let jsonData = JSON(data: data)
+    if jsonData.type == .null {
+      throw DataFormatError.invalidDataFormat
+    }
+    for jsonItem in jsonData.arrayValue {
       let id = jsonItem["id"].int
       let title = jsonItem["title"].string
       let subtitle = jsonItem["subtitle"].string
