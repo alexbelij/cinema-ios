@@ -5,9 +5,28 @@ class KeyedArchivalFormat: DataFormat {
   var defaultSchemaVersion: SchemaVersion?
 
   func serialize(_ elements: [MediaItem], schemaVersion: SchemaVersion) throws -> Data {
-    guard schemaVersion == .v1_0_0 else {
-      throw DataFormatError.unsupportedSchemaVersion(versionString: schemaVersion.versionString)
+    switch schemaVersion {
+      case .v1_0_0: return try serializeVersion1_0_0(elements)
     }
+  }
+
+  func deserialize(from data: Data) throws -> [MediaItem] {
+    // traps when invalid archive, but ignored since only used for internal model
+    let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
+    let versionString = (unarchiver.decodeObject(forKey: "schemaVersion") as? String)
+                        ?? SchemaVersion.v1_0_0.versionString
+    unarchiver.finishDecoding()
+    guard let version = SchemaVersion(versionString: versionString) else {
+      throw DataFormatError.unsupportedSchemaVersion(versionString: versionString)
+    }
+    switch version {
+      case .v1_0_0: return try deserializeVersion1_0_0(from: data)
+    }
+  }
+
+  // MARK: - Version 1-0-0
+
+  private func serializeVersion1_0_0(_ elements: [MediaItem]) throws -> Data {
     let rootObject: [[String: Any]] = elements.map { item in
       var dictionary: [String: Any] = [
         "id": item.id,
@@ -24,7 +43,7 @@ class KeyedArchivalFormat: DataFormat {
     return NSKeyedArchiver.archivedData(withRootObject: rootObject)
   }
 
-  func deserialize(from data: Data) throws -> [MediaItem] {
+  private func deserializeVersion1_0_0(from data: Data) throws -> [MediaItem] {
     guard let array = NSKeyedUnarchiver.unarchiveObject(with: data) as? [[String: Any]] else {
       throw DataFormatError.invalidDataFormat
     }
