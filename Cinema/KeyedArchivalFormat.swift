@@ -2,7 +2,12 @@ import Foundation
 
 class KeyedArchivalFormat: DataFormat {
 
-  func serialize(_ elements: [MediaItem]) -> Data {
+  var defaultSchemaVersion: SchemaVersion?
+
+  func serialize(_ elements: [MediaItem], schemaVersion: SchemaVersion) throws -> Data {
+    guard schemaVersion == .v1_0_0 else {
+      throw DataFormatError.unsupportedSchemaVersion(versionString: schemaVersion.versionString)
+    }
     let rootObject: [[String: Any]] = elements.map { item in
       var dictionary: [String: Any] = [
         "id": item.id,

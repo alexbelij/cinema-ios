@@ -3,7 +3,12 @@ import SwiftyJSON
 
 class JSONFormat: DataFormat {
 
-  func serialize(_ elements: [MediaItem]) throws -> Data {
+  var defaultSchemaVersion: SchemaVersion?
+
+  func serialize(_ elements: [MediaItem], schemaVersion: SchemaVersion) throws -> Data {
+    guard schemaVersion == .v1_0_0 else {
+      throw DataFormatError.unsupportedSchemaVersion(versionString: schemaVersion.versionString)
+    }
     let jsonArray: [JSON] = elements.map { item in
       var dictionary: [String: Any] = [
         "id": item.id,
