@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="H1p-Uh-vWS">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="H1p-Uh-vWS">
     <device id="retina4_0" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -8,6 +8,7 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -514,18 +515,30 @@
                                 <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iV8-OI-lxP">
+                                <rect key="frame" x="16" y="425.5" width="288" height="30"/>
+                                <state key="normal" title="OK"/>
+                                <connections>
+                                    <action selector="dismiss" destination="IBS-vn-BgN" eventType="touchUpInside" id="KMK-yQ-QL5"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="wmn-P8-AlH" firstAttribute="top" secondItem="cIW-f3-3Oe" secondAttribute="bottom" constant="12" id="1Ob-2R-g4c"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="iV8-OI-lxP" secondAttribute="trailing" id="7FH-VT-azG"/>
                             <constraint firstItem="wmn-P8-AlH" firstAttribute="leading" secondItem="qFU-uh-eh6" secondAttribute="leadingMargin" id="7bJ-O4-oT9"/>
                             <constraint firstItem="MVT-VT-nJb" firstAttribute="centerX" secondItem="qFU-uh-eh6" secondAttribute="centerX" id="Ie7-Si-eNn"/>
                             <constraint firstAttribute="trailingMargin" secondItem="wmn-P8-AlH" secondAttribute="trailing" id="MYI-1u-keO"/>
+                            <constraint firstItem="iV8-OI-lxP" firstAttribute="leading" secondItem="qFU-uh-eh6" secondAttribute="leadingMargin" id="QvO-LY-7BG"/>
                             <constraint firstItem="MVT-VT-nJb" firstAttribute="centerY" secondItem="qFU-uh-eh6" secondAttribute="centerY" id="nus-u4-8S5"/>
+                            <constraint firstItem="iV8-OI-lxP" firstAttribute="top" secondItem="wmn-P8-AlH" secondAttribute="bottom" multiplier="1.1" constant="8" symbolic="YES" id="vZB-cL-gCJ"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="activityIndicator" destination="HeS-SB-Gxy" id="2en-hY-QkP"/>
+                        <outlet property="centeringConstraint" destination="nus-u4-8S5" id="EJ9-Uk-qVX"/>
+                        <outlet property="closeButton" destination="iV8-OI-lxP" id="eVd-Sf-O0l"/>
                         <outlet property="errorLabel" destination="wmn-P8-AlH" id="irn-gp-Lh9"/>
                         <outlet property="label" destination="bwD-rm-A56" id="hpm-d0-WQl"/>
                     </connections>
