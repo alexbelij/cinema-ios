@@ -44,7 +44,10 @@ private struct TitleSortingStrategy: TableViewSortingStrategy {
     let title1 = removeArticlesAtBeginning(from: left.title)
     let title2 = removeArticlesAtBeginning(from: right.title)
     switch title1.compare(title2, options: [.diacriticInsensitive, .caseInsensitive]) {
-      case .orderedSame: return left.year <= right.year
+      case .orderedSame:
+        guard let leftYear = left.year else { return false }
+        guard let rightYear = right.year else { return true }
+        return leftYear <= rightYear
       case .orderedAscending: return true
       case .orderedDescending: return false
     }
@@ -116,11 +119,11 @@ private struct YearSortingStrategy: TableViewSortingStrategy {
   private let unknownSymbol = "?"
 
   func sectionIndexTitle(for item: MediaItem) -> String {
-    guard item.year > 0 else { return unknownSymbol }
-    if item.year < 2010 {
-      return String(item.year / 10 * 10)
+    guard let year = item.year else { return unknownSymbol }
+    if year < 2010 {
+      return String(year / 10 * 10)
     } else {
-      return String(item.year)
+      return String(year)
     }
   }
 

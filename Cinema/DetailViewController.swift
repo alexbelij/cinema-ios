@@ -37,7 +37,9 @@ class DetailViewController: UIViewController {
       runtimeLabel.text = mediaItem.runtime == nil
           ? NSLocalizedString("details.missing.runtime", comment: "")
           : Utils.formatDuration(mediaItem.runtime!)
-      yearLabel.text = "\(mediaItem.year)"
+      yearLabel.text = mediaItem.year == nil
+          ? NSLocalizedString("details.missing.year", comment: "")
+          : "\(mediaItem.year!)"
       diskLabel.text = localize(diskType: mediaItem.diskType)
 
       if movieDb.isConnected {

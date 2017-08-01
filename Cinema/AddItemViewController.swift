@@ -45,7 +45,7 @@ class AddItemViewController: UIViewController {
       let item = MediaItem(id: self.itemToAdd.id,
                            title: self.itemToAdd.title,
                            runtime: self.movieDb.runtime(for: self.itemToAdd.id),
-                           year: self.itemToAdd.year ?? -1,
+                           year: self.itemToAdd.year,
                            diskType: self.diskType)
       var libraryError: Error? = nil
       do {

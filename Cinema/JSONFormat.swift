@@ -34,7 +34,6 @@ class JSONFormat: DataFormat {
       var dictionary: [String: Any] = [
         "id": item.id,
         "title": item.title,
-        "year": item.year,
         "diskType": item.diskType.rawValue
       ]
       if let subtitle = item.subtitle {
@@ -42,6 +41,9 @@ class JSONFormat: DataFormat {
       }
       if let runtime = item.runtime {
         dictionary["runtime"] = runtime
+      }
+      if let year = item.year {
+        dictionary["year"] = year
       }
       return JSON(dictionary)
     }
@@ -61,7 +63,7 @@ class JSONFormat: DataFormat {
       let runtime = jsonItem["runtime"].int
       let year = jsonItem["year"].int
       let diskType = DiskType(rawValue: jsonItem["diskType"].string ?? "")
-      if let id = id, let title = title, let year = year, let diskType = diskType {
+      if let id = id, let title = title, let diskType = diskType {
         let mediaItem = MediaItem(id: id,
                                   title: title,
                                   subtitle: subtitle,
@@ -84,7 +86,7 @@ class JSONFormat: DataFormat {
         "id": item.id,
         "title": item.title,
         "runtime": item.runtime ?? -1,
-        "year": item.year,
+        "year": item.year ?? -1,
         "diskType": item.diskType.rawValue
       ]
       if let subtitle = item.subtitle {

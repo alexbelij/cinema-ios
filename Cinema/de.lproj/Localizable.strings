@@ -10,6 +10,7 @@
 "details.missing.genre" = "Kein Genre verfügbar.";
 "details.missing.overview" = "Keine Beschreibung vorhanden.";
 "details.missing.runtime" = "Keine Laufzeit verfügbar.";
+"details.missing.year" = "Kein Erscheinungsjahr verfügbar.";
 "discard" = "Verwerfen";
 "edit.deleteMovie" = "Film löschen";
 "edit.noTitleAlert" = "Ein Film braucht einen Titel.";
