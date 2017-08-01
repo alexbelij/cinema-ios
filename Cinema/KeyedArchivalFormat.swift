@@ -7,6 +7,7 @@ class KeyedArchivalFormat: DataFormat {
   func serialize(_ elements: [MediaItem], schemaVersion: SchemaVersion) throws -> Data {
     switch schemaVersion {
       case .v1_0_0: return try serializeVersion1_0_0(elements)
+      case .v2_0_0: return try serializeVersion2_0_0(elements)
     }
   }
 
@@ -21,7 +22,18 @@ class KeyedArchivalFormat: DataFormat {
     }
     switch version {
       case .v1_0_0: return try deserializeVersion1_0_0(from: data)
+      case .v2_0_0: return try deserializeVersion2_0_0(from: data)
     }
+  }
+
+  // MARK: - Version 2-0-0
+
+  private func serializeVersion2_0_0(_ elements: [MediaItem]) throws -> Data {
+    fatalError("unimplemented")
+  }
+
+  private func deserializeVersion2_0_0(from data: Data) throws -> [MediaItem] {
+    fatalError("unimplemented")
   }
 
   // MARK: - Version 1-0-0

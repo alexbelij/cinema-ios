@@ -30,27 +30,30 @@ enum SchemaVersion: Equatable, Comparable, CustomStringConvertible {
 
   // swiftlint:disable identifier_name
   case v1_0_0
+  case v2_0_0
   // swiftlint:enable identifier_name
 
   var model: UInt {
     switch self {
       case .v1_0_0: return 1
+      case .v2_0_0: return 2
     }
   }
   var revision: UInt {
     switch self {
-      case .v1_0_0: return 0
+      case .v1_0_0, .v2_0_0: return 0
     }
   }
   var addition: UInt {
     switch self {
-      case .v1_0_0: return 0
+      case .v1_0_0, .v2_0_0: return 0
     }
   }
 
   init?(versionString: String) {
     switch versionString {
       case "1-0-0": self = .v1_0_0
+      case "2-0-0": self = .v2_0_0
       default: return nil
     }
   }
