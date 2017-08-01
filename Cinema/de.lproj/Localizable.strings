@@ -36,4 +36,5 @@
 "sort.by.runtime.unknownHeader" = "Unbekannt";
 "sort.by.title" = "Titel";
 "sort.by.year" = "Erscheinungsjahr";
+"sort.by.year.unknownHeader" = "Unbekannt";
 "yes" = "Ja";

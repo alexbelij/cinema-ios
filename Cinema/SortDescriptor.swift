@@ -113,7 +113,10 @@ private struct RuntimeSortingStrategy: TableViewSortingStrategy {
 
 private struct YearSortingStrategy: TableViewSortingStrategy {
 
+  private let unknownSymbol = "?"
+
   func sectionIndexTitle(for item: MediaItem) -> String {
+    guard item.year > 0 else { return unknownSymbol }
     if item.year < 2010 {
       return String(item.year / 10 * 10)
     } else {
@@ -121,7 +124,27 @@ private struct YearSortingStrategy: TableViewSortingStrategy {
     }
   }
 
+  func refineSectionIndexTitles(_ titles: [String]) -> [String] {
+    if let index = titles.index(of: unknownSymbol) {
+      var titles = titles
+      titles.remove(at: index)
+      return titles
+    }
+    return titles
+  }
+
+  func sectionTitle(for sectionIndexTitle: String) -> String {
+    switch sectionIndexTitle {
+      case unknownSymbol:
+        return NSLocalizedString("sort.by.year.unknownHeader", comment: "")
+      default:
+        return sectionIndexTitle
+    }
+  }
+
   func sectionIndexTitleSorting(left: String, right: String) -> Bool {
+    guard left != unknownSymbol else { return false }
+    guard right != unknownSymbol else { return true }
     return Int(left)! >= Int(right)!
   }
 
