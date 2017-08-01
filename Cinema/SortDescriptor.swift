@@ -68,10 +68,8 @@ private struct RuntimeSortingStrategy: TableViewSortingStrategy {
   private let unknownSymbol = "?"
 
   func sectionIndexTitle(for item: MediaItem) -> String {
-    switch item.runtime {
-      case -1: return unknownSymbol
-      default: return String(item.runtime / 10 * 10)
-    }
+    guard let runtime = item.runtime else { return unknownSymbol }
+    return String(runtime / 10 * 10)
   }
 
   func refineSectionIndexTitles(_ sections: [String]) -> [String] {
@@ -107,7 +105,9 @@ private struct RuntimeSortingStrategy: TableViewSortingStrategy {
   }
 
   func itemSorting(left: MediaItem, right: MediaItem) -> Bool {
-    return left.runtime <= right.runtime
+    guard let leftRuntime = left.runtime else { return false }
+    guard let rightRuntime = right.runtime else { return true }
+    return leftRuntime <= rightRuntime
   }
 }
 

@@ -44,7 +44,7 @@ class AddItemViewController: UIViewController {
     DispatchQueue.global(qos: .userInitiated).async {
       let item = MediaItem(id: self.itemToAdd.id,
                            title: self.itemToAdd.title,
-                           runtime: self.movieDb.runtime(for: self.itemToAdd.id) ?? -1,
+                           runtime: self.movieDb.runtime(for: self.itemToAdd.id),
                            year: self.itemToAdd.year ?? -1,
                            diskType: self.diskType)
       var libraryError: Error? = nil

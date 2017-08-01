@@ -33,12 +33,14 @@ class KeyedArchivalFormat: DataFormat {
       var dictionary: [String: Any] = [
         "id": item.id,
         "title": item.title,
-        "runtime": item.runtime,
         "year": item.year,
         "diskType": item.diskType.rawValue
       ]
       if let subtitle = item.subtitle {
         dictionary["subtitle"] = subtitle
+      }
+      if let runtime = item.runtime {
+        dictionary["runtime"] = runtime
       }
       return dictionary
     }
@@ -64,7 +66,7 @@ class KeyedArchivalFormat: DataFormat {
       let runtime = dict["runtime"] as? Int
       let year = dict["year"] as? Int
       let diskType = DiskType(rawValue: dict["diskType"] as? String ?? "")
-      if let id = id, let title = title, let runtime = runtime, let year = year, let diskType = diskType {
+      if let id = id, let title = title, let year = year, let diskType = diskType {
         let mediaItem = MediaItem(id: id,
                                   title: title,
                                   subtitle: subtitle,
@@ -86,7 +88,7 @@ class KeyedArchivalFormat: DataFormat {
       var dictionary: [String: Any] = [
         "id": item.id,
         "title": item.title,
-        "runtime": item.runtime,
+        "runtime": item.runtime ?? -1,
         "year": item.year,
         "diskType": item.diskType.rawValue
       ]

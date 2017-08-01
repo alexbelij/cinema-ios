@@ -34,9 +34,9 @@ class DetailViewController: UIViewController {
       } else {
         subtitleLabel.isHidden = true
       }
-      runtimeLabel.text = mediaItem.runtime == -1
+      runtimeLabel.text = mediaItem.runtime == nil
           ? NSLocalizedString("details.missing.runtime", comment: "")
-          : Utils.formatDuration(mediaItem.runtime)
+          : Utils.formatDuration(mediaItem.runtime!)
       yearLabel.text = "\(mediaItem.year)"
       diskLabel.text = localize(diskType: mediaItem.diskType)
 

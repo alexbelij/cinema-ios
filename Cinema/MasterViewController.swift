@@ -138,9 +138,9 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
       mediaItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
     }
     cell.titleLabel!.text = mediaItem.fullTitle
-    cell.runtimeLabel!.text = mediaItem.runtime == -1
+    cell.runtimeLabel!.text = mediaItem.runtime == nil
         ? NSLocalizedString("details.missing.runtime", comment: "")
-        : Utils.formatDuration(mediaItem.runtime)
+        : Utils.formatDuration(mediaItem.runtime!)
     cell.posterView.image = #imageLiteral(resourceName:"GenericPoster-w92")
     cell.posterView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
     cell.posterView.layer.borderWidth = 0.5
