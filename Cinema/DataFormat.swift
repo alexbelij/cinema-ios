@@ -29,7 +29,12 @@ enum DataFormatError: Error {
 enum SchemaVersion: Equatable, Comparable, CustomStringConvertible {
 
   // swiftlint:disable identifier_name
+  // array of MediaItems
   case v1_0_0
+  /*
+   * schemaVersion -> <version>
+   * payload -> array of MediaItems
+   */
   case v2_0_0
   // swiftlint:enable identifier_name
 
@@ -83,4 +88,5 @@ enum SchemaVersion: Equatable, Comparable, CustomStringConvertible {
 
 extension String {
   static let schemaVersionKey = "schemaVersion"
+  static let payloadKey = "payload"
 }

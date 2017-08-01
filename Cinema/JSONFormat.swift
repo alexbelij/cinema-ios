@@ -30,11 +30,48 @@ class JSONFormat: DataFormat {
   // MARK: - Version 2-0-0
 
   private func serializeVersion2_0_0(_ elements: [MediaItem]) throws -> Data {
-    fatalError("unimplemented")
+    let payload: [JSON] = elements.map { item in
+      var dictionary: [String: Any] = [
+        "id": item.id,
+        "title": item.title,
+        "runtime": item.runtime,
+        "year": item.year,
+        "diskType": item.diskType.rawValue
+      ]
+      if let subtitle = item.subtitle {
+        dictionary["subtitle"] = subtitle
+      }
+      return JSON(dictionary)
+    }
+    let jsonDict: [String: JSON] = [
+      .schemaVersionKey: JSON(SchemaVersion.v2_0_0.versionString),
+      .payloadKey: JSON(array: payload)
+    ]
+    return try JSON(dictionary: jsonDict).rawData(options: .prettyPrinted)
   }
 
   private func deserializeVersion2_0_0(from json: JSON) throws -> [MediaItem] {
-    fatalError("unimplemented")
+    var items = [MediaItem]()
+    for jsonItem in json[String.payloadKey].arrayValue {
+      let id = jsonItem["id"].int
+      let title = jsonItem["title"].string
+      let subtitle = jsonItem["subtitle"].string
+      let runtime = jsonItem["runtime"].int
+      let year = jsonItem["year"].int
+      let diskType = DiskType(rawValue: jsonItem["diskType"].string ?? "")
+      if let id = id, let title = title, let runtime = runtime, let year = year, let diskType = diskType {
+        let mediaItem = MediaItem(id: id,
+                                  title: title,
+                                  subtitle: subtitle,
+                                  runtime: runtime,
+                                  year: year,
+                                  diskType: diskType)
+        items.append(mediaItem)
+      } else {
+        throw DataFormatError.invalidDataFormat
+      }
+    }
+    return items
   }
 
   // MARK: - Version 1-0-0
