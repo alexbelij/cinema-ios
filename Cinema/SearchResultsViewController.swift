@@ -42,7 +42,7 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
       // swiftlint:disable:next force_cast
       let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemCell", for: indexPath) as! SearchItemCell
       cell.titleLabel.text = searchItem.title
-      if let year = searchItem.year, year != -1 {
+      if let year = searchItem.year {
         cell.yearLabel.text = String(year)
       }
       return cell
