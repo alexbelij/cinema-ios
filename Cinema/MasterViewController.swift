@@ -3,8 +3,8 @@ import Dispatch
 
 class MasterViewController: UITableViewController, UISearchResultsUpdating, SortDescriptorViewControllerDelegate {
 
-  private var library: MediaLibrary!
-  private var movieDb: MovieDbClient!
+  var library: MediaLibrary!
+  var movieDb: MovieDbClient!
 
   private var allItems = [MediaItem]()
   private var filteredMediaItems = [MediaItem]()
@@ -19,10 +19,6 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
   private var sortDescriptor = SortDescriptor.title
 
   override func viewDidLoad() {
-    // swiftlint:disable:next force_cast
-    library = (UIApplication.shared.delegate as! AppDelegate).library
-    // swiftlint:disable:next force_cast
-    movieDb = (UIApplication.shared.delegate as! AppDelegate).movieDb
     fetchLibraryData()
     super.viewDidLoad()
     title = NSLocalizedString("library", comment: "")
