@@ -49,6 +49,7 @@
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <connections>
                         <outlet property="searchBarPlaceholder" destination="dDh-15-iSA" id="0mP-b8-YA7"/>
+                        <segue destination="11G-x7-NBc" kind="presentation" identifier="addItem" id="PPu-q1-74b"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cTT-Yk-ZSf" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -193,7 +194,7 @@
                     </constraints>
                 </view>
             </objects>
-            <point key="canvasLocation" x="2698" y="-878"/>
+            <point key="canvasLocation" x="1854" y="-1598"/>
         </scene>
         <!--Add Item View Controller-->
         <scene sceneID="q6N-Wa-AF6">
@@ -258,7 +259,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="UFH-Wq-4QO" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3519" y="-880"/>
+            <point key="canvasLocation" x="2738" y="-879"/>
         </scene>
     </scenes>
     <resources>

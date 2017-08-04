@@ -10,6 +10,8 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
   @IBOutlet weak var searchBarPlaceholder: UIView!
 
   private var searchResultsController: SearchResultsController!
+  private var selectedSearchResult: PartialMediaItem?
+  private var selectedDiskType: DiskType?
 
   var library: MediaLibrary!
   var movieDb: MovieDbClient!
@@ -56,23 +58,29 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
     let alert = UIAlertController(title: NSLocalizedString("addItem.alert.howToAdd.title", comment: ""),
                                   message: nil,
                                   preferredStyle: .alert)
+    self.selectedSearchResult = searchResult
     alert.addAction(UIAlertAction(title: NSLocalizedString("mediaItem.disk.dvd", comment: ""), style: .default) { _ in
-      let controller = self.storyboard!
-      // swiftlint:disable:next force_cast
-          .instantiateViewController(withIdentifier: "AddItemViewController") as! AddItemViewController
-      controller.add(item: searchResult, as: .dvd, to: self.library, movieDb: self.movieDb)
-      self.present(controller, animated: true)
+      self.selectedDiskType = .dvd
+      self.performSegue(withIdentifier: "addItem", sender: self)
     })
     alert.addAction(UIAlertAction(title: NSLocalizedString("mediaItem.disk.bluRay", comment: ""),
                                   style: .default) { _ in
-      let controller = self.storyboard!
-      // swiftlint:disable:next force_cast
-          .instantiateViewController(withIdentifier: "AddItemViewController") as! AddItemViewController
-      controller.add(item: searchResult, as: .bluRay, to: self.library, movieDb: self.movieDb)
-      self.present(controller, animated: true)
+      self.selectedDiskType = .bluRay
+      self.performSegue(withIdentifier: "addItem", sender: self)
     })
     alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     present(alert, animated: true)
   }
 
+  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    switch segue.unwrappedDestination {
+      case let addItemVC as AddItemViewController:
+        guard let item = selectedSearchResult,
+              let diskType = selectedDiskType else {
+          fatalError("item and disk type should have been set")
+        }
+        addItemVC.add(item: item, as: diskType, to: self.library, movieDb: self.movieDb)
+      default: fatalError("Unexpected segue: '\(self)' -> '\(segue.destination)'")
+    }
+  }
 }
