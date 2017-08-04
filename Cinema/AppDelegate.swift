@@ -65,9 +65,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
                                   message: nil,
                                   preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: NSLocalizedString("yes", comment: ""), style: .destructive, handler: { _ in
-      let controller = UIStoryboard(name: "Main", bundle: nil)
+      let controller = UIStoryboard(name: "ReplaceLibrary", bundle: nil)
           // swiftlint:disable:next force_cast
-          .instantiateViewController(withIdentifier: "ReplaceLibraryViewController") as! ReplaceLibraryViewController
+          .instantiateInitialViewController() as! ReplaceLibraryViewController
       controller.replaceLibraryContent(of: self.library, withContentOf: url)
       self.window!.rootViewController!.present(controller, animated: true)
     }))
