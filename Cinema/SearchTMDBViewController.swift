@@ -30,7 +30,6 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
     searchController.searchBar.sizeToFit()
     searchController.searchBar.placeholder = NSLocalizedString("addItem.search.placeholder", comment: "")
     searchBarPlaceholder.addSubview(searchController.searchBar)
-    searchController.isActive = true
     title = NSLocalizedString("addItem.title", comment: "")
   }
 
