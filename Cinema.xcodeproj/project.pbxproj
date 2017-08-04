@@ -29,6 +29,7 @@
 		CB9484CA1EFA71A900D9651E /* AddItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB9484C91EFA71A900D9651E /* AddItemViewController.swift */; };
 		CB9484CC1EFA8B8200D9651E /* ReplaceLibraryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB9484CB1EFA8B8200D9651E /* ReplaceLibraryViewController.swift */; };
 		CBAE5E811F3482A70055366F /* ReplaceLibrary.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBAE5E7F1F3482A70055366F /* ReplaceLibrary.storyboard */; };
+		CBAE5E861F3486EA0055366F /* EditItem.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBAE5E841F3486EA0055366F /* EditItem.storyboard */; };
 		CBB569671EA4D6A2005F7BA7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB569661EA4D6A2005F7BA7 /* AppDelegate.swift */; };
 		CBB569691EA4D6A2005F7BA7 /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB569681EA4D6A2005F7BA7 /* MasterViewController.swift */; };
 		CBB5696B1EA4D6A2005F7BA7 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB5696A1EA4D6A2005F7BA7 /* DetailViewController.swift */; };
@@ -67,6 +68,7 @@
 		CB9484C91EFA71A900D9651E /* AddItemViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddItemViewController.swift; sourceTree = "<group>"; };
 		CB9484CB1EFA8B8200D9651E /* ReplaceLibraryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReplaceLibraryViewController.swift; sourceTree = "<group>"; };
 		CBAE5E801F3482A70055366F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/ReplaceLibrary.storyboard; sourceTree = "<group>"; };
+		CBAE5E851F3486EA0055366F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/EditItem.storyboard; sourceTree = "<group>"; };
 		CBB569631EA4D6A2005F7BA7 /* Cinema.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cinema.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBB569661EA4D6A2005F7BA7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CBB569681EA4D6A2005F7BA7 /* MasterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 			children = (
 				CBB5696F1EA4D6A2005F7BA7 /* Assets.xcassets */,
 				CBB5696C1EA4D6A2005F7BA7 /* Main.storyboard */,
+				CBAE5E841F3486EA0055366F /* EditItem.storyboard */,
 				CBAE5E7F1F3482A70055366F /* ReplaceLibrary.storyboard */,
 				CBB569711EA4D6A2005F7BA7 /* LaunchScreen.storyboard */,
 				816BFC6B85744C53AD5A5ED5 /* MovieTableCell.swift */,
@@ -268,6 +271,7 @@
 				CB9484C11EFA643500D9651E /* Localizable.strings in Resources */,
 				CBB569701EA4D6A2005F7BA7 /* Assets.xcassets in Resources */,
 				CBB5696E1EA4D6A2005F7BA7 /* Main.storyboard in Resources */,
+				CBAE5E861F3486EA0055366F /* EditItem.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -373,6 +377,14 @@
 				CBAE5E801F3482A70055366F /* Base */,
 			);
 			name = ReplaceLibrary.storyboard;
+			sourceTree = "<group>";
+		};
+		CBAE5E841F3486EA0055366F /* EditItem.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CBAE5E851F3486EA0055366F /* Base */,
+			);
+			name = EditItem.storyboard;
 			sourceTree = "<group>";
 		};
 		CBB5696C1EA4D6A2005F7BA7 /* Main.storyboard */ = {
