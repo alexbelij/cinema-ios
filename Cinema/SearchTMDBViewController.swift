@@ -31,6 +31,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
     searchController.searchBar.placeholder = NSLocalizedString("addItem.search.placeholder", comment: "")
     searchBarPlaceholder.addSubview(searchController.searchBar)
     searchController.isActive = true
+    title = NSLocalizedString("addItem.title", comment: "")
   }
 
   func didPresentSearchController(_ searchController: UISearchController) {
