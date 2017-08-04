@@ -2,6 +2,16 @@
 
 All notable changes to the project will be documented in this file.
 
+## v1.2 - 2017-08-04
+
+### Added
+- already added movies are marked when adding new ones
+- support for identifying future model versions
+
+### Fixed
+- replacing library with invalid data leads to empty library
+- missing translations
+
 ## v1.1 - 2017-07-08
 
 ### Added
