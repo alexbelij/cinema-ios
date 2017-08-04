@@ -29,16 +29,12 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
     tableView.tableHeaderView = searchController.searchBar
     tableView.sectionIndexBackgroundColor = UIColor.clear
     tableView.setContentOffset(CGPoint(x: 0, y: searchController.searchBar.frame.height), animated: false)
+    clearsSelectionOnViewWillAppear = true
 
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(reloadLibraryData),
                                            name: .didChangeMediaLibraryContent,
                                            object: nil)
-  }
-
-  override func viewWillAppear(_ animated: Bool) {
-    clearsSelectionOnViewWillAppear = splitViewController!.isCollapsed
-    super.viewWillAppear(animated)
   }
 
   private func fetchLibraryData() {
@@ -82,10 +78,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
         } else {
           selectedItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
         }
-        let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
+        let controller = segue.destination as! DetailViewController
         controller.detailItem = selectedItem
-        controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
-        controller.navigationItem.leftItemsSupplementBackButton = true
         controller.movieDb = movieDb
         controller.library = library
       }

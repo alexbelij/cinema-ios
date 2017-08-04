@@ -149,7 +149,7 @@ class DetailViewController: UIViewController {
   open override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     if popAfterDidAppear {
-      self.navigationController!.navigationController!.popViewController(animated: true)
+      self.navigationController!.popViewController(animated: true)
       popAfterDidAppear = false
     }
   }
