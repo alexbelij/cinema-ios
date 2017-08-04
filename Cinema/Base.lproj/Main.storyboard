@@ -345,7 +345,7 @@
                     <navigationItem key="navigationItem" title="Library" id="Zdf-7t-Un8">
                         <barButtonItem key="leftBarButtonItem" image="Sort" style="done" id="xa6-xy-PhH">
                             <connections>
-                                <segue destination="zyi-7f-Ha6" kind="presentation" identifier="selectSortDescriptor" id="BXs-Cp-uOM"/>
+                                <segue destination="zyi-7f-Ha6" kind="presentation" identifier="showListOptions" id="BXs-Cp-uOM"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" style="done" systemItem="add" id="Reu-zF-sxg">

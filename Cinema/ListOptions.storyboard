@@ -8,7 +8,7 @@
         <!--Options-->
         <scene sceneID="nvg-nd-5mY">
             <objects>
-                <tableViewController id="hju-Is-PHL" customClass="SortDescriptorViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController id="hju-Is-PHL" customClass="ListOptionsViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" allowsMultipleSelection="YES" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="YC8-HZ-ojI">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

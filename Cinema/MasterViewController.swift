@@ -1,7 +1,7 @@
 import UIKit
 import Dispatch
 
-class MasterViewController: UITableViewController, UISearchResultsUpdating, SortDescriptorViewControllerDelegate {
+class MasterViewController: UITableViewController, UISearchResultsUpdating, ListOptionsViewControllerDelegate {
 
   var library: MediaLibrary!
   var movieDb: MovieDbClient!
@@ -88,9 +88,9 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
         let controller = segue.destination as! SearchTMDBViewController
         controller.library = library
         controller.movieDb = movieDb
-      case "selectSortDescriptor":
+      case "showListOptions":
         let navigationController = segue.destination as! UINavigationController
-        let controller = navigationController.topViewController as! SortDescriptorViewController
+        let controller = navigationController.topViewController as! ListOptionsViewController
         controller.selectedDescriptor = self.sortDescriptor
         controller.delegate = self
       default: fatalError("unknown segue identifier \(segue.identifier!)")
