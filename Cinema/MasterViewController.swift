@@ -97,7 +97,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
     }
     if segue.identifier == "selectSortDescriptor" {
       let navigationController = segue.destination as! UINavigationController
-      let controller = (navigationController).childViewControllers.last! as! SortDescriptorViewController
+      let controller = navigationController.topViewController as! SortDescriptorViewController
       controller.selectedDescriptor = self.sortDescriptor
       controller.delegate = self
     }

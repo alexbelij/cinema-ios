@@ -156,7 +156,7 @@ class DetailViewController: UIViewController {
 
   open override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     if let navigationController = segue.destination as? UINavigationController,
-       let editController = (navigationController).childViewControllers.last! as? EditItemTableViewController {
+       let editController = navigationController.topViewController as? EditItemTableViewController {
       editController.item = detailItem
       editController.library = library
     }

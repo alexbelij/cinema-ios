@@ -69,10 +69,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
           // swiftlint:disable:next force_cast
           .instantiateViewController(withIdentifier: "ReplaceLibraryViewController") as! ReplaceLibraryViewController
       controller.replaceLibraryContent(of: self.library, withContentOf: url)
-      UIApplication.shared.keyWindow!.rootViewController!.present(controller, animated: true)
+      self.window!.rootViewController!.present(controller, animated: true)
     }))
     alert.addAction(UIAlertAction(title: NSLocalizedString("no", comment: ""), style: .default))
-    UIApplication.shared.keyWindow!.rootViewController!.present(alert, animated: true)
+    window!.rootViewController!.present(alert, animated: true)
     return true
   }
 
