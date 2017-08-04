@@ -3,7 +3,31 @@ import SwiftyJSON
 
 class JSONFormat: DataFormat {
 
-  func serialize(_ elements: [MediaItem]) throws -> Data {
+  var defaultSchemaVersion: SchemaVersion?
+
+  func serialize(_ elements: [MediaItem], schemaVersion: SchemaVersion) throws -> Data {
+    switch schemaVersion {
+      case .v1_0_0: return try serializeVersion1_0_0(elements)
+    }
+  }
+
+  func deserialize(from data: Data) throws -> [MediaItem] {
+    let json = JSON(data: data)
+    if json.type == .null {
+      throw DataFormatError.invalidDataFormat
+    }
+    let versionString = json["schemaVersion"].string ?? SchemaVersion.v1_0_0.versionString
+    guard let version = SchemaVersion(versionString: versionString) else {
+      throw DataFormatError.unsupportedSchemaVersion(versionString: versionString)
+    }
+    switch version {
+      case .v1_0_0: return try deserializeVersion1_0_0(from: json)
+    }
+  }
+
+  // MARK: - Version 1-0-0
+
+  private func serializeVersion1_0_0(_ elements: [MediaItem]) throws -> Data {
     let jsonArray: [JSON] = elements.map { item in
       var dictionary: [String: Any] = [
         "id": item.id,
@@ -20,10 +44,9 @@ class JSONFormat: DataFormat {
     return try JSON(array: jsonArray).rawData(options: .prettyPrinted)
   }
 
-  func deserialize(from data: Data) throws -> [MediaItem] {
+  private func deserializeVersion1_0_0(from json: JSON) throws -> [MediaItem] {
     var items = [MediaItem]()
-    let jsonData = JSON(data: data).arrayValue
-    for jsonItem in jsonData {
+    for jsonItem in json.arrayValue {
       let id = jsonItem["id"].int
       let title = jsonItem["title"].string
       let subtitle = jsonItem["subtitle"].string

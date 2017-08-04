@@ -8,6 +8,9 @@ class ReplaceLibraryViewController: UIViewController {
 
   @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
   @IBOutlet weak var label: UILabel!
+  @IBOutlet weak var errorLabel: UILabel!
+  @IBOutlet weak var closeButton: UIButton!
+  @IBOutlet weak var centeringConstraint: NSLayoutConstraint!
 
   func replaceLibraryContent(of library: MediaLibrary, withContentOf url: URL) {
     self.library = library
@@ -17,6 +20,7 @@ class ReplaceLibraryViewController: UIViewController {
   open override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     label.text = NSLocalizedString("replaceLibrary.progress.text", comment: "")
+    closeButton.setTitle(NSLocalizedString("ok", comment: ""), for: .normal)
   }
 
   override func viewDidAppear(_ animated: Bool) {
@@ -39,21 +43,36 @@ class ReplaceLibraryViewController: UIViewController {
         self.activityIndicator.stopAnimating()
         if libraryError == nil {
           self.label.text = NSLocalizedString("replaceLibrary.done.success.text", comment: "")
-        } else {
-          switch libraryError! {
-            case DataFormatError.invalidDataFormat:
-              self.label.text = NSLocalizedString("error.invalidDataFormat", comment: "")
-            case MediaLibraryError.storageError:
-              self.label.text = NSLocalizedString("error.storageError", comment: "")
-            default:
-              self.label.text = NSLocalizedString("error.genericError", comment: "")
+          DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
+            self.dismiss()
           }
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
-          self.dismiss(animated: true)
+        } else {
+          self.label.text = NSLocalizedString("replaceLibrary.done.failure.text", comment: "")
+          switch libraryError! {
+            case DataFormatError.unsupportedSchemaVersion:
+              self.errorLabel.text = NSLocalizedString("error.unsupportedSchemaVersion", comment: "")
+            case DataFormatError.invalidDataFormat:
+              self.errorLabel.text = NSLocalizedString("error.invalidDataFormat", comment: "")
+            case MediaLibraryError.storageError:
+              self.errorLabel.text = NSLocalizedString("error.storageError", comment: "")
+            default:
+              self.errorLabel.text = NSLocalizedString("error.genericError", comment: "")
+          }
+          self.errorLabel.isHidden = false
+          self.closeButton.isHidden = false
+          self.view?.superview?.layoutIfNeeded()
+          let extraHeight = self.closeButton.frame.origin.y - self.errorLabel.frame.origin.y
+          UIView.animate(withDuration: 0.3) {
+            self.centeringConstraint.constant = -extraHeight / 2
+            self.view?.superview?.layoutIfNeeded()
+          }
         }
       }
     }
+  }
+
+  @IBAction private func dismiss() {
+    self.dismiss(animated: true)
   }
 
   override func viewWillDisappear(_ animated: Bool) {

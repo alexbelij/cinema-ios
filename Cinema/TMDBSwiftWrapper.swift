@@ -96,10 +96,8 @@ class TMDBSwiftWrapper: MovieDbClient {
     return value
   }
 
-  private static func extractYear(from dateString: String) -> Int {
-    guard !dateString.isEmpty else {
-      return -1
-    }
+  private static func extractYear(from dateString: String) -> Int? {
+    guard !dateString.isEmpty else { return nil }
     let year = Int(dateString.substring(to: dateString.index(dateString.startIndex, offsetBy: 4)))!
     return year
   }

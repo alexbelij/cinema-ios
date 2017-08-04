@@ -19,6 +19,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
     searchResultsController = storyboard!
     // swiftlint:disable:next force_cast
         .instantiateViewController(withIdentifier: "ResultsViewController") as! SearchResultsController
+    searchResultsController.library = library
     searchResultsController.delegate = self
     searchController = UISearchController(searchResultsController: searchResultsController)
     searchController.delegate = self
@@ -34,6 +35,10 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
 
   func didPresentSearchController(_ searchController: UISearchController) {
     searchController.searchBar.becomeFirstResponder()
+  }
+
+  override func viewWillDisappear(_ animated: Bool) {
+    searchController.isActive = false
   }
 
   public func updateSearchResults(for searchController: UISearchController) {

@@ -1,7 +1,7 @@
 import UIKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate {
 
   var window: UIWindow?
 
@@ -10,43 +10,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
   func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-    // swiftlint:disable:next force_cast
-    let splitViewController = window!.rootViewController as! UISplitViewController
-    let navigationController = splitViewController
-    // swiftlint:disable:next force_cast
-        .viewControllers[splitViewController.viewControllers.count - 1] as! UINavigationController
-    navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
-    splitViewController.delegate = self
-
-    do {
-      library = try FileBasedMediaLibrary(directory: Utils.applicationSupportDirectory(),
-                                          fileName: "cinema.data",
-                                          dataFormat: KeyedArchivalFormat())
-    } catch let error {
-      fatalError("Library could not be instantiated: \(error)")
-    }
-
-    movieDb = CachingMovieDbClient(backingClient: TMDBSwiftWrapper(storeFront: .germany))
-    movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
-    movieDb.tryConnect()
-
+    self.window = UIWindow(frame: UIScreen.main.bounds)
+    self.window?.makeKeyAndVisible()
+    self.window!.rootViewController = loadMainViewController()
     return true
   }
 
-  // MARK: - Split view
+  private func loadMainViewController() -> UIViewController {
+    let arguments = ProcessInfo.processInfo.arguments
 
-  func splitViewController(_ splitViewController: UISplitViewController,
-                           collapseSecondary secondaryViewController: UIViewController,
-                           onto primaryViewController: UIViewController) -> Bool {
-    guard let secondaryAsNavController = secondaryViewController as? UINavigationController else { return false }
-    guard let topAsDetailController = secondaryAsNavController.topViewController as? DetailViewController
-        else { return false }
-    if topAsDetailController.detailItem == nil {
-      // Return true to indicate that we have handled the collapse by doing nothing;
-      // the secondary controller will be discarded.
-      return true
-    }
-    return false
+    library = Config.initLibrary(launchArguments: arguments)
+
+    movieDb = Config.initMovieDb(launchArguments: arguments)
+    movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
+    movieDb.tryConnect()
+
+    // swiftlint:disable force_cast
+    let mainNavController = UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()
+    as! UINavigationController
+
+    let masterViewController = mainNavController.topViewController! as! MasterViewController
+    masterViewController.library = library
+    masterViewController.movieDb = movieDb
+    // swiftlint:enable force_cast
+
+    return mainNavController
   }
 
   public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
@@ -54,14 +42,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
                                   message: nil,
                                   preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: NSLocalizedString("yes", comment: ""), style: .destructive, handler: { _ in
-      let controller = UIStoryboard(name: "Main", bundle: nil)
+      let controller = UIStoryboard(name: "ReplaceLibrary", bundle: nil)
           // swiftlint:disable:next force_cast
-          .instantiateViewController(withIdentifier: "ReplaceLibraryViewController") as! ReplaceLibraryViewController
+          .instantiateInitialViewController() as! ReplaceLibraryViewController
       controller.replaceLibraryContent(of: self.library, withContentOf: url)
-      UIApplication.shared.keyWindow!.rootViewController!.present(controller, animated: true)
+      self.window!.rootViewController!.present(controller, animated: true)
     }))
     alert.addAction(UIAlertAction(title: NSLocalizedString("no", comment: ""), style: .default))
-    UIApplication.shared.keyWindow!.rootViewController!.present(alert, animated: true)
+    window!.rootViewController!.present(alert, animated: true)
     return true
   }
 

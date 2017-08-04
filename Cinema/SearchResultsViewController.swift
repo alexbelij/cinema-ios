@@ -6,11 +6,16 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
   @IBOutlet weak var tableView: UITableView!
   var searchResults = [PartialMediaItem]() {
     didSet {
+      resultsInLibrary = searchResults.map { movie in
+        return !self.library.mediaItems(where: { $0.id == movie.id }).isEmpty
+      }
       DispatchQueue.main.async {
         self.tableView.reloadData()
       }
     }
   }
+  var library: MediaLibrary!
+  private var resultsInLibrary: [Bool]!
   weak var delegate: SearchResultsSelectionDelegate?
 
   override func viewDidLoad() {
@@ -26,15 +31,26 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
   }
 
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    // swiftlint:disable:next force_cast
-    let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemCell", for: indexPath) as! SearchItemCell
-
     let searchItem = searchResults[indexPath.row]
-    cell.titleLabel.text = searchItem.title
-    if let year = searchItem.year, year != -1 {
-      cell.yearLabel.text = String(year)
+    if resultsInLibrary[indexPath.row] {
+      let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemAddedCell",
+                                               // swiftlint:disable:next force_cast
+                                               for: indexPath) as! SearchItemAddedCell
+      cell.titleLabel.text = searchItem.title
+      return cell
+    } else {
+      // swiftlint:disable:next force_cast
+      let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemCell", for: indexPath) as! SearchItemCell
+      cell.titleLabel.text = searchItem.title
+      if let year = searchItem.year, year != -1 {
+        cell.yearLabel.text = String(year)
+      }
+      return cell
     }
-    return cell
+  }
+
+  func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+    return resultsInLibrary[indexPath.row] ? nil : indexPath
   }
 
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

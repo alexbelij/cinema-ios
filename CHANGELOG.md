@@ -1,36 +1,42 @@
 # Change Log
 
 All notable changes to the project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unpublished
+## v1.2 - 2017-08-04
 
+### Added
+- already added movies are marked when adding new ones
+- support for identifying future model versions
+
+### Fixed
+- replacing library with invalid data leads to empty library
+- missing translations
 
 ## v1.1 - 2017-07-08
 
 ### Added
--   identify movies easily via its poster
--   edit title and subtitle of movies in library
--   remove movies from library
+- identify movies easily via its poster
+- edit title and subtitle of movies in library
+- remove movies from library
 
 ### Changed
--   border for posters
--   scrolling details, not just overview
--   more precise error messages
+- border for posters
+- scrolling details, not just overview
+- more precise error messages
 
 ### Fixed
--   [`#9`][] better displaying of long titles
+- [`#9`][] better displaying of long titles
 
 [`#9`]: https://github.com/bauer-martin/cinema-ios/issues/9
 
 ## v1.0.1 - 2017-06-27
 
 ### Changed
--   articles in title are not taken into account for sorting
--   small UI improvements
+- articles in title are not taken into account for sorting
+- small UI improvements
 
 ### Fixed
--   [`#1`][] Incorrect runtime sorting
+- [`#1`][] Incorrect runtime sorting
 
 [`#1`]: https://github.com/bauer-martin/cinema-ios/issues/1
 
