@@ -49,6 +49,8 @@ class ReplaceLibraryViewController: UIViewController {
         } else {
           self.label.text = NSLocalizedString("replaceLibrary.done.failure.text", comment: "")
           switch libraryError! {
+            case DataFormatError.unsupportedSchemaVersion:
+              self.errorLabel.text = NSLocalizedString("error.unsupportedSchemaVersion", comment: "")
             case DataFormatError.invalidDataFormat:
               self.errorLabel.text = NSLocalizedString("error.invalidDataFormat", comment: "")
             case MediaLibraryError.storageError:

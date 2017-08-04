@@ -18,6 +18,7 @@
 "error.genericError" = "Es ist ein unbekannter Fehler aufgetreten.";
 "error.invalidDataFormat" = "Die Datei kann nicht geöffnet werden. Home-Cinema konnte die Datei nicht lesen.";
 "error.storageError" = "Die Mediathek konnte nicht gespeichert werden.";
+"error.unsupportedSchemaVersion" = "Du benötigst eine neuere Version von Home-Cinema, um die Datei zu importieren.";
 "library" = "Mediathek";
 "library.search.placeholder" = "Titel durchsuchen...";
 "mediaItem.disk.bluRay" = "Blu-ray";

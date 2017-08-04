@@ -33,9 +33,11 @@ enum Config {
         library = SampleLibrary()
       case .fileBased:
         do {
+          let dataFormat = KeyedArchivalFormat()
+          dataFormat.defaultSchemaVersion = .v1_0_0
           library = try FileBasedMediaLibrary(directory: applicationSupportDirectory,
                                               fileName: "cinema.data",
-                                              dataFormat: KeyedArchivalFormat())
+                                              dataFormat: dataFormat)
         } catch let error {
           fatalError("Library could not be instantiated: \(error)")
         }
