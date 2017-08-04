@@ -34,7 +34,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     masterViewController.movieDb = movieDb
     // swiftlint:enable force_cast
 
-    return mainNavController
+    mainNavController.tabBarItem = UITabBarItem(title: NSLocalizedString("library", comment: ""),
+                                                image: #imageLiteral(resourceName:"Tab-Library-normal"),
+                                                selectedImage: #imageLiteral(resourceName:"Tab-Library-selected"))
+    let tabBarController = UITabBarController()
+    tabBarController.viewControllers = [mainNavController]
+    return tabBarController
   }
 
   public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
