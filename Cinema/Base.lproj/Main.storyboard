@@ -219,52 +219,6 @@
             </objects>
             <point key="canvasLocation" x="706.875" y="127.8169014084507"/>
         </scene>
-        <!--Options-->
-        <scene sceneID="nvg-nd-5mY">
-            <objects>
-                <tableViewController id="hju-Is-PHL" customClass="SortDescriptorViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" allowsMultipleSelection="YES" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="YC8-HZ-ojI">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
-                        <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="SortDescriptorCell" textLabel="Orx-6F-gGp" style="IBUITableViewCellStyleDefault" id="Pbz-KK-Gnz">
-                                <rect key="frame" x="0.0" y="56" width="320" height="44"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Pbz-KK-Gnz" id="wAl-Gk-zWG">
-                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Orx-6F-gGp">
-                                            <rect key="frame" x="15" y="0.0" width="290" height="43.5"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                    </subviews>
-                                </tableViewCellContentView>
-                            </tableViewCell>
-                        </prototypes>
-                        <sections/>
-                        <connections>
-                            <outlet property="dataSource" destination="hju-Is-PHL" id="2I7-TF-BpT"/>
-                            <outlet property="delegate" destination="hju-Is-PHL" id="EYE-lV-X6N"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="Options" id="DFz-he-x03">
-                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="9Ai-UC-VMK">
-                            <connections>
-                                <action selector="saveOptionsWithSegue:" destination="hju-Is-PHL" id="8uK-QM-aBy"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
-                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="SXh-Ph-ggh" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2393" y="-1362"/>
-        </scene>
         <!--SearchTMDB View Controller-->
         <scene sceneID="Irz-nF-inq">
             <objects>
@@ -391,7 +345,7 @@
                     <navigationItem key="navigationItem" title="Library" id="Zdf-7t-Un8">
                         <barButtonItem key="leftBarButtonItem" image="Sort" style="done" id="xa6-xy-PhH">
                             <connections>
-                                <segue destination="Ai1-48-Rfn" kind="presentation" identifier="selectSortDescriptor" id="BXs-Cp-uOM"/>
+                                <segue destination="zyi-7f-Ha6" kind="presentation" identifier="selectSortDescriptor" id="BXs-Cp-uOM"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" style="done" systemItem="add" id="Reu-zF-sxg">
@@ -566,24 +520,6 @@
             </objects>
             <point key="canvasLocation" x="3214" y="-633"/>
         </scene>
-        <!--Navigation Controller-->
-        <scene sceneID="mew-vT-bYX">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Ai1-48-Rfn" sceneMemberID="viewController">
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="lyk-9x-cD3">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="hju-Is-PHL" kind="relationship" relationship="rootViewController" id="Cv0-iI-w0j"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="VjC-sf-H8Y" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1548.75" y="-1361.6197183098591"/>
-        </scene>
         <!--EditItem-->
         <scene sceneID="5lt-b6-OcB">
             <objects>
@@ -591,6 +527,14 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="TgU-DM-iRb" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1345" y="128"/>
+        </scene>
+        <!--ListOptions-->
+        <scene sceneID="ONN-pd-CUv">
+            <objects>
+                <viewControllerPlaceholder storyboardName="ListOptions" id="zyi-7f-Ha6" sceneMemberID="viewController"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="42L-fx-3Jn" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1548.75" y="-1361.6197183098591"/>
         </scene>
     </scenes>
     <resources>
