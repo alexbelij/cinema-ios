@@ -17,6 +17,7 @@ class SortDescriptorViewController: UITableViewController {
   override func viewDidLoad() {
     guard selectedDescriptor != nil else { fatalError("selectedDescriptor was not set") }
     super.viewDidLoad()
+    title = NSLocalizedString("options", comment: "")
   }
 
   @IBAction private func saveOptions(segue: UIStoryboardSegue) {
