@@ -199,7 +199,7 @@
                     <navigationItem key="navigationItem" id="mOI-FS-AaM">
                         <barButtonItem key="rightBarButtonItem" systemItem="edit" id="bBS-e7-XCY">
                             <connections>
-                                <segue destination="tRg-8m-ihn" kind="presentation" id="xZO-E0-jBp"/>
+                                <segue destination="tRg-8m-ihn" kind="presentation" identifier="editItem" id="xZO-E0-jBp"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>

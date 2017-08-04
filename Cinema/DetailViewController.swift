@@ -155,11 +155,16 @@ class DetailViewController: UIViewController {
   }
 
   open override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    if let navigationController = segue.destination as? UINavigationController,
-       let editController = navigationController.topViewController as? EditItemTableViewController {
-      editController.item = detailItem
-      editController.library = library
+    // swiftlint:disable force_cast
+    switch segue.identifier! {
+      case "editItem":
+        let navigationController = segue.destination as! UINavigationController
+        let editController = navigationController.topViewController as! EditItemTableViewController
+        editController.item = detailItem
+        editController.library = library
+      default: fatalError("unknown segue identifier \(segue.identifier!)")
     }
+    // swiftlint:enable force_cast
   }
 
   deinit {

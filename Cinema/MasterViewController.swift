@@ -70,30 +70,30 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
 
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     // swiftlint:disable force_cast
-    if segue.identifier == "showDetail" {
-      if let indexPath = tableView.indexPathForSelectedRow {
-        let selectedItem: MediaItem
-        if searchController.isActive && searchController.searchBar.text != "" {
-          selectedItem = filteredMediaItems[indexPath.row]
-        } else {
-          selectedItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
+    switch segue.identifier! {
+      case "showDetail":
+        if let indexPath = tableView.indexPathForSelectedRow {
+          let selectedItem: MediaItem
+          if searchController.isActive && searchController.searchBar.text != "" {
+            selectedItem = filteredMediaItems[indexPath.row]
+          } else {
+            selectedItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
+          }
+          let controller = segue.destination as! DetailViewController
+          controller.detailItem = selectedItem
+          controller.movieDb = movieDb
+          controller.library = library
         }
-        let controller = segue.destination as! DetailViewController
-        controller.detailItem = selectedItem
-        controller.movieDb = movieDb
+      case "addItem":
+        let controller = segue.destination as! SearchTMDBViewController
         controller.library = library
-      }
-    }
-    if segue.identifier == "addItem" {
-      let controller = segue.destination as! SearchTMDBViewController
-      controller.library = library
-      controller.movieDb = movieDb
-    }
-    if segue.identifier == "selectSortDescriptor" {
-      let navigationController = segue.destination as! UINavigationController
-      let controller = navigationController.topViewController as! SortDescriptorViewController
-      controller.selectedDescriptor = self.sortDescriptor
-      controller.delegate = self
+        controller.movieDb = movieDb
+      case "selectSortDescriptor":
+        let navigationController = segue.destination as! UINavigationController
+        let controller = navigationController.topViewController as! SortDescriptorViewController
+        controller.selectedDescriptor = self.sortDescriptor
+        controller.delegate = self
+      default: fatalError("unknown segue identifier \(segue.identifier!)")
     }
     // swiftlint:enable force_cast
   }
