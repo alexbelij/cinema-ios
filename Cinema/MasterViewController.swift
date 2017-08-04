@@ -1,7 +1,7 @@
 import UIKit
 import Dispatch
 
-class MasterViewController: UITableViewController, UISearchResultsUpdating, SortDescriptorViewControllerDelegate {
+class MasterViewController: UITableViewController, UISearchResultsUpdating, ListOptionsViewControllerDelegate {
 
   var library: MediaLibrary!
   var movieDb: MovieDbClient!
@@ -29,16 +29,12 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
     tableView.tableHeaderView = searchController.searchBar
     tableView.sectionIndexBackgroundColor = UIColor.clear
     tableView.setContentOffset(CGPoint(x: 0, y: searchController.searchBar.frame.height), animated: false)
+    clearsSelectionOnViewWillAppear = true
 
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(reloadLibraryData),
                                            name: .didChangeMediaLibraryContent,
                                            object: nil)
-  }
-
-  override func viewWillAppear(_ animated: Bool) {
-    clearsSelectionOnViewWillAppear = splitViewController!.isCollapsed
-    super.viewWillAppear(animated)
   }
 
   private func fetchLibraryData() {
@@ -74,32 +70,30 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, Sort
 
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     // swiftlint:disable force_cast
-    if segue.identifier == "showDetail" {
-      if let indexPath = tableView.indexPathForSelectedRow {
-        let selectedItem: MediaItem
-        if searchController.isActive && searchController.searchBar.text != "" {
-          selectedItem = filteredMediaItems[indexPath.row]
-        } else {
-          selectedItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
+    switch segue.identifier! {
+      case "showDetail":
+        if let indexPath = tableView.indexPathForSelectedRow {
+          let selectedItem: MediaItem
+          if searchController.isActive && searchController.searchBar.text != "" {
+            selectedItem = filteredMediaItems[indexPath.row]
+          } else {
+            selectedItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
+          }
+          let controller = segue.destination as! DetailViewController
+          controller.detailItem = selectedItem
+          controller.movieDb = movieDb
+          controller.library = library
         }
-        let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
-        controller.detailItem = selectedItem
-        controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
-        controller.navigationItem.leftItemsSupplementBackButton = true
-        controller.movieDb = movieDb
+      case "addItem":
+        let controller = segue.destination as! SearchTMDBViewController
         controller.library = library
-      }
-    }
-    if segue.identifier == "addItem" {
-      let controller = segue.destination as! SearchTMDBViewController
-      controller.library = library
-      controller.movieDb = movieDb
-    }
-    if segue.identifier == "selectSortDescriptor" {
-      let navigationController = segue.destination as! UINavigationController
-      let controller = (navigationController).childViewControllers.last! as! SortDescriptorViewController
-      controller.selectedDescriptor = self.sortDescriptor
-      controller.delegate = self
+        controller.movieDb = movieDb
+      case "showListOptions":
+        let navigationController = segue.destination as! UINavigationController
+        let controller = navigationController.topViewController as! ListOptionsViewController
+        controller.selectedDescriptor = self.sortDescriptor
+        controller.delegate = self
+      default: fatalError("unknown segue identifier \(segue.identifier!)")
     }
     // swiftlint:enable force_cast
   }

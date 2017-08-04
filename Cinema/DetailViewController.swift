@@ -149,17 +149,22 @@ class DetailViewController: UIViewController {
   open override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     if popAfterDidAppear {
-      self.navigationController!.navigationController!.popViewController(animated: true)
+      self.navigationController!.popViewController(animated: true)
       popAfterDidAppear = false
     }
   }
 
   open override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    if let navigationController = segue.destination as? UINavigationController,
-       let editController = (navigationController).childViewControllers.last! as? EditItemTableViewController {
-      editController.item = detailItem
-      editController.library = library
+    // swiftlint:disable force_cast
+    switch segue.identifier! {
+      case "editItem":
+        let navigationController = segue.destination as! UINavigationController
+        let editController = navigationController.topViewController as! EditItemTableViewController
+        editController.item = detailItem
+        editController.library = library
+      default: fatalError("unknown segue identifier \(segue.identifier!)")
     }
+    // swiftlint:enable force_cast
   }
 
   deinit {

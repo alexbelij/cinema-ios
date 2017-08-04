@@ -1,6 +1,6 @@
 import UIKit
 
-class SortDescriptorViewController: UITableViewController {
+class ListOptionsViewController: UITableViewController {
 
   private let sortDescriptors: [SortDescriptor] = [.title, .runtime, .year]
   var selectedDescriptor: SortDescriptor? {
@@ -12,7 +12,7 @@ class SortDescriptorViewController: UITableViewController {
     }
   }
   private var selectedDescriptorIndex: Int!
-  weak var delegate: SortDescriptorViewControllerDelegate?
+  weak var delegate: ListOptionsViewControllerDelegate?
 
   override func viewDidLoad() {
     guard selectedDescriptor != nil else { fatalError("selectedDescriptor was not set") }
@@ -80,6 +80,6 @@ class SortDescriptorViewController: UITableViewController {
   }
 }
 
-protocol SortDescriptorViewControllerDelegate: class {
+protocol ListOptionsViewControllerDelegate: class {
   func sortDescriptorDidChange(to descriptor: SortDescriptor)
 }
