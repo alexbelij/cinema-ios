@@ -57,7 +57,7 @@
                         <viewLayoutGuide key="safeArea" id="r8k-fQ-ZSY"/>
                     </view>
                     <navigationItem key="navigationItem" id="3fn-Cg-ud4">
-                        <barButtonItem key="leftBarButtonItem" image="Sort" id="Idv-ft-cBJ"/>
+                        <barButtonItem key="rightBarButtonItem" image="Sort" id="Idv-ft-cBJ"/>
                     </navigationItem>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="NyF-si-xL8" userLabel="First Responder" sceneMemberID="firstResponder"/>
