@@ -74,8 +74,12 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
       case "showDetail":
         if let indexPath = tableView.indexPathForSelectedRow {
           let selectedItem: MediaItem
-          if searchController.isActive && searchController.searchBar.text != "" {
-            selectedItem = filteredMediaItems[indexPath.row]
+          if searchController.isActive {
+            if searchController.searchBar.text != "" {
+              selectedItem = filteredMediaItems[indexPath.row]
+            } else {
+              selectedItem = allItems[indexPath.row]
+            }
           } else {
             selectedItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
           }
