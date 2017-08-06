@@ -220,10 +220,10 @@
             </objects>
             <point key="canvasLocation" x="1693" y="-632"/>
         </scene>
-        <!--Library-->
+        <!--Movie List Controller-->
         <scene sceneID="smW-Zh-WAh">
             <objects>
-                <tableViewController title="Library" id="7bK-jq-Zjz" customClass="MovieListController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController id="7bK-jq-Zjz" customClass="MovieListController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="r7i-6Z-zg0">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -235,7 +235,7 @@
                             <outlet property="delegate" destination="7bK-jq-Zjz" id="RA6-mI-bju"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Library" id="Zdf-7t-Un8">
+                    <navigationItem key="navigationItem" id="Zdf-7t-Un8">
                         <barButtonItem key="rightBarButtonItem" image="Sort" style="done" id="xa6-xy-PhH">
                             <connections>
                                 <action selector="showSortDescriptorSheet" destination="7bK-jq-Zjz" id="Gk4-lS-fKy"/>

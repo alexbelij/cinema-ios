@@ -19,13 +19,14 @@ class LibraryContentCoordinator: CustomPresentableCoordinator {
   private var itemDetailsCoordinator: ItemDetailsCoordinator?
   private var editItemCoordinator: EditItemCoordinator?
 
-  init(dependencies: Dependencies) {
+  init(title: String, dependencies: Dependencies) {
     self.dependencies = dependencies
     // swiftlint:disable force_cast
     self.navigationController = UIStoryboard.movieList.instantiateInitialViewController() as! UINavigationController
     self.movieListController = navigationController.topViewController! as! MovieListController
     // swiftlint:enable force_cast
     movieListController.delegate = self
+    movieListController.title = title
     let posterProvider = MovieDbPosterProvider(dependencies.movieDb)
     movieListController.cellConfiguration = StandardMediaItemCellConfig(posterProvider: posterProvider)
     movieListController.items = dependencies.library.mediaItems { _ in true }

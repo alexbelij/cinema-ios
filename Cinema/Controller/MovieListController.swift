@@ -70,7 +70,6 @@ class MovieListController: UITableViewController {
 extension MovieListController {
   override func viewDidLoad() {
     super.viewDidLoad()
-    title = NSLocalizedString("library", comment: "")
     tableView.sectionIndexBackgroundColor = UIColor.clear
     definesPresentationContext = true
     navigationItem.hidesSearchBarWhenScrolling = false

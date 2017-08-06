@@ -17,7 +17,8 @@ class CoreCoordinator: CustomPresentableCoordinator {
   private let searchTmdbCoordinator: SearchTmdbCoordinator
 
   init(dependencies: Dependencies) {
-    libraryContentCoordinator = LibraryContentCoordinator(dependencies: dependencies)
+    libraryContentCoordinator = LibraryContentCoordinator(title: NSLocalizedString("library", comment: ""),
+                                                          dependencies: dependencies)
     libraryContentCoordinator.rootViewController.tabBarItem = UITabBarItem(
         title: NSLocalizedString("library", comment: ""),
         image: #imageLiteral(resourceName: "Tab-Library-normal"),
