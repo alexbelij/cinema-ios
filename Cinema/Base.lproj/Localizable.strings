@@ -41,7 +41,6 @@
 "genre.tvMovie" = "TV Movie";
 "genre.war" = "War";
 "genre.western" = "Western";
-"import.alert.title" = "Do you really want to import the library?";
 "import.done.failure.text" = "Library was not imported.";
 "import.done.success.text" = "Library was imported.";
 "import.progress.text" = "Importing library...";
