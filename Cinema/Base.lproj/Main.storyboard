@@ -199,7 +199,7 @@
                     <navigationItem key="navigationItem" id="mOI-FS-AaM">
                         <barButtonItem key="rightBarButtonItem" systemItem="edit" id="bBS-e7-XCY">
                             <connections>
-                                <segue destination="tRg-8m-ihn" kind="presentation" identifier="editItem" id="xZO-E0-jBp"/>
+                                <segue destination="tRg-8m-ihn" kind="presentation" identifier="" id="xZO-E0-jBp"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -332,7 +332,7 @@
                                     <outlet property="posterView" destination="tfX-gs-cmb" id="4Gu-Hi-aAP"/>
                                     <outlet property="runtimeLabel" destination="jLI-Qh-1nJ" id="A4h-BK-J29"/>
                                     <outlet property="titleLabel" destination="u4C-9v-cfc" id="TQg-tK-bre"/>
-                                    <segue destination="JEX-9P-axG" kind="show" identifier="showDetail" id="oJX-cD-d2b"/>
+                                    <segue destination="JEX-9P-axG" kind="show" identifier="" id="oJX-cD-d2b"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -345,12 +345,12 @@
                     <navigationItem key="navigationItem" title="Library" id="Zdf-7t-Un8">
                         <barButtonItem key="leftBarButtonItem" image="Sort" style="done" id="xa6-xy-PhH">
                             <connections>
-                                <segue destination="zyi-7f-Ha6" kind="presentation" identifier="showListOptions" id="BXs-Cp-uOM"/>
+                                <segue destination="zyi-7f-Ha6" kind="presentation" identifier="" id="BXs-Cp-uOM"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" style="done" systemItem="add" id="Reu-zF-sxg">
                             <connections>
-                                <segue destination="lEX-SM-kxr" kind="show" identifier="addItem" id="8Ui-cq-geC"/>
+                                <segue destination="lEX-SM-kxr" kind="show" identifier="" id="8Ui-cq-geC"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>

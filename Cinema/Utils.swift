@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 class Utils {
 
@@ -9,5 +10,16 @@ class Utils {
     formatter.zeroFormattingBehavior = [ .dropAll ]
 
     return formatter.string(from: Double(duration * 60))!
+  }
+}
+
+extension UIStoryboardSegue {
+  var unwrappedDestination: UIViewController {
+    switch destination {
+      case let navigation as UINavigationController:
+        return navigation.topViewController!
+      default:
+        return destination
+    }
   }
 }

@@ -69,9 +69,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
   // MARK: - Segues
 
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    // swiftlint:disable force_cast
-    switch segue.identifier! {
-      case "showDetail":
+    switch segue.unwrappedDestination {
+      case let detailVC as DetailViewController:
         if let indexPath = tableView.indexPathForSelectedRow {
           let selectedItem: MediaItem
           if searchController.isActive {
@@ -83,23 +82,18 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
           } else {
             selectedItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
           }
-          let controller = segue.destination as! DetailViewController
-          controller.detailItem = selectedItem
-          controller.movieDb = movieDb
-          controller.library = library
+          detailVC.detailItem = selectedItem
+          detailVC.movieDb = movieDb
+          detailVC.library = library
         }
-      case "addItem":
-        let controller = segue.destination as! SearchTMDBViewController
-        controller.library = library
-        controller.movieDb = movieDb
-      case "showListOptions":
-        let navigationController = segue.destination as! UINavigationController
-        let controller = navigationController.topViewController as! ListOptionsViewController
-        controller.selectedDescriptor = self.sortDescriptor
-        controller.delegate = self
-      default: fatalError("unknown segue identifier \(segue.identifier!)")
+      case let searchVC as SearchTMDBViewController:
+        searchVC.library = library
+        searchVC.movieDb = movieDb
+      case let listOptionsVC as ListOptionsViewController:
+        listOptionsVC.selectedDescriptor = self.sortDescriptor
+        listOptionsVC.delegate = self
+      default: fatalError("Unexpected segue: '\(self)' -> '\(segue.destination)'")
     }
-    // swiftlint:enable force_cast
   }
 
   func sortDescriptorDidChange(to descriptor: SortDescriptor) {
