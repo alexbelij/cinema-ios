@@ -16,7 +16,7 @@ protocol MovieDbClient {
 
   func certification(for id: Int) -> String?
 
-  func genres(for id: Int) -> [String]
+  func genreIds(for id: Int) -> [Int]
 
   func searchMovies(searchText: String) -> [PartialMediaItem]
 

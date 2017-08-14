@@ -55,8 +55,8 @@ class TMDBSwiftWrapper: MovieDbClient {
     return certification
   }
 
-  func genres(for id: Int) -> [String] {
-    if let genres = movie(for: id, language: effectiveLanguage())?.genres.map({ $0.name! }) {
+  func genreIds(for id: Int) -> [Int] {
+    if let genres = movie(for: id, language: effectiveLanguage())?.genres.map({ $0.id! }) {
       return genres
     }
     return []
