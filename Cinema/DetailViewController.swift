@@ -41,6 +41,12 @@ class DetailViewController: UIViewController {
           ? NSLocalizedString("details.missing.year", comment: "")
           : "\(mediaItem.year!)"
       diskLabel.text = localize(diskType: mediaItem.diskType)
+      var genreString = Utils.localizedGenreNames(for: self.detailItem!.genreIds)
+                             .joined(separator: ", ")
+      if genreString.isEmpty {
+        genreString = NSLocalizedString("details.missing.genre", comment: "")
+      }
+      self.genreLabel.text = genreString
 
       if movieDb.isConnected {
         fetchAdditionalData()
@@ -65,25 +71,13 @@ class DetailViewController: UIViewController {
     group.enter()
     queue.async {
       let text: String
-      if let overview  = self.movieDb.overview(for: self.detailItem!.id), !overview.isEmpty {
+      if let overview = self.movieDb.overview(for: self.detailItem!.id), !overview.isEmpty {
         text = overview
       } else {
         text = NSLocalizedString("details.missing.overview", comment: "")
       }
       DispatchQueue.main.async {
         self.textView.text = text
-        group.leave()
-      }
-    }
-    group.enter()
-    queue.async {
-      var genreString = Utils.localizedGenreNames(for: self.movieDb.genreIds(for: self.detailItem!.id))
-                             .joined(separator: ", ")
-      if genreString.isEmpty {
-        genreString = NSLocalizedString("details.missing.genre", comment: "")
-      }
-      DispatchQueue.main.async {
-        self.genreLabel.text = genreString
         group.leave()
       }
     }

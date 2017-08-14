@@ -5,9 +5,11 @@ struct MediaItem: Equatable, Hashable {
   let runtime: Int?
   let year: Int?
   let diskType: DiskType
+  let genreIds: [Int]
 
   init(id: Int, title: String, subtitle: String? = nil,
-       runtime: Int? = nil, year: Int? = nil, diskType: DiskType = .bluRay) {
+       runtime: Int? = nil, year: Int? = nil, diskType: DiskType = .bluRay,
+       genreIds: [Int]) {
     self.id = id
     self.title = title
     self.subtitle = subtitle
@@ -22,6 +24,7 @@ struct MediaItem: Equatable, Hashable {
       self.year = nil
     }
     self.diskType = diskType
+    self.genreIds = genreIds
   }
 
   var fullTitle: String {

@@ -91,7 +91,8 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
                      subtitle: subtitle,
                      runtime: self.item.runtime,
                      year: self.item.year,
-                     diskType: self.item.diskType)
+                     diskType: self.item.diskType,
+                     genreIds: self.item.genreIds)
   }
 
   private func showCancelOrDiscardAlert(title: String) {

@@ -46,7 +46,8 @@ class AddItemViewController: UIViewController {
                            title: self.itemToAdd.title,
                            runtime: self.movieDb.runtime(for: self.itemToAdd.id),
                            year: self.itemToAdd.year,
-                           diskType: self.diskType)
+                           diskType: self.diskType,
+                           genreIds: self.movieDb.genreIds(for: self.itemToAdd.id))
       var libraryError: Error? = nil
       do {
         try self.library.add(item)

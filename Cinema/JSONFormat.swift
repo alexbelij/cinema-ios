@@ -34,7 +34,8 @@ class JSONFormat: DataFormat {
       var dictionary: [String: Any] = [
         "id": item.id,
         "title": item.title,
-        "diskType": item.diskType.rawValue
+        "diskType": item.diskType.rawValue,
+        "genreIds": item.genreIds
       ]
       if let subtitle = item.subtitle {
         dictionary["subtitle"] = subtitle
@@ -63,13 +64,20 @@ class JSONFormat: DataFormat {
       let runtime = jsonItem["runtime"].int
       let year = jsonItem["year"].int
       let diskType = DiskType(rawValue: jsonItem["diskType"].string ?? "")
+      let genreIds: [Int]
+      if let ids = jsonItem["genreIds"].array {
+        genreIds = ids.map { $0.int! }
+      } else {
+        genreIds = []
+      }
       if let id = id, let title = title, let diskType = diskType {
         let mediaItem = MediaItem(id: id,
                                   title: title,
                                   subtitle: subtitle,
                                   runtime: runtime,
                                   year: year,
-                                  diskType: diskType)
+                                  diskType: diskType,
+                                  genreIds: genreIds)
         items.append(mediaItem)
       } else {
         throw DataFormatError.invalidDataFormat
@@ -112,7 +120,8 @@ class JSONFormat: DataFormat {
                                   subtitle: subtitle,
                                   runtime: runtime,
                                   year: year,
-                                  diskType: diskType)
+                                  diskType: diskType,
+                                  genreIds: [])
         items.append(mediaItem)
       } else {
         throw DataFormatError.invalidDataFormat
