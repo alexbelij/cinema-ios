@@ -77,7 +77,7 @@ private extension Array where Iterator.Element == String {
   }
 }
 
-fileprivate enum LibraryArgument: String {
+private enum LibraryArgument: String {
   static let defaultArguments = [flag, fileBased.rawValue]
   static let flag = "--library"
 
@@ -85,7 +85,7 @@ fileprivate enum LibraryArgument: String {
   case fileBased
 }
 
-fileprivate enum MovieDbArgument: String {
+private enum MovieDbArgument: String {
   static let defaultArguments = [flag, tmdbSwiftWrapper.rawValue, Options.cached.rawValue]
   static let flag = "--movie-db"
 

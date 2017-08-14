@@ -86,12 +86,12 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
     if subtitle != nil && subtitle!.isEmpty {
       subtitle = nil
     }
-    return MediaItem(id: self.item!.id,
+    return MediaItem(id: self.item.id,
                      title: self.titleTextField.text!,
                      subtitle: subtitle,
-                     runtime: self.item!.runtime,
-                     year: self.item!.year,
-                     diskType: self.item!.diskType)
+                     runtime: self.item.runtime,
+                     year: self.item.year,
+                     diskType: self.item.diskType)
   }
 
   private func showCancelOrDiscardAlert(title: String) {

@@ -75,13 +75,7 @@ class DetailViewController: UIViewController {
     }
     group.enter()
     queue.async {
-      var genreString = self.movieDb.genres(for: self.detailItem!.id).reduce("") { (result, next) in
-        if result.isEmpty {
-          return next
-        } else {
-          return "\(result), \(next)"
-        }
-      }
+      var genreString = self.movieDb.genres(for: self.detailItem!.id).joined(separator: ", ")
       if genreString.isEmpty {
         genreString = NSLocalizedString("details.missing.genre", comment: "")
       }
