@@ -17,7 +17,7 @@ class JSONFormat: DataFormat {
     if json.type == .null {
       throw DataFormatError.invalidDataFormat
     }
-    let versionString = json["schemaVersion"].string ?? SchemaVersion.v1_0_0.versionString
+    let versionString = json[String.schemaVersionKey].string ?? SchemaVersion.v1_0_0.versionString
     guard let version = SchemaVersion(versionString: versionString) else {
       throw DataFormatError.unsupportedSchemaVersion(versionString: versionString)
     }

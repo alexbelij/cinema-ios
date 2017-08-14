@@ -14,7 +14,7 @@ class KeyedArchivalFormat: DataFormat {
   func deserialize(from data: Data) throws -> [MediaItem] {
     // traps when invalid archive, but ignored since only used for internal model
     let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
-    let versionString = (unarchiver.decodeObject(forKey: "schemaVersion") as? String)
+    let versionString = (unarchiver.decodeObject(forKey: .schemaVersionKey) as? String)
                         ?? SchemaVersion.v1_0_0.versionString
     unarchiver.finishDecoding()
     guard let version = SchemaVersion(versionString: versionString) else {

@@ -80,3 +80,7 @@ enum SchemaVersion: Equatable, Comparable, CustomStringConvertible {
     return lhs.addition < rhs.addition
   }
 }
+
+extension String {
+  static let schemaVersionKey = "schemaVersion"
+}
