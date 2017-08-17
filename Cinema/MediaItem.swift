@@ -1,4 +1,4 @@
-struct MediaItem {
+struct MediaItem: Equatable, Hashable {
   let id: Int
   let title: String
   let subtitle: String?
@@ -23,14 +23,40 @@ struct MediaItem {
       return title
     }
   }
+
+  static func == (lhs: MediaItem, rhs: MediaItem) -> Bool {
+    guard lhs.id == rhs.id else { return false }
+    guard lhs.title == rhs.title else { return false }
+    guard lhs.subtitle == rhs.subtitle else { return false }
+    guard lhs.runtime == rhs.runtime else { return false }
+    guard lhs.year == rhs.year else { return false }
+    guard lhs.diskType == rhs.diskType else { return false }
+    return true
+  }
+
+  var hashValue: Int {
+    return id
+  }
+
 }
 
 enum DiskType: String {
   case dvd, bluRay
 }
 
-public struct PartialMediaItem {
+struct PartialMediaItem: Equatable, Hashable {
   let id: Int
   let title: String
   let year: Int?
+
+  static func == (lhs: PartialMediaItem, rhs: PartialMediaItem) -> Bool {
+    guard lhs.id == rhs.id else { return false }
+    guard lhs.title == rhs.title else { return false }
+    guard lhs.year == rhs.year else { return false }
+    return true
+  }
+
+  var hashValue: Int {
+    return id
+  }
 }
