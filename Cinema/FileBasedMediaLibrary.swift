@@ -65,11 +65,6 @@ class FileBasedMediaLibrary: MediaLibrary {
     try saveData()
   }
 
-  func replaceItems(_ mediaItems: [MediaItem]) throws {
-    self.mediaItems = mediaItems
-    try saveData()
-  }
-
   func performBatchUpdates(_ updates: () throws -> Void) throws {
     isPerformingBatchUpdates = true
     try updates()

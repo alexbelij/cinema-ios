@@ -29,8 +29,14 @@ class ReplaceLibraryViewController: UIViewController {
     DispatchQueue.global(qos: .userInitiated).async {
       var libraryError: Error? = nil
       do {
-        let mediaItems = try JSONFormat().deserialize(from: Data(contentsOf: self.newLibraryUrl))
-        try self.library.replaceItems(mediaItems)
+        let itemsToImport = try JSONFormat().deserialize(from: Data(contentsOf: self.newLibraryUrl))
+        let existingItems = self.library.mediaItems { _ in true }
+        let newItems = itemsToImport.filter { !existingItems.contains($0) }
+        try self.library.performBatchUpdates {
+          for item in newItems {
+            try self.library.add(item)
+          }
+        }
       } catch let error {
         libraryError = error
       }
