@@ -41,6 +41,10 @@
 "genre.tvMovie" = "TV-Film";
 "genre.war" = "Kriegsfilm";
 "genre.western" = "Western";
+"import.alert.title" = "Wollen Sie wirklich die Mediathek importieren?";
+"import.done.failure.text" = "Mediathek wurde nicht importiert.";
+"import.done.success.text" = "Mediathek wurde importiert.";
+"import.progress.text" = "Mediathek wird importiert...";
 "library" = "Mediathek";
 "library.empty" = "Deine Mediathek ist leer.";
 "library.search.placeholder" = "Titel durchsuchen...";
@@ -55,10 +59,6 @@
 "options" = "Optionen";
 "popularMovies" = "Beliebte Filme";
 "popularMovies.empty" = "Zurzeit gibt es keine beliebten Filme. Versuch es später nochmal.";
-"replaceLibrary.alert.title" = "Wollen Sie wirklich die Mediathek ersetzen?";
-"replaceLibrary.done.failure.text" = "Mediathek wurde nicht ersetzt.";
-"replaceLibrary.done.success.text" = "Mediathek wurde ersetzt.";
-"replaceLibrary.progress.text" = "Mediathek wird ersetzt...";
 "search.results.empty" = "Keine Treffer für „%@“";
 "sort.by" = "Sortieren nach";
 "sort.by.runtime" = "Laufzeit";

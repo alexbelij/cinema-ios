@@ -97,14 +97,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
-    let alert = UIAlertController(title: NSLocalizedString("replaceLibrary.alert.title", comment: ""),
+    let alert = UIAlertController(title: NSLocalizedString("import.alert.title", comment: ""),
                                   message: nil,
                                   preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: NSLocalizedString("yes", comment: ""), style: .destructive) { _ in
-      let controller = UIStoryboard(name: "ReplaceLibrary", bundle: nil)
+      let controller = UIStoryboard(name: "Import", bundle: nil)
           // swiftlint:disable:next force_cast
-          .instantiateInitialViewController() as! ReplaceLibraryViewController
-      controller.replaceLibraryContent(of: self.library, withContentOf: url)
+          .instantiateInitialViewController() as! ImportViewController
+      controller.importLibrary(contentOf: url, into: self.library)
       self.window!.rootViewController!.present(controller, animated: true)
     })
     alert.addAction(UIAlertAction(title: NSLocalizedString("no", comment: ""), style: .default))
