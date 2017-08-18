@@ -10,6 +10,8 @@ class FileBasedMediaLibrary: MediaLibrary {
 
   private var mediaItems: [MediaItem]
 
+  private var isPerformingBatchUpdates = false
+
   init(directory: URL, fileName: String, dataFormat: DataFormat) throws {
     self.directory = directory
     self.fileName = fileName
@@ -61,7 +63,15 @@ class FileBasedMediaLibrary: MediaLibrary {
     try saveData()
   }
 
+  func performBatchUpdates(_ updates: () throws -> Void) throws {
+    isPerformingBatchUpdates = true
+    try updates()
+    isPerformingBatchUpdates = false
+    try saveData()
+  }
+
   private func saveData() throws {
+    guard !isPerformingBatchUpdates else { return }
     NotificationCenter.default.post(name: .didChangeMediaLibraryContent, object: self)
     guard let data = try? dataFormat.serialize(mediaItems) else {
       throw MediaLibraryError.storageError
