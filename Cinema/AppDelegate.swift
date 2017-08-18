@@ -10,6 +10,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    let arguments = ProcessInfo.processInfo.arguments
+
+    self.movieDb = Config.initMovieDb(launchArguments: arguments)
+    self.movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
+    self.movieDb.tryConnect()
+
+    self.library = Config.initLibrary(launchArguments: arguments)
+
     self.window = UIWindow(frame: UIScreen.main.bounds)
     self.window?.makeKeyAndVisible()
     self.window!.rootViewController = loadMainViewController()
@@ -17,14 +25,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   private func loadMainViewController() -> UIViewController {
-    let arguments = ProcessInfo.processInfo.arguments
-
-    library = Config.initLibrary(launchArguments: arguments)
-
-    movieDb = Config.initMovieDb(launchArguments: arguments)
-    movieDb.language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en")
-    movieDb.tryConnect()
-
     // swiftlint:disable force_cast
     let mainNavController = UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()
     as! UINavigationController
