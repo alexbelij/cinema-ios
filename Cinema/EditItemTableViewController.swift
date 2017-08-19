@@ -90,7 +90,7 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
                      title: self.titleTextField.text!,
                      subtitle: subtitle,
                      runtime: self.item.runtime,
-                     year: self.item.year,
+                     releaseDate: self.item.releaseDate,
                      diskType: self.item.diskType,
                      genreIds: self.item.genreIds)
   }

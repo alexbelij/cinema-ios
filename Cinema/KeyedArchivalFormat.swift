@@ -29,6 +29,8 @@ class KeyedArchivalFormat: DataFormat {
   // MARK: - Version 2-0-0
 
   private func serializeVersion2_0_0(_ elements: [MediaItem]) throws -> Data {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
     let payload: [[String: Any]] = elements.map { item in
       var dictionary: [String: Any] = [
         "id": item.id,
@@ -42,8 +44,8 @@ class KeyedArchivalFormat: DataFormat {
       if let runtime = item.runtime {
         dictionary["runtime"] = runtime
       }
-      if let year = item.year {
-        dictionary["year"] = year
+      if let releaseDate = item.releaseDate {
+        dictionary["releaseDate"] = dateFormatter.string(from: releaseDate)
       }
       return dictionary
     }
@@ -61,13 +63,15 @@ class KeyedArchivalFormat: DataFormat {
       throw DataFormatError.invalidDataFormat
     }
     unarchiver.finishDecoding()
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
     var items = [MediaItem]()
     for dict in array {
       let id = dict["id"] as? Int
       let title = dict["title"] as? String
       let subtitle = dict["subtitle"] as? String
       let runtime = dict["runtime"] as? Int
-      let year = dict["year"] as? Int
+      let releaseDate = (dict["releaseDate"] as? String).flatMap { dateFormatter.date(from: $0) }
       let diskType = DiskType(rawValue: dict["diskType"] as? String ?? "")
       let genreIds = dict["genreIds"] as? [Int] ?? []
       if let id = id, let title = title, let diskType = diskType {
@@ -75,7 +79,7 @@ class KeyedArchivalFormat: DataFormat {
                                   title: title,
                                   subtitle: subtitle,
                                   runtime: runtime,
-                                  year: year,
+                                  releaseDate: releaseDate,
                                   diskType: diskType,
                                   genreIds: genreIds)
         items.append(mediaItem)
@@ -89,12 +93,14 @@ class KeyedArchivalFormat: DataFormat {
   // MARK: - Version 1-0-0
 
   private func serializeVersion1_0_0(_ elements: [MediaItem]) throws -> Data {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy"
     let rootObject: [[String: Any]] = elements.map { item in
       var dictionary: [String: Any] = [
         "id": item.id,
         "title": item.title,
         "runtime": item.runtime ?? -1,
-        "year": item.year ?? -1,
+        "year": item.releaseDate.map { dateFormatter.string(from: $0) } ?? -1,
         "diskType": item.diskType.rawValue
       ]
       if let subtitle = item.subtitle {
@@ -110,6 +116,8 @@ class KeyedArchivalFormat: DataFormat {
       throw DataFormatError.invalidDataFormat
     }
     var items = [MediaItem]()
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy"
     for dict in array {
       let id = dict["id"] as? Int
       let title = dict["title"] as? String
@@ -118,11 +126,17 @@ class KeyedArchivalFormat: DataFormat {
       let year = dict["year"] as? Int
       let diskType = DiskType(rawValue: dict["diskType"] as? String ?? "")
       if let id = id, let title = title, let runtime = runtime, let year = year, let diskType = diskType {
+        let releaseDate: Date?
+        if year > 0 {
+          releaseDate = dateFormatter.date(from: String(year))!
+        } else {
+          releaseDate = nil
+        }
         let mediaItem = MediaItem(id: id,
                                   title: title,
                                   subtitle: subtitle,
                                   runtime: runtime,
-                                  year: year,
+                                  releaseDate: releaseDate,
                                   diskType: diskType,
                                   genreIds: [])
         items.append(mediaItem)

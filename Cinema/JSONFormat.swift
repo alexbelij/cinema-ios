@@ -30,6 +30,8 @@ class JSONFormat: DataFormat {
   // MARK: - Version 2-0-0
 
   private func serializeVersion2_0_0(_ elements: [MediaItem]) throws -> Data {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
     let payload: [JSON] = elements.map { item in
       var dictionary: [String: Any] = [
         "id": item.id,
@@ -43,8 +45,8 @@ class JSONFormat: DataFormat {
       if let runtime = item.runtime {
         dictionary["runtime"] = runtime
       }
-      if let year = item.year {
-        dictionary["year"] = year
+      if let releaseDate = item.releaseDate {
+        dictionary["releaseDate"] = dateFormatter.string(from: releaseDate)
       }
       return JSON(dictionary)
     }
@@ -57,12 +59,14 @@ class JSONFormat: DataFormat {
 
   private func deserializeVersion2_0_0(from json: JSON) throws -> [MediaItem] {
     var items = [MediaItem]()
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
     for jsonItem in json[String.payloadKey].arrayValue {
       let id = jsonItem["id"].int
       let title = jsonItem["title"].string
       let subtitle = jsonItem["subtitle"].string
       let runtime = jsonItem["runtime"].int
-      let year = jsonItem["year"].int
+      let releaseDate = jsonItem["releaseDate"].string.flatMap { dateFormatter.date(from: $0) }
       let diskType = DiskType(rawValue: jsonItem["diskType"].string ?? "")
       let genreIds: [Int]
       if let ids = jsonItem["genreIds"].array {
@@ -75,7 +79,7 @@ class JSONFormat: DataFormat {
                                   title: title,
                                   subtitle: subtitle,
                                   runtime: runtime,
-                                  year: year,
+                                  releaseDate: releaseDate,
                                   diskType: diskType,
                                   genreIds: genreIds)
         items.append(mediaItem)
@@ -89,12 +93,14 @@ class JSONFormat: DataFormat {
   // MARK: - Version 1-0-0
 
   private func serializeVersion1_0_0(_ elements: [MediaItem]) throws -> Data {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy"
     let jsonArray: [JSON] = elements.map { item in
       var dictionary: [String: Any] = [
         "id": item.id,
         "title": item.title,
         "runtime": item.runtime ?? -1,
-        "year": item.year ?? -1,
+        "year": item.releaseDate.map { dateFormatter.string(from: $0) } ?? -1,
         "diskType": item.diskType.rawValue
       ]
       if let subtitle = item.subtitle {
@@ -107,6 +113,8 @@ class JSONFormat: DataFormat {
 
   private func deserializeVersion1_0_0(from json: JSON) throws -> [MediaItem] {
     var items = [MediaItem]()
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy"
     for jsonItem in json.arrayValue {
       let id = jsonItem["id"].int
       let title = jsonItem["title"].string
@@ -115,11 +123,17 @@ class JSONFormat: DataFormat {
       let year = jsonItem["year"].int
       let diskType = DiskType(rawValue: jsonItem["diskType"].string ?? "")
       if let id = id, let title = title, let runtime = runtime, let year = year, let diskType = diskType {
+        let releaseDate: Date?
+        if year > 0 {
+          releaseDate = dateFormatter.date(from: String(year))!
+        } else {
+          releaseDate = nil
+        }
         let mediaItem = MediaItem(id: id,
                                   title: title,
                                   subtitle: subtitle,
                                   runtime: runtime,
-                                  year: year,
+                                  releaseDate: releaseDate,
                                   diskType: diskType,
                                   genreIds: [])
         items.append(mediaItem)

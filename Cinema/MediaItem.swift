@@ -1,14 +1,21 @@
+import Foundation
+
 struct MediaItem: Equatable, Hashable {
   let id: Int
   let title: String
   let subtitle: String?
   let runtime: Int?
-  let year: Int?
+  var year: Int? {
+    guard let releaseDate = releaseDate else { return nil }
+    let calendar = Calendar.current
+    return calendar.component(.year, from: releaseDate)
+  }
+  let releaseDate: Date?
   let diskType: DiskType
   let genreIds: [Int]
 
   init(id: Int, title: String, subtitle: String? = nil,
-       runtime: Int? = nil, year: Int? = nil, diskType: DiskType = .bluRay,
+       runtime: Int? = nil, releaseDate: Date? = nil, diskType: DiskType = .bluRay,
        genreIds: [Int]) {
     self.id = id
     self.title = title
@@ -18,11 +25,7 @@ struct MediaItem: Equatable, Hashable {
     } else {
       self.runtime = nil
     }
-    if let year = year, year > 0 {
-      self.year = year
-    } else {
-      self.year = nil
-    }
+    self.releaseDate = releaseDate
     self.diskType = diskType
     self.genreIds = genreIds
   }
@@ -40,7 +43,7 @@ struct MediaItem: Equatable, Hashable {
     guard lhs.title == rhs.title else { return false }
     guard lhs.subtitle == rhs.subtitle else { return false }
     guard lhs.runtime == rhs.runtime else { return false }
-    guard lhs.year == rhs.year else { return false }
+    guard lhs.releaseDate == rhs.releaseDate else { return false }
     guard lhs.diskType == rhs.diskType else { return false }
     return true
   }
@@ -58,12 +61,17 @@ enum DiskType: String {
 struct PartialMediaItem: Equatable, Hashable {
   let id: Int
   let title: String
-  let year: Int?
+  let releaseDate: Date?
+  var year: Int? {
+    guard let releaseDate = releaseDate else { return nil }
+    let calendar = Calendar.current
+    return calendar.component(.year, from: releaseDate)
+  }
 
   static func == (lhs: PartialMediaItem, rhs: PartialMediaItem) -> Bool {
     guard lhs.id == rhs.id else { return false }
     guard lhs.title == rhs.title else { return false }
-    guard lhs.year == rhs.year else { return false }
+    guard lhs.releaseDate == rhs.releaseDate else { return false }
     return true
   }
 
