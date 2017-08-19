@@ -19,8 +19,9 @@ enum Config {
         library = SampleLibrary()
       case .fileBased:
         do {
-          let directory = Utils.directoryUrl(for: .applicationSupportDirectory)
+          let directory = Utils.directoryUrl(for: .documentDirectory)
           let fileName = "cinema.data"
+          moveLegacyLibraryFile(to: directory.appendingPathComponent(fileName))
           let dataFormat = KeyedArchivalFormat()
           dataFormat.defaultSchemaVersion = .v1_0_0
           library = try FileBasedMediaLibrary(directory: directory, fileName: fileName, dataFormat: dataFormat)
@@ -29,6 +30,18 @@ enum Config {
         }
     }
     return library
+  }
+
+  private static func moveLegacyLibraryFile(to url: URL) {
+    let legacyUrl = Utils.directoryUrl(for: .applicationSupportDirectory, createIfNecessary: false)
+                         .appendingPathComponent("cinema.data")
+    if FileManager.default.fileExists(atPath: legacyUrl.path) {
+      do {
+        try FileManager.default.moveItem(at: legacyUrl, to: url)
+      } catch let error {
+        fatalError("could not move library file: \(error)")
+      }
+    }
   }
 
   /// Usage
