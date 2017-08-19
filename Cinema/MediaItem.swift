@@ -1,19 +1,28 @@
+import Foundation
+
 struct MediaItem: Equatable, Hashable {
   let id: Int
   let title: String
   let subtitle: String?
-  let runtime: Int
-  let year: Int
+  let runtime: Int?
+  let releaseDate: Date?
   let diskType: DiskType
+  let genreIds: [Int]
 
   init(id: Int, title: String, subtitle: String? = nil,
-       runtime: Int, year: Int, diskType: DiskType = .bluRay) {
+       runtime: Int? = nil, releaseDate: Date? = nil, diskType: DiskType = .bluRay,
+       genreIds: [Int]) {
     self.id = id
     self.title = title
     self.subtitle = subtitle
-    self.runtime = runtime
-    self.year = year
+    if let runtime = runtime, runtime > 0 {
+      self.runtime = runtime
+    } else {
+      self.runtime = nil
+    }
+    self.releaseDate = releaseDate
     self.diskType = diskType
+    self.genreIds = genreIds
   }
 
   var fullTitle: String {
@@ -29,7 +38,7 @@ struct MediaItem: Equatable, Hashable {
     guard lhs.title == rhs.title else { return false }
     guard lhs.subtitle == rhs.subtitle else { return false }
     guard lhs.runtime == rhs.runtime else { return false }
-    guard lhs.year == rhs.year else { return false }
+    guard lhs.releaseDate == rhs.releaseDate else { return false }
     guard lhs.diskType == rhs.diskType else { return false }
     return true
   }
@@ -47,12 +56,12 @@ enum DiskType: String {
 struct PartialMediaItem: Equatable, Hashable {
   let id: Int
   let title: String
-  let year: Int?
+  let releaseDate: Date?
 
   static func == (lhs: PartialMediaItem, rhs: PartialMediaItem) -> Bool {
     guard lhs.id == rhs.id else { return false }
     guard lhs.title == rhs.title else { return false }
-    guard lhs.year == rhs.year else { return false }
+    guard lhs.releaseDate == rhs.releaseDate else { return false }
     return true
   }
 

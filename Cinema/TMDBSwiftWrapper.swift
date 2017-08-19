@@ -55,8 +55,8 @@ class TMDBSwiftWrapper: MovieDbClient {
     return certification
   }
 
-  func genres(for id: Int) -> [String] {
-    if let genres = movie(for: id, language: effectiveLanguage())?.genres.map({ $0.name! }) {
+  func genreIds(for id: Int) -> [Int] {
+    if let genres = movie(for: id, language: effectiveLanguage())?.genres.map({ $0.id! }) {
       return genres
     }
     return []
@@ -84,22 +84,18 @@ class TMDBSwiftWrapper: MovieDbClient {
                       year: nil,
                       primaryReleaseYear: nil) { _, results in
         if let results = results {
+          let dateFormatter = DateFormatter()
+          dateFormatter.dateFormat = "yyyy-MM-dd"
           value = results.map {
             PartialMediaItem(id: $0.id!,
                              title: $0.title!,
-                             year: TMDBSwiftWrapper.extractYear(from: $0.release_date!))
+                             releaseDate: dateFormatter.date(from: $0.release_date!))
           }
         }
         done()
       }
     }
     return value
-  }
-
-  private static func extractYear(from dateString: String) -> Int? {
-    guard !dateString.isEmpty else { return nil }
-    let year = Int(dateString.substring(to: dateString.index(dateString.startIndex, offsetBy: 4)))!
-    return year
   }
 
   func runtime(for id: Int) -> Int? {

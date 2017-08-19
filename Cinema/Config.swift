@@ -23,7 +23,7 @@ enum Config {
           let fileName = "cinema.data"
           moveLegacyLibraryFile(to: directory.appendingPathComponent(fileName))
           let dataFormat = KeyedArchivalFormat()
-          dataFormat.defaultSchemaVersion = .v1_0_0
+          dataFormat.defaultSchemaVersion = .v2_0_0
           library = try FileBasedMediaLibrary(directory: directory, fileName: fileName, dataFormat: dataFormat)
         } catch let error {
           fatalError("Library could not be instantiated: \(error)")

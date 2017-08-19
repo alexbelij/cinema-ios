@@ -64,8 +64,8 @@ class CachingMovieDbClient: MovieDbClient {
     return backingClient.certification(for: id)
   }
 
-  func genres(for id: Int) -> [String] {
-    return backingClient.genres(for: id)
+  func genreIds(for id: Int) -> [Int] {
+    return backingClient.genreIds(for: id)
   }
 
   func searchMovies(searchText: String) -> [PartialMediaItem] {

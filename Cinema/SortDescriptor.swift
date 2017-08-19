@@ -44,7 +44,10 @@ private struct TitleSortingStrategy: TableViewSortingStrategy {
     let title1 = removeArticlesAtBeginning(from: left.title)
     let title2 = removeArticlesAtBeginning(from: right.title)
     switch title1.compare(title2, options: [.diacriticInsensitive, .caseInsensitive]) {
-      case .orderedSame: return left.year <= right.year
+      case .orderedSame:
+        guard let leftDate = left.releaseDate else { return false }
+        guard let rightDate = right.releaseDate else { return true }
+        return leftDate <= rightDate
       case .orderedAscending: return true
       case .orderedDescending: return false
     }
@@ -68,10 +71,8 @@ private struct RuntimeSortingStrategy: TableViewSortingStrategy {
   private let unknownSymbol = "?"
 
   func sectionIndexTitle(for item: MediaItem) -> String {
-    switch item.runtime {
-      case -1: return unknownSymbol
-      default: return String(item.runtime / 10 * 10)
-    }
+    guard let runtime = item.runtime else { return unknownSymbol }
+    return String(runtime / 10 * 10)
   }
 
   func refineSectionIndexTitles(_ sections: [String]) -> [String] {
@@ -107,21 +108,47 @@ private struct RuntimeSortingStrategy: TableViewSortingStrategy {
   }
 
   func itemSorting(left: MediaItem, right: MediaItem) -> Bool {
-    return left.runtime <= right.runtime
+    guard let leftRuntime = left.runtime else { return false }
+    guard let rightRuntime = right.runtime else { return true }
+    return leftRuntime <= rightRuntime
   }
 }
 
 private struct YearSortingStrategy: TableViewSortingStrategy {
 
+  private let unknownSymbol = "?"
+
   func sectionIndexTitle(for item: MediaItem) -> String {
-    if item.year < 2010 {
-      return String(item.year / 10 * 10)
+    guard let releaseDate = item.releaseDate else { return unknownSymbol }
+    let year = Calendar.current.component(.year, from: releaseDate)
+    if year < 2010 {
+      return String(year / 10 * 10)
     } else {
-      return String(item.year)
+      return String(year)
+    }
+  }
+
+  func refineSectionIndexTitles(_ titles: [String]) -> [String] {
+    if let index = titles.index(of: unknownSymbol) {
+      var titles = titles
+      titles.remove(at: index)
+      return titles
+    }
+    return titles
+  }
+
+  func sectionTitle(for sectionIndexTitle: String) -> String {
+    switch sectionIndexTitle {
+      case unknownSymbol:
+        return NSLocalizedString("sort.by.year.unknownHeader", comment: "")
+      default:
+        return sectionIndexTitle
     }
   }
 
   func sectionIndexTitleSorting(left: String, right: String) -> Bool {
+    guard left != unknownSymbol else { return false }
+    guard right != unknownSymbol else { return true }
     return Int(left)! >= Int(right)!
   }
 

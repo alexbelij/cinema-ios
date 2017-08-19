@@ -9,6 +9,7 @@
 "details.missing.certification" = "No certification available.";
 "details.missing.genre" = "No genre available.";
 "details.missing.overview" = "No overview available.";
+"details.missing.releaseDate" = "No release date available.";
 "details.missing.runtime" = "No runtime available.";
 "discard" = "Discard";
 "edit.deleteMovie" = "Delete Movie";
@@ -19,6 +20,25 @@
 "error.invalidDataFormat" = "The file can't be opened. Home-Cinema couldn't read the file.";
 "error.storageError" = "The library could not be saved.";
 "error.unsupportedSchemaVersion" = "To import this file, you'll need a newer version of Home-Cinema.";
+"genre.action" = "Action";
+"genre.adventure" = "Adventure";
+"genre.animation" = "Animation";
+"genre.comedy" = "Comedy";
+"genre.crime" = "Crime";
+"genre.documentary" = "Documentary";
+"genre.drama" = "Drama";
+"genre.family" = "Family";
+"genre.fantasy" = "Fantasy";
+"genre.history" = "History";
+"genre.horror" = "Horror";
+"genre.music" = "Music";
+"genre.mystery" = "Mystery";
+"genre.romance" = "Romance";
+"genre.scienceFiction" = "Science Fiction";
+"genre.thriller" = "Thriller";
+"genre.tvMovie" = "TV Movie";
+"genre.war" = "War";
+"genre.western" = "Western";
 "library" = "Library";
 "library.search.placeholder" = "Search titles...";
 "mediaItem.disk.bluRay" = "Blu-ray";
@@ -36,5 +56,6 @@
 "sort.by.runtime.unknownHeader" = "Unknown";
 "sort.by.title" = "Title";
 "sort.by.year" = "Year";
+"sort.by.year.unknownHeader" = "Unknown";
 "yes" = "Yes";
 

@@ -44,9 +44,10 @@ class AddItemViewController: UIViewController {
     DispatchQueue.global(qos: .userInitiated).async {
       let item = MediaItem(id: self.itemToAdd.id,
                            title: self.itemToAdd.title,
-                           runtime: self.movieDb.runtime(for: self.itemToAdd.id) ?? -1,
-                           year: self.itemToAdd.year ?? -1,
-                           diskType: self.diskType)
+                           runtime: self.movieDb.runtime(for: self.itemToAdd.id),
+                           releaseDate: self.itemToAdd.releaseDate,
+                           diskType: self.diskType,
+                           genreIds: self.movieDb.genreIds(for: self.itemToAdd.id))
       var libraryError: Error? = nil
       do {
         try self.library.add(item)

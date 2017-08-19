@@ -14,7 +14,7 @@ class DetailViewController: UIViewController {
   @IBOutlet weak var imageView: UIImageView!
   @IBOutlet weak var genreLabel: UILabel!
   @IBOutlet weak var runtimeLabel: UILabel!
-  @IBOutlet weak var yearLabel: UILabel!
+  @IBOutlet weak var releaseDateLabel: UILabel!
   @IBOutlet weak var certificationLabel: UILabel!
   @IBOutlet weak var diskLabel: UILabel!
   @IBOutlet weak var textView: UITextView!
@@ -34,11 +34,22 @@ class DetailViewController: UIViewController {
       } else {
         subtitleLabel.isHidden = true
       }
-      runtimeLabel.text = mediaItem.runtime == -1
+      runtimeLabel.text = mediaItem.runtime == nil
           ? NSLocalizedString("details.missing.runtime", comment: "")
-          : Utils.formatDuration(mediaItem.runtime)
-      yearLabel.text = "\(mediaItem.year)"
+          : Utils.formatDuration(mediaItem.runtime!)
+      let dateFormatter = DateFormatter()
+      dateFormatter.dateStyle = .long
+      dateFormatter.timeStyle = .none
+      releaseDateLabel.text = mediaItem.releaseDate == nil
+          ? NSLocalizedString("details.missing.releaseDate", comment: "")
+          : dateFormatter.string(from: mediaItem.releaseDate!)
       diskLabel.text = localize(diskType: mediaItem.diskType)
+      var genreString = Utils.localizedGenreNames(for: self.detailItem!.genreIds)
+                             .joined(separator: ", ")
+      if genreString.isEmpty {
+        genreString = NSLocalizedString("details.missing.genre", comment: "")
+      }
+      self.genreLabel.text = genreString
 
       if movieDb.isConnected {
         fetchAdditionalData()
@@ -63,24 +74,13 @@ class DetailViewController: UIViewController {
     group.enter()
     queue.async {
       let text: String
-      if let overview  = self.movieDb.overview(for: self.detailItem!.id), !overview.isEmpty {
+      if let overview = self.movieDb.overview(for: self.detailItem!.id), !overview.isEmpty {
         text = overview
       } else {
         text = NSLocalizedString("details.missing.overview", comment: "")
       }
       DispatchQueue.main.async {
         self.textView.text = text
-        group.leave()
-      }
-    }
-    group.enter()
-    queue.async {
-      var genreString = self.movieDb.genres(for: self.detailItem!.id).joined(separator: ", ")
-      if genreString.isEmpty {
-        genreString = NSLocalizedString("details.missing.genre", comment: "")
-      }
-      DispatchQueue.main.async {
-        self.genreLabel.text = genreString
         group.leave()
       }
     }
@@ -116,7 +116,7 @@ class DetailViewController: UIViewController {
     imageView.layer.borderWidth = 0.5
     genreLabel?.text = ""
     runtimeLabel?.text = ""
-    yearLabel?.text = ""
+    releaseDateLabel?.text = ""
     certificationLabel?.text = ""
     diskLabel?.text = ""
     textView?.text = ""
