@@ -2,23 +2,6 @@ import Foundation
 
 enum Config {
 
-  private static func directoryUrl(for directory: FileManager.SearchPathDirectory,
-                                   createIfNecessary: Bool = true) -> URL {
-    let fileManager = FileManager.default
-    let urls = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)
-    let dir = urls[0].appendingPathComponent(Bundle.main.bundleIdentifier!, isDirectory: true)
-    do {
-      var isDirectory: ObjCBool = false
-      if !(FileManager.default.fileExists(atPath: dir.path, isDirectory: &isDirectory)
-           && isDirectory.boolValue) {
-        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true, attributes: nil)
-      }
-    } catch {
-      fatalError("Could not create \(dir)")
-    }
-    return dir
-  }
-
   /// Usage
   /// ```
   ///   --library sample
@@ -36,7 +19,7 @@ enum Config {
         library = SampleLibrary()
       case .fileBased:
         do {
-          let directory = directoryUrl(for: .applicationSupportDirectory)
+          let directory = Utils.directoryUrl(for: .applicationSupportDirectory)
           let fileName = "cinema.data"
           let dataFormat = KeyedArchivalFormat()
           dataFormat.defaultSchemaVersion = .v1_0_0
