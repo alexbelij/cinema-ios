@@ -5,15 +5,16 @@ enum Config {
   private static var applicationSupportDirectory: URL = {
     let fileManager = FileManager.default
     let urls = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)
-    if urls.count >= 1 {
-      let appSupportUrl = urls[0]
-      let appDirectory = appSupportUrl.appendingPathComponent(Bundle.main.bundleIdentifier!, isDirectory: true)
-      do {
-        try fileManager.createDirectory(at: appDirectory, withIntermediateDirectories: true)
-        return appDirectory
-      } catch {}
+    let dir = urls[0].appendingPathComponent(Bundle.main.bundleIdentifier!, isDirectory: true)
+    do {
+      var isDirectory: ObjCBool = false
+      if !(FileManager.default.fileExists(atPath: dir.path, isDirectory: &isDirectory)
+           && isDirectory.boolValue) {
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true, attributes: nil)
+      }
+    } catch {
+      fatalError("Could not create \(dir)")
     }
-    fatalError("Could not create Application Support directory")
   }()
 
   /// Usage
