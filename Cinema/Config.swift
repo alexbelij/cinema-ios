@@ -2,7 +2,8 @@ import Foundation
 
 enum Config {
 
-  private static var applicationSupportDirectory: URL = {
+  private static func directoryUrl(for directory: FileManager.SearchPathDirectory,
+                                   createIfNecessary: Bool = true) -> URL {
     let fileManager = FileManager.default
     let urls = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)
     let dir = urls[0].appendingPathComponent(Bundle.main.bundleIdentifier!, isDirectory: true)
@@ -15,7 +16,8 @@ enum Config {
     } catch {
       fatalError("Could not create \(dir)")
     }
-  }()
+    return dir
+  }
 
   /// Usage
   /// ```
@@ -34,11 +36,11 @@ enum Config {
         library = SampleLibrary()
       case .fileBased:
         do {
+          let directory = directoryUrl(for: .applicationSupportDirectory)
+          let fileName = "cinema.data"
           let dataFormat = KeyedArchivalFormat()
           dataFormat.defaultSchemaVersion = .v1_0_0
-          library = try FileBasedMediaLibrary(directory: applicationSupportDirectory,
-                                              fileName: "cinema.data",
-                                              dataFormat: dataFormat)
+          library = try FileBasedMediaLibrary(directory: directory, fileName: fileName, dataFormat: dataFormat)
         } catch let error {
           fatalError("Library could not be instantiated: \(error)")
         }
