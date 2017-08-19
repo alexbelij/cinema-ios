@@ -5,11 +5,6 @@ struct MediaItem: Equatable, Hashable {
   let title: String
   let subtitle: String?
   let runtime: Int?
-  var year: Int? {
-    guard let releaseDate = releaseDate else { return nil }
-    let calendar = Calendar.current
-    return calendar.component(.year, from: releaseDate)
-  }
   let releaseDate: Date?
   let diskType: DiskType
   let genreIds: [Int]
@@ -62,11 +57,6 @@ struct PartialMediaItem: Equatable, Hashable {
   let id: Int
   let title: String
   let releaseDate: Date?
-  var year: Int? {
-    guard let releaseDate = releaseDate else { return nil }
-    let calendar = Calendar.current
-    return calendar.component(.year, from: releaseDate)
-  }
 
   static func == (lhs: PartialMediaItem, rhs: PartialMediaItem) -> Bool {
     guard lhs.id == rhs.id else { return false }

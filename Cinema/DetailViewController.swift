@@ -14,7 +14,7 @@ class DetailViewController: UIViewController {
   @IBOutlet weak var imageView: UIImageView!
   @IBOutlet weak var genreLabel: UILabel!
   @IBOutlet weak var runtimeLabel: UILabel!
-  @IBOutlet weak var yearLabel: UILabel!
+  @IBOutlet weak var releaseDateLabel: UILabel!
   @IBOutlet weak var certificationLabel: UILabel!
   @IBOutlet weak var diskLabel: UILabel!
   @IBOutlet weak var textView: UITextView!
@@ -37,9 +37,12 @@ class DetailViewController: UIViewController {
       runtimeLabel.text = mediaItem.runtime == nil
           ? NSLocalizedString("details.missing.runtime", comment: "")
           : Utils.formatDuration(mediaItem.runtime!)
-      yearLabel.text = mediaItem.year == nil
-          ? NSLocalizedString("details.missing.year", comment: "")
-          : "\(mediaItem.year!)"
+      let dateFormatter = DateFormatter()
+      dateFormatter.dateStyle = .long
+      dateFormatter.timeStyle = .none
+      releaseDateLabel.text = mediaItem.releaseDate == nil
+          ? NSLocalizedString("details.missing.releaseDate", comment: "")
+          : dateFormatter.string(from: mediaItem.releaseDate!)
       diskLabel.text = localize(diskType: mediaItem.diskType)
       var genreString = Utils.localizedGenreNames(for: self.detailItem!.genreIds)
                              .joined(separator: ", ")
@@ -113,7 +116,7 @@ class DetailViewController: UIViewController {
     imageView.layer.borderWidth = 0.5
     genreLabel?.text = ""
     runtimeLabel?.text = ""
-    yearLabel?.text = ""
+    releaseDateLabel?.text = ""
     certificationLabel?.text = ""
     diskLabel?.text = ""
     textView?.text = ""
