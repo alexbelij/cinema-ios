@@ -34,6 +34,7 @@ enum Config {
 
   private static func moveLegacyLibraryFile(to url: URL) {
     let legacyUrl = Utils.directoryUrl(for: .applicationSupportDirectory, createIfNecessary: false)
+                         .appendingPathComponent(Bundle.main.bundleIdentifier!, isDirectory: true)
                          .appendingPathComponent("cinema.data")
     if FileManager.default.fileExists(atPath: legacyUrl.path) {
       do {

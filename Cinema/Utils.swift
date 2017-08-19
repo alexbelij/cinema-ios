@@ -15,8 +15,7 @@ class Utils {
   static func directoryUrl(for directory: FileManager.SearchPathDirectory,
                            createIfNecessary: Bool = true) -> URL {
     let fileManager = FileManager.default
-    let urls = fileManager.urls(for: directory, in: .userDomainMask)
-    let dir = urls[0].appendingPathComponent(Bundle.main.bundleIdentifier!, isDirectory: true)
+    let dir = fileManager.urls(for: directory, in: .userDomainMask).first!
     do {
       var isDirectory: ObjCBool = false
       if !(FileManager.default.fileExists(atPath: dir.path, isDirectory: &isDirectory)
