@@ -98,7 +98,18 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
 
   func sortDescriptorDidChange(to descriptor: SortDescriptor) {
     self.sortDescriptor = descriptor
-    DispatchQueue.global(qos: .userInitiated).async { self.reloadLibraryData() }
+    DispatchQueue.global(qos: .userInitiated).async {
+      self.reloadLibraryData()
+      DispatchQueue.main.async {
+        self.scrollToTop(animated: false)
+      }
+    }
+  }
+
+  private func scrollToTop(animated: Bool) {
+    let topHeight = UIApplication.shared.statusBarFrame.height + navigationController!.navigationBar.frame.height
+    let offset = searchController.searchBar.frame.height - topHeight
+    self.tableView.setContentOffset(CGPoint(x: 0, y: offset), animated: animated)
   }
 
   // MARK: - Table View
