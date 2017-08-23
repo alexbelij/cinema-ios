@@ -46,6 +46,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
     if !searchText.isEmpty {
       DispatchQueue.global(qos: .userInteractive).async {
         let searchResults = self.movieDb.searchMovies(searchText: searchText)
+        self.searchResultsController.searchText = searchText
         self.searchResultsController.searchResults = searchResults
       }
     }

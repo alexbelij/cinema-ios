@@ -50,7 +50,7 @@
 "replaceLibrary.done.failure.text" = "Library was not replaced.";
 "replaceLibrary.done.success.text" = "Library was replaced.";
 "replaceLibrary.progress.text" = "Replacing library...";
-"search.results.empty" = "No results";
+"search.results.empty" = "No results for “%@”";
 "sort.by" = "Sort by";
 "sort.by.runtime" = "Runtime";
 "sort.by.runtime.lessThanTenMinutes" = "Less than 10 minutes";

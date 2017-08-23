@@ -5,12 +5,18 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
 
   @IBOutlet weak var tableView: UITableView!
   @IBOutlet var emptyView: UIView!
-  @IBOutlet var emptyViewLabel: UILabel!
+  @IBOutlet weak var emptyViewLabel: UILabel!
 
+  var searchText: String?
   var searchResults = [PartialMediaItem]() {
     didSet {
       DispatchQueue.main.async {
         if self.searchResults.isEmpty {
+          guard let searchText = self.searchText else {
+            preconditionFailure("no search text set")
+          }
+          self.emptyViewLabel.text = String.localizedStringWithFormat(NSLocalizedString("search.results.empty",
+                                                                                        comment: ""), searchText)
           self.tableView.backgroundView = self.emptyView
           self.tableView.separatorStyle = .none
           self.resultsInLibrary = nil
@@ -33,7 +39,6 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
     super.viewDidLoad()
     tableView.delegate = self
     tableView.dataSource = self
-    emptyViewLabel.text = NSLocalizedString("search.results.empty", comment: "")
 
   }
 

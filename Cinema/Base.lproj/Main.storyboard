@@ -461,6 +461,7 @@
                     <nil key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="emptyView" destination="4PA-MK-gXX" id="hih-MM-yur"/>
+                        <outlet property="emptyViewLabel" destination="3PQ-WE-84x" id="GnL-aW-Xhr"/>
                         <outlet property="tableView" destination="Ktz-Oi-PQD" id="diW-UB-zLj"/>
                     </connections>
                 </viewController>
@@ -475,8 +476,8 @@
                                 <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="EmptySearchResults" translatesAutoresizingMaskIntoConstraints="NO" id="xlf-TA-jBT">
                                     <rect key="frame" x="97" y="0.0" width="90" height="90"/>
                                 </imageView>
-                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No results" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3PQ-WE-84x">
-                                    <rect key="frame" x="103" y="98" width="78" height="20.5"/>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No results for &quot;Test&quot;" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3PQ-WE-84x">
+                                    <rect key="frame" x="65" y="98" width="154.5" height="20.5"/>
                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                     <nil key="highlightedColor"/>
