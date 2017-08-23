@@ -4,10 +4,21 @@ import Dispatch
 class SearchResultsController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
   @IBOutlet weak var tableView: UITableView!
+  @IBOutlet var emptyView: UIView!
+  @IBOutlet var emptyViewLabel: UILabel!
+
   var searchResults = [PartialMediaItem]() {
     didSet {
-      resultsInLibrary = searchResults.map { movie in
-        return !self.library.mediaItems(where: { $0.id == movie.id }).isEmpty
+      if self.searchResults.isEmpty {
+        self.tableView.backgroundView = self.emptyView
+        self.tableView.separatorStyle = .none
+        self.resultsInLibrary = nil
+      } else {
+        self.tableView.backgroundView = nil
+        self.tableView.separatorStyle = .singleLine
+        self.resultsInLibrary = self.searchResults.map { movie in
+          return !self.library.mediaItems(where: { $0.id == movie.id }).isEmpty
+        }
       }
       DispatchQueue.main.async {
         self.tableView.reloadData()
@@ -22,6 +33,8 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
     super.viewDidLoad()
     tableView.delegate = self
     tableView.dataSource = self
+    emptyViewLabel.text = NSLocalizedString("search.results.empty", comment: "")
+
   }
 
   // MARK: - Table view data source

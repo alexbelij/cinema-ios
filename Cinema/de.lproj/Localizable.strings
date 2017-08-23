@@ -50,6 +50,7 @@
 "replaceLibrary.done.failure.text" = "Mediathek wurde nicht ersetzt.";
 "replaceLibrary.done.success.text" = "Mediathek wurde ersetzt.";
 "replaceLibrary.progress.text" = "Mediathek wird ersetzt...";
+"search.results.empty" = "Keine Treffer";
 "sort.by" = "Sortieren nach";
 "sort.by.runtime" = "Laufzeit";
 "sort.by.runtime.lessThanTenMinutes" = "Weniger als 10 Minuten";
