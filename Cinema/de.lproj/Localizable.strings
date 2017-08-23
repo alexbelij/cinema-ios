@@ -40,6 +40,7 @@
 "genre.war" = "Kriegsfilm";
 "genre.western" = "Western";
 "library" = "Mediathek";
+"library.empty" = "Deine Mediathek ist leer.";
 "library.search.placeholder" = "Titel durchsuchen...";
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";
@@ -50,6 +51,7 @@
 "replaceLibrary.done.failure.text" = "Mediathek wurde nicht ersetzt.";
 "replaceLibrary.done.success.text" = "Mediathek wurde ersetzt.";
 "replaceLibrary.progress.text" = "Mediathek wird ersetzt...";
+"search.results.empty" = "Keine Treffer für „%@“";
 "sort.by" = "Sortieren nach";
 "sort.by.runtime" = "Laufzeit";
 "sort.by.runtime.lessThanTenMinutes" = "Weniger als 10 Minuten";

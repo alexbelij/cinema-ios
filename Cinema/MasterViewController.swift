@@ -18,15 +18,19 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
 
   private var sortDescriptor = SortDescriptor.title
 
+  @IBOutlet weak var sortButton: UIBarButtonItem!
+  @IBOutlet var emptyView: UIView!
+  @IBOutlet weak var emptyViewLabel: UILabel!
+
   override func viewDidLoad() {
     fetchLibraryData()
     super.viewDidLoad()
     title = NSLocalizedString("library", comment: "")
+    emptyViewLabel.text = NSLocalizedString("library.empty", comment: "")
     searchController.searchResultsUpdater = self
     searchController.dimsBackgroundDuringPresentation = false
     definesPresentationContext = true
     searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
-    tableView.tableHeaderView = searchController.searchBar
     tableView.sectionIndexBackgroundColor = UIColor.clear
     tableView.setContentOffset(CGPoint(x: 0, y: searchController.searchBar.frame.height), animated: false)
     clearsSelectionOnViewWillAppear = true
@@ -35,6 +39,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
                                            selector: #selector(reloadLibraryData),
                                            name: .didChangeMediaLibraryContent,
                                            object: nil)
+    showEmptyViewIfNecessary()
   }
 
   private func fetchLibraryData() {
@@ -59,9 +64,25 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
     sectionTitles = sectionIndexTitles.map { strategy.sectionTitle(for: $0) }
   }
 
+  private func showEmptyViewIfNecessary() {
+    if self.allItems.isEmpty {
+      self.tableView.backgroundView = emptyView
+      self.tableView.separatorStyle = .none
+      self.searchController.isActive = false
+      self.tableView.tableHeaderView = nil
+      self.sortButton.isEnabled = false
+    } else {
+      self.tableView.backgroundView = nil
+      self.tableView.separatorStyle = .singleLine
+      self.tableView.tableHeaderView = self.searchController.searchBar
+      self.sortButton.isEnabled = true
+    }
+  }
+
   @objc private func reloadLibraryData() {
     fetchLibraryData()
     DispatchQueue.main.async {
+      self.showEmptyViewIfNecessary()
       self.tableView.reloadData()
     }
   }
@@ -171,6 +192,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
   }
 
   public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+    guard !self.allItems.isEmpty else { return nil }
     guard visibleSectionIndexTitles.count > 2 else {
       return nil
     }
