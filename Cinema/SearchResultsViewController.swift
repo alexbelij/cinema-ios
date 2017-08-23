@@ -9,18 +9,18 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
 
   var searchResults = [PartialMediaItem]() {
     didSet {
-      if self.searchResults.isEmpty {
-        self.tableView.backgroundView = self.emptyView
-        self.tableView.separatorStyle = .none
-        self.resultsInLibrary = nil
-      } else {
-        self.tableView.backgroundView = nil
-        self.tableView.separatorStyle = .singleLine
-        self.resultsInLibrary = self.searchResults.map { movie in
-          return !self.library.mediaItems(where: { $0.id == movie.id }).isEmpty
-        }
-      }
       DispatchQueue.main.async {
+        if self.searchResults.isEmpty {
+          self.tableView.backgroundView = self.emptyView
+          self.tableView.separatorStyle = .none
+          self.resultsInLibrary = nil
+        } else {
+          self.tableView.backgroundView = nil
+          self.tableView.separatorStyle = .singleLine
+          self.resultsInLibrary = self.searchResults.map { movie in
+            return !self.library.mediaItems(where: { $0.id == movie.id }).isEmpty
+          }
+        }
         self.tableView.reloadData()
       }
     }
