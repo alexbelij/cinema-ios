@@ -40,6 +40,7 @@
 "genre.war" = "War";
 "genre.western" = "Western";
 "library" = "Library";
+"library.empty" = "Your library is empty.";
 "library.search.placeholder" = "Search titles...";
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";

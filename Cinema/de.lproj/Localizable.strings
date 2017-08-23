@@ -40,6 +40,7 @@
 "genre.war" = "Kriegsfilm";
 "genre.western" = "Western";
 "library" = "Mediathek";
+"library.empty" = "Deine Mediathek ist leer.";
 "library.search.placeholder" = "Titel durchsuchen...";
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";
