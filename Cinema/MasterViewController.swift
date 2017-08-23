@@ -18,6 +18,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
 
   private var sortDescriptor = SortDescriptor.title
 
+  @IBOutlet weak var sortButton: UIBarButtonItem!
   @IBOutlet var emptyView: UIView!
   @IBOutlet weak var emptyViewLabel: UILabel!
 
@@ -69,10 +70,12 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
       self.tableView.separatorStyle = .none
       self.searchController.isActive = false
       self.tableView.tableHeaderView = nil
+      self.sortButton.isEnabled = false
     } else {
       self.tableView.backgroundView = nil
       self.tableView.separatorStyle = .singleLine
       self.tableView.tableHeaderView = self.searchController.searchBar
+      self.sortButton.isEnabled = true
     }
   }
 
