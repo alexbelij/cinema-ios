@@ -92,18 +92,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     switch segue.unwrappedDestination {
       case let detailVC as DetailViewController:
-        if let indexPath = tableView.indexPathForSelectedRow {
-          let selectedItem: MediaItem
-          if searchController.isActive {
-            if searchController.searchBar.text != "" {
-              selectedItem = filteredMediaItems[indexPath.row]
-            } else {
-              selectedItem = allItems[indexPath.row]
-            }
-          } else {
-            selectedItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
-          }
-          detailVC.detailItem = selectedItem
+        if let selectedIndexPath = tableView.indexPathForSelectedRow {
+          detailVC.detailItem = item(for: selectedIndexPath)
           detailVC.movieDb = movieDb
           detailVC.library = library
         }
@@ -132,6 +122,18 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
 
   // MARK: - Table View
 
+  private func item(for indexPath: IndexPath) -> MediaItem {
+    if searchController.isActive {
+      if searchController.searchBar.text == "" {
+        return allItems[indexPath.row]
+      } else {
+        return filteredMediaItems[indexPath.row]
+      }
+    } else {
+      return sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
+    }
+  }
+
   override func numberOfSections(in tableView: UITableView) -> Int {
     return searchController.isActive ? 1 : sectionIndexTitles.count
   }
@@ -156,16 +158,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
     // swiftlint:disable:next force_cast
     let cell = tableView.dequeueReusableCell(withIdentifier: "MovieTableCell", for: indexPath) as! MovieTableCell
 
-    let mediaItem: MediaItem
-    if searchController.isActive {
-      if searchController.searchBar.text != "" {
-        mediaItem = filteredMediaItems[indexPath.row]
-      } else {
-        mediaItem = allItems[indexPath.row]
-      }
-    } else {
-      mediaItem = sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
-    }
+    let mediaItem = item(for: indexPath)
     cell.titleLabel!.text = mediaItem.fullTitle
     cell.runtimeLabel!.text = mediaItem.runtime == nil
         ? NSLocalizedString("details.missing.runtime", comment: "")
