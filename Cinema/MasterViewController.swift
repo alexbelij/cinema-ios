@@ -173,7 +173,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
     cell.runtimeLabel!.text = mediaItem.runtime == nil
         ? NSLocalizedString("details.missing.runtime", comment: "")
         : Utils.formatDuration(mediaItem.runtime!)
-    cell.posterView.image = #imageLiteral(resourceName:"GenericPoster-w92")
+    cell.posterView.image = .genericPosterImage(minWidth: cell.posterView.frame.size.width)
     cell.posterView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
     cell.posterView.layer.borderWidth = 0.5
     DispatchQueue.global(qos: .userInteractive).async {
