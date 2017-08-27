@@ -125,6 +125,16 @@ class PopularMoviesViewController: UICollectionViewController {
     footerView.activityIndicator.stopAnimating()
   }
 
+  override func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
+    guard let cell = collectionView.cellForItem(at: indexPath) as? PosterCell else { return }
+    cell.highlightView.alpha = 0.3
+  }
+
+  override func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
+    guard let cell = collectionView.cellForItem(at: indexPath) as? PosterCell else { return }
+    cell.highlightView.alpha = 0
+  }
+
   override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     self.selectionDelegate?.didSelectSearchResult(items[indexPath.row])
   }
@@ -141,11 +151,20 @@ class PosterCell: UICollectionViewCell {
 
   @IBOutlet weak var posterImageView: UIImageView!
   @IBOutlet weak var titleLabel: UILabel!
+  var highlightView: UIView!
 
   override func awakeFromNib() {
     super.awakeFromNib()
     posterImageView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
     posterImageView.layer.borderWidth = 0.5
+    let posterFrame = posterImageView.frame
+    self.highlightView = UIView(frame: CGRect(x: 0,
+                                              y: 0,
+                                              width: posterFrame.size.width,
+                                              height: posterFrame.size.height))
+    self.highlightView.backgroundColor = .black
+    self.highlightView.alpha = 0
+    self.contentView.addSubview(highlightView)
   }
 }
 
