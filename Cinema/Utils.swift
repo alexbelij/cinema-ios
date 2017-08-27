@@ -82,6 +82,7 @@ extension UIImage {
     let width: CGFloat
     switch minWidth {
       case 0...92:    width =  92
+      case 93...154:  width = 154
       case 155...185: width = 185
       default:        fatalError("poster for min width \(minWidth) not yet added to project")
     }
