@@ -102,6 +102,27 @@ class TMDBSwiftWrapper: MovieDbClient {
     return movie(for: id, language: storeFront.language)?.runtime
   }
 
+  func popularMovies() -> PagingSequence<PartialMediaItem> {
+    return PagingSequence<PartialMediaItem> { page -> [PartialMediaItem]? in
+      var movies = [PartialMediaItem]()
+      self.waitUntil { done in
+        MovieMDB.popular(TMDBSwiftWrapper.apiKey, language: self.effectiveLanguage(), page: page) { _, result in
+          if let result = result {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd"
+            movies = result.map {
+              PartialMediaItem(id: $0.id!,
+                               title: $0.title!,
+                               releaseDate: dateFormatter.date(from: $0.release_date!))
+            }
+          }
+          done()
+        }
+      }
+      return movies.isEmpty ? nil : movies
+    }
+  }
+
   private func waitUntil(_ asyncProcess: (_ done: @escaping () -> Void) -> Void) {
     if Thread.isMainThread {
       fatalError("must not be called on the main thread")

@@ -71,4 +71,8 @@ class CachingMovieDbClient: MovieDbClient {
   func runtime(for id: Int) -> Int? {
     return backingClient.runtime(for: id)
   }
+
+  func popularMovies() -> PagingSequence<PartialMediaItem> {
+    return backingClient.popularMovies()
+  }
 }

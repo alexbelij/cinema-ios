@@ -22,6 +22,8 @@ protocol MovieDbClient {
 
   func runtime(for id: Int) -> Int?
 
+  func popularMovies() -> PagingSequence<PartialMediaItem>
+
 }
 
 enum MovieDbStoreFront {
@@ -56,5 +58,39 @@ public enum PosterSize: String {
       case 343...500: self = .w500
       default:        self = .w780
     }
+  }
+}
+
+struct PagingSequence<PageElement>: Sequence, IteratorProtocol {
+  typealias Element = PageElement
+
+  private let pageGenerator: (Int) -> AnyIterator<PageElement>?
+
+  private var nextPage = 1
+  private var pageElementIterator: AnyIterator<PageElement>?
+
+  init<S>(pageGenerator: @escaping (Int) -> S?) where S: Sequence, S.Iterator.Element == PageElement {
+    self.pageGenerator = { page in
+      guard let generatedPage = pageGenerator(page) else { return nil }
+      return AnyIterator<PageElement>(generatedPage.makeIterator())
+    }
+  }
+
+  private mutating func nextPageElementIterator() -> AnyIterator<PageElement>? {
+    guard let pageElementIterator = pageGenerator(nextPage) else { return nil }
+    defer { self.nextPage += 1 }
+    return AnyIterator { pageElementIterator.next() }
+  }
+
+  mutating func next() -> PageElement? {
+    if pageElementIterator == nil {
+      pageElementIterator = nextPageElementIterator()
+    }
+    guard let iterator = pageElementIterator else { return nil }
+    guard let element = iterator.next() else {
+      pageElementIterator = nil
+      return next()
+    }
+    return element
   }
 }
