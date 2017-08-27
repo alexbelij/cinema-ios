@@ -83,6 +83,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
       case let popularMoviesVC as PopularMoviesViewController:
         popularMoviesVC.library = library
         popularMoviesVC.movieDb = movieDb
+        popularMoviesVC.selectionDelegate = self
       default: fatalError("Unexpected segue: '\(self)' -> '\(segue.destination)'")
     }
   }

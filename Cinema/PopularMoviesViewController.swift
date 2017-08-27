@@ -6,6 +6,7 @@ class PopularMoviesViewController: UICollectionViewController {
   var library: MediaLibrary!
   var movieDb: MovieDbClient!
   var items = [PartialMediaItem]()
+  weak var selectionDelegate: SearchResultsSelectionDelegate?
 
   private let cellPosterSize = PosterSize.init(minWidth: 130)
   private var movieIterator: AnyIterator<PartialMediaItem>!
@@ -122,6 +123,10 @@ class PopularMoviesViewController: UICollectionViewController {
     guard elementKind == UICollectionElementKindSectionFooter,
           let footerView = view as? TmdbFooterView else { return }
     footerView.activityIndicator.stopAnimating()
+  }
+
+  override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    self.selectionDelegate?.didSelectSearchResult(items[indexPath.row])
   }
 
 }
