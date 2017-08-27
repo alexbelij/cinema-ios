@@ -49,12 +49,12 @@ public enum PosterSize: String {
 
   init(minWidth: Int, scaleFactor: CGFloat = UIScreen.main.scale) {
     switch minWidth * Int(scaleFactor) {
-      case 0...92: self = .w92
-      case 93...154: self = .w154
+      case 0...92:    self =  .w92
+      case 93...154:  self = .w154
       case 155...185: self = .w185
       case 186...342: self = .w342
       case 343...500: self = .w500
-      default: self = .w780
+      default:        self = .w780
     }
   }
 }

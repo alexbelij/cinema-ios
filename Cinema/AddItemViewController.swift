@@ -25,6 +25,7 @@ class AddItemViewController: UIViewController {
   open override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     label.text = NSLocalizedString("addItem.progress.text", comment: "")
+    posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
     posterView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
     posterView.layer.borderWidth = 0.5
     posterFetchWorkItem = DispatchWorkItem {
