@@ -6,6 +6,8 @@ import Dispatch
 class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISearchControllerDelegate,
     SearchResultsSelectionDelegate {
 
+  private let searchQueue = DispatchQueue(label: "de.martinbauer.cinema.tmdb-search", qos: .userInitiated)
+  private var currentSearch: DispatchWorkItem?
   private var searchController: UISearchController!
   @IBOutlet weak var searchBarPlaceholder: UIView!
 
@@ -44,10 +46,19 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
   public func updateSearchResults(for searchController: UISearchController) {
     let searchText = searchController.searchBar.text!
     if !searchText.isEmpty {
-      DispatchQueue.global(qos: .userInteractive).async {
-        let searchResults = self.movieDb.searchMovies(searchText: searchText)
-        self.searchResultsController.searchText = searchText
-        self.searchResultsController.searchResults = searchResults
+      DispatchQueue.main.async {
+        if let previousSearch = self.currentSearch {
+          previousSearch.cancel()
+        }
+        self.currentSearch = DispatchWorkItem {
+          let searchResults = self.movieDb.searchMovies(searchText: searchText)
+          self.searchResultsController.searchText = searchText
+          self.searchResultsController.searchResults = searchResults
+          DispatchQueue.main.sync {
+            self.currentSearch = nil
+          }
+        }
+        self.searchQueue.async(execute: self.currentSearch!)
       }
     }
   }
