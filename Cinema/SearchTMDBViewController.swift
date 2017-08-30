@@ -80,6 +80,9 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
           fatalError("item and disk type should have been set")
         }
         addItemVC.add(item: item, as: diskType, to: self.library, movieDb: self.movieDb)
+      case let popularMoviesVC as PopularMoviesViewController:
+        popularMoviesVC.library = library
+        popularMoviesVC.movieDb = movieDb
       default: fatalError("Unexpected segue: '\(self)' -> '\(segue.destination)'")
     }
   }

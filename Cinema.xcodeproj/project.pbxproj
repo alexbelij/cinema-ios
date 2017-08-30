@@ -41,6 +41,7 @@
 		CBB5697F1EA4D6C3005F7BA7 /* SampleLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB5697A1EA4D6C3005F7BA7 /* SampleLibrary.swift */; };
 		CBB569801EA4D6C3005F7BA7 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB5697B1EA4D6C3005F7BA7 /* MediaItem.swift */; };
 		CBB569811EA4D6C3005F7BA7 /* MediaLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB5697C1EA4D6C3005F7BA7 /* MediaLibrary.swift */; };
+		CBC8E1931F38DA1E003EA77A /* PopularMoviesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC8E1921F38DA1E003EA77A /* PopularMoviesViewController.swift */; };
 		CBE5F7B41F1505D30009F02B /* SearchItemAddedCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE5F7B31F1505D30009F02B /* SearchItemAddedCell.swift */; };
 /* End PBXBuildFile section */
 
@@ -84,6 +85,7 @@
 		CBB5697A1EA4D6C3005F7BA7 /* SampleLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleLibrary.swift; sourceTree = "<group>"; };
 		CBB5697B1EA4D6C3005F7BA7 /* MediaItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
 		CBB5697C1EA4D6C3005F7BA7 /* MediaLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaLibrary.swift; sourceTree = "<group>"; };
+		CBC8E1921F38DA1E003EA77A /* PopularMoviesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopularMoviesViewController.swift; sourceTree = "<group>"; };
 		CBE5F7B31F1505D30009F02B /* SearchItemAddedCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchItemAddedCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -152,6 +154,7 @@
 				816BF6385F8102579B1288F3 /* ListOptionsViewController.swift */,
 				CB0547CD1F0937C7007ED2BE /* EditItemTableViewController.swift */,
 				816BF56BD6ED8C73627653DE /* SortDescriptor.swift */,
+				CBC8E1921F38DA1E003EA77A /* PopularMoviesViewController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -360,6 +363,7 @@
 				816BF08147407F0A19973059 /* SearchItemCell.swift in Sources */,
 				816BF2B0528D0B40917F1CB1 /* TableViewSortingStrategy.swift in Sources */,
 				CB0547CE1F0937C7007ED2BE /* EditItemTableViewController.swift in Sources */,
+				CBC8E1931F38DA1E003EA77A /* PopularMoviesViewController.swift in Sources */,
 				816BFEC37D6B7C1E0487B49F /* ListOptionsViewController.swift in Sources */,
 				816BF52DDE5A95DE54EE1FEF /* JSONFormat.swift in Sources */,
 				816BF004BC16AF0115D05088 /* CachingMovieDbClient.swift in Sources */,
