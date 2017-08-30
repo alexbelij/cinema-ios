@@ -9,6 +9,7 @@ class PopularMoviesViewController: UICollectionViewController {
 
   private let cellPosterSize = PosterSize.init(minWidth: 130)
   private var movieIterator: AnyIterator<PartialMediaItem>!
+  private var isFetchingItems = false
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -31,12 +32,26 @@ class PopularMoviesViewController: UICollectionViewController {
   }
 
   private func fetchItems(count: Int) {
+    isFetchingItems = true
+    if let footerView = self.collectionView!.supplementaryView(forElementKind: UICollectionElementKindSectionFooter,
+                                                               at: IndexPath(row: 0,
+                                                                             section: 0)) as? TmdbFooterView {
+      footerView.activityIndicator.startAnimating()
+    }
     DispatchQueue.global(qos: .userInitiated).async {
       for _ in 0..<count {
         guard let item = self.movieIterator.next() else { break }
         DispatchQueue.main.sync {
           self.items.append(item)
           self.collectionView?.insertItems(at: [IndexPath(row: self.items.count - 1, section: 0)])
+        }
+      }
+      DispatchQueue.main.sync {
+        self.isFetchingItems = false
+        if let footerView = self.collectionView!.supplementaryView(forElementKind: UICollectionElementKindSectionFooter,
+                                                                   at: IndexPath(row: 0,
+                                                                                 section: 0)) as? TmdbFooterView {
+          footerView.activityIndicator.stopAnimating()
         }
       }
     }
@@ -89,9 +104,29 @@ class PopularMoviesViewController: UICollectionViewController {
     }
   }
 
+  override func collectionView(_ collectionView: UICollectionView,
+                               willDisplaySupplementaryView view: UICollectionReusableView,
+                               forElementKind elementKind: String,
+                               at indexPath: IndexPath) {
+    guard elementKind == UICollectionElementKindSectionFooter,
+          let footerView = view as? TmdbFooterView else { return }
+    if isFetchingItems {
+      footerView.activityIndicator.startAnimating()
+    }
+  }
+
+  override func collectionView(_ collectionView: UICollectionView,
+                               didEndDisplayingSupplementaryView view: UICollectionReusableView,
+                               forElementOfKind elementKind: String,
+                               at indexPath: IndexPath) {
+    guard elementKind == UICollectionElementKindSectionFooter,
+          let footerView = view as? TmdbFooterView else { return }
+    footerView.activityIndicator.stopAnimating()
+  }
+
 }
 
-// MARK: - Header Views & Cells
+// MARK: - Header Views, Footer Views & Cells
 
 class TitleHeaderView: UICollectionReusableView {
   @IBOutlet weak var label: UILabel!
@@ -107,4 +142,8 @@ class PosterCell: UICollectionViewCell {
     posterImageView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
     posterImageView.layer.borderWidth = 0.5
   }
+}
+
+class TmdbFooterView: UICollectionReusableView {
+  @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
 }
