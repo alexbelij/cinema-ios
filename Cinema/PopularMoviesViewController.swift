@@ -12,6 +12,9 @@ class PopularMoviesViewController: UICollectionViewController {
   private var movieIterator: AnyIterator<PartialMediaItem>!
   private var isFetchingItems = false
 
+  @IBOutlet var emptyView: UIView!
+  @IBOutlet weak var emptyViewLabel: UILabel!
+
   override func viewDidLoad() {
     super.viewDidLoad()
     guard let flowLayout = self.collectionView?.collectionViewLayout as? UICollectionViewFlowLayout else {
@@ -23,6 +26,7 @@ class PopularMoviesViewController: UICollectionViewController {
     let spacing = (contentWidth - totalCellWidth) / 3.5
     flowLayout.minimumInteritemSpacing = spacing
     flowLayout.sectionInset = UIEdgeInsets(top: 10, left: spacing, bottom: 10, right: spacing)
+    emptyViewLabel.text = NSLocalizedString("popularMovies.empty", comment: "")
 
     self.movieIterator = AnyIterator(self.movieDb.popularMovies().lazy.filter(isNotInLibrary).makeIterator())
     fetchItems(count: 10)
@@ -54,7 +58,12 @@ class PopularMoviesViewController: UICollectionViewController {
                                                                                  section: 0)) as? TmdbFooterView {
           footerView.activityIndicator.stopAnimating()
           DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
-            footerView.imageView.isHidden = false
+            if self.items.isEmpty {
+              self.collectionView!.backgroundView = self.emptyView
+              footerView.imageView.isHidden = true
+            } else {
+              footerView.imageView.isHidden = false
+            }
           }
         }
       }

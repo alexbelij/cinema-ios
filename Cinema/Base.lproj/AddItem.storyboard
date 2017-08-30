@@ -364,8 +364,30 @@
                             <outlet property="delegate" destination="Ima-4S-hbd" id="g7K-kP-2H7"/>
                         </connections>
                     </collectionView>
+                    <connections>
+                        <outlet property="emptyView" destination="gfi-vs-moq" id="1AO-5V-mSv"/>
+                        <outlet property="emptyViewLabel" destination="Azn-FY-1tM" id="uTg-rj-CsY"/>
+                    </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bXn-Zh-be0" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <view contentMode="scaleToFill" id="gfi-vs-moq">
+                    <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="There are no popular movies at the moment. Please, come back later." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Azn-FY-1tM">
+                            <rect key="frame" x="8" y="33.5" width="224" height="61"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstItem="Azn-FY-1tM" firstAttribute="centerY" secondItem="gfi-vs-moq" secondAttribute="centerY" id="UBn-eS-7HW"/>
+                        <constraint firstAttribute="trailing" secondItem="Azn-FY-1tM" secondAttribute="trailing" constant="8" id="gds-Hb-dTI"/>
+                        <constraint firstItem="Azn-FY-1tM" firstAttribute="leading" secondItem="gfi-vs-moq" secondAttribute="leading" constant="8" id="pgM-jW-5wd"/>
+                    </constraints>
+                </view>
             </objects>
             <point key="canvasLocation" x="1853.5999999999999" y="-157.87106446776613"/>
         </scene>
