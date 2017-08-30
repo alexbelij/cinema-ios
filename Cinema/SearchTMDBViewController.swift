@@ -10,6 +10,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
   private var currentSearch: DispatchWorkItem?
   private var searchController: UISearchController!
   @IBOutlet weak var searchBarPlaceholder: UIView!
+  private var popularMoviesVC: PopularMoviesViewController!
 
   private var searchResultsController: SearchResultsController!
   private var selectedSearchResult: PartialMediaItem?
@@ -17,6 +18,8 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
 
   var library: MediaLibrary!
   var movieDb: MovieDbClient!
+
+  private var removedItem: PartialMediaItem?
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -35,6 +38,16 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
     searchController.searchBar.placeholder = NSLocalizedString("addItem.search.placeholder", comment: "")
     searchBarPlaceholder.addSubview(searchController.searchBar)
     title = NSLocalizedString("addItem.title", comment: "")
+  }
+
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    if let removedItem = self.removedItem {
+      DispatchQueue.main.async {
+        self.popularMoviesVC.removeItem(removedItem)
+      }
+      self.removedItem = nil
+    }
   }
 
   func didPresentSearchController(_ searchController: UISearchController) {
@@ -71,11 +84,13 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
                                   preferredStyle: .alert)
     self.selectedSearchResult = searchResult
     alert.addAction(UIAlertAction(title: NSLocalizedString("mediaItem.disk.dvd", comment: ""), style: .default) { _ in
+      self.removedItem = searchResult
       self.selectedDiskType = .dvd
       self.performSegue(withIdentifier: "addItem", sender: self)
     })
     alert.addAction(UIAlertAction(title: NSLocalizedString("mediaItem.disk.bluRay", comment: ""),
                                   style: .default) { _ in
+      self.removedItem = searchResult
       self.selectedDiskType = .bluRay
       self.performSegue(withIdentifier: "addItem", sender: self)
     })
@@ -91,6 +106,11 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
           fatalError("item and disk type should have been set")
         }
         addItemVC.add(item: item, as: diskType, to: self.library, movieDb: self.movieDb)
+      case let popularMoviesVC as PopularMoviesViewController:
+        self.popularMoviesVC = popularMoviesVC
+        popularMoviesVC.library = library
+        popularMoviesVC.movieDb = movieDb
+        popularMoviesVC.selectionDelegate = self
       default: fatalError("Unexpected segue: '\(self)' -> '\(segue.destination)'")
     }
   }

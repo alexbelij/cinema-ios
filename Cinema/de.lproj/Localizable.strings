@@ -48,6 +48,8 @@
 "no" = "Nein";
 "ok" = "OK";
 "options" = "Optionen";
+"popularMovies" = "Beliebte Filme";
+"popularMovies.empty" = "Zurzeit gibt es keine beliebten Filme. Versuch es später nochmal.";
 "replaceLibrary.alert.title" = "Wollen Sie wirklich die Mediathek ersetzen?";
 "replaceLibrary.done.failure.text" = "Mediathek wurde nicht ersetzt.";
 "replaceLibrary.done.success.text" = "Mediathek wurde ersetzt.";

@@ -48,6 +48,8 @@
 "no" = "No";
 "ok" = "OK";
 "options" = "Options";
+"popularMovies" = "Popular movies";
+"popularMovies.empty" = "There are no popular movies at the moment. Please, come back later.";
 "replaceLibrary.alert.title" = "Do you really want to replace your library?";
 "replaceLibrary.done.failure.text" = "Library was not replaced.";
 "replaceLibrary.done.success.text" = "Library was replaced.";

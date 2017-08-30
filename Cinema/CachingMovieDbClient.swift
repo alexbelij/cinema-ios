@@ -11,7 +11,7 @@ class CachingMovieDbClient: MovieDbClient {
     self.backingClient = backingClient
     posterCache = SpecializedCache<UIImage>(name: "PosterCache",
                                             config: Cache.Config(expiry: .never,
-                                                                 maxDiskSize: 30 * 1000 * 1000)) // about 1000 movies
+                                                                 maxDiskSize: 50_000_000))
   }
 
   func tryConnect() {
@@ -41,19 +41,15 @@ class CachingMovieDbClient: MovieDbClient {
   }
 
   func poster(for id: Int, size: PosterSize) -> UIImage? {
-    switch size {
-      case .w92:
-        let key = String(id)
-        if let poster = posterCache.object(forKey: key) {
-          return poster
-        }
-        if let poster = backingClient.poster(for: id, size: size) {
-          try? posterCache.addObject(poster, forKey: key)
-          return poster
-        }
-        return nil
-      default: return backingClient.poster(for: id, size: size)
+    let key = "\(id)-\(size)"
+    if let poster = posterCache.object(forKey: key) {
+      return poster
     }
+    if let poster = backingClient.poster(for: id, size: size) {
+      try? posterCache.addObject(poster, forKey: key)
+      return poster
+    }
+    return nil
   }
 
   func overview(for id: Int) -> String? {
@@ -74,5 +70,9 @@ class CachingMovieDbClient: MovieDbClient {
 
   func runtime(for id: Int) -> Int? {
     return backingClient.runtime(for: id)
+  }
+
+  func popularMovies() -> PagingSequence<PartialMediaItem> {
+    return backingClient.popularMovies()
   }
 }
