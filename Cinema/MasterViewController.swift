@@ -107,9 +107,6 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
           detailVC.movieDb = movieDb
           detailVC.library = library
         }
-      case let searchVC as SearchTMDBViewController:
-        searchVC.library = library
-        searchVC.movieDb = movieDb
       case let listOptionsVC as ListOptionsViewController:
         listOptionsVC.selectedDescriptor = self.sortDescriptor
         listOptionsVC.delegate = self

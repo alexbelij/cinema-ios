@@ -1,3 +1,4 @@
+"addItem.title" = "Add Movie";
 "addItem.alert.howToAdd.title" = "How do you want to add the movie?";
 "addItem.done.failure.text" = "Update failed.";
 "addItem.done.success.messageFormat" = "Added %@.";

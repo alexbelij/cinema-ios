@@ -32,9 +32,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let masterViewController = mainNavController.topViewController! as! MasterViewController
     masterViewController.library = library
     masterViewController.movieDb = movieDb
+
+    let addItemNavController = UIStoryboard(name: "AddItem", bundle: nil).instantiateInitialViewController()
+    as! UINavigationController
+    let searchController = addItemNavController.topViewController as! SearchTMDBViewController
+    searchController.library = library
+    searchController.movieDb = movieDb
     // swiftlint:enable force_cast
 
-    return mainNavController
+    mainNavController.tabBarItem = UITabBarItem(title: NSLocalizedString("library", comment: ""),
+                                                image: #imageLiteral(resourceName:"Tab-Library-normal"),
+                                                selectedImage: #imageLiteral(resourceName:"Tab-Library-selected"))
+    addItemNavController.tabBarItem = UITabBarItem(title: NSLocalizedString("addItem.title", comment: ""),
+                                                   image: #imageLiteral(resourceName:"Tab-AddItem-normal"),
+                                                   selectedImage: #imageLiteral(resourceName:"Tab-AddItem-selected"))
+    let tabBarController = UITabBarController()
+    tabBarController.viewControllers = [mainNavController, addItemNavController]
+    return tabBarController
   }
 
   public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {

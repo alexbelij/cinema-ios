@@ -1,3 +1,4 @@
+"addItem.title" = "Film hinzufügen";
 "addItem.alert.howToAdd.title" = "Wie willst du den Film hinzufügen?";
 "addItem.done.failure.text" = "Aktualisierung fehlgeschlagen.";
 "addItem.done.success.messageFormat" = "%@ wurde hinzugefügt.";
