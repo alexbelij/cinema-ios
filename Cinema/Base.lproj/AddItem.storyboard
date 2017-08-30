@@ -342,7 +342,7 @@
                                         <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="doY-JZ-w2m">
                                             <rect key="frame" x="177.5" y="0.0" width="20" height="20"/>
                                         </activityIndicatorView>
-                                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="TMDB" translatesAutoresizingMaskIntoConstraints="NO" id="c8y-sJ-WAw">
+                                        <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="TMDB" translatesAutoresizingMaskIntoConstraints="NO" id="c8y-sJ-WAw">
                                             <rect key="frame" x="137" y="28" width="101" height="52"/>
                                         </imageView>
                                     </subviews>
@@ -356,6 +356,7 @@
                             </constraints>
                             <connections>
                                 <outlet property="activityIndicator" destination="doY-JZ-w2m" id="45j-HF-G9G"/>
+                                <outlet property="imageView" destination="c8y-sJ-WAw" id="NYq-Re-LBE"/>
                             </connections>
                         </collectionReusableView>
                         <connections>

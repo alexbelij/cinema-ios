@@ -53,6 +53,9 @@ class PopularMoviesViewController: UICollectionViewController {
                                                                    at: IndexPath(row: 0,
                                                                                  section: 0)) as? TmdbFooterView {
           footerView.activityIndicator.stopAnimating()
+          DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
+            footerView.imageView.isHidden = false
+          }
         }
       }
     }
@@ -177,4 +180,5 @@ class PosterCell: UICollectionViewCell {
 
 class TmdbFooterView: UICollectionReusableView {
   @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+  @IBOutlet weak var imageView: UIImageView!
 }
