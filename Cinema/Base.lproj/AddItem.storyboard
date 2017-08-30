@@ -272,13 +272,13 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="egB-DD-Wor">
                             <size key="itemSize" width="130" height="225"/>
-                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="headerReferenceSize" width="50" height="40"/>
+                            <size key="footerReferenceSize" width="50" height="40"/>
                             <inset key="sectionInset" minX="10" minY="10" maxX="10" maxY="10"/>
                         </collectionViewFlowLayout>
                         <cells>
                             <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PosterCell" id="XXR-x3-I0h" customClass="PosterCell" customModule="Cinema" customModuleProvider="target">
-                                <rect key="frame" x="10" y="10" width="130" height="225"/>
+                                <rect key="frame" x="10" y="50" width="130" height="225"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
                                     <rect key="frame" x="0.0" y="0.0" width="130" height="225"/>
@@ -313,6 +313,40 @@
                                 </connections>
                             </collectionViewCell>
                         </cells>
+                        <collectionReusableView key="sectionHeaderView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="TitleHeaderView" id="tEd-mm-g6N" customClass="TitleHeaderView" customModule="Cinema" customModuleProvider="target">
+                            <rect key="frame" x="0.0" y="0.0" width="375" height="40"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Popular movies" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PL2-vX-KmH">
+                                    <rect key="frame" x="8" y="6.5" width="157.5" height="27"/>
+                                    <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="22"/>
+                                    <nil key="textColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                            <constraints>
+                                <constraint firstItem="PL2-vX-KmH" firstAttribute="centerY" secondItem="tEd-mm-g6N" secondAttribute="centerY" id="BTq-mr-oPL"/>
+                                <constraint firstItem="PL2-vX-KmH" firstAttribute="leading" secondItem="tEd-mm-g6N" secondAttribute="leadingMargin" id="INM-UO-KUg"/>
+                            </constraints>
+                            <connections>
+                                <outlet property="label" destination="PL2-vX-KmH" id="Qj2-35-fbj"/>
+                            </connections>
+                        </collectionReusableView>
+                        <collectionReusableView key="sectionFooterView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="TmdbFooterView" id="Fc4-1B-q4m">
+                            <rect key="frame" x="0.0" y="285" width="375" height="40"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                            <subviews>
+                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="TMDB" translatesAutoresizingMaskIntoConstraints="NO" id="c8y-sJ-WAw">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="40"/>
+                                </imageView>
+                            </subviews>
+                            <constraints>
+                                <constraint firstItem="c8y-sJ-WAw" firstAttribute="top" secondItem="Fc4-1B-q4m" secondAttribute="top" id="8cL-7c-iq1"/>
+                                <constraint firstItem="c8y-sJ-WAw" firstAttribute="leading" secondItem="Fc4-1B-q4m" secondAttribute="leading" id="cyG-S1-HhR"/>
+                                <constraint firstAttribute="trailing" secondItem="c8y-sJ-WAw" secondAttribute="trailing" id="qLc-iv-spp"/>
+                                <constraint firstAttribute="bottom" secondItem="c8y-sJ-WAw" secondAttribute="bottom" id="ts1-uE-JyR"/>
+                            </constraints>
+                        </collectionReusableView>
                         <connections>
                             <outlet property="dataSource" destination="Ima-4S-hbd" id="TNw-57-yS3"/>
                             <outlet property="delegate" destination="Ima-4S-hbd" id="g7K-kP-2H7"/>
@@ -327,5 +361,6 @@
     <resources>
         <image name="EmptySearchResults" width="90" height="90"/>
         <image name="GenericPoster-w185" width="185" height="276"/>
+        <image name="TMDB" width="101" height="40"/>
     </resources>
 </document>

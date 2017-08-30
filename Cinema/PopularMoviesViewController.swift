@@ -57,9 +57,35 @@ class PopularMoviesViewController: UICollectionViewController {
     return cell
   }
 
+  // MARK: UICollectionViewDelegate
+
+  override func collectionView(_ collectionView: UICollectionView,
+                               viewForSupplementaryElementOfKind kind: String,
+                               at indexPath: IndexPath) -> UICollectionReusableView {
+    switch kind {
+      case UICollectionElementKindSectionHeader:
+        let reusableView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+                                                                           withReuseIdentifier: "TitleHeaderView",
+                                                                           // swiftlint:disable:next force_cast
+                                                                           for: indexPath) as! TitleHeaderView
+        reusableView.label.text = NSLocalizedString("popularMovies", comment: "")
+        return reusableView
+      case UICollectionElementKindSectionFooter:
+        return collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+                                                               withReuseIdentifier: "TmdbFooterView",
+                                                               for: indexPath)
+      default:
+        fatalError("Unexpected kind \(kind)")
+    }
+  }
+
 }
 
-// MARK: - Cells
+// MARK: - Header Views & Cells
+
+class TitleHeaderView: UICollectionReusableView {
+  @IBOutlet weak var label: UILabel!
+}
 
 class PosterCell: UICollectionViewCell {
 
