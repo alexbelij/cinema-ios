@@ -12,6 +12,16 @@ class PopularMoviesViewController: UICollectionViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    guard let flowLayout = self.collectionView?.collectionViewLayout as? UICollectionViewFlowLayout else {
+      fatalError("unexpected collection view layout")
+    }
+    let totalCellWidth = flowLayout.itemSize.width * 2
+    let contentWidth = collectionView!.frame.size.width
+                       - collectionView!.contentInset.left - collectionView!.contentInset.right
+    let spacing = (contentWidth - totalCellWidth) / 3.5
+    flowLayout.minimumInteritemSpacing = spacing
+    flowLayout.sectionInset = UIEdgeInsets(top: 10, left: spacing, bottom: 10, right: spacing)
+
     self.movieIterator = AnyIterator(self.movieDb.popularMovies().lazy.filter(isNotInLibrary).makeIterator())
     fetchItems(count: 10)
   }
