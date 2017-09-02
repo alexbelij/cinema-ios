@@ -44,6 +44,7 @@ struct MediaItem: Equatable, Hashable {
     guard lhs.runtime == rhs.runtime else { return false }
     guard lhs.releaseDate == rhs.releaseDate else { return false }
     guard lhs.diskType == rhs.diskType else { return false }
+    guard lhs.genreIds == rhs.genreIds else { return false }
     return true
   }
 
