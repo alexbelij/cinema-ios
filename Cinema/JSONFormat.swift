@@ -52,9 +52,9 @@ class JSONFormat: DataFormat {
     }
     let jsonDict: [String: JSON] = [
       .schemaVersionKey: JSON(SchemaVersion.v2_0_0.versionString),
-      .payloadKey: JSON(array: payload)
+      .payloadKey: JSON(payload)
     ]
-    return try JSON(dictionary: jsonDict).rawData(options: .prettyPrinted)
+    return try JSON(jsonDict).rawData(options: .prettyPrinted)
   }
 
   private func deserializeVersion2_0_0(from json: JSON) throws -> [MediaItem] {
@@ -108,7 +108,7 @@ class JSONFormat: DataFormat {
       }
       return JSON(dictionary)
     }
-    return try JSON(array: jsonArray).rawData(options: .prettyPrinted)
+    return try JSON(jsonArray).rawData(options: .prettyPrinted)
   }
 
   private func deserializeVersion1_0_0(from json: JSON) throws -> [MediaItem] {
