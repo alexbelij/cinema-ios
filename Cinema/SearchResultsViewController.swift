@@ -82,3 +82,18 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
 protocol SearchResultsSelectionDelegate: class {
   func didSelectSearchResult(_ searchResult: PartialMediaItem)
 }
+
+class SearchItemCell: UITableViewCell {
+  @IBOutlet weak var titleLabel: UILabel!
+  @IBOutlet weak var yearLabel: UILabel!
+}
+
+class SearchItemAddedCell: UITableViewCell {
+
+  @IBOutlet weak var titleLabel: UILabel!
+
+  override func awakeFromNib() {
+    super.awakeFromNib()
+    self.tintColor = #colorLiteral(red: 0.495413959, green: 0.495413959, blue: 0.495413959, alpha: 1)
+  }
+}
