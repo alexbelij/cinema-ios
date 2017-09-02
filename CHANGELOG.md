@@ -2,6 +2,29 @@
 
 All notable changes to the project will be documented in this file.
 
+## unreleased
+
+### Added
+- popular movies
+- new persistent data schema
+- full release data replaces release year
+- tab bar
+- launch screen
+- empty state views
+
+### Changed
+- user data is stored in documents folder
+- genres are stored by id instead of name
+- runtime and release date are optional
+- updated icons
+
+### Fixed
+- crash, when tapping on a movie while searching with empty search bar
+- invalid property values are accepted
+- movie list stays scrolled down when sorting changed
+- posters with different aspect ratio are displayed incorrectly
+- fast typing while searching leads to unexpected results
+
 ## v1.2 - 2017-08-04
 
 ### Added
