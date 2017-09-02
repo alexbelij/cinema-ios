@@ -1,5 +1,5 @@
-import UIKit
 import Dispatch
+import UIKit
 
 class MasterViewController: UITableViewController, UISearchResultsUpdating, ListOptionsViewControllerDelegate {
 
@@ -18,9 +18,9 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
 
   private var sortDescriptor = SortDescriptor.title
 
-  @IBOutlet weak var sortButton: UIBarButtonItem!
-  @IBOutlet var emptyView: UIView!
-  @IBOutlet weak var emptyViewLabel: UILabel!
+  @IBOutlet private weak var sortButton: UIBarButtonItem!
+  @IBOutlet private var emptyView: UIView!
+  @IBOutlet private weak var emptyViewLabel: UILabel!
 
   override func viewDidLoad() {
     fetchLibraryData()
@@ -44,7 +44,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
 
   private func fetchLibraryData() {
     let strategy = sortDescriptor.tableViewStrategy
-    allItems = library.mediaItems(where: { _ in true })
+    allItems = library.mediaItems { _ in true }
     allItems.sort(by: SortDescriptor.title.tableViewStrategy.itemSorting)
     sectionItems = [String: [MediaItem]]()
     for item in allItems {
@@ -79,7 +79,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
     }
   }
 
-  @objc private func reloadLibraryData() {
+  @objc
+  private func reloadLibraryData() {
     fetchLibraryData()
     DispatchQueue.main.async {
       self.showEmptyViewIfNecessary()
@@ -164,7 +165,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
         ? NSLocalizedString("details.missing.runtime", comment: "")
         : Utils.formatDuration(mediaItem.runtime!)
     cell.posterView.image = .genericPosterImage(minWidth: cell.posterView.frame.size.width)
-    cell.posterView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
+    cell.posterView.layer.borderColor = #colorLiteral(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.2).cgColor
     cell.posterView.layer.borderWidth = 0.5
     DispatchQueue.global(qos: .userInteractive).async {
       if let poster = self.movieDb.poster(for: mediaItem.id, size: PosterSize(minWidth: 46)) {
@@ -203,7 +204,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
 
   public func updateSearchResults(for searchController: UISearchController) {
     let lowercasedSearchText = searchController.searchBar.text!.lowercased()
-    filteredMediaItems = allItems.filter({ $0.fullTitle.lowercased().contains(lowercasedSearchText) })
+    filteredMediaItems = allItems.filter { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
 
     tableView.reloadData()
   }
@@ -211,7 +212,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
 }
 
 class MovieTableCell: UITableViewCell {
-  @IBOutlet weak var posterView: UIImageView!
-  @IBOutlet weak var titleLabel: UILabel!
-  @IBOutlet weak var runtimeLabel: UILabel!
+  @IBOutlet fileprivate weak var posterView: UIImageView!
+  @IBOutlet fileprivate weak var titleLabel: UILabel!
+  @IBOutlet fileprivate weak var runtimeLabel: UILabel!
 }

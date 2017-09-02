@@ -1,11 +1,11 @@
-import UIKit
 import Dispatch
+import UIKit
 
 class SearchResultsController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
-  @IBOutlet weak var tableView: UITableView!
-  @IBOutlet var emptyView: UIView!
-  @IBOutlet weak var emptyViewLabel: UILabel!
+  @IBOutlet private weak var tableView: UITableView!
+  @IBOutlet private var emptyView: UIView!
+  @IBOutlet private weak var emptyViewLabel: UILabel!
 
   var searchText: String?
   var searchResults = [PartialMediaItem]() {
@@ -24,7 +24,7 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
           self.tableView.backgroundView = nil
           self.tableView.separatorStyle = .singleLine
           self.resultsInLibrary = self.searchResults.map { movie in
-            return !self.library.mediaItems(where: { $0.id == movie.id }).isEmpty
+            !self.library.mediaItems { $0.id == movie.id }.isEmpty
           }
         }
         self.tableView.reloadData()
@@ -84,13 +84,13 @@ protocol SearchResultsSelectionDelegate: class {
 }
 
 class SearchItemCell: UITableViewCell {
-  @IBOutlet weak var titleLabel: UILabel!
-  @IBOutlet weak var yearLabel: UILabel!
+  @IBOutlet fileprivate weak var titleLabel: UILabel!
+  @IBOutlet fileprivate weak var yearLabel: UILabel!
 }
 
 class SearchItemAddedCell: UITableViewCell {
 
-  @IBOutlet weak var titleLabel: UILabel!
+  @IBOutlet fileprivate weak var titleLabel: UILabel!
 
   override func awakeFromNib() {
     super.awakeFromNib()

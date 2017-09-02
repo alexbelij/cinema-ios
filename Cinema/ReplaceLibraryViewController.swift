@@ -1,16 +1,16 @@
-import UIKit
 import Dispatch
+import UIKit
 
 class ReplaceLibraryViewController: UIViewController {
 
   private var library: MediaLibrary!
   private var newLibraryUrl: URL!
 
-  @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
-  @IBOutlet weak var label: UILabel!
-  @IBOutlet weak var errorLabel: UILabel!
-  @IBOutlet weak var closeButton: UIButton!
-  @IBOutlet weak var centeringConstraint: NSLayoutConstraint!
+  @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
+  @IBOutlet private weak var label: UILabel!
+  @IBOutlet private weak var errorLabel: UILabel!
+  @IBOutlet private weak var closeButton: UIButton!
+  @IBOutlet private weak var centeringConstraint: NSLayoutConstraint!
 
   func replaceLibraryContent(of library: MediaLibrary, withContentOf url: URL) {
     self.library = library

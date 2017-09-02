@@ -43,7 +43,10 @@ enum MovieDbStoreFront {
 }
 
 enum MovieDbLanguage: String {
-  case en, de
+  // swiftlint:disable identifier_name
+  case en
+  case de
+  // swiftlint:enable identifier_name
 }
 
 public enum PosterSize: String {

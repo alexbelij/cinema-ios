@@ -1,6 +1,6 @@
-import UIKit.UIImage
 import Dispatch
 import TMDBSwift
+import UIKit.UIImage
 
 class TMDBSwiftWrapper: MovieDbClient {
 

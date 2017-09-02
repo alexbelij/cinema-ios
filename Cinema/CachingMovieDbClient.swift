@@ -1,6 +1,6 @@
+import Cache
 import Foundation
 import UIKit
-import Cache
 
 class CachingMovieDbClient: MovieDbClient {
 

@@ -1,7 +1,6 @@
-import Foundation
-
-import UIKit
 import Dispatch
+import Foundation
+import UIKit
 
 class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISearchControllerDelegate,
     SearchResultsSelectionDelegate {
@@ -9,7 +8,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
   private let searchQueue = DispatchQueue(label: "de.martinbauer.cinema.tmdb-search", qos: .userInitiated)
   private var currentSearch: DispatchWorkItem?
   private var searchController: UISearchController!
-  @IBOutlet weak var searchBarPlaceholder: UIView!
+  @IBOutlet private weak var searchBarPlaceholder: UIView!
   private var popularMoviesVC: PopularMoviesViewController!
 
   private var searchResultsController: SearchResultsController!
@@ -55,6 +54,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
   }
 
   override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
     searchController.isActive = false
   }
 

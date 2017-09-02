@@ -5,9 +5,9 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
   var item: MediaItem!
   var library: MediaLibrary!
 
-  @IBOutlet weak var titleTextField: UITextField!
-  @IBOutlet weak var subtitleTextField: UITextField!
-  @IBOutlet weak var deleteMovieButton: UIButton!
+  @IBOutlet private weak var titleTextField: UITextField!
+  @IBOutlet private weak var subtitleTextField: UITextField!
+  @IBOutlet private weak var deleteMovieButton: UIButton!
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -31,8 +31,9 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
                                             message: nil,
                                             preferredStyle: .actionSheet)
     alertController.addAction(UIAlertAction(title: NSLocalizedString("edit.deleteMovie", comment: ""),
-                                            style: .destructive,
-                                            handler: { _ in self.deleteItem() }))
+                                            style: .destructive) { _ in
+      self.deleteItem()
+    })
     alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     self.present(alertController, animated: true)
   }
@@ -100,10 +101,10 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
                                             message: nil,
                                             preferredStyle: .alert)
     alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
-    alertController.addAction(UIAlertAction(title: NSLocalizedString("discard", comment: ""), style: .destructive,
-                                            handler: { _ in
-                                              self.dismiss(animated: true)
-                                            }))
+    alertController.addAction(UIAlertAction(title: NSLocalizedString("discard", comment: ""),
+                                            style: .destructive) { _ in
+      self.dismiss(animated: true)
+    })
     self.present(alertController, animated: true)
   }
 

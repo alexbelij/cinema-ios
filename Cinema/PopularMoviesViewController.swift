@@ -1,5 +1,5 @@
-import UIKit
 import Dispatch
+import UIKit
 
 class PopularMoviesViewController: UICollectionViewController {
 
@@ -8,12 +8,12 @@ class PopularMoviesViewController: UICollectionViewController {
   var items = [PartialMediaItem]()
   weak var selectionDelegate: SearchResultsSelectionDelegate?
 
-  private let cellPosterSize = PosterSize.init(minWidth: 130)
+  private let cellPosterSize = PosterSize(minWidth: 130)
   private var movieIterator: AnyIterator<PartialMediaItem>!
   private var isFetchingItems = false
 
-  @IBOutlet var emptyView: UIView!
-  @IBOutlet weak var emptyViewLabel: UILabel!
+  @IBOutlet private var emptyView: UIView!
+  @IBOutlet private weak var emptyViewLabel: UILabel!
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -163,18 +163,18 @@ class PopularMoviesViewController: UICollectionViewController {
 // MARK: - Header Views, Footer Views & Cells
 
 class TitleHeaderView: UICollectionReusableView {
-  @IBOutlet weak var label: UILabel!
+  @IBOutlet fileprivate weak var label: UILabel!
 }
 
 class PosterCell: UICollectionViewCell {
 
-  @IBOutlet weak var posterImageView: UIImageView!
-  @IBOutlet weak var titleLabel: UILabel!
+  @IBOutlet fileprivate weak var posterImageView: UIImageView!
+  @IBOutlet fileprivate weak var titleLabel: UILabel!
   var highlightView: UIView!
 
   override func awakeFromNib() {
     super.awakeFromNib()
-    posterImageView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
+    posterImageView.layer.borderColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
     posterImageView.layer.borderWidth = 0.5
     let posterFrame = posterImageView.frame
     self.highlightView = UIView(frame: CGRect(x: 0,
@@ -188,6 +188,6 @@ class PosterCell: UICollectionViewCell {
 }
 
 class TmdbFooterView: UICollectionReusableView {
-  @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
-  @IBOutlet weak var imageView: UIImageView!
+  @IBOutlet fileprivate weak var activityIndicator: UIActivityIndicatorView!
+  @IBOutlet fileprivate weak var imageView: UIImageView!
 }

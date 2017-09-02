@@ -50,7 +50,7 @@ class KeyedArchivalFormat: DataFormat {
       return dictionary
     }
     let data = NSMutableData()
-    let archiver = NSKeyedArchiver.init(forWritingWith: data)
+    let archiver = NSKeyedArchiver(forWritingWith: data)
     archiver.encode(SchemaVersion.v2_0_0.versionString, forKey: .schemaVersionKey)
     archiver.encode(payload, forKey: .payloadKey)
     archiver.finishEncoding()
@@ -58,7 +58,7 @@ class KeyedArchivalFormat: DataFormat {
   }
 
   private func deserializeVersion2_0_0(from data: Data) throws -> [MediaItem] {
-    let unarchiver = NSKeyedUnarchiver.init(forReadingWith: data)
+    let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
     guard let array = unarchiver.decodeObject(forKey: .payloadKey) as? [[String: Any]] else {
       throw DataFormatError.invalidDataFormat
     }

@@ -9,15 +9,15 @@ class DetailViewController: UIViewController {
     }
   }
 
-  @IBOutlet weak var titleLabel: UILabel!
-  @IBOutlet weak var subtitleLabel: UILabel!
-  @IBOutlet weak var imageView: UIImageView!
-  @IBOutlet weak var genreLabel: UILabel!
-  @IBOutlet weak var runtimeLabel: UILabel!
-  @IBOutlet weak var releaseDateLabel: UILabel!
-  @IBOutlet weak var certificationLabel: UILabel!
-  @IBOutlet weak var diskLabel: UILabel!
-  @IBOutlet weak var textView: UITextView!
+  @IBOutlet private weak var titleLabel: UILabel!
+  @IBOutlet private weak var subtitleLabel: UILabel!
+  @IBOutlet private weak var imageView: UIImageView!
+  @IBOutlet private weak var genreLabel: UILabel!
+  @IBOutlet private weak var runtimeLabel: UILabel!
+  @IBOutlet private weak var releaseDateLabel: UILabel!
+  @IBOutlet private weak var certificationLabel: UILabel!
+  @IBOutlet private weak var diskLabel: UILabel!
+  @IBOutlet private weak var textView: UITextView!
 
   var movieDb: MovieDbClient!
   var library: MediaLibrary!
@@ -113,7 +113,7 @@ class DetailViewController: UIViewController {
   override func viewDidLoad() {
     UIApplication.shared.isNetworkActivityIndicatorVisible = true
     imageView.image = .genericPosterImage(minWidth: imageView.frame.size.width)
-    imageView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
+    imageView.layer.borderColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
     imageView.layer.borderWidth = 0.5
     genreLabel?.text = ""
     runtimeLabel?.text = ""
@@ -129,9 +129,10 @@ class DetailViewController: UIViewController {
                                            object: nil)
   }
 
-  @objc private func reloadDetailItem() {
+  @objc
+  private func reloadDetailItem() {
     DispatchQueue.main.async {
-      let items = self.library.mediaItems(where: { $0.id == self.detailItem!.id })
+      let items = self.library.mediaItems { $0.id == self.detailItem!.id }
       if let updatedItem = items.first {
         self.detailItem = updatedItem
       } else {

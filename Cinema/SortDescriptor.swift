@@ -84,7 +84,7 @@ private struct RuntimeSortingStrategy: TableViewSortingStrategy {
     if min == max {
       return Array(sections.dropLast())
     } else {
-      return Array(stride(from: min, through: max, by: 10)).map({ String($0) })
+      return Array(stride(from: min, through: max, by: 10)).map { String($0) }
     }
   }
 
