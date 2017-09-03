@@ -7,6 +7,7 @@ All notable changes to the project will be documented in this file.
 ### Added
 - popular movies
 - new persistent data schema
+- importing new movies no longer replaces entire library
 - full release data replaces release year
 - tab bar
 - launch screen
