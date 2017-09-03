@@ -10,6 +10,8 @@ protocol DataFormat {
 
   func deserialize(from data: Data) throws -> [MediaItem]
 
+  func schemaVersion(of data: Data) throws -> SchemaVersion
+
 }
 
 extension DataFormat {

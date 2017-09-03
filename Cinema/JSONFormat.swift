@@ -13,6 +13,14 @@ class JSONFormat: DataFormat {
   }
 
   func deserialize(from data: Data) throws -> [MediaItem] {
+    let version = try schemaVersion(of: data)
+    switch version {
+      case .v1_0_0: return try deserializeVersion1_0_0(from: JSON(data: data))
+      case .v2_0_0: return try deserializeVersion2_0_0(from: JSON(data: data))
+    }
+  }
+
+  func schemaVersion(of data: Data) throws -> SchemaVersion {
     let json = JSON(data: data)
     if json.type == .null {
       throw DataFormatError.invalidDataFormat
@@ -21,10 +29,7 @@ class JSONFormat: DataFormat {
     guard let version = SchemaVersion(versionString: versionString) else {
       throw DataFormatError.unsupportedSchemaVersion(versionString: versionString)
     }
-    switch version {
-      case .v1_0_0: return try deserializeVersion1_0_0(from: json)
-      case .v2_0_0: return try deserializeVersion2_0_0(from: json)
-    }
+    return version
   }
 
   // MARK: - Version 2-0-0
