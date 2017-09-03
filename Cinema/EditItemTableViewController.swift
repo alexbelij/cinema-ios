@@ -99,19 +99,6 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
     self.present(alertController, animated: true)
   }
 
-  @IBAction private func dismissKeyboard() {
-    self.view?.endEditing(false)
-  }
-
-  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-      if let nextField = self.view.viewWithTag(textField.tag + 1) as? UITextField {
-        nextField.becomeFirstResponder()
-      } else {
-        textField.resignFirstResponder()
-      }
-      return false
-  }
-
   private func deleteItem() {
     DispatchQueue.global(qos: .userInitiated).async {
       var libraryError: Error? = nil
@@ -135,8 +122,6 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
     }
   }
 
-  // MARK: - Table View
-
   public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
     switch section {
       case 0: return NSLocalizedString("edit.sectionHeader.title", comment: "")
@@ -144,4 +129,18 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
       default: return nil
     }
   }
+
+  @IBAction private func dismissKeyboard() {
+    self.view?.endEditing(false)
+  }
+
+  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    if let nextField = self.view.viewWithTag(textField.tag + 1) as? UITextField {
+      nextField.becomeFirstResponder()
+    } else {
+      textField.resignFirstResponder()
+    }
+    return false
+  }
+
 }
