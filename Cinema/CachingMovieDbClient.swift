@@ -75,4 +75,8 @@ class CachingMovieDbClient: MovieDbClient {
   func popularMovies() -> PagingSequence<PartialMediaItem> {
     return backingClient.popularMovies()
   }
+
+  func releaseDate(for id: Int) -> Date? {
+    return backingClient.releaseDate(for: id)
+  }
 }

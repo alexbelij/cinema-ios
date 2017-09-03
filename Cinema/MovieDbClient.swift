@@ -1,3 +1,4 @@
+import Foundation
 import UIKit.UIImage
 
 protocol MovieDbClient {
@@ -23,6 +24,8 @@ protocol MovieDbClient {
   func runtime(for id: Int) -> Int?
 
   func popularMovies() -> PagingSequence<PartialMediaItem>
+
+  func releaseDate(for id: Int) -> Date?
 
 }
 

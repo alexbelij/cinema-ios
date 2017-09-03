@@ -1,4 +1,5 @@
 import Dispatch
+import Foundation
 import TMDBSwift
 import UIKit.UIImage
 
@@ -121,6 +122,14 @@ class TMDBSwiftWrapper: MovieDbClient {
       }
       return movies.isEmpty ? nil : movies
     }
+  }
+
+  func releaseDate(for id: Int) -> Date? {
+    guard let movie = movie(for: id, language: effectiveLanguage()),
+          let releaseDate = movie.release_date else { return nil }
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
+    return dateFormatter.date(from: releaseDate)
   }
 
   private func waitUntil(_ asyncProcess: (_ done: @escaping () -> Void) -> Void) {

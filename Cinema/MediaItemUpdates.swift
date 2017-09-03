@@ -11,3 +11,17 @@ class GenreIdsUpdate: PropertyUpdate {
   }
 
 }
+
+class ReleaseDateUpdate: PropertyUpdate {
+
+  private var movieDb: MovieDbClient
+
+  init(movieDb: MovieDbClient) {
+    self.movieDb = movieDb
+  }
+
+  func apply(on item: inout MediaItem) {
+    item.releaseDate = movieDb.releaseDate(for: item.id)
+  }
+
+}
