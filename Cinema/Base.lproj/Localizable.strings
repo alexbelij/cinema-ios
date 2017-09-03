@@ -6,6 +6,7 @@
 "addItem.progress.text" = "Updating library...";
 "addItem.search.placeholder" = "Enter the movie title...";
 "cancel" = "Cancel";
+"continue" = "Continue";
 "details.certificationFormat" = "FSK %@";
 "details.missing.certification" = "No certification available.";
 "details.missing.genre" = "No genre available.";
@@ -43,6 +44,10 @@
 "library" = "Library";
 "library.empty" = "Your library is empty.";
 "library.search.placeholder" = "Search titles...";
+"maintenance.failed" = "Your library could not be updated.";
+"maintenance.intention" = "To make the app better for you, we need to update your library.";
+"maintenance.start" = "Start Update";
+"maintenance.succeeded" = "Your library has been updated.";
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";
 "no" = "No";
