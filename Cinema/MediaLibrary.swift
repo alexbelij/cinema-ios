@@ -12,8 +12,6 @@ protocol MediaLibrary {
 
   func remove(_ mediaItem: MediaItem) throws
 
-  func replaceItems(_ mediaItems: [MediaItem]) throws
-
   func performBatchUpdates(_ updates: () throws -> Void) throws
 
 }

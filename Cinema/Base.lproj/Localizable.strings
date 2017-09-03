@@ -41,6 +41,9 @@
 "genre.tvMovie" = "TV Movie";
 "genre.war" = "War";
 "genre.western" = "Western";
+"import.failed" = "Oh, snap!";
+"import.succeeded" = "Update completed.";
+"import.progress" = "Updating your library...";
 "library" = "Library";
 "library.empty" = "Your library is empty.";
 "library.search.placeholder" = "Search titles...";
@@ -55,10 +58,6 @@
 "options" = "Options";
 "popularMovies" = "Popular movies";
 "popularMovies.empty" = "There are no popular movies at the moment. Please, come back later.";
-"replaceLibrary.alert.title" = "Do you really want to replace your library?";
-"replaceLibrary.done.failure.text" = "Library was not replaced.";
-"replaceLibrary.done.success.text" = "Library was replaced.";
-"replaceLibrary.progress.text" = "Replacing library...";
 "search.results.empty" = "No results for “%@”";
 "sort.by" = "Sort by";
 "sort.by.runtime" = "Runtime";

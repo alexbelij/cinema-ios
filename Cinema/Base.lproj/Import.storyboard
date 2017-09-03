@@ -11,10 +11,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Replace Library View Controller-->
+        <!--Import View Controller-->
         <scene sceneID="Mmh-WO-0mI">
             <objects>
-                <viewController id="IBS-vn-BgN" customClass="ReplaceLibraryViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="IBS-vn-BgN" customClass="ImportViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="A8B-Ve-5wW"/>
                         <viewControllerLayoutGuide type="bottom" id="RdO-Id-NKv"/>
@@ -33,7 +33,7 @@
                                         <rect key="frame" x="0.0" y="110" width="155.5" height="20.5"/>
                                         <subviews>
                                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="HeS-SB-Gxy">
-                                                <rect key="frame" x="0.0" y="0.0" width="20" height="20"/>
+                                                <rect key="frame" x="0.0" y="0.5" width="20" height="20"/>
                                             </activityIndicatorView>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Replacing library" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bwD-rm-A56">
                                                 <rect key="frame" x="28" y="0.0" width="127.5" height="20.5"/>

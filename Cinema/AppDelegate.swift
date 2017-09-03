@@ -97,18 +97,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
-    let alert = UIAlertController(title: NSLocalizedString("replaceLibrary.alert.title", comment: ""),
-                                  message: nil,
-                                  preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: NSLocalizedString("yes", comment: ""), style: .destructive) { _ in
-      let controller = UIStoryboard(name: "ReplaceLibrary", bundle: nil)
-          // swiftlint:disable:next force_cast
-          .instantiateInitialViewController() as! ReplaceLibraryViewController
-      controller.replaceLibraryContent(of: self.library, withContentOf: url)
-      self.window!.rootViewController!.present(controller, animated: true)
-    })
-    alert.addAction(UIAlertAction(title: NSLocalizedString("no", comment: ""), style: .default))
-    window!.rootViewController!.present(alert, animated: true)
+    let controller = UIStoryboard(name: "Maintenance", bundle: nil).instantiateInitialViewController()
+    // swiftlint:disable:next force_cast
+    as! MaintenanceViewController
+    controller.run(ImportAndUpdateAction(library: library, movieDb: movieDb, from: url),
+                   initiation: .runAutomatically) { result in
+      switch result {
+        case let .result(addedItems):
+          controller.primaryText = NSLocalizedString("import.succeeded", comment: "")
+          let format = NSLocalizedString("import.succeeded.changes", comment: "")
+          controller.secondaryText = .localizedStringWithFormat(format, addedItems.count)
+        case let .error(error):
+          controller.primaryText = NSLocalizedString("import.failed", comment: "")
+          controller.secondaryText = Utils.localizedErrorMessage(for: error)
+      }
+    }
+    controller.primaryText = NSLocalizedString("import.progress", comment: "")
+    self.window!.rootViewController!.present(controller, animated: true)
     return true
   }
 
