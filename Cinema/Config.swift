@@ -4,7 +4,6 @@ enum Config {
 
   /// Usage
   /// ```
-  ///   --library sample
   ///   --library fileBased
   /// ```
   static func initLibrary(launchArguments: [String]) -> MediaLibrary {
@@ -15,8 +14,6 @@ enum Config {
     }
     let library: MediaLibrary
     switch libraryType {
-      case .sample:
-        library = SampleLibrary()
       case .fileBased:
         do {
           let directory = Utils.directoryUrl(for: .documentDirectory)
@@ -81,7 +78,6 @@ private enum LibraryArgument: String {
   static let defaultArguments = [flag, fileBased.rawValue]
   static let flag = "--library"
 
-  case sample
   case fileBased
 }
 

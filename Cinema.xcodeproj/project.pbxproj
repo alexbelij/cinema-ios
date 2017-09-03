@@ -36,7 +36,6 @@
 		CBB5696E1EA4D6A2005F7BA7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBB5696C1EA4D6A2005F7BA7 /* Main.storyboard */; };
 		CBB569701EA4D6A2005F7BA7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CBB5696F1EA4D6A2005F7BA7 /* Assets.xcassets */; };
 		CBB569731EA4D6A2005F7BA7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBB569711EA4D6A2005F7BA7 /* LaunchScreen.storyboard */; };
-		CBB5697F1EA4D6C3005F7BA7 /* SampleLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB5697A1EA4D6C3005F7BA7 /* SampleLibrary.swift */; };
 		CBB569801EA4D6C3005F7BA7 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB5697B1EA4D6C3005F7BA7 /* MediaItem.swift */; };
 		CBB569811EA4D6C3005F7BA7 /* MediaLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB5697C1EA4D6C3005F7BA7 /* MediaLibrary.swift */; };
 		CBC8E1931F38DA1E003EA77A /* PopularMoviesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC8E1921F38DA1E003EA77A /* PopularMoviesViewController.swift */; };
@@ -77,7 +76,6 @@
 		CBB5696F1EA4D6A2005F7BA7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CBB569721EA4D6A2005F7BA7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		CBB569741EA4D6A2005F7BA7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		CBB5697A1EA4D6C3005F7BA7 /* SampleLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleLibrary.swift; sourceTree = "<group>"; };
 		CBB5697B1EA4D6C3005F7BA7 /* MediaItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
 		CBB5697C1EA4D6C3005F7BA7 /* MediaLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaLibrary.swift; sourceTree = "<group>"; };
 		CBC8E1921F38DA1E003EA77A /* PopularMoviesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopularMoviesViewController.swift; sourceTree = "<group>"; };
@@ -109,7 +107,6 @@
 			children = (
 				CBB5697C1EA4D6C3005F7BA7 /* MediaLibrary.swift */,
 				CBB5697B1EA4D6C3005F7BA7 /* MediaItem.swift */,
-				CBB5697A1EA4D6C3005F7BA7 /* SampleLibrary.swift */,
 				816BFA309BDAC4DB9673DA9D /* FileBasedMediaLibrary.swift */,
 				816BFE92A74C1A209F3908F4 /* DataFormat.swift */,
 				816BFF4C36540A18EF3BBC17 /* KeyedArchivalFormat.swift */,
@@ -336,7 +333,6 @@
 				CBB569691EA4D6A2005F7BA7 /* MasterViewController.swift in Sources */,
 				CBB569811EA4D6C3005F7BA7 /* MediaLibrary.swift in Sources */,
 				CBB569801EA4D6C3005F7BA7 /* MediaItem.swift in Sources */,
-				CBB5697F1EA4D6C3005F7BA7 /* SampleLibrary.swift in Sources */,
 				CBB569671EA4D6A2005F7BA7 /* AppDelegate.swift in Sources */,
 				CB9484CC1EFA8B8200D9651E /* ReplaceLibraryViewController.swift in Sources */,
 				816BF40FCCC10885A4DACB13 /* Utils.swift in Sources */,
