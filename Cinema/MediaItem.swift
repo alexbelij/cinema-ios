@@ -2,8 +2,8 @@ import Foundation
 
 struct MediaItem: Equatable, Hashable {
   let id: Int
-  let title: String
-  let subtitle: String?
+  var title: String
+  var subtitle: String?
   let runtime: Int?
   let releaseDate: Date?
   let diskType: DiskType

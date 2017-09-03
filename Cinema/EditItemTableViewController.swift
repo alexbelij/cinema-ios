@@ -45,11 +45,18 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
         self.dismiss(animated: true)
         return
       }
-      let newMediaItem = self.collectInfos()
+
+      item.title = self.titleTextField.text!
+      var subtitle = self.subtitleTextField.text
+      if subtitle != nil && subtitle!.isEmpty {
+        subtitle = nil
+      }
+      item.subtitle = subtitle
+
       DispatchQueue.global(qos: .userInitiated).async {
         var libraryError: Error? = nil
         do {
-          try self.library.update(newMediaItem)
+          try self.library.update(self.item)
         } catch let error {
           libraryError = error
         }
@@ -59,7 +66,7 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
           } else {
             switch libraryError! {
               case MediaLibraryError.itemDoesNotExist:
-                fatalError("updating non-existing item \(newMediaItem)")
+                fatalError("updating non-existing item \(self.item)")
               case MediaLibraryError.storageError:
                 self.showCancelOrDiscardAlert(title: NSLocalizedString("error.storageError", comment: ""))
               default:
@@ -80,20 +87,6 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
   private func isValidEdit() -> Bool {
     guard let newTitle = titleTextField.text else { return false }
     return !newTitle.isEmpty
-  }
-
-  private func collectInfos() -> MediaItem {
-    var subtitle = self.subtitleTextField.text
-    if subtitle != nil && subtitle!.isEmpty {
-      subtitle = nil
-    }
-    return MediaItem(id: self.item.id,
-                     title: self.titleTextField.text!,
-                     subtitle: subtitle,
-                     runtime: self.item.runtime,
-                     releaseDate: self.item.releaseDate,
-                     diskType: self.item.diskType,
-                     genreIds: self.item.genreIds)
   }
 
   private func showCancelOrDiscardAlert(title: String) {
