@@ -32,7 +32,9 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
                                             preferredStyle: .actionSheet)
     alertController.addAction(UIAlertAction(title: NSLocalizedString("edit.deleteMovie", comment: ""),
                                             style: .destructive) { _ in
-      self.deleteItem()
+      DispatchQueue.global(qos: .userInitiated).async {
+        self.performLibraryUpdate { try self.library.remove(self.item) }
+      }
     })
     alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     self.present(alertController, animated: true)
@@ -54,24 +56,7 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
       item.subtitle = subtitle
 
       DispatchQueue.global(qos: .userInitiated).async {
-        var libraryError: Error? = nil
-        do {
-          try self.library.update(self.item)
-        } catch let error {
-          libraryError = error
-        }
-        DispatchQueue.main.async {
-          if libraryError == nil {
-            self.dismiss(animated: true)
-          } else {
-            switch libraryError! {
-              case MediaLibraryError.itemDoesNotExist:
-                fatalError("updating non-existing item \(self.item)")
-              default:
-                self.showCancelOrDiscardAlert(title: Utils.localizedErrorMessage(for: libraryError!))
-            }
-          }
-        }
+        self.performLibraryUpdate { try self.library.update(self.item) }
       }
     } else {
       let alertController = UIAlertController(title: NSLocalizedString("edit.noTitleAlert", comment: ""),
@@ -87,6 +72,24 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
     return !newTitle.isEmpty
   }
 
+  private func performLibraryUpdate(action: @escaping () throws -> Void) {
+    do {
+      try action()
+      DispatchQueue.main.async {
+        self.dismiss(animated: true)
+      }
+    } catch let error {
+      switch error {
+        case MediaLibraryError.itemDoesNotExist:
+          fatalError("updating non-existing item \(self.item)")
+        default:
+          DispatchQueue.main.async {
+            self.showCancelOrDiscardAlert(title: Utils.localizedErrorMessage(for: error))
+          }
+      }
+    }
+  }
+
   private func showCancelOrDiscardAlert(title: String) {
     let alertController = UIAlertController(title: title,
                                             message: nil,
@@ -97,29 +100,6 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
       self.dismiss(animated: true)
     })
     self.present(alertController, animated: true)
-  }
-
-  private func deleteItem() {
-    DispatchQueue.global(qos: .userInitiated).async {
-      var libraryError: Error? = nil
-      do {
-        try self.library.remove(self.item)
-      } catch let error {
-        libraryError = error
-      }
-      DispatchQueue.main.async {
-        if libraryError == nil {
-          self.dismiss(animated: true)
-        } else {
-          switch libraryError! {
-            case MediaLibraryError.itemDoesNotExist:
-              fatalError("updating non-existing item \(self.item)")
-            default:
-              self.showCancelOrDiscardAlert(title: Utils.localizedErrorMessage(for: libraryError!))
-          }
-        }
-      }
-    }
   }
 
   public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
