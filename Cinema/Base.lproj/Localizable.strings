@@ -41,9 +41,9 @@
 "genre.tvMovie" = "TV Movie";
 "genre.war" = "War";
 "genre.western" = "Western";
-"import.done.failure.text" = "Library was not imported.";
-"import.done.success.text" = "Library was imported.";
-"import.progress.text" = "Importing library...";
+"import.failed" = "Library was not imported.";
+"import.succeeded" = "Library was imported.";
+"import.progress" = "Importing library...";
 "library" = "Library";
 "library.empty" = "Your library is empty.";
 "library.search.placeholder" = "Search titles...";

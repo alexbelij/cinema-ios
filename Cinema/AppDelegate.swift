@@ -97,10 +97,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
-    let controller = UIStoryboard(name: "Import", bundle: nil).instantiateInitialViewController()
+    let controller = UIStoryboard(name: "Maintenance", bundle: nil).instantiateInitialViewController()
     // swiftlint:disable:next force_cast
-    as! ImportViewController
-    controller.importLibrary(contentOf: url, into: self.library)
+    as! MaintenanceViewController
+    controller.run(ImportAndUpdateAction(library: library, movieDb: movieDb, from: url),
+                   initiation: .runAutomatically) { result in
+      switch result {
+        case .result:
+          controller.primaryText = NSLocalizedString("import.succeeded", comment: "")
+        case let .error(error):
+          controller.primaryText = NSLocalizedString("import.failed", comment: "")
+          controller.secondaryText = Utils.localizedErrorMessage(for: error)
+      }
+    }
+    controller.primaryText = NSLocalizedString("import.progress", comment: "")
     self.window!.rootViewController!.present(controller, animated: true)
     return true
   }
