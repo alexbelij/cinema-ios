@@ -1,4 +1,5 @@
 import Dispatch
+import Foundation
 import TMDBSwift
 import UIKit.UIImage
 
@@ -12,8 +13,11 @@ class TMDBSwiftWrapper: MovieDbClient {
 
   var language: MovieDbLanguage?
 
-  init(storeFront: MovieDbStoreFront) {
+  var cache: TMDBSwiftCache
+
+  init(storeFront: MovieDbStoreFront, cache: TMDBSwiftCache) {
     self.storeFront = storeFront
+    self.cache = cache
   }
 
   private func effectiveLanguage() -> String {
@@ -27,13 +31,15 @@ class TMDBSwiftWrapper: MovieDbClient {
   private(set) var isConnected: Bool = false
 
   func poster(for id: Int, size: PosterSize) -> UIKit.UIImage? {
-    if let posterPath = movie(for: id, language: storeFront.language)?.poster_path {
-      let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
-      if let data = try? Data(contentsOf: URL(string: path)!) {
-        return UIImage(data: data)
+    return cache.poster(for: "\(id)-\(size)") {
+      if let posterPath = movie(for: id, language: storeFront.language)?.poster_path {
+        let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
+        if let data = try? Data(contentsOf: URL(string: path)!) {
+          return UIImage(data: data)
+        }
       }
+      return nil
     }
-    return nil
   }
 
   func overview(for id: Int) -> String? {
@@ -41,18 +47,26 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   func certification(for id: Int) -> String? {
-    var certification: String?
-    waitUntil { done in
-      MovieMDB.release_dates(TMDBSwiftWrapper.apiKey, movieID: id) { _, releaseDates in
-        if let releaseDates = releaseDates {
-          for date in releaseDates where date.iso_3166_1 == self.storeFront.country {
-            certification = date.release_dates[0].certification
+    let country = self.storeFront.country
+    var releaseDates: [MovieReleaseDatesMDB]? = nil
+    let certificationJson = cache.string(for: "certification-\(id)") {
+      var jsonString: String?
+      waitUntil { done in
+        MovieMDB.release_dates(TMDBSwiftWrapper.apiKey, movieID: id) { apiReturn, releaseDates1 in
+          if let json = apiReturn.json, apiReturn.json!["results"].exists(),
+             let releaseDates1 = releaseDates1 {
+            jsonString = json["results"].rawString()
+            releaseDates = releaseDates1
           }
+          done()
         }
-        done()
       }
+      return jsonString
     }
-    return certification
+    if releaseDates == nil && certificationJson != nil {
+      releaseDates = MovieReleaseDatesMDB.initialize(json: JSON.parse(certificationJson!))
+    }
+    return releaseDates!.first { $0.iso_3166_1 == country }?.release_dates[0].certification
   }
 
   func genreIds(for id: Int) -> [Int] {
@@ -63,14 +77,24 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   private func movie(for id: Int, language: String) -> MovieDetailedMDB? {
-    var movieToReturn: MovieDetailedMDB?
-    waitUntil { done in
-      MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: language) { _, movie in
-        movieToReturn = movie
-        done()
+    var createdMovie: MovieDetailedMDB? = nil
+    let movieJson = cache.string(for: "movie-\(id)-\(language)") {
+      var jsonString: String?
+      waitUntil { done in
+        MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: language) { apiReturn, movie in
+          if let json = apiReturn.json, apiReturn.json!["id"].exists() {
+            jsonString = json.rawString()
+            createdMovie = movie
+          }
+          done()
+        }
       }
+      return jsonString
     }
-    return movieToReturn
+    if createdMovie == nil && movieJson != nil {
+      createdMovie = MovieDetailedMDB(results: JSON.parse(movieJson!))
+    }
+    return createdMovie
   }
 
   func searchMovies(searchText: String) -> [PartialMediaItem] {
@@ -121,6 +145,14 @@ class TMDBSwiftWrapper: MovieDbClient {
       }
       return movies.isEmpty ? nil : movies
     }
+  }
+
+  func releaseDate(for id: Int) -> Date? {
+    guard let movie = movie(for: id, language: effectiveLanguage()),
+          let releaseDate = movie.release_date else { return nil }
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
+    return dateFormatter.date(from: releaseDate)
   }
 
   private func waitUntil(_ asyncProcess: (_ done: @escaping () -> Void) -> Void) {

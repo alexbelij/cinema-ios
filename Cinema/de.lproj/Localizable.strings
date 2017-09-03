@@ -6,6 +6,7 @@
 "addItem.progress.text" = "Mediathek wird aktualisiert...";
 "addItem.search.placeholder" = "Gib den Filmtitel ein...";
 "cancel" = "Abbrechen";
+"continue" = "Fortfahren";
 "details.certificationFormat" = "FSK %@";
 "details.missing.certification" = "Keine Altersfreigabe verfügbar.";
 "details.missing.genre" = "Kein Genre verfügbar.";
@@ -43,6 +44,10 @@
 "library" = "Mediathek";
 "library.empty" = "Deine Mediathek ist leer.";
 "library.search.placeholder" = "Titel durchsuchen...";
+"maintenance.failed" = "Deine Mediathek konnte nicht aktualisiert werden.";
+"maintenance.intention" = "Um die App für dich zu verbessern, müssen wir deine Mediathek aktualisieren.";
+"maintenance.start" = "Aktualisierung starten";
+"maintenance.succeeded" = "Deine Mediathek wurde aktualisiert.";
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";
 "no" = "Nein";

@@ -47,17 +47,8 @@ class ReplaceLibraryViewController: UIViewController {
             self.dismiss()
           }
         } else {
-          self.label.text = NSLocalizedString("replaceLibrary.done.failure.text", comment: "")
-          switch libraryError! {
-            case DataFormatError.unsupportedSchemaVersion:
-              self.errorLabel.text = NSLocalizedString("error.unsupportedSchemaVersion", comment: "")
-            case DataFormatError.invalidDataFormat:
-              self.errorLabel.text = NSLocalizedString("error.invalidDataFormat", comment: "")
-            case MediaLibraryError.storageError:
-              self.errorLabel.text = NSLocalizedString("error.storageError", comment: "")
-            default:
-              self.errorLabel.text = NSLocalizedString("error.genericError", comment: "")
-          }
+          self.label.text = NSLocalizedString("import.done.failure.text", comment: "")
+          self.errorLabel.text = Utils.localizedErrorMessage(for: libraryError!)
           self.errorLabel.isHidden = false
           self.closeButton.isHidden = false
           self.view?.superview?.layoutIfNeeded()

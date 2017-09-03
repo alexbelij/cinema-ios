@@ -1,3 +1,4 @@
+import Foundation
 import UIKit.UIImage
 
 protocol MovieDbClient {
@@ -7,6 +8,8 @@ protocol MovieDbClient {
   var storeFront: MovieDbStoreFront { get set }
 
   var language: MovieDbLanguage? { get set }
+
+  var cache: TMDBSwiftCache { get set }
 
   var isConnected: Bool { get }
 
@@ -23,6 +26,8 @@ protocol MovieDbClient {
   func runtime(for id: Int) -> Int?
 
   func popularMovies() -> PagingSequence<PartialMediaItem>
+
+  func releaseDate(for id: Int) -> Date?
 
 }
 

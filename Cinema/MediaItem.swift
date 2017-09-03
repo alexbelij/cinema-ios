@@ -5,9 +5,9 @@ struct MediaItem: Equatable, Hashable {
   var title: String
   var subtitle: String?
   let runtime: Int?
-  let releaseDate: Date?
+  var releaseDate: Date?
   let diskType: DiskType
-  let genreIds: [Int]
+  var genreIds: [Int]
 
   init(id: Int,
        title: String,

@@ -63,12 +63,7 @@ class AddItemViewController: UIViewController {
                                           item.title)
         } else {
           self.label.text = NSLocalizedString("addItem.done.failure.text", comment: "")
-          switch libraryError! {
-            case MediaLibraryError.storageError:
-              self.messageLabel.text = NSLocalizedString("error.storageError", comment: "")
-            default:
-              self.messageLabel.text = NSLocalizedString("error.genericError", comment: "")
-          }
+          self.messageLabel.text = Utils.localizedErrorMessage(for: libraryError!)
         }
         self.messageLabel.isHidden = false
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {

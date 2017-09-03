@@ -67,10 +67,8 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
             switch libraryError! {
               case MediaLibraryError.itemDoesNotExist:
                 fatalError("updating non-existing item \(self.item)")
-              case MediaLibraryError.storageError:
-                self.showCancelOrDiscardAlert(title: NSLocalizedString("error.storageError", comment: ""))
               default:
-                self.showCancelOrDiscardAlert(title: NSLocalizedString("error.genericError", comment: ""))
+                self.showCancelOrDiscardAlert(title: Utils.localizedErrorMessage(for: libraryError!))
             }
           }
         }
@@ -129,10 +127,8 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
           switch libraryError! {
             case MediaLibraryError.itemDoesNotExist:
               fatalError("updating non-existing item \(self.item)")
-            case MediaLibraryError.storageError:
-              self.showCancelOrDiscardAlert(title: NSLocalizedString("error.storageError", comment: ""))
             default:
-              self.showCancelOrDiscardAlert(title: NSLocalizedString("error.genericError", comment: ""))
+              self.showCancelOrDiscardAlert(title: Utils.localizedErrorMessage(for: libraryError!))
           }
         }
       }

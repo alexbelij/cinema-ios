@@ -2,6 +2,8 @@ import Foundation
 
 protocol MediaLibrary {
 
+  var persistentSchemaVersion: SchemaVersion { get }
+
   func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem]
 
   func add(_ mediaItem: MediaItem) throws

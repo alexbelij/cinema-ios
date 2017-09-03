@@ -55,9 +55,9 @@ enum Config {
     switch movieDbType {
       case .tmdbSwiftWrapper:
         if arguments[orEmptyAt: startIndex + 2] == MovieDbArgument.Options.cached.rawValue {
-          movieDb = CachingMovieDbClient(backingClient: TMDBSwiftWrapper(storeFront: .germany))
+          movieDb = TMDBSwiftWrapper(storeFront: .germany, cache: StandardTMDBSwiftCache())
         } else {
-          movieDb = TMDBSwiftWrapper(storeFront: .germany)
+          movieDb = TMDBSwiftWrapper(storeFront: .germany, cache: EmptyTMDBSwiftCache())
         }
     }
     return movieDb

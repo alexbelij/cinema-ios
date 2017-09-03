@@ -12,6 +12,14 @@ class KeyedArchivalFormat: DataFormat {
   }
 
   func deserialize(from data: Data) throws -> [MediaItem] {
+    let version = try schemaVersion(of: data)
+    switch version {
+      case .v1_0_0: return try deserializeVersion1_0_0(from: data)
+      case .v2_0_0: return try deserializeVersion2_0_0(from: data)
+    }
+  }
+
+  func schemaVersion(of data: Data) throws -> SchemaVersion {
     // traps when invalid archive, but ignored since only used for internal model
     let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
     let versionString = (unarchiver.decodeObject(forKey: .schemaVersionKey) as? String)
@@ -20,10 +28,7 @@ class KeyedArchivalFormat: DataFormat {
     guard let version = SchemaVersion(versionString: versionString) else {
       throw DataFormatError.unsupportedSchemaVersion(versionString: versionString)
     }
-    switch version {
-      case .v1_0_0: return try deserializeVersion1_0_0(from: data)
-      case .v2_0_0: return try deserializeVersion2_0_0(from: data)
-    }
+    return version
   }
 
   // MARK: - Version 2-0-0

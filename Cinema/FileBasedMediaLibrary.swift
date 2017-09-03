@@ -27,6 +27,17 @@ class FileBasedMediaLibrary: MediaLibrary {
     }
   }
 
+  var persistentSchemaVersion: SchemaVersion {
+    guard FileManager.default.fileExists(atPath: url.path) else {
+      return dataFormat.defaultSchemaVersion!
+    }
+    do {
+      return try dataFormat.schemaVersion(of: try Data(contentsOf: url))
+    } catch let error {
+      fatalError("Could not detect version of data at \(url): \(error)")
+    }
+  }
+
   func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem] {
     return mediaItems.filter(predicate)
   }
