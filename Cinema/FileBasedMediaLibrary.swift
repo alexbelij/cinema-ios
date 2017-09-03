@@ -2,9 +2,7 @@ import Foundation
 
 class FileBasedMediaLibrary: MediaLibrary {
 
-  private let directory: URL
-
-  private let fileName: String
+  private let url: URL
 
   private let dataFormat: DataFormat
 
@@ -12,11 +10,9 @@ class FileBasedMediaLibrary: MediaLibrary {
 
   private var isPerformingBatchUpdates = false
 
-  init(directory: URL, fileName: String, dataFormat: DataFormat) throws {
-    self.directory = directory
-    self.fileName = fileName
+  init(url: URL, dataFormat: DataFormat) throws {
+    self.url = url
     self.dataFormat = dataFormat
-    let url = directory.appendingPathComponent(fileName)
     if FileManager.default.fileExists(atPath: url.path) {
       guard let data = try? Data(contentsOf: URL(fileURLWithPath: url.path)) else {
         throw MediaLibraryError.storageError
@@ -76,8 +72,7 @@ class FileBasedMediaLibrary: MediaLibrary {
     guard let data = try? dataFormat.serialize(mediaItems) else {
       throw MediaLibraryError.storageError
     }
-    let success = FileManager.default.createFile(atPath: directory.appendingPathComponent(fileName).path,
-                                                 contents: data)
+    let success = FileManager.default.createFile(atPath: url.path, contents: data)
     if !success {
       throw MediaLibraryError.storageError
     }

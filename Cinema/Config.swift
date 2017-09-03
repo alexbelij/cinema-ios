@@ -15,13 +15,12 @@ enum Config {
     let library: MediaLibrary
     switch libraryType {
       case .fileBased:
+        let url = Utils.directoryUrl(for: .documentDirectory).appendingPathComponent("cinema.data")
+        moveLegacyLibraryFile(to: url)
+        let dataFormat = KeyedArchivalFormat()
+        dataFormat.defaultSchemaVersion = .v2_0_0
         do {
-          let directory = Utils.directoryUrl(for: .documentDirectory)
-          let fileName = "cinema.data"
-          moveLegacyLibraryFile(to: directory.appendingPathComponent(fileName))
-          let dataFormat = KeyedArchivalFormat()
-          dataFormat.defaultSchemaVersion = .v2_0_0
-          library = try FileBasedMediaLibrary(directory: directory, fileName: fileName, dataFormat: dataFormat)
+          library = try FileBasedMediaLibrary(url: url, dataFormat: dataFormat)
         } catch let error {
           fatalError("Library could not be instantiated: \(error)")
         }
