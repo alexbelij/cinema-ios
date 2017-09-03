@@ -71,7 +71,7 @@ class PopularMoviesViewController: UICollectionViewController {
   }
 
   func removeItem(_ item: PartialMediaItem) {
-    guard let index = items.index(of: item) else { fatalError("can not remove unknown item \(item)") }
+    guard let index = items.index(of: item) else { return }
     self.items.remove(at: index)
     collectionView!.deleteItems(at: [IndexPath(row: index, section: 0)])
     fetchItems(count: 1)
