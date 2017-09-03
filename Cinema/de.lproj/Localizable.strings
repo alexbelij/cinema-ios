@@ -1,10 +1,10 @@
-"addItem.title" = "Film hinzufügen";
 "addItem.alert.howToAdd.title" = "Wie willst du den Film hinzufügen?";
-"addItem.done.failure.text" = "Aktualisierung fehlgeschlagen.";
-"addItem.done.success.messageFormat" = "%@ wurde hinzugefügt.";
-"addItem.done.success.text" = "Aktualisierung abgeschlossen.";
-"addItem.progress.text" = "Mediathek wird aktualisiert...";
+"addItem.failed" = "Hoppla!";
+"addItem.progress" = "Mediathek wird aktualisiert...";
 "addItem.search.placeholder" = "Gib den Filmtitel ein...";
+"addItem.succeeded" = "Aktualisierung abgeschlossen.";
+"addItem.succeeded.changes" = "%@ wurde hinzugefügt.";
+"addItem.title" = "Film hinzufügen";
 "cancel" = "Abbrechen";
 "continue" = "Fortfahren";
 "details.certificationFormat" = "FSK %@";

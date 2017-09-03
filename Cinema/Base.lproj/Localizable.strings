@@ -1,10 +1,10 @@
-"addItem.title" = "Add Movie";
 "addItem.alert.howToAdd.title" = "How do you want to add the movie?";
-"addItem.done.failure.text" = "Update failed.";
-"addItem.done.success.messageFormat" = "Added %@.";
-"addItem.done.success.text" = "Update complete.";
-"addItem.progress.text" = "Updating library...";
+"addItem.failed" = "Oh, snap!";
+"addItem.progress" = "Updating library...";
 "addItem.search.placeholder" = "Enter the movie title...";
+"addItem.succeeded" = "Update complete.";
+"addItem.succeeded.changes" = "Added %@.";
+"addItem.title" = "Add Movie";
 "cancel" = "Cancel";
 "continue" = "Continue";
 "details.certificationFormat" = "FSK %@";

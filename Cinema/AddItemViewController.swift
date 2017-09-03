@@ -24,7 +24,7 @@ class AddItemViewController: UIViewController {
 
   open override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
-    label.text = NSLocalizedString("addItem.progress.text", comment: "")
+    label.text = NSLocalizedString("addItem.progress", comment: "")
     posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
     posterView.layer.borderColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
     posterView.layer.borderWidth = 0.5
@@ -58,11 +58,11 @@ class AddItemViewController: UIViewController {
       DispatchQueue.main.async {
         self.activityIndicator.stopAnimating()
         if libraryError == nil {
-          self.label.text = NSLocalizedString("addItem.done.success.text", comment: "")
-          self.messageLabel.text = String(format: NSLocalizedString("addItem.done.success.messageFormat", comment: ""),
+          self.label.text = NSLocalizedString("addItem.succeeded", comment: "")
+          self.messageLabel.text = String(format: NSLocalizedString("addItem.succeeded.changes", comment: ""),
                                           item.title)
         } else {
-          self.label.text = NSLocalizedString("addItem.done.failure.text", comment: "")
+          self.label.text = NSLocalizedString("addItem.failed", comment: "")
           self.messageLabel.text = Utils.localizedErrorMessage(for: libraryError!)
         }
         self.messageLabel.isHidden = false
