@@ -47,18 +47,26 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   func certification(for id: Int) -> String? {
-    var certification: String?
-    waitUntil { done in
-      MovieMDB.release_dates(TMDBSwiftWrapper.apiKey, movieID: id) { _, releaseDates in
-        if let releaseDates = releaseDates {
-          for date in releaseDates where date.iso_3166_1 == self.storeFront.country {
-            certification = date.release_dates[0].certification
+    let country = self.storeFront.country
+    var releaseDates: [MovieReleaseDatesMDB]? = nil
+    let certificationJson = cache.string(for: "certification-\(id)") {
+      var jsonString: String?
+      waitUntil { done in
+        MovieMDB.release_dates(TMDBSwiftWrapper.apiKey, movieID: id) { apiReturn, releaseDates1 in
+          if let json = apiReturn.json, apiReturn.json!["results"].exists(),
+             let releaseDates1 = releaseDates1 {
+            jsonString = json["results"].rawString()
+            releaseDates = releaseDates1
           }
+          done()
         }
-        done()
       }
+      return jsonString
     }
-    return certification
+    if releaseDates == nil && certificationJson != nil {
+      releaseDates = MovieReleaseDatesMDB.initialize(json: JSON.parse(certificationJson!))
+    }
+    return releaseDates!.first { $0.iso_3166_1 == country }?.release_dates[0].certification
   }
 
   func genreIds(for id: Int) -> [Int] {
@@ -69,14 +77,24 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   private func movie(for id: Int, language: String) -> MovieDetailedMDB? {
-    var movieToReturn: MovieDetailedMDB?
-    waitUntil { done in
-      MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: language) { _, movie in
-        movieToReturn = movie
-        done()
+    var createdMovie: MovieDetailedMDB? = nil
+    let movieJson = cache.string(for: "movie-\(id)-\(language)") {
+      var jsonString: String?
+      waitUntil { done in
+        MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: language) { apiReturn, movie in
+          if let json = apiReturn.json, apiReturn.json!["id"].exists() {
+            jsonString = json.rawString()
+            createdMovie = movie
+          }
+          done()
+        }
       }
+      return jsonString
     }
-    return movieToReturn
+    if createdMovie == nil && movieJson != nil {
+      createdMovie = MovieDetailedMDB(results: JSON.parse(movieJson!))
+    }
+    return createdMovie
   }
 
   func searchMovies(searchText: String) -> [PartialMediaItem] {
