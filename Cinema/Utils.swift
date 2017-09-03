@@ -64,6 +64,19 @@ class Utils {
     }
   }
 
+  static func localizedErrorMessage(for error: Error) -> String {
+    switch error {
+      case DataFormatError.unsupportedSchemaVersion:
+        return NSLocalizedString("error.unsupportedSchemaVersion", comment: "")
+      case DataFormatError.invalidDataFormat:
+        return NSLocalizedString("error.invalidDataFormat", comment: "")
+      case MediaLibraryError.storageError:
+        return NSLocalizedString("error.storageError", comment: "")
+      default:
+        return NSLocalizedString("error.genericError", comment: "")
+    }
+  }
+
 }
 
 extension UIStoryboardSegue {
