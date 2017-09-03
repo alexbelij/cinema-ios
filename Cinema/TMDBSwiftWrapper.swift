@@ -13,8 +13,11 @@ class TMDBSwiftWrapper: MovieDbClient {
 
   var language: MovieDbLanguage?
 
-  init(storeFront: MovieDbStoreFront) {
+  var cache: TMDBSwiftCache
+
+  init(storeFront: MovieDbStoreFront, cache: TMDBSwiftCache) {
     self.storeFront = storeFront
+    self.cache = cache
   }
 
   private func effectiveLanguage() -> String {
@@ -28,13 +31,15 @@ class TMDBSwiftWrapper: MovieDbClient {
   private(set) var isConnected: Bool = false
 
   func poster(for id: Int, size: PosterSize) -> UIKit.UIImage? {
-    if let posterPath = movie(for: id, language: storeFront.language)?.poster_path {
-      let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
-      if let data = try? Data(contentsOf: URL(string: path)!) {
-        return UIImage(data: data)
+    return cache.poster(for: "\(id)-\(size)") {
+      if let posterPath = movie(for: id, language: storeFront.language)?.poster_path {
+        let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
+        if let data = try? Data(contentsOf: URL(string: path)!) {
+          return UIImage(data: data)
+        }
       }
+      return nil
     }
-    return nil
   }
 
   func overview(for id: Int) -> String? {

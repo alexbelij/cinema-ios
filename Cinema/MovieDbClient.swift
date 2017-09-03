@@ -9,6 +9,8 @@ protocol MovieDbClient {
 
   var language: MovieDbLanguage? { get set }
 
+  var cache: TMDBSwiftCache { get set }
+
   var isConnected: Bool { get }
 
   func poster(for id: Int, size: PosterSize) -> UIKit.UIImage?
