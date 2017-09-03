@@ -103,8 +103,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     controller.run(ImportAndUpdateAction(library: library, movieDb: movieDb, from: url),
                    initiation: .runAutomatically) { result in
       switch result {
-        case .result:
+        case let .result(addedItems):
           controller.primaryText = NSLocalizedString("import.succeeded", comment: "")
+          let format = NSLocalizedString("import.succeeded.changes", comment: "")
+          controller.secondaryText = .localizedStringWithFormat(format, addedItems.count)
         case let .error(error):
           controller.primaryText = NSLocalizedString("import.failed", comment: "")
           controller.secondaryText = Utils.localizedErrorMessage(for: error)
