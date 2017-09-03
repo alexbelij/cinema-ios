@@ -15,7 +15,7 @@ struct MediaItem: Equatable, Hashable {
        runtime: Int? = nil,
        releaseDate: Date? = nil,
        diskType: DiskType = .bluRay,
-       genreIds: [Int]) {
+       genreIds: [Int] = []) {
     self.id = id
     self.title = title
     self.subtitle = subtitle
