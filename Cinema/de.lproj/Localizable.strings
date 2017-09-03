@@ -41,9 +41,9 @@
 "genre.tvMovie" = "TV-Film";
 "genre.war" = "Kriegsfilm";
 "genre.western" = "Western";
-"import.failed" = "Mediathek wurde nicht importiert.";
-"import.succeeded" = "Mediathek wurde importiert.";
-"import.progress" = "Mediathek wird importiert...";
+"import.failed" = "Hoppla!";
+"import.succeeded" = "Aktualisierung abgeschlossen.";
+"import.progress" = "Deine Mediathek wird aktualisiert...";
 "library" = "Mediathek";
 "library.empty" = "Deine Mediathek ist leer.";
 "library.search.placeholder" = "Titel durchsuchen...";
