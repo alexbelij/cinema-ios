@@ -79,7 +79,7 @@ class Utils {
 
   static func updates(from version: SchemaVersion, using movieDb: MovieDbClient) -> [PropertyUpdate] {
     switch version {
-      case .v1_0_0: fatalError("unimplemented")
+      case .v1_0_0: return [GenreIdsUpdate(movieDb: movieDb)]
       case .v2_0_0: return []
     }
   }
