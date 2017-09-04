@@ -60,7 +60,11 @@ class TMDBSwiftWrapper: MovieDbClient {
       return jsonString
     }
     if releaseDates == nil && certificationJson != nil {
-      releaseDates = MovieReleaseDatesMDB.initialize(json: JSON.parse(certificationJson!))
+      var array = [MovieReleaseDatesMDB]()
+      JSON.parse(certificationJson!).forEach {
+        array.append(MovieReleaseDatesMDB(results: $0.1))
+      }
+      releaseDates = array
     }
     return releaseDates!.first { $0.iso_3166_1 == self.country.rawValue }?.release_dates[0].certification
   }
