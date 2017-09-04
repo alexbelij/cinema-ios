@@ -5,9 +5,7 @@ protocol MovieDbClient {
 
   func tryConnect()
 
-  var storeFront: MovieDbStoreFront { get set }
-
-  var language: MovieDbLanguage? { get set }
+  var language: MovieDbLanguage { get set }
 
   var cache: TMDBSwiftCache { get set }
 
@@ -29,22 +27,6 @@ protocol MovieDbClient {
 
   func releaseDate(for id: Int) -> Date?
 
-}
-
-enum MovieDbStoreFront {
-  case germany
-
-  var language: String {
-    switch self {
-      case .germany: return "de"
-    }
-  }
-
-  var country: String {
-    switch self {
-      case .germany: return "DE"
-    }
-  }
 }
 
 enum MovieDbLanguage: String {
