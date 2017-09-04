@@ -14,7 +14,9 @@ All notable changes to the project will be documented in this file.
 - empty state views
 
 ### Changed
+- movies are fetched based on the user's language and region
 - user data is stored in documents folder
+- all images and movie responses from TMDB are cached
 - genres are stored by id instead of name
 - runtime and release date are optional
 - updated icons
