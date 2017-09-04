@@ -54,10 +54,12 @@ enum Config {
     let movieDb: MovieDbClient
     switch movieDbType {
       case .tmdbSwiftWrapper:
+        let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en
+        let country = MovieDbCountry(rawValue: Locale.current.regionCode ?? "US") ?? .unitedStates
         if arguments[orEmptyAt: startIndex + 2] == MovieDbArgument.Options.cached.rawValue {
-          movieDb = TMDBSwiftWrapper(storeFront: .germany, cache: StandardTMDBSwiftCache())
+          movieDb = TMDBSwiftWrapper(language: language, country: country, cache: StandardTMDBSwiftCache())
         } else {
-          movieDb = TMDBSwiftWrapper(storeFront: .germany, cache: EmptyTMDBSwiftCache())
+          movieDb = TMDBSwiftWrapper(language: language, country: country, cache: EmptyTMDBSwiftCache())
         }
     }
     return movieDb

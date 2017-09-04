@@ -9,19 +9,16 @@ class TMDBSwiftWrapper: MovieDbClient {
 
   private static let baseUrl = "https://image.tmdb.org/t/p/"
 
-  var storeFront: MovieDbStoreFront
+  var language: MovieDbLanguage
 
-  var language: MovieDbLanguage?
+  var country: MovieDbCountry
 
   var cache: TMDBSwiftCache
 
-  init(storeFront: MovieDbStoreFront, cache: TMDBSwiftCache) {
-    self.storeFront = storeFront
+  init(language: MovieDbLanguage, country: MovieDbCountry, cache: TMDBSwiftCache) {
+    self.language = language
+    self.country = country
     self.cache = cache
-  }
-
-  private func effectiveLanguage() -> String {
-    return language?.rawValue ?? storeFront.language
   }
 
   func tryConnect() {
@@ -31,8 +28,8 @@ class TMDBSwiftWrapper: MovieDbClient {
   private(set) var isConnected: Bool = false
 
   func poster(for id: Int, size: PosterSize) -> UIKit.UIImage? {
-    return cache.poster(for: "\(id)-\(size)") {
-      if let posterPath = movie(for: id, language: storeFront.language)?.poster_path {
+    return cache.poster(for: "\(id)-\(language)-\(size)") {
+      if let posterPath = movie(for: id)?.poster_path {
         let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
         if let data = try? Data(contentsOf: URL(string: path)!) {
           return UIImage(data: data)
@@ -43,11 +40,10 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   func overview(for id: Int) -> String? {
-    return movie(for: id, language: effectiveLanguage())?.overview
+    return movie(for: id)?.overview
   }
 
   func certification(for id: Int) -> String? {
-    let country = self.storeFront.country
     var releaseDates: [MovieReleaseDatesMDB]? = nil
     let certificationJson = cache.string(for: "certification-\(id)") {
       var jsonString: String?
@@ -66,22 +62,22 @@ class TMDBSwiftWrapper: MovieDbClient {
     if releaseDates == nil && certificationJson != nil {
       releaseDates = MovieReleaseDatesMDB.initialize(json: JSON.parse(certificationJson!))
     }
-    return releaseDates!.first { $0.iso_3166_1 == country }?.release_dates[0].certification
+    return releaseDates!.first { $0.iso_3166_1 == self.country.rawValue }?.release_dates[0].certification
   }
 
   func genreIds(for id: Int) -> [Int] {
-    if let genres = movie(for: id, language: effectiveLanguage())?.genres.map({ $0.id! }) {
+    if let genres = movie(for: id)?.genres.map({ $0.id! }) {
       return genres
     }
     return []
   }
 
-  private func movie(for id: Int, language: String) -> MovieDetailedMDB? {
+  private func movie(for id: Int) -> MovieDetailedMDB? {
     var createdMovie: MovieDetailedMDB? = nil
-    let movieJson = cache.string(for: "movie-\(id)-\(language)") {
+    let movieJson = cache.string(for: "movie-\(id)-\(language.rawValue)") {
       var jsonString: String?
       waitUntil { done in
-        MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: language) { apiReturn, movie in
+        MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: language.rawValue) { apiReturn, movie in
           if let json = apiReturn.json, apiReturn.json!["id"].exists() {
             jsonString = json.rawString()
             createdMovie = movie
@@ -102,7 +98,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     waitUntil { done in
       SearchMDB.movie(TMDBSwiftWrapper.apiKey,
                       query: searchText,
-                      language: storeFront.language,
+                      language: language.rawValue,
                       page: 1,
                       includeAdult: false,
                       year: nil,
@@ -123,14 +119,14 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   func runtime(for id: Int) -> Int? {
-    return movie(for: id, language: storeFront.language)?.runtime
+    return movie(for: id)?.runtime
   }
 
   func popularMovies() -> PagingSequence<PartialMediaItem> {
     return PagingSequence<PartialMediaItem> { page -> [PartialMediaItem]? in
       var movies = [PartialMediaItem]()
       self.waitUntil { done in
-        MovieMDB.popular(TMDBSwiftWrapper.apiKey, language: self.effectiveLanguage(), page: page) { _, result in
+        MovieMDB.popular(TMDBSwiftWrapper.apiKey, language: self.language.rawValue, page: page) { _, result in
           if let result = result {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -148,7 +144,7 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   func releaseDate(for id: Int) -> Date? {
-    guard let movie = movie(for: id, language: effectiveLanguage()),
+    guard let movie = movie(for: id),
           let releaseDate = movie.release_date else { return nil }
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy-MM-dd"

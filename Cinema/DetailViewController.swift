@@ -88,8 +88,7 @@ class DetailViewController: UIViewController {
     queue.async {
       let text: String
       if let certification = self.movieDb.certification(for: self.detailItem!.id), !certification.isEmpty {
-        let format = NSLocalizedString("details.certificationFormat", comment: "")
-        text = String(format: format, certification)
+        text = certification
       } else {
         text = NSLocalizedString("details.missing.certification", comment: "")
       }
