@@ -11,10 +11,13 @@ class TMDBSwiftWrapper: MovieDbClient {
 
   var language: MovieDbLanguage
 
+  var country: MovieDbCountry
+
   var cache: TMDBSwiftCache
 
-  init(language: MovieDbLanguage, cache: TMDBSwiftCache) {
+  init(language: MovieDbLanguage, country: MovieDbCountry, cache: TMDBSwiftCache) {
     self.language = language
+    self.country = country
     self.cache = cache
   }
 
@@ -59,7 +62,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     if releaseDates == nil && certificationJson != nil {
       releaseDates = MovieReleaseDatesMDB.initialize(json: JSON.parse(certificationJson!))
     }
-    return releaseDates!.first { $0.iso_3166_1 == "DE" }?.release_dates[0].certification
+    return releaseDates!.first { $0.iso_3166_1 == self.country.rawValue }?.release_dates[0].certification
   }
 
   func genreIds(for id: Int) -> [Int] {

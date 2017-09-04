@@ -7,6 +7,8 @@ protocol MovieDbClient {
 
   var language: MovieDbLanguage { get set }
 
+  var country: MovieDbCountry { get set }
+
   var cache: TMDBSwiftCache { get set }
 
   var isConnected: Bool { get }
@@ -27,6 +29,11 @@ protocol MovieDbClient {
 
   func releaseDate(for id: Int) -> Date?
 
+}
+
+enum MovieDbCountry: String {
+  case germany = "DE"
+  case unitedStates = "US"
 }
 
 enum MovieDbLanguage: String {

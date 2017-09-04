@@ -7,7 +7,6 @@
 "addItem.title" = "Add Movie";
 "cancel" = "Cancel";
 "continue" = "Continue";
-"details.certificationFormat" = "FSK %@";
 "details.missing.certification" = "No certification available.";
 "details.missing.genre" = "No genre available.";
 "details.missing.overview" = "No overview available.";
