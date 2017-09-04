@@ -116,7 +116,7 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   func runtime(for id: Int) -> Int? {
-    return movie(for: id, language: .de)?.runtime
+    return movie(for: id, language: language)?.runtime
   }
 
   func popularMovies() -> PagingSequence<PartialMediaItem> {
