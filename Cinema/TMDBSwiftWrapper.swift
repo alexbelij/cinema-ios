@@ -95,7 +95,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     waitUntil { done in
       SearchMDB.movie(TMDBSwiftWrapper.apiKey,
                       query: searchText,
-                      language: MovieDbLanguage.de.rawValue,
+                      language: language.rawValue,
                       page: 1,
                       includeAdult: false,
                       year: nil,
