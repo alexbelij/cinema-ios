@@ -2,7 +2,7 @@
 
 All notable changes to the project will be documented in this file.
 
-## unreleased
+## v1.3 - 2017-09-04
 
 ### Added
 - popular movies
