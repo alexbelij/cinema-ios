@@ -26,7 +26,7 @@ class TMDBSwiftWrapper: MovieDbClient {
 
   func poster(for id: Int, size: PosterSize) -> UIKit.UIImage? {
     return cache.poster(for: "\(id)-\(language)-\(size)") {
-      if let posterPath = movie(for: id, language: language)?.poster_path {
+      if let posterPath = movie(for: id)?.poster_path {
         let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
         if let data = try? Data(contentsOf: URL(string: path)!) {
           return UIImage(data: data)
@@ -37,7 +37,7 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   func overview(for id: Int) -> String? {
-    return movie(for: id, language: language)?.overview
+    return movie(for: id)?.overview
   }
 
   func certification(for id: Int) -> String? {
@@ -63,13 +63,13 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   func genreIds(for id: Int) -> [Int] {
-    if let genres = movie(for: id, language: language)?.genres.map({ $0.id! }) {
+    if let genres = movie(for: id)?.genres.map({ $0.id! }) {
       return genres
     }
     return []
   }
 
-  private func movie(for id: Int, language: MovieDbLanguage) -> MovieDetailedMDB? {
+  private func movie(for id: Int) -> MovieDetailedMDB? {
     var createdMovie: MovieDetailedMDB? = nil
     let movieJson = cache.string(for: "movie-\(id)-\(language.rawValue)") {
       var jsonString: String?
@@ -116,7 +116,7 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   func runtime(for id: Int) -> Int? {
-    return movie(for: id, language: language)?.runtime
+    return movie(for: id)?.runtime
   }
 
   func popularMovies() -> PagingSequence<PartialMediaItem> {
@@ -141,7 +141,7 @@ class TMDBSwiftWrapper: MovieDbClient {
   }
 
   func releaseDate(for id: Int) -> Date? {
-    guard let movie = movie(for: id, language: language),
+    guard let movie = movie(for: id),
           let releaseDate = movie.release_date else { return nil }
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy-MM-dd"
