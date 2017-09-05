@@ -1,5 +1,5 @@
 import Foundation
-import UIKit.UIImage
+import UIKit
 
 protocol MovieDbClient {
 
@@ -9,7 +9,7 @@ protocol MovieDbClient {
 
   var cache: TMDBSwiftCache { get set }
 
-  func poster(for id: Int, size: PosterSize) -> UIKit.UIImage?
+  func poster(for id: Int, size: PosterSize) -> UIImage?
 
   func overview(for id: Int) -> String?
 

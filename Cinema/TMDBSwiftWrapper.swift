@@ -1,7 +1,7 @@
 import Dispatch
 import Foundation
 import TMDBSwift
-import UIKit.UIImage
+import UIKit
 
 class TMDBSwiftWrapper: MovieDbClient {
 
@@ -21,7 +21,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     self.cache = cache
   }
 
-  func poster(for id: Int, size: PosterSize) -> UIKit.UIImage? {
+  func poster(for id: Int, size: PosterSize) -> UIImage? {
     return cache.poster(for: "\(id)-\(language)-\(size)") {
       if let posterPath = movie(for: id)?.poster_path {
         let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
