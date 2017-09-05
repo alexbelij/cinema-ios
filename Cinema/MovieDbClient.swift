@@ -1,12 +1,15 @@
+import Foundation
 import UIKit.UIImage
 
 protocol MovieDbClient {
 
   func tryConnect()
 
-  var storeFront: MovieDbStoreFront { get set }
+  var language: MovieDbLanguage { get set }
 
-  var language: MovieDbLanguage? { get set }
+  var country: MovieDbCountry { get set }
+
+  var cache: TMDBSwiftCache { get set }
 
   var isConnected: Bool { get }
 
@@ -16,32 +19,28 @@ protocol MovieDbClient {
 
   func certification(for id: Int) -> String?
 
-  func genres(for id: Int) -> [String]
+  func genreIds(for id: Int) -> [Int]
 
   func searchMovies(searchText: String) -> [PartialMediaItem]
 
   func runtime(for id: Int) -> Int?
 
+  func popularMovies() -> PagingSequence<PartialMediaItem>
+
+  func releaseDate(for id: Int) -> Date?
+
 }
 
-enum MovieDbStoreFront {
-  case germany
-
-  var language: String {
-    switch self {
-      case .germany: return "de"
-    }
-  }
-
-  var country: String {
-    switch self {
-      case .germany: return "DE"
-    }
-  }
+enum MovieDbCountry: String {
+  case germany = "DE"
+  case unitedStates = "US"
 }
 
 enum MovieDbLanguage: String {
-  case en, de
+  // swiftlint:disable identifier_name
+  case en
+  case de
+  // swiftlint:enable identifier_name
 }
 
 public enum PosterSize: String {
@@ -49,12 +48,46 @@ public enum PosterSize: String {
 
   init(minWidth: Int, scaleFactor: CGFloat = UIScreen.main.scale) {
     switch minWidth * Int(scaleFactor) {
-      case 0...92: self = .w92
-      case 93...154: self = .w154
+      case 0...92:    self =  .w92
+      case 93...154:  self = .w154
       case 155...185: self = .w185
       case 186...342: self = .w342
       case 343...500: self = .w500
-      default: self = .w780
+      default:        self = .w780
     }
+  }
+}
+
+struct PagingSequence<PageElement>: Sequence, IteratorProtocol {
+  typealias Element = PageElement
+
+  private let pageGenerator: (Int) -> AnyIterator<PageElement>?
+
+  private var nextPage = 1
+  private var pageElementIterator: AnyIterator<PageElement>?
+
+  init<S>(pageGenerator: @escaping (Int) -> S?) where S: Sequence, S.Iterator.Element == PageElement {
+    self.pageGenerator = { page in
+      guard let generatedPage = pageGenerator(page) else { return nil }
+      return AnyIterator<PageElement>(generatedPage.makeIterator())
+    }
+  }
+
+  private mutating func nextPageElementIterator() -> AnyIterator<PageElement>? {
+    guard let pageElementIterator = pageGenerator(nextPage) else { return nil }
+    defer { self.nextPage += 1 }
+    return AnyIterator { pageElementIterator.next() }
+  }
+
+  mutating func next() -> PageElement? {
+    if pageElementIterator == nil {
+      pageElementIterator = nextPageElementIterator()
+    }
+    guard let iterator = pageElementIterator else { return nil }
+    guard let element = iterator.next() else {
+      pageElementIterator = nil
+      return next()
+    }
+    return element
   }
 }

@@ -2,6 +2,8 @@ import Foundation
 
 protocol MediaLibrary {
 
+  var persistentSchemaVersion: SchemaVersion { get }
+
   func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem]
 
   func add(_ mediaItem: MediaItem) throws
@@ -10,7 +12,7 @@ protocol MediaLibrary {
 
   func remove(_ mediaItem: MediaItem) throws
 
-  func replaceItems(_ mediaItems: [MediaItem]) throws
+  func performBatchUpdates(_ updates: () throws -> Void) throws
 
 }
 

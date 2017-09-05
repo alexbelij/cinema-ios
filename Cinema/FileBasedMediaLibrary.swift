@@ -2,19 +2,17 @@ import Foundation
 
 class FileBasedMediaLibrary: MediaLibrary {
 
-  private let directory: URL
-
-  private let fileName: String
+  private let url: URL
 
   private let dataFormat: DataFormat
 
   private var mediaItems: [MediaItem]
 
-  init(directory: URL, fileName: String, dataFormat: DataFormat) throws {
-    self.directory = directory
-    self.fileName = fileName
+  private var isPerformingBatchUpdates = false
+
+  init(url: URL, dataFormat: DataFormat) throws {
+    self.url = url
     self.dataFormat = dataFormat
-    let url = directory.appendingPathComponent(fileName)
     if FileManager.default.fileExists(atPath: url.path) {
       guard let data = try? Data(contentsOf: URL(fileURLWithPath: url.path)) else {
         throw MediaLibraryError.storageError
@@ -26,6 +24,17 @@ class FileBasedMediaLibrary: MediaLibrary {
       }
     } else {
       mediaItems = []
+    }
+  }
+
+  var persistentSchemaVersion: SchemaVersion {
+    guard FileManager.default.fileExists(atPath: url.path) else {
+      return dataFormat.defaultSchemaVersion!
+    }
+    do {
+      return try dataFormat.schemaVersion(of: try Data(contentsOf: url))
+    } catch let error {
+      fatalError("Could not detect version of data at \(url): \(error)")
     }
   }
 
@@ -56,18 +65,20 @@ class FileBasedMediaLibrary: MediaLibrary {
     try saveData()
   }
 
-  func replaceItems(_ mediaItems: [MediaItem]) throws {
-    self.mediaItems = mediaItems
+  func performBatchUpdates(_ updates: () throws -> Void) throws {
+    isPerformingBatchUpdates = true
+    try updates()
+    isPerformingBatchUpdates = false
     try saveData()
   }
 
   private func saveData() throws {
+    guard !isPerformingBatchUpdates else { return }
     NotificationCenter.default.post(name: .didChangeMediaLibraryContent, object: self)
     guard let data = try? dataFormat.serialize(mediaItems) else {
       throw MediaLibraryError.storageError
     }
-    let success = FileManager.default.createFile(atPath: directory.appendingPathComponent(fileName).path,
-                                                 contents: data)
+    let success = FileManager.default.createFile(atPath: url.path, contents: data)
     if !success {
       throw MediaLibraryError.storageError
     }

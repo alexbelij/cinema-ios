@@ -2,6 +2,32 @@
 
 All notable changes to the project will be documented in this file.
 
+## v1.3 - 2017-09-04
+
+### Added
+- popular movies
+- new persistent data schema
+- importing new movies no longer replaces entire library
+- full release data replaces release year
+- tab bar
+- launch screen
+- empty state views
+
+### Changed
+- movies are fetched based on the user's language and region
+- user data is stored in documents folder
+- all images and movie responses from TMDB are cached
+- genres are stored by id instead of name
+- runtime and release date are optional
+- updated icons
+
+### Fixed
+- crash, when tapping on a movie while searching with empty search bar
+- invalid property values are accepted
+- movie list stays scrolled down when sorting changed
+- posters with different aspect ratio are displayed incorrectly
+- fast typing while searching leads to unexpected results
+
 ## v1.2 - 2017-08-04
 
 ### Added

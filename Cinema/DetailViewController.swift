@@ -9,15 +9,15 @@ class DetailViewController: UIViewController {
     }
   }
 
-  @IBOutlet weak var titleLabel: UILabel!
-  @IBOutlet weak var subtitleLabel: UILabel!
-  @IBOutlet weak var imageView: UIImageView!
-  @IBOutlet weak var genreLabel: UILabel!
-  @IBOutlet weak var runtimeLabel: UILabel!
-  @IBOutlet weak var yearLabel: UILabel!
-  @IBOutlet weak var certificationLabel: UILabel!
-  @IBOutlet weak var diskLabel: UILabel!
-  @IBOutlet weak var textView: UITextView!
+  @IBOutlet private weak var titleLabel: UILabel!
+  @IBOutlet private weak var subtitleLabel: UILabel!
+  @IBOutlet private weak var imageView: UIImageView!
+  @IBOutlet private weak var genreLabel: UILabel!
+  @IBOutlet private weak var runtimeLabel: UILabel!
+  @IBOutlet private weak var releaseDateLabel: UILabel!
+  @IBOutlet private weak var certificationLabel: UILabel!
+  @IBOutlet private weak var diskLabel: UILabel!
+  @IBOutlet private weak var textView: UITextView!
 
   var movieDb: MovieDbClient!
   var library: MediaLibrary!
@@ -34,11 +34,22 @@ class DetailViewController: UIViewController {
       } else {
         subtitleLabel.isHidden = true
       }
-      runtimeLabel.text = mediaItem.runtime == -1
+      runtimeLabel.text = mediaItem.runtime == nil
           ? NSLocalizedString("details.missing.runtime", comment: "")
-          : Utils.formatDuration(mediaItem.runtime)
-      yearLabel.text = "\(mediaItem.year)"
+          : Utils.formatDuration(mediaItem.runtime!)
+      let dateFormatter = DateFormatter()
+      dateFormatter.dateStyle = .long
+      dateFormatter.timeStyle = .none
+      releaseDateLabel.text = mediaItem.releaseDate == nil
+          ? NSLocalizedString("details.missing.releaseDate", comment: "")
+          : dateFormatter.string(from: mediaItem.releaseDate!)
       diskLabel.text = localize(diskType: mediaItem.diskType)
+      var genreString = Utils.localizedGenreNames(for: self.detailItem!.genreIds)
+                             .joined(separator: ", ")
+      if genreString.isEmpty {
+        genreString = NSLocalizedString("details.missing.genre", comment: "")
+      }
+      self.genreLabel.text = genreString
 
       if movieDb.isConnected {
         fetchAdditionalData()
@@ -63,7 +74,7 @@ class DetailViewController: UIViewController {
     group.enter()
     queue.async {
       let text: String
-      if let overview  = self.movieDb.overview(for: self.detailItem!.id), !overview.isEmpty {
+      if let overview = self.movieDb.overview(for: self.detailItem!.id), !overview.isEmpty {
         text = overview
       } else {
         text = NSLocalizedString("details.missing.overview", comment: "")
@@ -75,27 +86,9 @@ class DetailViewController: UIViewController {
     }
     group.enter()
     queue.async {
-      var genreString = self.movieDb.genres(for: self.detailItem!.id).reduce("") { (result, next) in
-        if result.isEmpty {
-          return next
-        } else {
-          return "\(result), \(next)"
-        }
-      }
-      if genreString.isEmpty {
-        genreString = NSLocalizedString("details.missing.genre", comment: "")
-      }
-      DispatchQueue.main.async {
-        self.genreLabel.text = genreString
-        group.leave()
-      }
-    }
-    group.enter()
-    queue.async {
       let text: String
       if let certification = self.movieDb.certification(for: self.detailItem!.id), !certification.isEmpty {
-        let format = NSLocalizedString("details.certificationFormat", comment: "")
-        text = String(format: format, certification)
+        text = certification
       } else {
         text = NSLocalizedString("details.missing.certification", comment: "")
       }
@@ -118,11 +111,12 @@ class DetailViewController: UIViewController {
 
   override func viewDidLoad() {
     UIApplication.shared.isNetworkActivityIndicatorVisible = true
-    imageView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
+    imageView.image = .genericPosterImage(minWidth: imageView.frame.size.width)
+    imageView.layer.borderColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
     imageView.layer.borderWidth = 0.5
     genreLabel?.text = ""
     runtimeLabel?.text = ""
-    yearLabel?.text = ""
+    releaseDateLabel?.text = ""
     certificationLabel?.text = ""
     diskLabel?.text = ""
     textView?.text = ""
@@ -134,9 +128,10 @@ class DetailViewController: UIViewController {
                                            object: nil)
   }
 
-  @objc private func reloadDetailItem() {
+  @objc
+  private func reloadDetailItem() {
     DispatchQueue.main.async {
-      let items = self.library.mediaItems(where: { $0.id == self.detailItem!.id })
+      let items = self.library.mediaItems { $0.id == self.detailItem!.id }
       if let updatedItem = items.first {
         self.detailItem = updatedItem
       } else {
@@ -155,16 +150,12 @@ class DetailViewController: UIViewController {
   }
 
   open override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    // swiftlint:disable force_cast
-    switch segue.identifier! {
-      case "editItem":
-        let navigationController = segue.destination as! UINavigationController
-        let editController = navigationController.topViewController as! EditItemTableViewController
-        editController.item = detailItem
-        editController.library = library
-      default: fatalError("unknown segue identifier \(segue.identifier!)")
+    switch segue.unwrappedDestination {
+      case let editVC as EditItemTableViewController:
+        editVC.item = detailItem
+        editVC.library = library
+      default: fatalError("Unexpected segue: '\(self)' -> '\(segue.destination)'")
     }
-    // swiftlint:enable force_cast
   }
 
   deinit {

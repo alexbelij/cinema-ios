@@ -2,23 +2,8 @@ import Foundation
 
 enum Config {
 
-  private static var applicationSupportDirectory: URL = {
-    let fileManager = FileManager.default
-    let urls = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)
-    if urls.count >= 1 {
-      let appSupportUrl = urls[0]
-      let appDirectory = appSupportUrl.appendingPathComponent(Bundle.main.bundleIdentifier!, isDirectory: true)
-      do {
-        try fileManager.createDirectory(at: appDirectory, withIntermediateDirectories: true)
-        return appDirectory
-      } catch {}
-    }
-    fatalError("Could not create Application Support directory")
-  }()
-
   /// Usage
   /// ```
-  ///   --library sample
   ///   --library fileBased
   /// ```
   static func initLibrary(launchArguments: [String]) -> MediaLibrary {
@@ -29,20 +14,31 @@ enum Config {
     }
     let library: MediaLibrary
     switch libraryType {
-      case .sample:
-        library = SampleLibrary()
       case .fileBased:
+        let url = Utils.directoryUrl(for: .documentDirectory).appendingPathComponent("cinema.data")
+        moveLegacyLibraryFile(to: url)
+        let dataFormat = KeyedArchivalFormat()
+        dataFormat.defaultSchemaVersion = .v2_0_0
         do {
-          let dataFormat = KeyedArchivalFormat()
-          dataFormat.defaultSchemaVersion = .v1_0_0
-          library = try FileBasedMediaLibrary(directory: applicationSupportDirectory,
-                                              fileName: "cinema.data",
-                                              dataFormat: dataFormat)
+          library = try FileBasedMediaLibrary(url: url, dataFormat: dataFormat)
         } catch let error {
           fatalError("Library could not be instantiated: \(error)")
         }
     }
     return library
+  }
+
+  private static func moveLegacyLibraryFile(to url: URL) {
+    let legacyUrl = Utils.directoryUrl(for: .applicationSupportDirectory, createIfNecessary: false)
+                         .appendingPathComponent(Bundle.main.bundleIdentifier!, isDirectory: true)
+                         .appendingPathComponent("cinema.data")
+    if FileManager.default.fileExists(atPath: legacyUrl.path) {
+      do {
+        try FileManager.default.moveItem(at: legacyUrl, to: url)
+      } catch let error {
+        fatalError("could not move library file: \(error)")
+      }
+    }
   }
 
   /// Usage
@@ -58,10 +54,12 @@ enum Config {
     let movieDb: MovieDbClient
     switch movieDbType {
       case .tmdbSwiftWrapper:
+        let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en
+        let country = MovieDbCountry(rawValue: Locale.current.regionCode ?? "US") ?? .unitedStates
         if arguments[orEmptyAt: startIndex + 2] == MovieDbArgument.Options.cached.rawValue {
-          movieDb = CachingMovieDbClient(backingClient: TMDBSwiftWrapper(storeFront: .germany))
+          movieDb = TMDBSwiftWrapper(language: language, country: country, cache: StandardTMDBSwiftCache())
         } else {
-          movieDb = TMDBSwiftWrapper(storeFront: .germany)
+          movieDb = TMDBSwiftWrapper(language: language, country: country, cache: EmptyTMDBSwiftCache())
         }
     }
     return movieDb
@@ -77,15 +75,14 @@ private extension Array where Iterator.Element == String {
   }
 }
 
-fileprivate enum LibraryArgument: String {
+private enum LibraryArgument: String {
   static let defaultArguments = [flag, fileBased.rawValue]
   static let flag = "--library"
 
-  case sample
   case fileBased
 }
 
-fileprivate enum MovieDbArgument: String {
+private enum MovieDbArgument: String {
   static let defaultArguments = [flag, tmdbSwiftWrapper.rawValue, Options.cached.rawValue]
   static let flag = "--movie-db"
 

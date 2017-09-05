@@ -5,9 +5,9 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
   var item: MediaItem!
   var library: MediaLibrary!
 
-  @IBOutlet weak var titleTextField: UITextField!
-  @IBOutlet weak var subtitleTextField: UITextField!
-  @IBOutlet weak var deleteMovieButton: UIButton!
+  @IBOutlet private weak var titleTextField: UITextField!
+  @IBOutlet private weak var subtitleTextField: UITextField!
+  @IBOutlet private weak var deleteMovieButton: UIButton!
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -31,8 +31,11 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
                                             message: nil,
                                             preferredStyle: .actionSheet)
     alertController.addAction(UIAlertAction(title: NSLocalizedString("edit.deleteMovie", comment: ""),
-                                            style: .destructive,
-                                            handler: { _ in self.deleteItem() }))
+                                            style: .destructive) { _ in
+      DispatchQueue.global(qos: .userInitiated).async {
+        self.performLibraryUpdate { try self.library.remove(self.item) }
+      }
+    })
     alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     self.present(alertController, animated: true)
   }
@@ -44,28 +47,16 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
         self.dismiss(animated: true)
         return
       }
-      let newMediaItem = self.collectInfos()
+
+      item.title = self.titleTextField.text!
+      var subtitle = self.subtitleTextField.text
+      if subtitle != nil && subtitle!.isEmpty {
+        subtitle = nil
+      }
+      item.subtitle = subtitle
+
       DispatchQueue.global(qos: .userInitiated).async {
-        var libraryError: Error? = nil
-        do {
-          try self.library.update(newMediaItem)
-        } catch let error {
-          libraryError = error
-        }
-        DispatchQueue.main.async {
-          if libraryError == nil {
-            self.dismiss(animated: true)
-          } else {
-            switch libraryError! {
-              case MediaLibraryError.itemDoesNotExist:
-                fatalError("updating non-existing item \(newMediaItem)")
-              case MediaLibraryError.storageError:
-                self.showCancelOrDiscardAlert(title: NSLocalizedString("error.storageError", comment: ""))
-              default:
-                self.showCancelOrDiscardAlert(title: NSLocalizedString("error.genericError", comment: ""))
-            }
-          }
-        }
+        self.performLibraryUpdate { try self.library.update(self.item) }
       }
     } else {
       let alertController = UIAlertController(title: NSLocalizedString("edit.noTitleAlert", comment: ""),
@@ -81,17 +72,22 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
     return !newTitle.isEmpty
   }
 
-  private func collectInfos() -> MediaItem {
-    var subtitle = self.subtitleTextField.text
-    if subtitle != nil && subtitle!.isEmpty {
-      subtitle = nil
+  private func performLibraryUpdate(action: @escaping () throws -> Void) {
+    do {
+      try action()
+      DispatchQueue.main.async {
+        self.dismiss(animated: true)
+      }
+    } catch let error {
+      switch error {
+        case MediaLibraryError.itemDoesNotExist:
+          fatalError("updating non-existing item \(self.item)")
+        default:
+          DispatchQueue.main.async {
+            self.showCancelOrDiscardAlert(title: Utils.localizedErrorMessage(for: error))
+          }
+      }
     }
-    return MediaItem(id: self.item!.id,
-                     title: self.titleTextField.text!,
-                     subtitle: subtitle,
-                     runtime: self.item!.runtime,
-                     year: self.item!.year,
-                     diskType: self.item!.diskType)
   }
 
   private func showCancelOrDiscardAlert(title: String) {
@@ -99,52 +95,12 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
                                             message: nil,
                                             preferredStyle: .alert)
     alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
-    alertController.addAction(UIAlertAction(title: NSLocalizedString("discard", comment: ""), style: .destructive,
-                                            handler: { _ in
-                                              self.dismiss(animated: true)
-                                            }))
+    alertController.addAction(UIAlertAction(title: NSLocalizedString("discard", comment: ""),
+                                            style: .destructive) { _ in
+      self.dismiss(animated: true)
+    })
     self.present(alertController, animated: true)
   }
-
-  @IBAction private func dismissKeyboard() {
-    self.view?.endEditing(false)
-  }
-
-  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-      if let nextField = self.view.viewWithTag(textField.tag + 1) as? UITextField {
-        nextField.becomeFirstResponder()
-      } else {
-        textField.resignFirstResponder()
-      }
-      return false
-  }
-
-  private func deleteItem() {
-    DispatchQueue.global(qos: .userInitiated).async {
-      var libraryError: Error? = nil
-      do {
-        try self.library.remove(self.item)
-      } catch let error {
-        libraryError = error
-      }
-      DispatchQueue.main.async {
-        if libraryError == nil {
-          self.dismiss(animated: true)
-        } else {
-          switch libraryError! {
-            case MediaLibraryError.itemDoesNotExist:
-              fatalError("updating non-existing item \(self.item)")
-            case MediaLibraryError.storageError:
-              self.showCancelOrDiscardAlert(title: NSLocalizedString("error.storageError", comment: ""))
-            default:
-              self.showCancelOrDiscardAlert(title: NSLocalizedString("error.genericError", comment: ""))
-          }
-        }
-      }
-    }
-  }
-
-  // MARK: - Table View
 
   public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
     switch section {
@@ -153,4 +109,18 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
       default: return nil
     }
   }
+
+  @IBAction private func dismissKeyboard() {
+    self.view?.endEditing(false)
+  }
+
+  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    if let nextField = self.view.viewWithTag(textField.tag + 1) as? UITextField {
+      nextField.becomeFirstResponder()
+    } else {
+      textField.resignFirstResponder()
+    }
+    return false
+  }
+
 }
