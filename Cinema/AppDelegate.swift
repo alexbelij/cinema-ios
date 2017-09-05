@@ -13,7 +13,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let arguments = ProcessInfo.processInfo.arguments
 
     self.movieDb = Config.initMovieDb(launchArguments: arguments)
-    self.movieDb.tryConnect()
 
     self.library = Config.initLibrary(launchArguments: arguments)
 

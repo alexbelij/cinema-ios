@@ -3,15 +3,11 @@ import UIKit.UIImage
 
 protocol MovieDbClient {
 
-  func tryConnect()
-
   var language: MovieDbLanguage { get set }
 
   var country: MovieDbCountry { get set }
 
   var cache: TMDBSwiftCache { get set }
-
-  var isConnected: Bool { get }
 
   func poster(for id: Int, size: PosterSize) -> UIKit.UIImage?
 

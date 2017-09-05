@@ -21,12 +21,6 @@ class TMDBSwiftWrapper: MovieDbClient {
     self.cache = cache
   }
 
-  func tryConnect() {
-    isConnected = true
-  }
-
-  private(set) var isConnected: Bool = false
-
   func poster(for id: Int, size: PosterSize) -> UIKit.UIImage? {
     return cache.poster(for: "\(id)-\(language)-\(size)") {
       if let posterPath = movie(for: id)?.poster_path {
