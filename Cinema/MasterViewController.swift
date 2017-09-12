@@ -1,7 +1,8 @@
 import Dispatch
 import UIKit
 
-class MasterViewController: UITableViewController, UISearchResultsUpdating, ListOptionsViewControllerDelegate {
+class MasterViewController: UITableViewController, UISearchResultsUpdating, UISearchControllerDelegate,
+    ListOptionsViewControllerDelegate {
 
   var library: MediaLibrary!
   var movieDb: MovieDbClient!
@@ -22,6 +23,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
   @IBOutlet private var emptyView: UIView!
   @IBOutlet private weak var emptyViewLabel: UILabel!
 
+  private var state: State = .initializing
+
   override func viewDidLoad() {
     fetchLibraryData()
     super.viewDidLoad()
@@ -29,6 +32,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
     emptyViewLabel.text = NSLocalizedString("library.empty", comment: "")
     searchController.searchResultsUpdater = self
     searchController.dimsBackgroundDuringPresentation = false
+    searchController.delegate = self
     definesPresentationContext = true
     searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
     tableView.sectionIndexBackgroundColor = UIColor.clear
@@ -66,16 +70,27 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
 
   private func showEmptyViewIfNecessary() {
     if self.allItems.isEmpty {
-      self.tableView.backgroundView = emptyView
-      self.tableView.separatorStyle = .none
-      self.searchController.isActive = false
-      self.tableView.tableHeaderView = nil
-      self.sortButton.isEnabled = false
+      switch state {
+        case .initializing, .data, .searching:
+          self.tableView.backgroundView = emptyView
+          self.tableView.separatorStyle = .none
+          self.searchController.isActive = false
+          self.tableView.tableHeaderView = nil
+          self.sortButton.isEnabled = false
+          self.state = .noData
+        case .noData: break
+      }
     } else {
-      self.tableView.backgroundView = nil
-      self.tableView.separatorStyle = .singleLine
-      self.tableView.tableHeaderView = self.searchController.searchBar
-      self.sortButton.isEnabled = true
+      switch state {
+        case .initializing, .noData:
+          self.tableView.backgroundView = nil
+          self.tableView.separatorStyle = .singleLine
+          self.tableView.tableHeaderView = self.searchController.searchBar
+          self.sortButton.isEnabled = true
+          self.state = .data
+        case .data: fallthrough
+        case .searching: break
+      }
     }
   }
 
@@ -207,6 +222,20 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
     tableView.reloadData()
   }
 
+  func willPresentSearchController(_ searchController: UISearchController) {
+    state = .searching
+  }
+
+  func willDismissSearchController(_ searchController: UISearchController) {
+    state = allItems.isEmpty ? .noData : .data
+  }
+
+  private enum State {
+    case initializing
+    case noData
+    case data
+    case searching
+  }
 }
 
 class MovieTableCell: UITableViewCell {
