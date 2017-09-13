@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13196" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="RMx-3f-FxP">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13196" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="RMx-3f-FxP">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -8,6 +8,7 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -34,16 +35,12 @@
         <scene sceneID="yUG-lL-AsK">
             <objects>
                 <viewController title="Detail" id="JEX-9P-axG" customClass="DetailViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="SYR-Wa-9uf"/>
-                        <viewControllerLayoutGuide type="bottom" id="GAO-Cl-Wes"/>
-                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="svH-Pt-448">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rxh-GR-vWh">
-                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eWR-Wq-QmO">
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="275"/>
@@ -201,10 +198,11 @@
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="rxh-GR-vWh" secondAttribute="trailing" id="3en-os-T9x"/>
-                            <constraint firstItem="rxh-GR-vWh" firstAttribute="top" secondItem="svH-Pt-448" secondAttribute="topMargin" id="DIV-61-NVb"/>
-                            <constraint firstAttribute="bottomMargin" secondItem="rxh-GR-vWh" secondAttribute="bottom" id="Iy1-ih-GWN"/>
+                            <constraint firstItem="rxh-GR-vWh" firstAttribute="top" secondItem="svH-Pt-448" secondAttribute="top" id="DIV-61-NVb"/>
+                            <constraint firstAttribute="bottom" secondItem="rxh-GR-vWh" secondAttribute="bottom" id="Iy1-ih-GWN"/>
                             <constraint firstItem="rxh-GR-vWh" firstAttribute="leading" secondItem="svH-Pt-448" secondAttribute="leading" id="eYC-r8-IqG"/>
                         </constraints>
+                        <viewLayoutGuide key="safeArea" id="22T-kn-pVr"/>
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" id="mOI-FS-AaM">
@@ -301,7 +299,7 @@
                                     <outlet property="posterView" destination="tfX-gs-cmb" id="4Gu-Hi-aAP"/>
                                     <outlet property="runtimeLabel" destination="jLI-Qh-1nJ" id="A4h-BK-J29"/>
                                     <outlet property="titleLabel" destination="u4C-9v-cfc" id="TQg-tK-bre"/>
-                                    <segue destination="JEX-9P-axG" kind="show" identifier="" id="oJX-cD-d2b"/>
+                                    <segue destination="JEX-9P-axG" kind="show" id="Xyu-3L-FUr"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -330,10 +328,10 @@
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <subviews>
                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="7Mg-RS-fZZ">
-                            <rect key="frame" x="0.0" y="91.5" width="300" height="118.5"/>
+                            <rect key="frame" x="16" y="91" width="300" height="118.5"/>
                             <subviews>
                                 <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="EmptyLibrary" translatesAutoresizingMaskIntoConstraints="NO" id="pl3-1Y-onL">
-                                    <rect key="frame" x="150" y="0.0" width="90" height="90"/>
+                                    <rect key="frame" x="134" y="0.0" width="90" height="90"/>
                                 </imageView>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Your library is empty." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eic-vT-vzJ">
                                     <rect key="frame" x="0.0" y="98" width="300" height="20.5"/>
@@ -346,10 +344,11 @@
                     </subviews>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <constraints>
-                        <constraint firstItem="7Mg-RS-fZZ" firstAttribute="centerY" secondItem="TMl-t9-Hr9" secondAttribute="centerY" id="1pv-u5-AVI"/>
-                        <constraint firstItem="7Mg-RS-fZZ" firstAttribute="leading" secondItem="TMl-t9-Hr9" secondAttribute="leadingMargin" id="gmV-oT-eOR"/>
-                        <constraint firstAttribute="trailingMargin" secondItem="7Mg-RS-fZZ" secondAttribute="trailing" id="xVe-lr-RZy"/>
+                        <constraint firstItem="7Mg-RS-fZZ" firstAttribute="centerY" secondItem="0FG-kc-gxk" secondAttribute="centerY" id="1pv-u5-AVI"/>
+                        <constraint firstItem="7Mg-RS-fZZ" firstAttribute="leading" secondItem="0FG-kc-gxk" secondAttribute="leading" constant="16" id="gmV-oT-eOR"/>
+                        <constraint firstItem="7Mg-RS-fZZ" firstAttribute="trailing" secondItem="0FG-kc-gxk" secondAttribute="trailing" constant="16" id="xVe-lr-RZy"/>
                     </constraints>
+                    <viewLayoutGuide key="safeArea" id="0FG-kc-gxk"/>
                 </view>
             </objects>
             <point key="canvasLocation" x="709" y="-630"/>
