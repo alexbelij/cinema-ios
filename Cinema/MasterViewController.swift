@@ -68,8 +68,11 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
     }
     sectionIndexTitles = Array(sectionItems.keys)
     sectionIndexTitles.sort(by: strategy.sectionIndexTitleSorting)
-    visibleSectionIndexTitles = [UITableViewIndexSearch] + strategy.refineSectionIndexTitles(
-        sectionIndexTitles)
+    if #available(iOS 11.0, *) {
+      visibleSectionIndexTitles = strategy.refineSectionIndexTitles(sectionIndexTitles)
+    } else {
+      visibleSectionIndexTitles = [UITableViewIndexSearch] + strategy.refineSectionIndexTitles(sectionIndexTitles)
+    }
     sectionTitles = sectionIndexTitles.map { strategy.sectionTitle(for: $0) }
   }
 
@@ -112,6 +115,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
     if #available(iOS 11.0, *) {
       if addSearchBarOnViewDidAppear {
         self.navigationItem.searchController = searchController
+        self.navigationItem.hidesSearchBarWhenScrolling = false
         addSearchBarOnViewDidAppear = false
       }
     }
