@@ -38,16 +38,16 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
     definesPresentationContext = true
     searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
     tableView.sectionIndexBackgroundColor = UIColor.clear
-    if #available(iOS 11.0, *) {
-    } else {
-      tableView.setContentOffset(CGPoint(x: 0, y: searchController.searchBar.frame.height), animated: false)
-    }
     clearsSelectionOnViewWillAppear = true
 
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(reloadLibraryData),
                                            name: .didChangeMediaLibraryContent,
                                            object: nil)
+    if #available(iOS 11.0, *) {
+    } else {
+      scrollToTop(animated: false)
+    }
     showEmptyViewIfNecessary()
   }
 
@@ -158,9 +158,28 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
   }
 
   private func scrollToTop(animated: Bool) {
-    let topHeight = UIApplication.shared.statusBarFrame.height + navigationController!.navigationBar.frame.height
-    let offset = searchController.searchBar.frame.height - topHeight
-    self.tableView.setContentOffset(CGPoint(x: 0, y: offset), animated: animated)
+    switch state {
+      case .initializing:
+        if #available(iOS 11.0, *) {
+          fatalError("search bar is hidden by default")
+        } else {
+          let offset = searchController.searchBar.frame.height
+          self.tableView.setContentOffset(CGPoint(x: 0, y: offset), animated: animated)
+        }
+      case .noData: break
+      case .searching:
+        if filteredMediaItems.isEmpty {
+          break
+        }
+        fallthrough
+      case .data:
+        if #available(iOS 11.0, *) {
+          tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
+        } else {
+          let offset = -UIApplication.shared.statusBarFrame.height
+          self.tableView.setContentOffset(CGPoint(x: 0, y: offset), animated: animated)
+        }
+    }
   }
 
   // MARK: - Table View
@@ -247,6 +266,9 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
     filteredMediaItems = allItems.filter { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
 
     tableView.reloadData()
+    if searchController.isActive {
+      self.scrollToTop(animated: false)
+    }
   }
 
   func willPresentSearchController(_ searchController: UISearchController) {
