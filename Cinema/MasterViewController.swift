@@ -25,6 +25,8 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
 
   private var state: State = .initializing
 
+  private var addSearchBarOnViewDidAppear = false
+
   override func viewDidLoad() {
     fetchLibraryData()
     super.viewDidLoad()
@@ -36,7 +38,10 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
     definesPresentationContext = true
     searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
     tableView.sectionIndexBackgroundColor = UIColor.clear
-    tableView.setContentOffset(CGPoint(x: 0, y: searchController.searchBar.frame.height), animated: false)
+    if #available(iOS 11.0, *) {
+    } else {
+      tableView.setContentOffset(CGPoint(x: 0, y: searchController.searchBar.frame.height), animated: false)
+    }
     clearsSelectionOnViewWillAppear = true
 
     NotificationCenter.default.addObserver(self,
@@ -63,8 +68,11 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
     }
     sectionIndexTitles = Array(sectionItems.keys)
     sectionIndexTitles.sort(by: strategy.sectionIndexTitleSorting)
-    visibleSectionIndexTitles = [UITableViewIndexSearch] + strategy.refineSectionIndexTitles(
-        sectionIndexTitles)
+    if #available(iOS 11.0, *) {
+      visibleSectionIndexTitles = strategy.refineSectionIndexTitles(sectionIndexTitles)
+    } else {
+      visibleSectionIndexTitles = [UITableViewIndexSearch] + strategy.refineSectionIndexTitles(sectionIndexTitles)
+    }
     sectionTitles = sectionIndexTitles.map { strategy.sectionTitle(for: $0) }
   }
 
@@ -75,7 +83,11 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
           self.tableView.backgroundView = emptyView
           self.tableView.separatorStyle = .none
           self.searchController.isActive = false
-          self.tableView.tableHeaderView = nil
+          if #available(iOS 11.0, *) {
+            self.navigationItem.searchController = nil
+          } else {
+            self.tableView.tableHeaderView = nil
+          }
           self.sortButton.isEnabled = false
           self.state = .noData
         case .noData: break
@@ -85,11 +97,26 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
         case .initializing, .noData:
           self.tableView.backgroundView = nil
           self.tableView.separatorStyle = .singleLine
-          self.tableView.tableHeaderView = self.searchController.searchBar
+          if #available(iOS 11.0, *) {
+            self.addSearchBarOnViewDidAppear = true
+          } else {
+            self.tableView.tableHeaderView = self.searchController.searchBar
+          }
           self.sortButton.isEnabled = true
           self.state = .data
         case .data: fallthrough
         case .searching: break
+      }
+    }
+  }
+
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    if #available(iOS 11.0, *) {
+      if addSearchBarOnViewDidAppear {
+        self.navigationItem.searchController = searchController
+        self.navigationItem.hidesSearchBarWhenScrolling = false
+        addSearchBarOnViewDidAppear = false
       }
     }
   }

@@ -30,8 +30,7 @@ class StandardTMDBSwiftCache: TMDBSwiftCache {
     return cachingImpl(key: key, cache: posterCache, supplier: supplier)
   }
 
-  private func cachingImpl<Element>(key: String, cache: SpecializedCache<Element>, supplier: () -> Element?) -> Element?
-      where Element: Cachable {
+  private func cachingImpl<Element>(key: String, cache: SpecializedCache<Element>, supplier: () -> Element?) -> Element? {
     if let cachedElement = cache.object(forKey: key) {
       return cachedElement
     }
