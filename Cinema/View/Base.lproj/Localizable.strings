@@ -54,7 +54,6 @@
 "mediaItem.disk.dvd" = "DVD";
 "no" = "No";
 "ok" = "OK";
-"options" = "Options";
 "popularMovies" = "Popular movies";
 "popularMovies.empty" = "There are no popular movies at the moment. Please, come back later.";
 "search.results.empty" = "No results for “%@”";
