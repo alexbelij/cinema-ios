@@ -5,7 +5,7 @@ target 'Cinema' do
 
   # Pods for Cinema
   pod 'TMDBSwift', '0.4.0'
-  pod 'Cache', '3.3.0'
+  pod 'Cache', '4.0.0'
   pod 'SwiftyJSON', '3.1.4'
 
 end
