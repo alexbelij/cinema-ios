@@ -55,7 +55,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     }
     if releaseDates == nil && certificationJson != nil {
       var array = [MovieReleaseDatesMDB]()
-      JSON.parse(certificationJson!).forEach {
+      JSON(parseJSON: certificationJson!).forEach {
         array.append(MovieReleaseDatesMDB(results: $0.1))
       }
       releaseDates = array
@@ -86,7 +86,7 @@ class TMDBSwiftWrapper: MovieDbClient {
       return jsonString
     }
     if createdMovie == nil && movieJson != nil {
-      createdMovie = MovieDetailedMDB(results: JSON.parse(movieJson!))
+      createdMovie = MovieDetailedMDB(results: JSON(parseJSON: movieJson!))
     }
     return createdMovie
   }
