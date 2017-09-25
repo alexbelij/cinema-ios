@@ -20,8 +20,10 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
   private var sortDescriptor = SortDescriptor.title
 
   @IBOutlet private weak var sortButton: UIBarButtonItem!
-  @IBOutlet private var emptyView: UIView!
-  @IBOutlet private weak var emptyViewLabel: UILabel!
+  @IBOutlet private var emptyLibraryView: UIView!
+  @IBOutlet private weak var emptyLibraryViewLabel: UILabel!
+  @IBOutlet private var emptySearchResultsView: UIView!
+  @IBOutlet private weak var emptySearchResultsViewLabel: UILabel!
 
   private var state: State = .initializing
 
@@ -31,7 +33,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
     fetchLibraryData()
     super.viewDidLoad()
     title = NSLocalizedString("library", comment: "")
-    emptyViewLabel.text = NSLocalizedString("library.empty", comment: "")
+    emptyLibraryViewLabel.text = NSLocalizedString("library.empty", comment: "")
     searchController.searchResultsUpdater = self
     searchController.dimsBackgroundDuringPresentation = false
     searchController.delegate = self
@@ -48,7 +50,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
     } else {
       scrollToTop(animated: false)
     }
-    showEmptyViewIfNecessary()
+    showEmptyLibraryViewIfNecessary()
   }
 
   private func fetchLibraryData() {
@@ -76,11 +78,11 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
     sectionTitles = sectionIndexTitles.map { strategy.sectionTitle(for: $0) }
   }
 
-  private func showEmptyViewIfNecessary() {
+  private func showEmptyLibraryViewIfNecessary() {
     if self.allItems.isEmpty {
       switch state {
         case .initializing, .data, .searching:
-          self.tableView.backgroundView = emptyView
+          self.tableView.backgroundView = emptyLibraryView
           self.tableView.separatorStyle = .none
           self.searchController.isActive = false
           if #available(iOS 11.0, *) {
@@ -125,7 +127,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
   private func reloadLibraryData() {
     fetchLibraryData()
     DispatchQueue.main.async {
-      self.showEmptyViewIfNecessary()
+      self.showEmptyLibraryViewIfNecessary()
       self.tableView.reloadData()
     }
   }
@@ -262,13 +264,31 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
   }
 
   public func updateSearchResults(for searchController: UISearchController) {
-    let lowercasedSearchText = searchController.searchBar.text!.lowercased()
-    filteredMediaItems = allItems.filter { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
+    switch state {
+      case .searching:
+        let searchText = searchController.searchBar.text!
+        let lowercasedSearchText = searchText.lowercased()
+        filteredMediaItems = allItems.filter { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
 
-    tableView.reloadData()
-    if searchController.isActive {
-      self.scrollToTop(animated: false)
+        if filteredMediaItems.isEmpty && !searchText.isEmpty {
+          self.emptySearchResultsViewLabel.text = .localizedStringWithFormat(NSLocalizedString("search.results.empty",
+                                                                                               comment: ""), searchText)
+          self.tableView.backgroundView = self.emptySearchResultsView
+          self.tableView.separatorStyle = .none
+        } else {
+          self.tableView.backgroundView = nil
+          self.tableView.separatorStyle = .singleLine
+        }
+      case .data:
+        self.tableView.backgroundView = nil
+        self.tableView.separatorStyle = .singleLine
+      case .noData:
+        self.tableView.backgroundView = emptyLibraryView
+        self.tableView.separatorStyle = .none
+      case .initializing: fatalError("should not be called during initialization")
     }
+    tableView.reloadData()
+    self.scrollToTop(animated: false)
   }
 
   func willPresentSearchController(_ searchController: UISearchController) {
