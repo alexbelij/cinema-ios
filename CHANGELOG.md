@@ -2,11 +2,14 @@
 
 All notable changes to the project will be documented in this file.
 
-## v1.3.1 - unreleased
+## v1.3.1 - 2017-09-26
 
 ### Added
 - support for iOS 11
 - empty state view for search
+
+### Changed
+- written in Swift 4
 
 ### Fixed
 - search bar disappears after library is modified
