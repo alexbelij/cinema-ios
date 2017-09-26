@@ -1,7 +1,7 @@
 import Dispatch
 import Foundation
 import TMDBSwift
-import UIKit.UIImage
+import UIKit
 
 class TMDBSwiftWrapper: MovieDbClient {
 
@@ -21,13 +21,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     self.cache = cache
   }
 
-  func tryConnect() {
-    isConnected = true
-  }
-
-  private(set) var isConnected: Bool = false
-
-  func poster(for id: Int, size: PosterSize) -> UIKit.UIImage? {
+  func poster(for id: Int, size: PosterSize) -> UIImage? {
     return cache.poster(for: "\(id)-\(language)-\(size)") {
       if let posterPath = movie(for: id)?.poster_path {
         let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
@@ -61,7 +55,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     }
     if releaseDates == nil && certificationJson != nil {
       var array = [MovieReleaseDatesMDB]()
-      JSON.parse(certificationJson!).forEach {
+      JSON(parseJSON: certificationJson!).forEach {
         array.append(MovieReleaseDatesMDB(results: $0.1))
       }
       releaseDates = array
@@ -92,7 +86,7 @@ class TMDBSwiftWrapper: MovieDbClient {
       return jsonString
     }
     if createdMovie == nil && movieJson != nil {
-      createdMovie = MovieDetailedMDB(results: JSON.parse(movieJson!))
+      createdMovie = MovieDetailedMDB(results: JSON(parseJSON: movieJson!))
     }
     return createdMovie
   }

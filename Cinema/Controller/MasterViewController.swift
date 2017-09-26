@@ -1,7 +1,8 @@
 import Dispatch
 import UIKit
 
-class MasterViewController: UITableViewController, UISearchResultsUpdating, ListOptionsViewControllerDelegate {
+class MasterViewController: UITableViewController, UISearchResultsUpdating, UISearchControllerDelegate,
+    ListOptionsViewControllerDelegate {
 
   var library: MediaLibrary!
   var movieDb: MovieDbClient!
@@ -19,27 +20,37 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
   private var sortDescriptor = SortDescriptor.title
 
   @IBOutlet private weak var sortButton: UIBarButtonItem!
-  @IBOutlet private var emptyView: UIView!
-  @IBOutlet private weak var emptyViewLabel: UILabel!
+  @IBOutlet private var emptyLibraryView: UIView!
+  @IBOutlet private weak var emptyLibraryViewLabel: UILabel!
+  @IBOutlet private var emptySearchResultsView: UIView!
+  @IBOutlet private weak var emptySearchResultsViewLabel: UILabel!
+
+  private var state: State = .initializing
+
+  private var addSearchBarOnViewDidAppear = false
 
   override func viewDidLoad() {
     fetchLibraryData()
     super.viewDidLoad()
     title = NSLocalizedString("library", comment: "")
-    emptyViewLabel.text = NSLocalizedString("library.empty", comment: "")
+    emptyLibraryViewLabel.text = NSLocalizedString("library.empty", comment: "")
     searchController.searchResultsUpdater = self
     searchController.dimsBackgroundDuringPresentation = false
+    searchController.delegate = self
     definesPresentationContext = true
     searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
     tableView.sectionIndexBackgroundColor = UIColor.clear
-    tableView.setContentOffset(CGPoint(x: 0, y: searchController.searchBar.frame.height), animated: false)
     clearsSelectionOnViewWillAppear = true
 
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(reloadLibraryData),
                                            name: .didChangeMediaLibraryContent,
                                            object: nil)
-    showEmptyViewIfNecessary()
+    if #available(iOS 11.0, *) {
+    } else {
+      scrollToTop(animated: false)
+    }
+    showEmptyLibraryViewIfNecessary()
   }
 
   private func fetchLibraryData() {
@@ -59,23 +70,56 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
     }
     sectionIndexTitles = Array(sectionItems.keys)
     sectionIndexTitles.sort(by: strategy.sectionIndexTitleSorting)
-    visibleSectionIndexTitles = [UITableViewIndexSearch] + strategy.refineSectionIndexTitles(
-        sectionIndexTitles)
+    if #available(iOS 11.0, *) {
+      visibleSectionIndexTitles = strategy.refineSectionIndexTitles(sectionIndexTitles)
+    } else {
+      visibleSectionIndexTitles = [UITableViewIndexSearch] + strategy.refineSectionIndexTitles(sectionIndexTitles)
+    }
     sectionTitles = sectionIndexTitles.map { strategy.sectionTitle(for: $0) }
   }
 
-  private func showEmptyViewIfNecessary() {
+  private func showEmptyLibraryViewIfNecessary() {
     if self.allItems.isEmpty {
-      self.tableView.backgroundView = emptyView
-      self.tableView.separatorStyle = .none
-      self.searchController.isActive = false
-      self.tableView.tableHeaderView = nil
-      self.sortButton.isEnabled = false
+      switch state {
+        case .initializing, .data, .searching:
+          self.tableView.backgroundView = emptyLibraryView
+          self.tableView.separatorStyle = .none
+          self.searchController.isActive = false
+          if #available(iOS 11.0, *) {
+            self.navigationItem.searchController = nil
+          } else {
+            self.tableView.tableHeaderView = nil
+          }
+          self.sortButton.isEnabled = false
+          self.state = .noData
+        case .noData: break
+      }
     } else {
-      self.tableView.backgroundView = nil
-      self.tableView.separatorStyle = .singleLine
-      self.tableView.tableHeaderView = self.searchController.searchBar
-      self.sortButton.isEnabled = true
+      switch state {
+        case .initializing, .noData:
+          self.tableView.backgroundView = nil
+          self.tableView.separatorStyle = .singleLine
+          if #available(iOS 11.0, *) {
+            self.addSearchBarOnViewDidAppear = true
+          } else {
+            self.tableView.tableHeaderView = self.searchController.searchBar
+          }
+          self.sortButton.isEnabled = true
+          self.state = .data
+        case .data: fallthrough
+        case .searching: break
+      }
+    }
+  }
+
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    if #available(iOS 11.0, *) {
+      if addSearchBarOnViewDidAppear {
+        self.navigationItem.searchController = searchController
+        self.navigationItem.hidesSearchBarWhenScrolling = false
+        addSearchBarOnViewDidAppear = false
+      }
     }
   }
 
@@ -83,7 +127,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
   private func reloadLibraryData() {
     fetchLibraryData()
     DispatchQueue.main.async {
-      self.showEmptyViewIfNecessary()
+      self.showEmptyLibraryViewIfNecessary()
       self.tableView.reloadData()
     }
   }
@@ -116,9 +160,28 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
   }
 
   private func scrollToTop(animated: Bool) {
-    let topHeight = UIApplication.shared.statusBarFrame.height + navigationController!.navigationBar.frame.height
-    let offset = searchController.searchBar.frame.height - topHeight
-    self.tableView.setContentOffset(CGPoint(x: 0, y: offset), animated: animated)
+    switch state {
+      case .initializing:
+        if #available(iOS 11.0, *) {
+          fatalError("search bar is hidden by default")
+        } else {
+          let offset = searchController.searchBar.frame.height
+          self.tableView.setContentOffset(CGPoint(x: 0, y: offset), animated: animated)
+        }
+      case .noData: break
+      case .searching:
+        if filteredMediaItems.isEmpty {
+          break
+        }
+        fallthrough
+      case .data:
+        if #available(iOS 11.0, *) {
+          tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
+        } else {
+          let offset = -UIApplication.shared.statusBarFrame.height
+          self.tableView.setContentOffset(CGPoint(x: 0, y: offset), animated: animated)
+        }
+    }
   }
 
   // MARK: - Table View
@@ -201,12 +264,47 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, List
   }
 
   public func updateSearchResults(for searchController: UISearchController) {
-    let lowercasedSearchText = searchController.searchBar.text!.lowercased()
-    filteredMediaItems = allItems.filter { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
+    switch state {
+      case .searching:
+        let searchText = searchController.searchBar.text!
+        let lowercasedSearchText = searchText.lowercased()
+        filteredMediaItems = allItems.filter { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
 
+        if filteredMediaItems.isEmpty && !searchText.isEmpty {
+          self.emptySearchResultsViewLabel.text = .localizedStringWithFormat(NSLocalizedString("search.results.empty",
+                                                                                               comment: ""), searchText)
+          self.tableView.backgroundView = self.emptySearchResultsView
+          self.tableView.separatorStyle = .none
+        } else {
+          self.tableView.backgroundView = nil
+          self.tableView.separatorStyle = .singleLine
+        }
+      case .data:
+        self.tableView.backgroundView = nil
+        self.tableView.separatorStyle = .singleLine
+      case .noData:
+        self.tableView.backgroundView = emptyLibraryView
+        self.tableView.separatorStyle = .none
+      case .initializing: fatalError("should not be called during initialization")
+    }
     tableView.reloadData()
+    self.scrollToTop(animated: false)
   }
 
+  func willPresentSearchController(_ searchController: UISearchController) {
+    state = .searching
+  }
+
+  func willDismissSearchController(_ searchController: UISearchController) {
+    state = allItems.isEmpty ? .noData : .data
+  }
+
+  private enum State {
+    case initializing
+    case noData
+    case data
+    case searching
+  }
 }
 
 class MovieTableCell: UITableViewCell {
@@ -216,7 +314,7 @@ class MovieTableCell: UITableViewCell {
 
   override func awakeFromNib() {
     super.awakeFromNib()
-    posterView.layer.borderColor = #colorLiteral(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.2).cgColor
+    posterView.layer.borderColor = #colorLiteral(red:0.0, green:0.0, blue:0.0, alpha:0.2).cgColor
     posterView.layer.borderWidth = 0.5
   }
 }

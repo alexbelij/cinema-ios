@@ -33,7 +33,7 @@ class PropertyUpdateAction: MaintenanceAction {
           progress.completedUnitCount += 1
         }
       }
-      completion(.result())
+      completion(.result(()))
     } catch let error {
       completion(.error(error))
     }

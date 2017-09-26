@@ -1,9 +1,7 @@
 import Foundation
-import UIKit.UIImage
+import UIKit
 
 protocol MovieDbClient {
-
-  func tryConnect()
 
   var language: MovieDbLanguage { get set }
 
@@ -11,9 +9,7 @@ protocol MovieDbClient {
 
   var cache: TMDBSwiftCache { get set }
 
-  var isConnected: Bool { get }
-
-  func poster(for id: Int, size: PosterSize) -> UIKit.UIImage?
+  func poster(for id: Int, size: PosterSize) -> UIImage?
 
   func overview(for id: Int) -> String?
 

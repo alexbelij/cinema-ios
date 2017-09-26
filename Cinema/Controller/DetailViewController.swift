@@ -51,9 +51,7 @@ class DetailViewController: UIViewController {
       }
       self.genreLabel.text = genreString
 
-      if movieDb.isConnected {
-        fetchAdditionalData()
-      }
+      fetchAdditionalData()
     }
   }
 
