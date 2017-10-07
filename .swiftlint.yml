@@ -1,19 +1,26 @@
-disabled_rules: # rule identifiers to exclude from running
-opt_in_rules: # some rules are only opt-in
+disabled_rules:
+  - fallthrough
+  - switch_case_alignment
+opt_in_rules:
+  - array_init
   - attributes
   - closure_end_indentation
   - closure_spacing
+  - contains_over_first_not_nil
   - empty_count
-  - explicit_enum_raw_value
   - explicit_init
   - fatal_error_message
   - first_where
   - for_where
   - implicit_return
+  - joined_default_parameter
+  - literal_expression_end_indentation
   - let_var_whitespace
+  - multiline_arguments
   - multiline_parameters
   - nimble_operator
   - object_literal
+  - operator_usage_whitespace
   - overridden_super_call
   - pattern_matching_keywords
   - private_outlet
