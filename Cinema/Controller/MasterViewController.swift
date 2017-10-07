@@ -314,7 +314,7 @@ class MovieTableCell: UITableViewCell {
 
   override func awakeFromNib() {
     super.awakeFromNib()
-    posterView.layer.borderColor = #colorLiteral(red:0.0, green:0.0, blue:0.0, alpha:0.2).cgColor
+    posterView.layer.borderColor = #colorLiteral(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.2).cgColor
     posterView.layer.borderWidth = 0.5
   }
 }

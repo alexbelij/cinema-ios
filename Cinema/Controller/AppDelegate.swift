@@ -47,11 +47,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // swiftlint:enable force_cast
 
     mainNavController.tabBarItem = UITabBarItem(title: NSLocalizedString("library", comment: ""),
-                                                image: #imageLiteral(resourceName:"Tab-Library-normal"),
-                                                selectedImage: #imageLiteral(resourceName:"Tab-Library-selected"))
+                                                image: #imageLiteral(resourceName: "Tab-Library-normal"),
+                                                selectedImage: #imageLiteral(resourceName: "Tab-Library-selected"))
     addItemNavController.tabBarItem = UITabBarItem(title: NSLocalizedString("addItem.title", comment: ""),
-                                                   image: #imageLiteral(resourceName:"Tab-AddItem-normal"),
-                                                   selectedImage: #imageLiteral(resourceName:"Tab-AddItem-selected"))
+                                                   image: #imageLiteral(resourceName: "Tab-AddItem-normal"),
+                                                   selectedImage: #imageLiteral(resourceName: "Tab-AddItem-selected"))
     let tabBarController = UITabBarController()
     tabBarController.viewControllers = [mainNavController, addItemNavController]
     return tabBarController
@@ -83,12 +83,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     if let snapShot = self.window!.snapshotView(afterScreenUpdates: true) {
       newController.view.addSubview(snapShot)
       self.window!.rootViewController = newController
-      UIView.animate(withDuration: 0.3, animations: {
-        snapShot.layer.opacity = 0
-        snapShot.layer.transform = CATransform3DMakeScale(1.5, 1.5, 1.5)
-      }) { _ in
-        snapShot.removeFromSuperview()
-      }
+      UIView.animate(withDuration: 0.3,
+                     animations: {
+                       snapShot.layer.opacity = 0
+                       snapShot.layer.transform = CATransform3DMakeScale(1.5, 1.5, 1.5)
+                     },
+                     completion: { _ in
+                       snapShot.removeFromSuperview()
+                     })
     } else {
       self.window!.rootViewController = newController
     }

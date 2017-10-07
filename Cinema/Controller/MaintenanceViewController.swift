@@ -57,7 +57,7 @@ class MaintenanceViewController: UIViewController {
     super.viewWillAppear(animated)
     primaryLabel.text = primaryText
     secondaryLabel.text = secondaryText
-    if case let ActionInitiation.button(title:title) = initiation! {
+    if case let ActionInitiation.button(title) = initiation! {
       actionButton.setTitle(title, for: .normal)
       actionButton.isHidden = false
     } else {
