@@ -146,11 +146,10 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
   }
 
   @IBAction func showSortDescriptorSheet() {
-    let controller = UIAlertController(title: NSLocalizedString("sort.by", comment: ""),
-                                       message: nil,
-                                       preferredStyle: .actionSheet)
+    let controller = TabularSheetController<SortingSheetItem>(cellConfig: SortingSheetCellConfig())
     for descriptor in [SortDescriptor.title, .runtime, .year] {
-      controller.addAction(UIAlertAction(title: self.localizedTitle(for: descriptor), style: .default) { _ in
+      controller.addSheetItem(SortingSheetItem(sortingName: self.localizedTitle(for: descriptor),
+                                               isCurrentSorting: descriptor == self.sortDescriptor) { _ in
         self.sortDescriptor = descriptor
         DispatchQueue.global(qos: .userInitiated).async {
           self.reloadLibraryData()
@@ -160,7 +159,6 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
         }
       })
     }
-    controller.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     self.present(controller, animated: true)
   }
 

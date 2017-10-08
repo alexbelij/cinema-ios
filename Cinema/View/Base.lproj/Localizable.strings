@@ -57,7 +57,6 @@
 "popularMovies" = "Popular movies";
 "popularMovies.empty" = "There are no popular movies at the moment. Please, come back later.";
 "search.results.empty" = "No results for “%@”";
-"sort.by" = "Sort by";
 "sort.by.runtime" = "Runtime";
 "sort.by.runtime.lessThanTenMinutes" = "Less than 10 minutes";
 "sort.by.runtime.unknownHeader" = "Unknown";
