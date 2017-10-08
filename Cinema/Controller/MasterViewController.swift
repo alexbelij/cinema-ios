@@ -150,6 +150,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
     for descriptor in [SortDescriptor.title, .runtime, .year] {
       controller.addSheetItem(SortingSheetItem(sortingName: self.localizedTitle(for: descriptor),
                                                isCurrentSorting: descriptor == self.sortDescriptor) { _ in
+        guard self.sortDescriptor != descriptor else { return }
         self.sortDescriptor = descriptor
         DispatchQueue.global(qos: .userInitiated).async {
           self.reloadLibraryData()
