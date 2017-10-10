@@ -11,6 +11,7 @@ class DimmingPresentationController: UIPresentationController {
 
   override func presentationTransitionWillBegin() {
     containerView?.insertSubview(dimmingView, at: 0)
+    presentingViewController.view.tintAdjustmentMode = .dimmed
     presentedViewController.transitionCoordinator!.animate(alongsideTransition: { _ in self.dimmingView.alpha = 1.0 },
                                                            completion: nil)
   }
@@ -21,6 +22,7 @@ class DimmingPresentationController: UIPresentationController {
   }
 
   override func dismissalTransitionWillBegin() {
+    presentingViewController.view.tintAdjustmentMode = .automatic
     presentedViewController.transitionCoordinator!.animate(alongsideTransition: { _ in self.dimmingView.alpha = 0.0 },
                                                            completion: nil)
   }
