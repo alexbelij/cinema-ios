@@ -77,6 +77,14 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
     self.hasViewBeenShown = true
   }
 
+  public override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    contentView!.frame = CGRect(x: self.view.bounds.origin.x + sheetMargin,
+                                y: self.view.bounds.origin.y + self.view.bounds.height - self.contentHeight,
+                                width: contentWidth,
+                                height: contentHeight)
+  }
+
   private func setUpContentView() {
     guard !self.sheetItems.isEmpty else { preconditionFailure("there must be at least one sheet item") }
     contentView = UIView()
