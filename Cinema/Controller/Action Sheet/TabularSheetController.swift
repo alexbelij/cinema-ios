@@ -79,7 +79,7 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
 
   public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
-    contentView!.frame = CGRect(x: self.view.bounds.origin.x + sheetMargin,
+    contentView!.frame = CGRect(x: (self.view.bounds.width - self.contentWidth) / 2,
                                 y: self.view.bounds.origin.y + self.view.bounds.height - self.contentHeight,
                                 width: contentWidth,
                                 height: contentHeight)
@@ -88,7 +88,7 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
   private func setUpContentView() {
     guard !self.sheetItems.isEmpty else { preconditionFailure("there must be at least one sheet item") }
     contentView = UIView()
-    contentWidth = self.view.bounds.height - 2 * sheetMargin
+    contentWidth = min(self.view.bounds.width, self.view.bounds.height) - 2 * sheetMargin
     contentHeight = 0.0
     sheetItemGroups.forEach { group in
       self.setUpTableView(tableController: ArrayTableController(sheetItemType: .array(group),
