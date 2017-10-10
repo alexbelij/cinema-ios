@@ -80,8 +80,7 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
       self.tableControllers.removeAll()
     }
     contentView = UIView()
-    let bounds = view.bounds
-    contentWidth = bounds.size.width - 2 * sheetMargin
+    contentWidth = self.view.bounds.height - 2 * sheetMargin
     contentHeight = 0.0
     sheetItemGroups.forEach { group in
       self.setUpTableView(tableController: ArrayTableController(sheetItemType: .array(group),
@@ -97,8 +96,8 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
         tableView.register(CancelCell.self, forCellReuseIdentifier: "CancelCell")
       }
     }
-    contentView!.frame = CGRect(x: bounds.origin.x + sheetMargin,
-                                y: self.view.bounds.origin.y + self.view.frame.height,
+    contentView!.frame = CGRect(x: self.view.bounds.origin.x + sheetMargin,
+                                y: self.view.bounds.origin.y + self.view.bounds.height,
                                 width: contentWidth,
                                 height: contentHeight)
     view.addSubview(contentView!)
@@ -154,34 +153,35 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
     let duration = transitionDuration(using: transitionContext)
     let containerView = transitionContext.containerView
 
+    let fromViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from)!
+    let fromView = fromViewController.view!
+    let toViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to)!
+    let toView = toViewController.view!
     if isPresenting {
-      let toViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to)!
-      containerView.addSubview(toViewController.view!)
-
+      containerView.addSubview(toView)
       UIView.animate(withDuration: duration,
                      delay: 0.0,
                      usingSpringWithDamping: 1.0,
                      initialSpringVelocity: 0.0,
                      options: [.curveEaseOut],
                      animations: {
-                       contentView.frame.origin.y = self.view.bounds.origin.y + self.view.frame.height
+                       contentView.frame.origin.y = fromView.bounds.origin.y + fromView.bounds.height
                                                     - self.contentHeight
                      },
                      completion: { _ in
                        transitionContext.completeTransition(true)
                      })
     } else {
-      let fromViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from)!
       UIView.animate(withDuration: duration,
                      delay: 0.0,
                      usingSpringWithDamping: 1.0,
                      initialSpringVelocity: 0.0,
                      options: [.curveEaseIn],
                      animations: {
-                       contentView.frame.origin.y = self.view.bounds.origin.y + self.view.frame.height
+                       contentView.frame.origin.y = toView.bounds.origin.y + toView.bounds.height
                      },
                      completion: { _ in
-                       fromViewController.view?.removeFromSuperview()
+                       fromView.removeFromSuperview()
                        transitionContext.completeTransition(true)
                      })
     }
