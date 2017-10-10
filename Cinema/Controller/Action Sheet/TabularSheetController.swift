@@ -40,9 +40,9 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
   public var sheetCornerRadius: CGFloat = 14.0
 
   private var contentView: UIView?
-  private var isContentViewSetup = false
   private var contentWidth: CGFloat = 0.0
   private var contentHeight: CGFloat = 0.0
+  private var hasViewBeenShown = false
 
   public init<C: TabularSheetCellConfiguration>(cellConfig: C) where C.SheetItem == SheetItem {
     self.cellConfig = AnyTabularSheetCellConfiguration(cellConfig)
@@ -62,23 +62,23 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
 
   public func addSheetItem(_ item: SheetItem) {
     sheetItems.append(item)
-    isContentViewSetup = false
   }
 
   // MARK: - Table View Setup
 
   public override func viewWillAppear(_ animated: Bool) {
+    guard !hasViewBeenShown else { preconditionFailure("TabularSheetController can only be shown once") }
     super.viewWillAppear(animated)
     setUpContentView()
   }
 
+  public override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    self.hasViewBeenShown = true
+  }
+
   private func setUpContentView() {
-    guard !isContentViewSetup else { return }
     guard !self.sheetItems.isEmpty else { preconditionFailure("there must be at least one sheet item") }
-    if self.contentView != nil {
-      self.contentView!.removeFromSuperview()
-      self.tableControllers.removeAll()
-    }
     contentView = UIView()
     contentWidth = self.view.bounds.height - 2 * sheetMargin
     contentHeight = 0.0
@@ -101,7 +101,6 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
                                 width: contentWidth,
                                 height: contentHeight)
     view.addSubview(contentView!)
-    self.isContentViewSetup = true
   }
 
   private func setUpTableView(tableController: ArrayTableController<SheetItem>,
