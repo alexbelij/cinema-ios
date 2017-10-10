@@ -11,16 +11,13 @@ class DimmingPresentationController: UIPresentationController {
 
   override func presentationTransitionWillBegin() {
     containerView?.insertSubview(dimmingView, at: 0)
-    NSLayoutConstraint.activate(NSLayoutConstraint.constraints(withVisualFormat: "V:|[dimmingView]|",
-                                                               options: [],
-                                                               metrics: nil,
-                                                               views: ["dimmingView": dimmingView]))
-    NSLayoutConstraint.activate(NSLayoutConstraint.constraints(withVisualFormat: "H:|[dimmingView]|",
-                                                               options: [],
-                                                               metrics: nil,
-                                                               views: ["dimmingView": dimmingView]))
     presentedViewController.transitionCoordinator!.animate(alongsideTransition: { _ in self.dimmingView.alpha = 1.0 },
                                                            completion: nil)
+  }
+
+  override func containerViewDidLayoutSubviews() {
+    super.containerViewDidLayoutSubviews()
+    dimmingView.frame = frameOfPresentedViewInContainerView
   }
 
   override func dismissalTransitionWillBegin() {
