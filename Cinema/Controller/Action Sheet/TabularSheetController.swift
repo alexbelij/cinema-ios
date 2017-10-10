@@ -16,7 +16,7 @@ public enum SheetItemGroupingStyle {
 // MARK: - TabularSheetController
 
 public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewController,
-    UIViewControllerTransitioningDelegate, UIViewControllerAnimatedTransitioning, UIGestureRecognizerDelegate {
+    UIViewControllerTransitioningDelegate, UIGestureRecognizerDelegate {
 
   private var sheetItems = [SheetItem]()
   private var sheetItemGroups: [[SheetItem]] {
@@ -135,63 +135,16 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
     contentHeight += tableView.frame.height + sheetMargin
   }
 
-  // MARK: - UIViewControllerTransitioningDelegate & UIViewControllerAnimatedTransitioning
-
-  private var isPresenting = true
+  // MARK: - UIViewControllerTransitioningDelegate
 
   public func animationController(forPresented presented: UIViewController,
                                   presenting: UIViewController,
                                   source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-    isPresenting = true
-    return self
+    return ContentViewPresentTransition()
   }
 
   public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-    isPresenting = false
-    return self
-  }
-
-  public func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-    return 0.4
-  }
-
-  public func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-    guard let contentView = self.contentView else { preconditionFailure() }
-    let duration = transitionDuration(using: transitionContext)
-    let containerView = transitionContext.containerView
-
-    let fromViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from)!
-    let fromView = fromViewController.view!
-    let toViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to)!
-    let toView = toViewController.view!
-    if isPresenting {
-      containerView.addSubview(toView)
-      UIView.animate(withDuration: duration,
-                     delay: 0.0,
-                     usingSpringWithDamping: 1.0,
-                     initialSpringVelocity: 0.0,
-                     options: [.curveEaseOut],
-                     animations: {
-                       contentView.frame.origin.y = fromView.bounds.origin.y + fromView.bounds.height
-                                                    - self.contentHeight
-                     },
-                     completion: { _ in
-                       transitionContext.completeTransition(true)
-                     })
-    } else {
-      UIView.animate(withDuration: duration,
-                     delay: 0.0,
-                     usingSpringWithDamping: 1.0,
-                     initialSpringVelocity: 0.0,
-                     options: [.curveEaseIn],
-                     animations: {
-                       contentView.frame.origin.y = toView.bounds.origin.y + toView.bounds.height
-                     },
-                     completion: { _ in
-                       fromView.removeFromSuperview()
-                       transitionContext.completeTransition(true)
-                     })
-    }
+    return ContentViewDismissTransition()
   }
 
   public func presentationController(forPresented presented: UIViewController,
