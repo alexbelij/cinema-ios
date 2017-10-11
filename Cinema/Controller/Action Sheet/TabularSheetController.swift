@@ -16,7 +16,7 @@ public enum SheetItemGroupingStyle {
 // MARK: - TabularSheetController
 
 public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewController,
-    UIViewControllerTransitioningDelegate, UIGestureRecognizerDelegate {
+    UIViewControllerTransitioningDelegate {
 
   private var sheetItems = [SheetItem]()
   private var sheetItemGroups: [[SheetItem]] {
@@ -151,25 +151,6 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
                                      presenting: UIViewController?,
                                      source: UIViewController) -> UIPresentationController? {
     return DimmingPresentationController(presentedViewController: presented, presenting: presenting)
-  }
-
-  // MARK: - Dismiss When Tapped Outside Of Content View
-
-  public override func viewDidLoad() {
-    super.viewDidLoad()
-    let recognizer = UITapGestureRecognizer(target: self, action: #selector(tappedOutsideOfContentView))
-    recognizer.delegate = self
-    recognizer.cancelsTouchesInView = false
-    self.view.addGestureRecognizer(recognizer)
-  }
-
-  public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-    return !contentView!.frame.contains(touch.location(in: nil))
-  }
-
-  @objc
-  private func tappedOutsideOfContentView() {
-    self.dismiss(animated: true)
   }
 }
 
