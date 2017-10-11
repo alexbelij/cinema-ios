@@ -76,8 +76,8 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
     self.hasViewBeenShown = true
   }
 
-  public override func viewDidLayoutSubviews() {
-    super.viewDidLayoutSubviews()
+  public override func viewWillLayoutSubviews() {
+    super.viewWillLayoutSubviews()
     let bounds = presentingViewController!.view.bounds
     view.frame = CGRect(x: (bounds.width - self.contentWidth) / 2,
                         y: bounds.origin.y + bounds.height - self.contentHeight,
