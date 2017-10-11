@@ -136,16 +136,6 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
 
   // MARK: - UIViewControllerTransitioningDelegate
 
-  public func animationController(forPresented presented: UIViewController,
-                                  presenting: UIViewController,
-                                  source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-    return ContentViewPresentTransition()
-  }
-
-  public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-    return ContentViewDismissTransition()
-  }
-
   public func presentationController(forPresented presented: UIViewController,
                                      presenting: UIViewController?,
                                      source: UIViewController) -> UIPresentationController? {
