@@ -39,7 +39,6 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
   public var sheetMargin: CGFloat = 10.0
   public var sheetCornerRadius: CGFloat = 14.0
 
-  private var contentView: UIView?
   private var contentWidth: CGFloat = 0.0
   private var contentHeight: CGFloat = 0.0
   private var hasViewBeenShown = false
@@ -79,15 +78,15 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
 
   public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
-    contentView!.frame = CGRect(x: (self.view.bounds.width - self.contentWidth) / 2,
-                                y: self.view.bounds.origin.y + self.view.bounds.height - self.contentHeight,
-                                width: contentWidth,
-                                height: contentHeight)
+    let bounds = presentingViewController!.view.bounds
+    view.frame = CGRect(x: (bounds.width - self.contentWidth) / 2,
+                        y: bounds.origin.y + bounds.height - self.contentHeight,
+                        width: contentWidth,
+                        height: contentHeight)
   }
 
   private func setUpContentView() {
     guard !self.sheetItems.isEmpty else { preconditionFailure("there must be at least one sheet item") }
-    contentView = UIView()
     contentWidth = min(self.view.bounds.width, self.view.bounds.height) - 2 * sheetMargin
     contentHeight = 0.0
     sheetItemGroups.forEach { group in
@@ -104,11 +103,11 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
         tableView.register(CancelCell.self, forCellReuseIdentifier: "CancelCell")
       }
     }
-    contentView!.frame = CGRect(x: self.view.bounds.origin.x + sheetMargin,
-                                y: self.view.bounds.origin.y + self.view.bounds.height,
-                                width: contentWidth,
-                                height: contentHeight)
-    view.addSubview(contentView!)
+    let bounds = presentingViewController!.view.bounds
+    view.frame = CGRect(x: (bounds.width - self.contentWidth) / 2,
+                        y: bounds.origin.y + bounds.height,
+                        width: contentWidth,
+                        height: contentHeight)
   }
 
   private func setUpTableView(tableController: ArrayTableController<SheetItem>,
@@ -125,7 +124,7 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
     tableView.layer.cornerRadius = self.sheetCornerRadius
     tableView.layer.masksToBounds = true
     cellRegistering(tableView)
-    contentView!.addSubview(tableView)
+    view.addSubview(tableView)
 
     tableView.layoutIfNeeded()
     tableView.frame = CGRect(x: 0,
