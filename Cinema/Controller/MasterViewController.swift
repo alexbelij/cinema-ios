@@ -1,8 +1,7 @@
 import Dispatch
 import UIKit
 
-class MasterViewController: UITableViewController, UISearchResultsUpdating, UISearchControllerDelegate,
-    ListOptionsViewControllerDelegate {
+class MasterViewController: UITableViewController, UISearchResultsUpdating, UISearchControllerDelegate {
 
   var library: MediaLibrary!
   var movieDb: MovieDbClient!
@@ -142,20 +141,33 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
           detailVC.movieDb = movieDb
           detailVC.library = library
         }
-      case let listOptionsVC as ListOptionsViewController:
-        listOptionsVC.selectedDescriptor = self.sortDescriptor
-        listOptionsVC.delegate = self
       default: fatalError("Unexpected segue: '\(self)' -> '\(segue.destination)'")
     }
   }
 
-  func sortDescriptorDidChange(to descriptor: SortDescriptor) {
-    self.sortDescriptor = descriptor
-    DispatchQueue.global(qos: .userInitiated).async {
-      self.reloadLibraryData()
-      DispatchQueue.main.async {
-        self.scrollToTop(animated: false)
-      }
+  @IBAction func showSortDescriptorSheet() {
+    let controller = TabularSheetController<SortingSheetItem>(cellConfig: SortingSheetCellConfig())
+    for descriptor in [SortDescriptor.title, .runtime, .year] {
+      controller.addSheetItem(SortingSheetItem(sortingName: self.localizedTitle(for: descriptor),
+                                               isCurrentSorting: descriptor == self.sortDescriptor) { _ in
+        guard self.sortDescriptor != descriptor else { return }
+        self.sortDescriptor = descriptor
+        DispatchQueue.global(qos: .userInitiated).async {
+          self.reloadLibraryData()
+          DispatchQueue.main.async {
+            self.scrollToTop(animated: false)
+          }
+        }
+      })
+    }
+    self.present(controller, animated: true)
+  }
+
+  private func localizedTitle(for descriptor: SortDescriptor) -> String {
+    switch descriptor {
+      case .title: return NSLocalizedString("sort.by.title", comment: "")
+      case .runtime: return NSLocalizedString("sort.by.runtime", comment: "")
+      case .year: return NSLocalizedString("sort.by.year", comment: "")
     }
   }
 

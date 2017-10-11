@@ -312,7 +312,7 @@
                     <navigationItem key="navigationItem" title="Library" id="Zdf-7t-Un8">
                         <barButtonItem key="leftBarButtonItem" image="Sort" style="done" id="xa6-xy-PhH">
                             <connections>
-                                <segue destination="zyi-7f-Ha6" kind="presentation" identifier="" id="BXs-Cp-uOM"/>
+                                <action selector="showSortDescriptorSheet" destination="7bK-jq-Zjz" id="Gk4-lS-fKy"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -389,14 +389,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="TgU-DM-iRb" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2371" y="-632"/>
-        </scene>
-        <!--ListOptions-->
-        <scene sceneID="ONN-pd-CUv">
-            <objects>
-                <viewControllerPlaceholder storyboardName="ListOptions" id="zyi-7f-Ha6" sceneMemberID="viewController"/>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="42L-fx-3Jn" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1487" y="-1152"/>
         </scene>
     </scenes>
     <resources>

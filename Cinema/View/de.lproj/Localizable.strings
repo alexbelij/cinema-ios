@@ -54,11 +54,9 @@
 "mediaItem.disk.dvd" = "DVD";
 "no" = "Nein";
 "ok" = "OK";
-"options" = "Optionen";
 "popularMovies" = "Beliebte Filme";
 "popularMovies.empty" = "Zurzeit gibt es keine beliebten Filme. Versuch es später nochmal.";
 "search.results.empty" = "Keine Treffer für „%@“";
-"sort.by" = "Sortieren nach";
 "sort.by.runtime" = "Laufzeit";
 "sort.by.runtime.lessThanTenMinutes" = "Weniger als 10 Minuten";
 "sort.by.runtime.unknownHeader" = "Unbekannt";
