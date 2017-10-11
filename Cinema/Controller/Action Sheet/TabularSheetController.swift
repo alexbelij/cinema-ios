@@ -76,11 +76,17 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
     self.hasViewBeenShown = true
   }
 
-  public override func viewDidLayoutSubviews() {
-    super.viewDidLayoutSubviews()
+  public override func viewWillLayoutSubviews() {
+    super.viewWillLayoutSubviews()
+    let bottomInset: CGFloat
+    if #available(iOS 11.0, *) {
+      bottomInset = presentingViewController!.view.safeAreaInsets.bottom
+    } else {
+      bottomInset = 0
+    }
     let bounds = presentingViewController!.view.bounds
     view.frame = CGRect(x: (bounds.width - self.contentWidth) / 2,
-                        y: bounds.origin.y + bounds.height - self.contentHeight,
+                        y: bounds.origin.y + bounds.height - self.contentHeight - bottomInset,
                         width: contentWidth,
                         height: contentHeight)
   }
