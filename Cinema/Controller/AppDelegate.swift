@@ -10,11 +10,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-    let arguments = ProcessInfo.processInfo.arguments
-
-    self.movieDb = Config.initMovieDb(launchArguments: arguments)
-
-    self.library = Config.initLibrary(launchArguments: arguments)
+    self.movieDb = Config.initMovieDb()
+    self.library = Config.initLibrary()
 
     let rootViewController: UIViewController
     let updates = Utils.updates(from: library.persistentSchemaVersion, using: movieDb)
