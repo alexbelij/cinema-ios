@@ -1,7 +1,6 @@
 import UIKit
 
 class ArrayTableController<SheetItem: SheetItemProtocol>: NSObject, UITableViewDataSource, UITableViewDelegate {
-  private let selectedBackgroundColor = #colorLiteral(red: 0.9, green: 0.9, blue: 0.9, alpha: 1)
 
   private let sheetItemType: SheetItemType
   private let cellConfig: AnyTabularSheetCellConfiguration<SheetItem>
@@ -51,10 +50,6 @@ class ArrayTableController<SheetItem: SheetItemProtocol>: NSObject, UITableViewD
         }
     }
     tableView.deselectRow(at: indexPath, animated: true)
-  }
-
-  func tableView(_ tableView: UITableView, didHighlightRowAt indexPath: IndexPath) {
-    tableView.cellForRow(at: indexPath)?.contentView.backgroundColor = selectedBackgroundColor
   }
 
   func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
