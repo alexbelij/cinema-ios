@@ -86,6 +86,13 @@ class Utils {
 
 }
 
+extension UIStoryboard {
+  static var main = UIStoryboard(name: "Main", bundle: nil)
+  static var addItem = UIStoryboard(name: "AddItem", bundle: nil)
+  static var editItem = UIStoryboard(name: "EditItem", bundle: nil)
+  static var maintenance = UIStoryboard(name: "Maintenance", bundle: nil)
+}
+
 extension UIStoryboardSegue {
   var unwrappedDestination: UIViewController {
     switch destination {
