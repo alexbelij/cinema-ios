@@ -102,17 +102,6 @@ extension UIStoryboard {
   }
 }
 
-extension UIStoryboardSegue {
-  var unwrappedDestination: UIViewController {
-    switch destination {
-      case let navigation as UINavigationController:
-        return navigation.topViewController!
-      default:
-        return destination
-    }
-  }
-}
-
 extension UIImage {
   static func genericPosterImage(minWidth: CGFloat) -> UIImage {
     let width: CGFloat

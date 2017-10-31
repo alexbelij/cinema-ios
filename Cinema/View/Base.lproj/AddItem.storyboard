@@ -49,7 +49,6 @@
                     <connections>
                         <outlet property="placeholderHeightConstraint" destination="Jau-CY-5YV" id="L2a-nr-VKp"/>
                         <outlet property="searchBarPlaceholder" destination="dDh-15-iSA" id="0mP-b8-YA7"/>
-                        <segue destination="11G-x7-NBc" kind="presentation" identifier="addItem" id="6kD-tJ-ZjW"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cTT-Yk-ZSf" userLabel="First Responder" sceneMemberID="firstResponder"/>

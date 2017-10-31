@@ -131,20 +131,6 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
     }
   }
 
-  // MARK: - Segues
-
-  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    switch segue.unwrappedDestination {
-      case let detailVC as DetailViewController:
-        if let selectedIndexPath = tableView.indexPathForSelectedRow {
-          detailVC.detailItem = item(for: selectedIndexPath)
-          detailVC.movieDb = movieDb
-          detailVC.library = library
-        }
-      default: fatalError("Unexpected segue: '\(self)' -> '\(segue.destination)'")
-    }
-  }
-
   @IBAction func showSortDescriptorSheet() {
     let controller = TabularSheetController<SortingSheetItem>(cellConfig: SortingSheetCellConfig())
     for descriptor in [SortDescriptor.title, .runtime, .year] {
@@ -272,6 +258,16 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
       return -1
     } else {
       return sectionIndexTitles.index(of: title) ?? -1
+    }
+  }
+
+  override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    if let selectedIndexPath = tableView.indexPathForSelectedRow {
+      let detailVC = UIStoryboard.main.instantiate(DetailViewController.self)
+      detailVC.detailItem = item(for: selectedIndexPath)
+      detailVC.movieDb = movieDb
+      detailVC.library = library
+      self.navigationController!.pushViewController(detailVC, animated: true)
     }
   }
 

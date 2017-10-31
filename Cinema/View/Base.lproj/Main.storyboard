@@ -31,10 +31,10 @@
             </objects>
             <point key="canvasLocation" x="-176" y="-631"/>
         </scene>
-        <!--Detail-->
+        <!--Detail View Controller-->
         <scene sceneID="yUG-lL-AsK">
             <objects>
-                <viewController title="Detail" id="JEX-9P-axG" customClass="DetailViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="DetailViewController" id="JEX-9P-axG" customClass="DetailViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="svH-Pt-448">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -208,10 +208,11 @@
                     <navigationItem key="navigationItem" id="mOI-FS-AaM">
                         <barButtonItem key="rightBarButtonItem" systemItem="edit" id="bBS-e7-XCY">
                             <connections>
-                                <segue destination="tRg-8m-ihn" kind="presentation" identifier="" id="xZO-E0-jBp"/>
+                                <action selector="presentEditViewController" destination="JEX-9P-axG" id="GEJ-VA-vMh"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <connections>
                         <outlet property="certificationLabel" destination="1oE-tC-Pti" id="5qY-AG-Xbf"/>
                         <outlet property="diskLabel" destination="lu0-Yv-0Bi" id="3cW-0q-2wX"/>
@@ -299,7 +300,6 @@
                                     <outlet property="posterView" destination="tfX-gs-cmb" id="4Gu-Hi-aAP"/>
                                     <outlet property="runtimeLabel" destination="jLI-Qh-1nJ" id="A4h-BK-J29"/>
                                     <outlet property="titleLabel" destination="u4C-9v-cfc" id="TQg-tK-bre"/>
-                                    <segue destination="JEX-9P-axG" kind="show" id="Xyu-3L-FUr"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -381,14 +381,6 @@
                 </view>
             </objects>
             <point key="canvasLocation" x="709" y="-630"/>
-        </scene>
-        <!--EditItem-->
-        <scene sceneID="5lt-b6-OcB">
-            <objects>
-                <viewControllerPlaceholder storyboardName="EditItem" id="tRg-8m-ihn" sceneMemberID="viewController"/>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="TgU-DM-iRb" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2371" y="-632"/>
         </scene>
     </scenes>
     <resources>
