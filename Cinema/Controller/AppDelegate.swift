@@ -56,8 +56,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   private func loadMaintenanceViewController(updates: [PropertyUpdate]) -> UIViewController {
-    // swiftlint:disable:next force_cast
-    let controller = UIStoryboard.maintenance.instantiateInitialViewController() as! MaintenanceViewController
+    let controller = UIStoryboard.maintenance.instantiate(MaintenanceViewController.self)
     controller.run(PropertyUpdateAction(library: library, updates: updates),
                    initiation: .button(title: NSLocalizedString("maintenance.start", comment: ""))) { result in
       switch result {
@@ -94,8 +93,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
-    // swiftlint:disable:next force_cast
-    let controller = UIStoryboard.maintenance.instantiateInitialViewController() as! MaintenanceViewController
+    let controller = UIStoryboard.maintenance.instantiate(MaintenanceViewController.self)
     controller.run(ImportAndUpdateAction(library: library, movieDb: movieDb, from: url),
                    initiation: .runAutomatically) { result in
       switch result {

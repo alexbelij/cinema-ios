@@ -91,6 +91,15 @@ extension UIStoryboard {
   static var addItem = UIStoryboard(name: "AddItem", bundle: nil)
   static var editItem = UIStoryboard(name: "EditItem", bundle: nil)
   static var maintenance = UIStoryboard(name: "Maintenance", bundle: nil)
+
+  func instantiate<ViewController: UIViewController>(_ viewController: ViewController.Type) -> ViewController {
+    let identifier = String(describing: viewController)
+    guard let controller = instantiateViewController(withIdentifier: identifier)
+    as? ViewController else {
+      fatalError("could not instantiate view controller with identifier \(identifier) ")
+    }
+    return controller
+  }
 }
 
 extension UIStoryboardSegue {

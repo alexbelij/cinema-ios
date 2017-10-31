@@ -75,7 +75,7 @@
         <!--Search Results Controller-->
         <scene sceneID="nZP-5Q-lru">
             <objects>
-                <viewController storyboardIdentifier="ResultsViewController" id="u5G-L7-MWH" customClass="SearchResultsController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SearchResultsController" id="u5G-L7-MWH" customClass="SearchResultsController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="AT8-CL-3au">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

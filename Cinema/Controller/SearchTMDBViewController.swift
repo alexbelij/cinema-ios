@@ -23,9 +23,7 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    searchResultsController = storyboard!
-    // swiftlint:disable:next force_cast
-        .instantiateViewController(withIdentifier: "ResultsViewController") as! SearchResultsController
+    searchResultsController = storyboard!.instantiate(SearchResultsController.self)
     searchResultsController.library = library
     searchResultsController.delegate = self
     searchController = UISearchController(searchResultsController: searchResultsController)
