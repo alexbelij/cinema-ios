@@ -147,13 +147,14 @@ class DetailViewController: UIViewController {
     }
   }
 
-  open override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    switch segue.unwrappedDestination {
-      case let editVC as EditItemTableViewController:
-        editVC.item = detailItem
-        editVC.library = library
-      default: fatalError("Unexpected segue: '\(self)' -> '\(segue.destination)'")
-    }
+  @IBAction private func presentEditViewController() {
+    // swiftlint:disable force_cast
+    let navController = UIStoryboard.editItem.instantiateInitialViewController() as! UINavigationController
+    let editVC = navController.topViewController as! EditItemTableViewController
+    // swiftlint:enable force_cast
+    editVC.item = detailItem
+    editVC.library = library
+    self.present(navController, animated: true)
   }
 
   deinit {

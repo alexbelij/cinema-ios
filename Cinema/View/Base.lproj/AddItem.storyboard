@@ -49,7 +49,6 @@
                     <connections>
                         <outlet property="placeholderHeightConstraint" destination="Jau-CY-5YV" id="L2a-nr-VKp"/>
                         <outlet property="searchBarPlaceholder" destination="dDh-15-iSA" id="0mP-b8-YA7"/>
-                        <segue destination="11G-x7-NBc" kind="presentation" identifier="addItem" id="6kD-tJ-ZjW"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cTT-Yk-ZSf" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -75,7 +74,7 @@
         <!--Search Results Controller-->
         <scene sceneID="nZP-5Q-lru">
             <objects>
-                <viewController storyboardIdentifier="ResultsViewController" id="u5G-L7-MWH" customClass="SearchResultsController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SearchResultsController" id="u5G-L7-MWH" customClass="SearchResultsController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="AT8-CL-3au">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

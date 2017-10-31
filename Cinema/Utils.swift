@@ -86,14 +86,19 @@ class Utils {
 
 }
 
-extension UIStoryboardSegue {
-  var unwrappedDestination: UIViewController {
-    switch destination {
-      case let navigation as UINavigationController:
-        return navigation.topViewController!
-      default:
-        return destination
+extension UIStoryboard {
+  static var main = UIStoryboard(name: "Main", bundle: nil)
+  static var addItem = UIStoryboard(name: "AddItem", bundle: nil)
+  static var editItem = UIStoryboard(name: "EditItem", bundle: nil)
+  static var maintenance = UIStoryboard(name: "Maintenance", bundle: nil)
+
+  func instantiate<ViewController: UIViewController>(_ viewController: ViewController.Type) -> ViewController {
+    let identifier = String(describing: viewController)
+    guard let controller = instantiateViewController(withIdentifier: identifier)
+    as? ViewController else {
+      fatalError("could not instantiate view controller with identifier \(identifier) ")
     }
+    return controller
   }
 }
 

@@ -32,15 +32,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   private func loadMainViewController() -> UIViewController {
     // swiftlint:disable force_cast
-    let mainNavController = UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()
-    as! UINavigationController
+    let mainNavController = UIStoryboard.main.instantiateInitialViewController() as! UINavigationController
 
     let masterViewController = mainNavController.topViewController! as! MasterViewController
     masterViewController.library = library
     masterViewController.movieDb = movieDb
 
-    let addItemNavController = UIStoryboard(name: "AddItem", bundle: nil).instantiateInitialViewController()
-    as! UINavigationController
+    let addItemNavController = UIStoryboard.addItem.instantiateInitialViewController() as! UINavigationController
     let searchController = addItemNavController.topViewController as! SearchTMDBViewController
     searchController.library = library
     searchController.movieDb = movieDb
@@ -58,9 +56,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   private func loadMaintenanceViewController(updates: [PropertyUpdate]) -> UIViewController {
-    let controller = UIStoryboard(name: "Maintenance", bundle: nil).instantiateInitialViewController()
-    // swiftlint:disable:next force_cast
-    as! MaintenanceViewController
+    let controller = UIStoryboard.maintenance.instantiate(MaintenanceViewController.self)
     controller.run(PropertyUpdateAction(library: library, updates: updates),
                    initiation: .button(title: NSLocalizedString("maintenance.start", comment: ""))) { result in
       switch result {
@@ -97,9 +93,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
-    let controller = UIStoryboard(name: "Maintenance", bundle: nil).instantiateInitialViewController()
-    // swiftlint:disable:next force_cast
-    as! MaintenanceViewController
+    let controller = UIStoryboard.maintenance.instantiate(MaintenanceViewController.self)
     controller.run(ImportAndUpdateAction(library: library, movieDb: movieDb, from: url),
                    initiation: .runAutomatically) { result in
       switch result {
