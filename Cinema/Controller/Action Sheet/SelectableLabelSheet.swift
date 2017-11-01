@@ -18,8 +18,6 @@ struct SelectableLabelSheetItem: SheetItemProtocol {
 }
 
 class SelectableLabelCell: UITableViewCell {
-  static let identifier = "SelectableLabelCell"
-
   @IBOutlet private weak var label: UILabel!
 
   override func awakeFromNib() {
@@ -36,10 +34,10 @@ class SelectableLabelCell: UITableViewCell {
 class SelectableLabelCellConfig: TabularSheetCellConfiguration {
   typealias SheetItem = SelectableLabelSheetItem
 
-  let nibCellReuseIdentifiers: [String] = [SelectableLabelCell.identifier]
+  let nibCellTypes: [UITableViewCell.Type] = [SelectableLabelCell.self]
 
   func cell(for sheetItem: SelectableLabelSheetItem, cellDequeuing: CellDequeuing) -> UITableViewCell {
-    let cell = cellDequeuing.dequeueReusableCell(withIdentifier: SelectableLabelCell.identifier) as SelectableLabelCell
+    let cell = cellDequeuing.dequeueReusableCell(SelectableLabelCell.self)
     cell.configure(labelText: sheetItem.title, accessoryType: sheetItem.accessoryType)
     return cell
   }

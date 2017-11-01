@@ -70,8 +70,9 @@ private class TableViewWrapper: CellDequeuing {
   fileprivate var tableView: UITableView?
   fileprivate var indexPath: IndexPath?
 
-  func dequeueReusableCell<CellType: UITableViewCell>(withIdentifier identifier: String) -> CellType {
+  func dequeueReusableCell<CellType: UITableViewCell>(_ cellType: CellType.Type) -> CellType {
     guard let tableView = self.tableView, let indexPath = self.indexPath else { preconditionFailure() }
+    let identifier = String(describing: cellType)
     guard let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath) as? CellType else {
       preconditionFailure("cell with identifier \(identifier) is not of type \(CellType.self)")
     }
