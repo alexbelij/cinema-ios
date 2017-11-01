@@ -324,7 +324,7 @@ class MovieTableCell: UITableViewCell {
 }
 
 extension MasterViewController: MediaLibraryDelegate {
-  func libraryDidUpdateContent(_ library: MediaLibrary) {
+  func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
     self.reloadLibraryData()
   }
 }

@@ -123,18 +123,6 @@ class DetailViewController: UIViewController {
     library.delegates.add(self)
   }
 
-  private func reloadDetailItem() {
-    DispatchQueue.main.async {
-      let items = self.library.mediaItems { $0.id == self.detailItem!.id }
-      if let updatedItem = items.first {
-        self.detailItem = updatedItem
-      } else {
-        // item was deleted
-        self.popAfterDidAppear = true
-      }
-    }
-  }
-
   open override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     if popAfterDidAppear {
@@ -155,7 +143,13 @@ class DetailViewController: UIViewController {
 }
 
 extension DetailViewController: MediaLibraryDelegate {
-  func libraryDidUpdateContent(_ library: MediaLibrary) {
-    self.reloadDetailItem()
+  func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
+    DispatchQueue.main.async {
+      if let updatedItem = contentUpdate.updatedItems[self.detailItem!.id] {
+        self.detailItem = updatedItem
+      } else if contentUpdate.removedItems.contains(self.detailItem!) {
+        self.popAfterDidAppear = true
+      }
+    }
   }
 }

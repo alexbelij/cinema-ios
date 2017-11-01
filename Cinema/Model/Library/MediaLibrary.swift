@@ -24,5 +24,17 @@ enum MediaLibraryError: Error {
 }
 
 protocol MediaLibraryDelegate: class {
-  func libraryDidUpdateContent(_ library: MediaLibrary)
+  func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate)
+}
+
+struct MediaLibraryContentUpdate {
+  var addedItems: [MediaItem]
+  var removedItems: [MediaItem]
+  var updatedItems: [Int: MediaItem]
+
+  init(addedItems: [MediaItem] = [], removedItems: [MediaItem] = [], updatedItems: [Int: MediaItem] = [:]) {
+    self.addedItems = addedItems
+    self.removedItems = removedItems
+    self.updatedItems = updatedItems
+  }
 }

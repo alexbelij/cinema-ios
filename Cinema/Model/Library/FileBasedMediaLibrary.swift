@@ -12,6 +12,8 @@ class FileBasedMediaLibrary: MediaLibrary {
 
   private var isPerformingBatchUpdates = false
 
+  private var pendingContentUpdate = MediaLibraryContentUpdate()
+
   init(url: URL, dataFormat: DataFormat) throws {
     self.url = url
     self.dataFormat = dataFormat
@@ -47,6 +49,7 @@ class FileBasedMediaLibrary: MediaLibrary {
   func add(_ mediaItem: MediaItem) throws {
     guard !mediaItems.contains(where: { $0.id == mediaItem.id }) else { return }
     mediaItems.append(mediaItem)
+    pendingContentUpdate.addedItems.append(mediaItem)
     try saveData()
   }
 
@@ -56,6 +59,7 @@ class FileBasedMediaLibrary: MediaLibrary {
     }
     mediaItems.remove(at: index)
     mediaItems.insert(mediaItem, at: index)
+    pendingContentUpdate.updatedItems[mediaItem.id] = mediaItem
     try saveData()
   }
 
@@ -64,6 +68,7 @@ class FileBasedMediaLibrary: MediaLibrary {
       throw MediaLibraryError.itemDoesNotExist(id: mediaItem.id)
     }
     mediaItems.remove(at: index)
+    pendingContentUpdate.removedItems.append(mediaItem)
     try saveData()
   }
 
@@ -82,7 +87,8 @@ class FileBasedMediaLibrary: MediaLibrary {
     guard FileManager.default.createFile(atPath: url.path, contents: data) else {
       throw MediaLibraryError.storageError
     }
-    delegates.invoke { $0.libraryDidUpdateContent(self) }
+    delegates.invoke { $0.library(self, didUpdateContent: self.pendingContentUpdate) }
+    pendingContentUpdate = MediaLibraryContentUpdate()
   }
 
 }
