@@ -41,10 +41,7 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
     tableView.sectionIndexBackgroundColor = UIColor.clear
     clearsSelectionOnViewWillAppear = true
 
-    NotificationCenter.default.addObserver(self,
-                                           selector: #selector(reloadLibraryData),
-                                           name: .didChangeMediaLibraryContent,
-                                           object: nil)
+    library.delegates.add(self)
     if #available(iOS 11.0, *) {
     } else {
       scrollToTop(animated: false)
@@ -122,7 +119,6 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
     }
   }
 
-  @objc
   private func reloadLibraryData() {
     fetchLibraryData()
     DispatchQueue.main.async {
@@ -324,5 +320,11 @@ class MovieTableCell: UITableViewCell {
     super.awakeFromNib()
     posterView.layer.borderColor = UIColor.posterBorder.cgColor
     posterView.layer.borderWidth = 0.5
+  }
+}
+
+extension MasterViewController: MediaLibraryDelegate {
+  func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
+    self.reloadLibraryData()
   }
 }

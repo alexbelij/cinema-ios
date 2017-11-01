@@ -14,6 +14,7 @@
 		816BF52DDE5A95DE54EE1FEF /* JSONFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFB35827AAE8FBEE17E66 /* JSONFormat.swift */; };
 		816BF5794525B14475533BF1 /* TMDBSwiftCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF09753AED0716E1BBC94 /* TMDBSwiftCache.swift */; };
 		816BF78402385BCBF434A807 /* FileBasedMediaLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFA309BDAC4DB9673DA9D /* FileBasedMediaLibrary.swift */; };
+		816BF7B198C9B80F6C055AF0 /* MulticastDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF1736861B92F3C805B3D /* MulticastDelegate.swift */; };
 		816BF8AD896393450AFBB602 /* ImportAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF176EC09E4DC465BD019 /* ImportAction.swift */; };
 		816BF9965330281626DFEB45 /* MovieDbClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF2612290416EB1BFCA59 /* MovieDbClient.swift */; };
 		816BFA30AFFD31F1A07CD0B6 /* KeyedArchivalFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFF4C36540A18EF3BBC17 /* KeyedArchivalFormat.swift */; };
@@ -53,6 +54,7 @@
 /* Begin PBXFileReference section */
 		7EFA6A072B4111F2406B5151 /* Pods-Cinema.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Cinema.release.xcconfig"; path = "Pods/Target Support Files/Pods-Cinema/Pods-Cinema.release.xcconfig"; sourceTree = "<group>"; };
 		816BF09753AED0716E1BBC94 /* TMDBSwiftCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TMDBSwiftCache.swift; sourceTree = "<group>"; };
+		816BF1736861B92F3C805B3D /* MulticastDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MulticastDelegate.swift; sourceTree = "<group>"; };
 		816BF176EC09E4DC465BD019 /* ImportAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImportAction.swift; sourceTree = "<group>"; };
 		816BF18B4CBACCFADEB126E2 /* ImportAndUpdateAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImportAndUpdateAction.swift; sourceTree = "<group>"; };
 		816BF2612290416EB1BFCA59 /* MovieDbClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieDbClient.swift; sourceTree = "<group>"; };
@@ -168,6 +170,7 @@
 				CBED94151F6BF64800FA4045 /* Library */,
 				CBED94161F6BF66200FA4045 /* Maintenance */,
 				CBED94141F6BF63500FA4045 /* MovieDb */,
+				816BF1736861B92F3C805B3D /* MulticastDelegate.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -422,6 +425,7 @@
 				CBED94291F6BF80E00FA4045 /* SearchTMDBViewController.swift in Sources */,
 				816BF8AD896393450AFBB602 /* ImportAction.swift in Sources */,
 				CB65D7AD1F8A108A00457386 /* ArrayTableController.swift in Sources */,
+				816BF7B198C9B80F6C055AF0 /* MulticastDelegate.swift in Sources */,
 				816BFA3ED2B1415E000BE24F /* ImportAndUpdateAction.swift in Sources */,
 				816BFC18F7DB44F8FF6B6838 /* SelectableLabelSheet.swift in Sources */,
 			);

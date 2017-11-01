@@ -120,23 +120,7 @@ class DetailViewController: UIViewController {
     textView?.text = ""
     configureView()
     super.viewDidLoad()
-    NotificationCenter.default.addObserver(self,
-                                           selector: #selector(reloadDetailItem),
-                                           name: .didChangeMediaLibraryContent,
-                                           object: nil)
-  }
-
-  @objc
-  private func reloadDetailItem() {
-    DispatchQueue.main.async {
-      let items = self.library.mediaItems { $0.id == self.detailItem!.id }
-      if let updatedItem = items.first {
-        self.detailItem = updatedItem
-      } else {
-        // item was deleted
-        self.popAfterDidAppear = true
-      }
-    }
+    library.delegates.add(self)
   }
 
   open override func viewDidAppear(_ animated: Bool) {
@@ -156,8 +140,16 @@ class DetailViewController: UIViewController {
     editVC.library = library
     self.present(navController, animated: true)
   }
+}
 
-  deinit {
-    NotificationCenter.default.removeObserver(self)
+extension DetailViewController: MediaLibraryDelegate {
+  func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
+    DispatchQueue.main.async {
+      if let updatedItem = contentUpdate.updatedItems[self.detailItem!.id] {
+        self.detailItem = updatedItem
+      } else if contentUpdate.removedItems.contains(self.detailItem!) {
+        self.popAfterDidAppear = true
+      }
+    }
   }
 }
