@@ -74,14 +74,13 @@ class FileBasedMediaLibrary: MediaLibrary {
 
   private func saveData() throws {
     guard !isPerformingBatchUpdates else { return }
-    NotificationCenter.default.post(name: .didChangeMediaLibraryContent, object: self)
     guard let data = try? dataFormat.serialize(mediaItems) else {
       throw MediaLibraryError.storageError
     }
-    let success = FileManager.default.createFile(atPath: url.path, contents: data)
-    if !success {
+    guard FileManager.default.createFile(atPath: url.path, contents: data) else {
       throw MediaLibraryError.storageError
     }
+    NotificationCenter.default.post(name: .didChangeMediaLibraryContent, object: self)
   }
 
 }
