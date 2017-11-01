@@ -75,22 +75,14 @@ extension DetailViewController {
       releaseDateLabel.text = mediaItem.releaseDate == nil
           ? NSLocalizedString("details.missing.releaseDate", comment: "")
           : dateFormatter.string(from: mediaItem.releaseDate!)
-      diskLabel.text = localize(diskType: mediaItem.diskType)
-      var genreString = Utils.localizedGenreNames(for: self.detailItem!.genreIds)
-                             .joined(separator: ", ")
+      diskLabel.text = mediaItem.diskType.localizedName
+      var genreString = self.detailItem!.genreIds.localizedGenreNames.joined(separator: ", ")
       if genreString.isEmpty {
         genreString = NSLocalizedString("details.missing.genre", comment: "")
       }
       self.genreLabel.text = genreString
 
       fetchAdditionalData()
-    }
-  }
-
-  private func localize(diskType: DiskType) -> String {
-    switch diskType {
-      case .dvd: return NSLocalizedString("mediaItem.disk.dvd", comment: "")
-      case .bluRay: return NSLocalizedString("mediaItem.disk.bluRay", comment: "")
     }
   }
 

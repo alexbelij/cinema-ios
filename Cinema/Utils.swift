@@ -30,13 +30,22 @@ class Utils {
 
 // MARK: - Localization
 
-extension Utils {
-  static func localizedGenreNames(for genreIds: [Int]) -> [String] {
-    return genreIds.map(localizedGenreName(for:)).filter { $0 != nil }.map { $0! }
+extension DiskType {
+  var localizedName: String {
+    switch self {
+      case .dvd: return NSLocalizedString("mediaItem.disk.dvd", comment: "")
+      case .bluRay: return NSLocalizedString("mediaItem.disk.bluRay", comment: "")
+    }
+  }
+}
+
+extension Array where Array.Element == Int {
+  var localizedGenreNames: [String] {
+    return map(localizedGenreName(for:)).filter { $0 != nil }.map { $0! }
   }
 
   // swiftlint:disable:next cyclomatic_complexity
-  private static func localizedGenreName(for genreId: Int) -> String? {
+  private func localizedGenreName(for genreId: Int) -> String? {
     let key: String?
     switch genreId {
       case 12: key = "genre.adventure"
@@ -66,7 +75,9 @@ extension Utils {
       return nil
     }
   }
+}
 
+extension Utils {
   static func localizedErrorMessage(for error: Error) -> String {
     switch error {
       case DataFormatError.unsupportedSchemaVersion:

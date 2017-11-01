@@ -99,15 +99,12 @@ extension SearchTMDBViewController: SearchResultsSelectionDelegate {
     let alert = UIAlertController(title: NSLocalizedString("addItem.alert.howToAdd.title", comment: ""),
                                   message: nil,
                                   preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: NSLocalizedString("mediaItem.disk.dvd", comment: ""), style: .default) { _ in
-      self.removedItem = searchResult
-      self.add(searchResult, withDiskType: .dvd)
-    })
-    alert.addAction(UIAlertAction(title: NSLocalizedString("mediaItem.disk.bluRay", comment: ""),
-                                  style: .default) { _ in
-      self.removedItem = searchResult
-      self.add(searchResult, withDiskType: .bluRay)
-    })
+    for diskType in [DiskType.dvd, .bluRay] {
+      alert.addAction(UIAlertAction(title: diskType.localizedName, style: .default) { _ in
+        self.removedItem = searchResult
+        self.add(searchResult, withDiskType: diskType)
+      })
+    }
     alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     present(alert, animated: true)
   }

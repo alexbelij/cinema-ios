@@ -10,6 +10,14 @@ enum SortDescriptor {
       case .year: return YearSortingStrategy()
     }
   }
+
+  var localizedName: String {
+    switch self {
+      case .title: return NSLocalizedString("sort.by.title", comment: "")
+      case .runtime: return NSLocalizedString("sort.by.runtime", comment: "")
+      case .year: return NSLocalizedString("sort.by.year", comment: "")
+    }
+  }
 }
 
 private struct TitleSortingStrategy: TableViewSortingStrategy {

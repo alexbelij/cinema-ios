@@ -325,7 +325,7 @@ extension MasterViewController {
   @IBAction func showSortDescriptorSheet() {
     let controller = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
     for descriptor in [SortDescriptor.title, .runtime, .year] {
-      controller.addSheetItem(SelectableLabelSheetItem(title: self.localizedTitle(for: descriptor),
+      controller.addSheetItem(SelectableLabelSheetItem(title: descriptor.localizedName,
                                                        showCheckmark: descriptor == self.sortDescriptor) { _ in
         guard self.sortDescriptor != descriptor else { return }
         self.sortDescriptor = descriptor
@@ -338,13 +338,5 @@ extension MasterViewController {
       })
     }
     self.present(controller, animated: true)
-  }
-
-  private func localizedTitle(for descriptor: SortDescriptor) -> String {
-    switch descriptor {
-      case .title: return NSLocalizedString("sort.by.title", comment: "")
-      case .runtime: return NSLocalizedString("sort.by.runtime", comment: "")
-      case .year: return NSLocalizedString("sort.by.year", comment: "")
-    }
   }
 }
