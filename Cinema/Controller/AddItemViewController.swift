@@ -26,7 +26,7 @@ class AddItemViewController: UIViewController {
     super.viewWillAppear(animated)
     label.text = NSLocalizedString("addItem.progress", comment: "")
     posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
-    posterView.layer.borderColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
+    posterView.layer.borderColor = UIColor.posterBorder.cgColor
     posterView.layer.borderWidth = 0.5
     posterFetchWorkItem = DispatchWorkItem {
       if let poster = self.movieDb.poster(for: self.itemToAdd.id, size: PosterSize(minWidth: 185)) {

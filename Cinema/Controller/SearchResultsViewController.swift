@@ -94,6 +94,6 @@ class SearchItemAddedCell: UITableViewCell {
 
   override func awakeFromNib() {
     super.awakeFromNib()
-    self.tintColor = #colorLiteral(red: 0.495413959, green: 0.495413959, blue: 0.495413959, alpha: 1)
+    self.tintColor = .disabledControlText
   }
 }

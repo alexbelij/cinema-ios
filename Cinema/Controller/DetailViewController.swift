@@ -110,7 +110,7 @@ class DetailViewController: UIViewController {
   override func viewDidLoad() {
     UIApplication.shared.isNetworkActivityIndicatorVisible = true
     imageView.image = .genericPosterImage(minWidth: imageView.frame.size.width)
-    imageView.layer.borderColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
+    imageView.layer.borderColor = UIColor.posterBorder.cgColor
     imageView.layer.borderWidth = 0.5
     genreLabel?.text = ""
     runtimeLabel?.text = ""

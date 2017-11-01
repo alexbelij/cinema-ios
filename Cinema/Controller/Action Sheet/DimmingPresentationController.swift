@@ -4,7 +4,7 @@ class DimmingPresentationController: UIPresentationController {
   private let dimmingView: UIView = {
     let dimmingView = UIView()
     dimmingView.translatesAutoresizingMaskIntoConstraints = false
-    dimmingView.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.4)
+    dimmingView.backgroundColor = .dimBackground
     dimmingView.alpha = 0.0
     return dimmingView
   }()

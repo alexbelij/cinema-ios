@@ -174,7 +174,7 @@ class PosterCell: UICollectionViewCell {
 
   override func awakeFromNib() {
     super.awakeFromNib()
-    posterImageView.layer.borderColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
+    posterImageView.layer.borderColor = UIColor.posterBorder.cgColor
     posterImageView.layer.borderWidth = 0.5
     let posterFrame = posterImageView.frame
     self.highlightView = UIView(frame: CGRect(x: 0,

@@ -114,3 +114,12 @@ extension UIImage {
     return UIImage(named: "GenericPoster-w\(width)")!
   }
 }
+
+extension UIColor {
+  // swiftlint:disable object_literal
+  static let disabledControlText = UIColor(white: 0.58, alpha: 1.0)
+  static let destructive = UIColor(red: 1.0, green: 0.231, blue: 0.188, alpha: 1.0)
+  static let posterBorder = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2)
+  static let dimBackground = UIColor(red: 0, green: 0, blue: 0, alpha: 0.4)
+  // swiftlint:enable object_literal
+}
