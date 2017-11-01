@@ -132,10 +132,10 @@ class MasterViewController: UITableViewController, UISearchResultsUpdating, UISe
   }
 
   @IBAction func showSortDescriptorSheet() {
-    let controller = TabularSheetController<SortingSheetItem>(cellConfig: SortingSheetCellConfig())
+    let controller = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
     for descriptor in [SortDescriptor.title, .runtime, .year] {
-      controller.addSheetItem(SortingSheetItem(sortingName: self.localizedTitle(for: descriptor),
-                                               isCurrentSorting: descriptor == self.sortDescriptor) { _ in
+      controller.addSheetItem(SelectableLabelSheetItem(title: self.localizedTitle(for: descriptor),
+                                                       showCheckmark: descriptor == self.sortDescriptor) { _ in
         guard self.sortDescriptor != descriptor else { return }
         self.sortDescriptor = descriptor
         DispatchQueue.global(qos: .userInitiated).async {
