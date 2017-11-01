@@ -23,7 +23,39 @@ class DetailViewController: UIViewController {
   var library: MediaLibrary!
 
   private var popAfterDidAppear = false
+}
 
+// MARK: - View Controller Lifecycle
+
+extension DetailViewController {
+  override func viewDidLoad() {
+    UIApplication.shared.isNetworkActivityIndicatorVisible = true
+    imageView.image = .genericPosterImage(minWidth: imageView.frame.size.width)
+    imageView.layer.borderColor = UIColor.posterBorder.cgColor
+    imageView.layer.borderWidth = 0.5
+    genreLabel?.text = ""
+    runtimeLabel?.text = ""
+    releaseDateLabel?.text = ""
+    certificationLabel?.text = ""
+    diskLabel?.text = ""
+    textView?.text = ""
+    configureView()
+    super.viewDidLoad()
+    library.delegates.add(self)
+  }
+
+  open override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    if popAfterDidAppear {
+      self.navigationController!.popViewController(animated: true)
+      popAfterDidAppear = false
+    }
+  }
+}
+
+// MARK: - Detail Item Configuration
+
+extension DetailViewController {
   func configureView() {
     guard isViewLoaded else { return }
     if let mediaItem = detailItem {
@@ -52,6 +84,13 @@ class DetailViewController: UIViewController {
       self.genreLabel.text = genreString
 
       fetchAdditionalData()
+    }
+  }
+
+  private func localize(diskType: DiskType) -> String {
+    switch diskType {
+      case .dvd: return NSLocalizedString("mediaItem.disk.dvd", comment: "")
+      case .bluRay: return NSLocalizedString("mediaItem.disk.bluRay", comment: "")
     }
   }
 
@@ -99,48 +138,9 @@ class DetailViewController: UIViewController {
       UIApplication.shared.isNetworkActivityIndicatorVisible = false
     }
   }
-
-  private func localize(diskType: DiskType) -> String {
-    switch diskType {
-      case .dvd: return NSLocalizedString("mediaItem.disk.dvd", comment: "")
-      case .bluRay: return NSLocalizedString("mediaItem.disk.bluRay", comment: "")
-    }
-  }
-
-  override func viewDidLoad() {
-    UIApplication.shared.isNetworkActivityIndicatorVisible = true
-    imageView.image = .genericPosterImage(minWidth: imageView.frame.size.width)
-    imageView.layer.borderColor = UIColor.posterBorder.cgColor
-    imageView.layer.borderWidth = 0.5
-    genreLabel?.text = ""
-    runtimeLabel?.text = ""
-    releaseDateLabel?.text = ""
-    certificationLabel?.text = ""
-    diskLabel?.text = ""
-    textView?.text = ""
-    configureView()
-    super.viewDidLoad()
-    library.delegates.add(self)
-  }
-
-  open override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-    if popAfterDidAppear {
-      self.navigationController!.popViewController(animated: true)
-      popAfterDidAppear = false
-    }
-  }
-
-  @IBAction private func presentEditViewController() {
-    // swiftlint:disable force_cast
-    let navController = UIStoryboard.editItem.instantiateInitialViewController() as! UINavigationController
-    let editVC = navController.topViewController as! EditItemTableViewController
-    // swiftlint:enable force_cast
-    editVC.item = detailItem
-    editVC.library = library
-    self.present(navController, animated: true)
-  }
 }
+
+// MARK: - Library Events
 
 extension DetailViewController: MediaLibraryDelegate {
   func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
@@ -151,5 +151,19 @@ extension DetailViewController: MediaLibraryDelegate {
         self.popAfterDidAppear = true
       }
     }
+  }
+}
+
+// MARK: - User Actions
+
+extension DetailViewController {
+  @IBAction private func presentEditViewController() {
+    // swiftlint:disable force_cast
+    let navController = UIStoryboard.editItem.instantiateInitialViewController() as! UINavigationController
+    let editVC = navController.topViewController as! EditItemTableViewController
+    // swiftlint:enable force_cast
+    editVC.item = detailItem
+    editVC.library = library
+    self.present(navController, animated: true)
   }
 }

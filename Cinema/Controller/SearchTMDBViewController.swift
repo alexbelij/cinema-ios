@@ -2,8 +2,7 @@ import Dispatch
 import Foundation
 import UIKit
 
-class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISearchControllerDelegate,
-    SearchResultsSelectionDelegate {
+class SearchTMDBViewController: UIViewController {
 
   private let searchQueue = DispatchQueue(label: "de.martinbauer.cinema.tmdb-search", qos: .userInitiated)
   private var currentSearch: DispatchWorkItem?
@@ -52,13 +51,26 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
     }
   }
 
-  func didPresentSearchController(_ searchController: UISearchController) {
-    searchController.searchBar.becomeFirstResponder()
-  }
-
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
     searchController.isActive = false
+  }
+
+  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    switch segue.destination {
+      case let popularMoviesVC as PopularMoviesViewController:
+        self.popularMoviesVC = popularMoviesVC
+        popularMoviesVC.library = library
+        popularMoviesVC.movieDb = movieDb
+        popularMoviesVC.selectionDelegate = self
+      default: fatalError("Unexpected segue: '\(self)' -> '\(segue.destination)'")
+    }
+  }
+}
+
+extension SearchTMDBViewController: UISearchResultsUpdating, UISearchControllerDelegate {
+  func didPresentSearchController(_ searchController: UISearchController) {
+    searchController.searchBar.becomeFirstResponder()
   }
 
   public func updateSearchResults(for searchController: UISearchController) {
@@ -80,7 +92,9 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
       }
     }
   }
+}
 
+extension SearchTMDBViewController: SearchResultsSelectionDelegate {
   func didSelectSearchResult(_ searchResult: PartialMediaItem) {
     let alert = UIAlertController(title: NSLocalizedString("addItem.alert.howToAdd.title", comment: ""),
                                   message: nil,
@@ -102,16 +116,5 @@ class SearchTMDBViewController: UIViewController, UISearchResultsUpdating, UISea
     let controller = UIStoryboard.addItem.instantiate(AddItemViewController.self)
     controller.add(item: searchResult, as: diskType, to: self.library, movieDb: self.movieDb)
     self.present(controller, animated: true)
-  }
-
-  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    switch segue.destination {
-      case let popularMoviesVC as PopularMoviesViewController:
-        self.popularMoviesVC = popularMoviesVC
-        popularMoviesVC.library = library
-        popularMoviesVC.movieDb = movieDb
-        popularMoviesVC.selectionDelegate = self
-      default: fatalError("Unexpected segue: '\(self)' -> '\(segue.destination)'")
-    }
   }
 }

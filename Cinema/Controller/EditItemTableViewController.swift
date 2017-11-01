@@ -1,6 +1,6 @@
 import UIKit
 
-class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
+class EditItemTableViewController: UITableViewController {
 
   var item: MediaItem!
   var library: MediaLibrary!
@@ -9,6 +9,11 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
   @IBOutlet private weak var subtitleTextField: UITextField!
   @IBOutlet private weak var deleteMovieButton: UIButton!
 
+}
+
+// MARK: - View Controller Lifecycle
+
+extension EditItemTableViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     titleTextField.text = item.title
@@ -17,29 +22,36 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
     subtitleTextField.delegate = self
     deleteMovieButton.setTitle(NSLocalizedString("edit.deleteMovie", comment: ""), for: .normal)
   }
+}
 
-  @IBAction func cancelButtonClicked() {
-    self.dismiss(animated: true)
+// MARK: - Table View
+
+extension EditItemTableViewController {
+  public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    switch section {
+      case 0: return NSLocalizedString("edit.sectionHeader.title", comment: "")
+      case 1: return NSLocalizedString("edit.sectionHeader.subtitle", comment: "")
+      default: return nil
+    }
   }
+}
 
-  @IBAction func doneButtonClicked() {
-    self.acceptEdits()
+// MARK: - UITextFieldDelegate
+
+extension EditItemTableViewController: UITextFieldDelegate {
+  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    if let nextField = self.view.viewWithTag(textField.tag + 1) as? UITextField {
+      nextField.becomeFirstResponder()
+    } else {
+      textField.resignFirstResponder()
+    }
+    return false
   }
+}
 
-  @IBAction func deleteButtonClicked() {
-    let alertController = UIAlertController(title: nil,
-                                            message: nil,
-                                            preferredStyle: .actionSheet)
-    alertController.addAction(UIAlertAction(title: NSLocalizedString("edit.deleteMovie", comment: ""),
-                                            style: .destructive) { _ in
-      DispatchQueue.global(qos: .userInitiated).async {
-        self.performLibraryUpdate { try self.library.remove(self.item) }
-      }
-    })
-    alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
-    self.present(alertController, animated: true)
-  }
+// MARK: - Edit Management
 
+extension EditItemTableViewController {
   private func acceptEdits() {
     if isValidEdit() {
       guard titleTextField.text != item.title
@@ -101,26 +113,34 @@ class EditItemTableViewController: UITableViewController, UITextFieldDelegate {
     })
     self.present(alertController, animated: true)
   }
+}
 
-  public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    switch section {
-      case 0: return NSLocalizedString("edit.sectionHeader.title", comment: "")
-      case 1: return NSLocalizedString("edit.sectionHeader.subtitle", comment: "")
-      default: return nil
-    }
+// MARK: - User Actions
+
+extension EditItemTableViewController {
+  @IBAction func cancelButtonClicked() {
+    self.dismiss(animated: true)
+  }
+
+  @IBAction func doneButtonClicked() {
+    self.acceptEdits()
+  }
+
+  @IBAction func deleteButtonClicked() {
+    let alertController = UIAlertController(title: nil,
+                                            message: nil,
+                                            preferredStyle: .actionSheet)
+    alertController.addAction(UIAlertAction(title: NSLocalizedString("edit.deleteMovie", comment: ""),
+                                            style: .destructive) { _ in
+      DispatchQueue.global(qos: .userInitiated).async {
+        self.performLibraryUpdate { try self.library.remove(self.item) }
+      }
+    })
+    alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
+    self.present(alertController, animated: true)
   }
 
   @IBAction private func dismissKeyboard() {
     self.view?.endEditing(false)
   }
-
-  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-    if let nextField = self.view.viewWithTag(textField.tag + 1) as? UITextField {
-      nextField.becomeFirstResponder()
-    } else {
-      textField.resignFirstResponder()
-    }
-    return false
-  }
-
 }

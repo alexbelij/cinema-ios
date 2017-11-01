@@ -2,7 +2,6 @@ import Foundation
 import UIKit
 
 class Utils {
-
   static func formatDuration(_ duration: Int) -> String {
     let formatter = DateComponentsFormatter()
     formatter.unitsStyle = .full
@@ -27,7 +26,11 @@ class Utils {
     }
     return dir
   }
+}
 
+// MARK: - Localization
+
+extension Utils {
   static func localizedGenreNames(for genreIds: [Int]) -> [String] {
     return genreIds.map(localizedGenreName(for:)).filter { $0 != nil }.map { $0! }
   }
@@ -76,15 +79,20 @@ class Utils {
         return NSLocalizedString("error.genericError", comment: "")
     }
   }
+}
 
+// MARK: - Migration
+
+extension Utils {
   static func updates(from version: SchemaVersion, using movieDb: MovieDbClient) -> [PropertyUpdate] {
     switch version {
       case .v1_0_0: return [GenreIdsUpdate(movieDb: movieDb), ReleaseDateUpdate(movieDb: movieDb)]
       case .v2_0_0: return []
     }
   }
-
 }
+
+// MARK: - Other Extensions
 
 extension UIStoryboard {
   static var main = UIStoryboard(name: "Main", bundle: nil)

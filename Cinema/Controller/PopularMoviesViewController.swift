@@ -15,6 +15,10 @@ class PopularMoviesViewController: UICollectionViewController {
   @IBOutlet private var emptyView: UIView!
   @IBOutlet private weak var emptyViewLabel: UILabel!
 
+}
+
+// MARK: - View Controller Lifecycle
+extension PopularMoviesViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     guard let flowLayout = self.collectionView?.collectionViewLayout as? UICollectionViewFlowLayout else {
@@ -31,54 +35,11 @@ class PopularMoviesViewController: UICollectionViewController {
     self.movieIterator = AnyIterator(self.movieDb.popularMovies().lazy.filter(isNotInLibrary).makeIterator())
     fetchItems(count: 10)
   }
+}
 
-  private func isNotInLibrary(_ item: PartialMediaItem) -> Bool {
-    return library.mediaItems { $0.id == item.id }.isEmpty
-  }
+// MARK: - UICollectionViewDataSource
 
-  private func fetchItems(count: Int) {
-    isFetchingItems = true
-    if let footerView = self.collectionView!.supplementaryView(forElementKind: UICollectionElementKindSectionFooter,
-                                                               at: IndexPath(row: 0,
-                                                                             section: 0)) as? TmdbFooterView {
-      footerView.activityIndicator.startAnimating()
-    }
-    DispatchQueue.global(qos: .userInitiated).async {
-      for _ in 0..<count {
-        guard let item = self.movieIterator.next() else { break }
-        DispatchQueue.main.sync {
-          self.items.append(item)
-          self.collectionView?.insertItems(at: [IndexPath(row: self.items.count - 1, section: 0)])
-        }
-      }
-      DispatchQueue.main.sync {
-        self.isFetchingItems = false
-        if let footerView = self.collectionView!.supplementaryView(forElementKind: UICollectionElementKindSectionFooter,
-                                                                   at: IndexPath(row: 0,
-                                                                                 section: 0)) as? TmdbFooterView {
-          footerView.activityIndicator.stopAnimating()
-          DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
-            if self.items.isEmpty {
-              self.collectionView!.backgroundView = self.emptyView
-              footerView.imageView.isHidden = true
-            } else {
-              footerView.imageView.isHidden = false
-            }
-          }
-        }
-      }
-    }
-  }
-
-  func removeItem(_ item: PartialMediaItem) {
-    guard let index = items.index(of: item) else { return }
-    self.items.remove(at: index)
-    collectionView!.deleteItems(at: [IndexPath(row: index, section: 0)])
-    fetchItems(count: 1)
-  }
-
-  // MARK: UICollectionViewDataSource
-
+extension PopularMoviesViewController {
   override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
     return items.count
   }
@@ -101,9 +62,11 @@ class PopularMoviesViewController: UICollectionViewController {
 
     return cell
   }
+}
 
-  // MARK: UICollectionViewDelegate
+// MARK: - UICollectionViewDelegate
 
+extension PopularMoviesViewController {
   override func collectionView(_ collectionView: UICollectionView,
                                viewForSupplementaryElementOfKind kind: String,
                                at indexPath: IndexPath) -> UICollectionReusableView {
@@ -157,7 +120,59 @@ class PopularMoviesViewController: UICollectionViewController {
   override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     self.selectionDelegate?.didSelectSearchResult(items[indexPath.row])
   }
+}
 
+// MARK: - Data Management
+
+extension PopularMoviesViewController {
+  private func isNotInLibrary(_ item: PartialMediaItem) -> Bool {
+    return library.mediaItems { $0.id == item.id }.isEmpty
+  }
+
+  private func fetchItems(count: Int) {
+    isFetchingItems = true
+    if let footerView = self.collectionView!.supplementaryView(forElementKind: UICollectionElementKindSectionFooter,
+                                                               at: IndexPath(row: 0,
+                                                                             section: 0)) as? TmdbFooterView {
+      footerView.activityIndicator.startAnimating()
+    }
+    DispatchQueue.global(qos: .userInitiated).async {
+      for _ in 0..<count {
+        guard let item = self.movieIterator.next() else { break }
+        DispatchQueue.main.sync {
+          self.items.append(item)
+          self.collectionView?.insertItems(at: [IndexPath(row: self.items.count - 1, section: 0)])
+        }
+      }
+      DispatchQueue.main.sync {
+        self.isFetchingItems = false
+        if let footerView = self.collectionView!.supplementaryView(forElementKind: UICollectionElementKindSectionFooter,
+                                                                   at: IndexPath(row: 0,
+                                                                                 section: 0)) as? TmdbFooterView {
+          footerView.activityIndicator.stopAnimating()
+          DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
+            if self.items.isEmpty {
+              self.collectionView!.backgroundView = self.emptyView
+              footerView.imageView.isHidden = true
+            } else {
+              footerView.imageView.isHidden = false
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// MARK: - Actions
+
+extension PopularMoviesViewController {
+  func removeItem(_ item: PartialMediaItem) {
+    guard let index = items.index(of: item) else { return }
+    self.items.remove(at: index)
+    collectionView!.deleteItems(at: [IndexPath(row: index, section: 0)])
+    fetchItems(count: 1)
+  }
 }
 
 // MARK: - Header Views, Footer Views & Cells

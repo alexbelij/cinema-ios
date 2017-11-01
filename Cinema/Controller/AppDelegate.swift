@@ -27,6 +27,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     return true
   }
 
+  public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
+    let controller = UIStoryboard.maintenance.instantiate(MaintenanceViewController.self)
+    controller.run(ImportAndUpdateAction(library: library, movieDb: movieDb, from: url),
+                   initiation: .runAutomatically) { result in
+      switch result {
+        case let .result(addedItems):
+          controller.primaryText = NSLocalizedString("import.succeeded", comment: "")
+          let format = NSLocalizedString("import.succeeded.changes", comment: "")
+          controller.secondaryText = .localizedStringWithFormat(format, addedItems.count)
+        case let .error(error):
+          controller.primaryText = NSLocalizedString("import.failed", comment: "")
+          controller.secondaryText = Utils.localizedErrorMessage(for: error)
+      }
+    }
+    controller.primaryText = NSLocalizedString("import.progress", comment: "")
+    self.window!.rootViewController!.present(controller, animated: true)
+    return true
+  }
+
+}
+
+extension AppDelegate {
   private func loadMainViewController() -> UIViewController {
     // swiftlint:disable force_cast
     let mainNavController = UIStoryboard.main.instantiateInitialViewController() as! UINavigationController
@@ -88,24 +110,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       self.window!.rootViewController = newController
     }
   }
-
-  public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
-    let controller = UIStoryboard.maintenance.instantiate(MaintenanceViewController.self)
-    controller.run(ImportAndUpdateAction(library: library, movieDb: movieDb, from: url),
-                   initiation: .runAutomatically) { result in
-      switch result {
-        case let .result(addedItems):
-          controller.primaryText = NSLocalizedString("import.succeeded", comment: "")
-          let format = NSLocalizedString("import.succeeded.changes", comment: "")
-          controller.secondaryText = .localizedStringWithFormat(format, addedItems.count)
-        case let .error(error):
-          controller.primaryText = NSLocalizedString("import.failed", comment: "")
-          controller.secondaryText = Utils.localizedErrorMessage(for: error)
-      }
-    }
-    controller.primaryText = NSLocalizedString("import.progress", comment: "")
-    self.window!.rootViewController!.present(controller, animated: true)
-    return true
-  }
-
 }

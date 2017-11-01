@@ -1,7 +1,7 @@
 import Dispatch
 import UIKit
 
-class SearchResultsController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class SearchResultsController: UIViewController {
 
   @IBOutlet private weak var tableView: UITableView!
   @IBOutlet private var emptyView: UIView!
@@ -41,9 +41,11 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
     tableView.dataSource = self
 
   }
+}
 
-  // MARK: - Table view data source
+// MARK: - Table View
 
+extension SearchResultsController: UITableViewDataSource, UITableViewDelegate {
   public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     return searchResults.count
   }
@@ -76,7 +78,6 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
     delegate?.didSelectSearchResult(searchResults[indexPath.row])
     tableView.deselectRow(at: indexPath, animated: true)
   }
-
 }
 
 protocol SearchResultsSelectionDelegate: class {
