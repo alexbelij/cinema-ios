@@ -120,13 +120,9 @@ class DetailViewController: UIViewController {
     textView?.text = ""
     configureView()
     super.viewDidLoad()
-    NotificationCenter.default.addObserver(self,
-                                           selector: #selector(reloadDetailItem),
-                                           name: .didChangeMediaLibraryContent,
-                                           object: nil)
+    library.delegates.add(self)
   }
 
-  @objc
   private func reloadDetailItem() {
     DispatchQueue.main.async {
       let items = self.library.mediaItems { $0.id == self.detailItem!.id }
@@ -156,8 +152,10 @@ class DetailViewController: UIViewController {
     editVC.library = library
     self.present(navController, animated: true)
   }
+}
 
-  deinit {
-    NotificationCenter.default.removeObserver(self)
+extension DetailViewController: MediaLibraryDelegate {
+  func libraryDidUpdateContent(_ library: MediaLibrary) {
+    self.reloadDetailItem()
   }
 }

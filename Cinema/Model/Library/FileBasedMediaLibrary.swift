@@ -2,6 +2,8 @@ import Foundation
 
 class FileBasedMediaLibrary: MediaLibrary {
 
+  let delegates: MulticastDelegate<MediaLibraryDelegate> = MulticastDelegate()
+
   private let url: URL
 
   private let dataFormat: DataFormat
@@ -80,7 +82,7 @@ class FileBasedMediaLibrary: MediaLibrary {
     guard FileManager.default.createFile(atPath: url.path, contents: data) else {
       throw MediaLibraryError.storageError
     }
-    NotificationCenter.default.post(name: .didChangeMediaLibraryContent, object: self)
+    delegates.invoke { $0.libraryDidUpdateContent(self) }
   }
 
 }

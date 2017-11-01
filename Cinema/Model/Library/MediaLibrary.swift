@@ -2,6 +2,8 @@ import Foundation
 
 protocol MediaLibrary {
 
+  var delegates: MulticastDelegate<MediaLibraryDelegate> { get }
+
   var persistentSchemaVersion: SchemaVersion { get }
 
   func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem]
@@ -21,6 +23,6 @@ enum MediaLibraryError: Error {
   case itemDoesNotExist(id: Int)
 }
 
-extension Notification.Name {
-  static let didChangeMediaLibraryContent = Notification.Name("didChangeMediaLibraryContent")
+protocol MediaLibraryDelegate: class {
+  func libraryDidUpdateContent(_ library: MediaLibrary)
 }
