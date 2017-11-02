@@ -56,16 +56,12 @@ extension SearchResultsController: UITableViewDataSource, UITableViewDelegate {
       let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemAddedCell",
                                                // swiftlint:disable:next force_cast
                                                for: indexPath) as! SearchItemAddedCell
-      cell.titleLabel.text = searchItem.title
+      cell.configure(for: searchItem)
       return cell
     } else {
       // swiftlint:disable:next force_cast
       let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemCell", for: indexPath) as! SearchItemCell
-      cell.titleLabel.text = searchItem.title
-      if let releaseDate = searchItem.releaseDate {
-        let calendar = Calendar.current
-        cell.yearLabel.text = String(calendar.component(.year, from: releaseDate))
-      }
+      cell.configure(for: searchItem)
       return cell
     }
   }
@@ -85,13 +81,25 @@ protocol SearchResultsSelectionDelegate: class {
 }
 
 class SearchItemCell: UITableViewCell {
-  @IBOutlet fileprivate weak var titleLabel: UILabel!
-  @IBOutlet fileprivate weak var yearLabel: UILabel!
+  @IBOutlet private weak var titleLabel: UILabel!
+  @IBOutlet private weak var yearLabel: UILabel!
+
+  func configure(for searchItem: PartialMediaItem) {
+    titleLabel.text = searchItem.title
+    if let releaseDate = searchItem.releaseDate {
+      let calendar = Calendar.current
+      yearLabel.text = String(calendar.component(.year, from: releaseDate))
+    }
+  }
 }
 
 class SearchItemAddedCell: UITableViewCell {
 
-  @IBOutlet fileprivate weak var titleLabel: UILabel!
+  @IBOutlet private weak var titleLabel: UILabel!
+
+  func configure(for searchItem: PartialMediaItem) {
+    titleLabel.text = searchItem.title
+  }
 
   override func awakeFromNib() {
     super.awakeFromNib()

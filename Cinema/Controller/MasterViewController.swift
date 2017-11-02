@@ -183,11 +183,7 @@ extension MasterViewController {
     let cell = tableView.dequeueReusableCell(withIdentifier: "MovieTableCell", for: indexPath) as! MovieTableCell
 
     let mediaItem = item(for: indexPath)
-    cell.titleLabel!.text = mediaItem.fullTitle
-    cell.runtimeLabel!.text = mediaItem.runtime == nil
-        ? NSLocalizedString("details.missing.runtime", comment: "")
-        : Utils.formatDuration(mediaItem.runtime!)
-    cell.posterView.image = .genericPosterImage(minWidth: cell.posterView.frame.size.width)
+    cell.configure(for: mediaItem)
     DispatchQueue.global(qos: .userInteractive).async {
       if let poster = self.movieDb.poster(for: mediaItem.id, size: PosterSize(minWidth: 46)) {
         DispatchQueue.main.async {
@@ -261,13 +257,21 @@ extension MasterViewController {
 
 class MovieTableCell: UITableViewCell {
   @IBOutlet fileprivate weak var posterView: UIImageView!
-  @IBOutlet fileprivate weak var titleLabel: UILabel!
-  @IBOutlet fileprivate weak var runtimeLabel: UILabel!
+  @IBOutlet private weak var titleLabel: UILabel!
+  @IBOutlet private weak var runtimeLabel: UILabel!
 
   override func awakeFromNib() {
     super.awakeFromNib()
     posterView.layer.borderColor = UIColor.posterBorder.cgColor
     posterView.layer.borderWidth = 0.5
+  }
+
+  func configure(for mediaItem: MediaItem) {
+    titleLabel!.text = mediaItem.fullTitle
+    runtimeLabel!.text = mediaItem.runtime == nil
+        ? NSLocalizedString("details.missing.runtime", comment: "")
+        : Utils.formatDuration(mediaItem.runtime!)
+    posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
   }
 }
 
