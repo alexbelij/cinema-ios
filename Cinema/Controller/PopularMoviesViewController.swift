@@ -50,8 +50,7 @@ extension PopularMoviesViewController {
     let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PosterCell", for: indexPath) as! PosterCell
 
     let item = items[indexPath.row]
-    cell.titleLabel.text = item.title
-    cell.posterImageView.image = .genericPosterImage(minWidth: cell.posterImageView.frame.size.width)
+    cell.configure(for: item)
 
     DispatchQueue.global(qos: .userInteractive).async {
       let poster = self.movieDb.poster(for: item.id, size: self.cellPosterSize)
@@ -76,7 +75,7 @@ extension PopularMoviesViewController {
                                                                            withReuseIdentifier: "TitleHeaderView",
                                                                            // swiftlint:disable:next force_cast
                                                                            for: indexPath) as! TitleHeaderView
-        reusableView.label.text = NSLocalizedString("popularMovies", comment: "")
+        reusableView.configure(title: NSLocalizedString("popularMovies", comment: ""))
         return reusableView
       case UICollectionElementKindSectionFooter:
         return collectionView.dequeueReusableSupplementaryView(ofKind: kind,
@@ -105,16 +104,6 @@ extension PopularMoviesViewController {
     guard elementKind == UICollectionElementKindSectionFooter,
           let footerView = view as? TmdbFooterView else { return }
     footerView.activityIndicator.stopAnimating()
-  }
-
-  override func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
-    guard let cell = collectionView.cellForItem(at: indexPath) as? PosterCell else { return }
-    cell.highlightView.alpha = 0.3
-  }
-
-  override func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
-    guard let cell = collectionView.cellForItem(at: indexPath) as? PosterCell else { return }
-    cell.highlightView.alpha = 0
   }
 
   override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -178,14 +167,18 @@ extension PopularMoviesViewController {
 // MARK: - Header Views, Footer Views & Cells
 
 class TitleHeaderView: UICollectionReusableView {
-  @IBOutlet fileprivate weak var label: UILabel!
+  @IBOutlet private weak var label: UILabel!
+
+  func configure(title: String) {
+    label.text = title
+  }
 }
 
 class PosterCell: UICollectionViewCell {
 
   @IBOutlet fileprivate weak var posterImageView: UIImageView!
-  @IBOutlet fileprivate weak var titleLabel: UILabel!
-  var highlightView: UIView!
+  @IBOutlet private weak var titleLabel: UILabel!
+  private var highlightView: UIView!
 
   override func awakeFromNib() {
     super.awakeFromNib()
@@ -199,6 +192,21 @@ class PosterCell: UICollectionViewCell {
     self.highlightView.backgroundColor = .black
     self.highlightView.alpha = 0
     self.contentView.addSubview(highlightView)
+  }
+
+  func configure(for item: PartialMediaItem) {
+    titleLabel.text = item.title
+    posterImageView.image = .genericPosterImage(minWidth: posterImageView.frame.size.width)
+  }
+
+  override var isHighlighted: Bool {
+    didSet {
+      if isHighlighted {
+        highlightView.alpha = 0.3
+      } else {
+        highlightView.alpha = 0.0
+      }
+    }
   }
 }
 
