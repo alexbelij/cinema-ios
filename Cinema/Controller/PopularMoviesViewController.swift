@@ -106,16 +106,6 @@ extension PopularMoviesViewController {
     footerView.activityIndicator.stopAnimating()
   }
 
-  override func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
-    guard let cell = collectionView.cellForItem(at: indexPath) as? PosterCell else { return }
-    cell.highlightView.alpha = 0.3
-  }
-
-  override func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
-    guard let cell = collectionView.cellForItem(at: indexPath) as? PosterCell else { return }
-    cell.highlightView.alpha = 0
-  }
-
   override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     self.selectionDelegate?.didSelectSearchResult(items[indexPath.row])
   }
@@ -188,7 +178,7 @@ class PosterCell: UICollectionViewCell {
 
   @IBOutlet fileprivate weak var posterImageView: UIImageView!
   @IBOutlet private weak var titleLabel: UILabel!
-  var highlightView: UIView!
+  private var highlightView: UIView!
 
   override func awakeFromNib() {
     super.awakeFromNib()
@@ -207,6 +197,16 @@ class PosterCell: UICollectionViewCell {
   func configure(for item: PartialMediaItem) {
     titleLabel.text = item.title
     posterImageView.image = .genericPosterImage(minWidth: posterImageView.frame.size.width)
+  }
+
+  override var isHighlighted: Bool {
+    didSet {
+      if isHighlighted {
+        highlightView.alpha = 0.3
+      } else {
+        highlightView.alpha = 0.0
+      }
+    }
   }
 }
 
