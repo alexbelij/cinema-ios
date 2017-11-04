@@ -12,8 +12,14 @@ class PopularMoviesViewController: UICollectionViewController {
   private var movieIterator: AnyIterator<PartialMediaItem>!
   private var isFetchingItems = false
 
-  @IBOutlet private var emptyView: UIView!
-  @IBOutlet private weak var emptyViewLabel: UILabel!
+  private lazy var emptyView: GenericEmptyView = {
+    let view = GenericEmptyView()
+    view.configure(
+        accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
+        description: .basic(NSLocalizedString("popularMovies.empty", comment: ""))
+    )
+    return view
+  }()
 
 }
 
@@ -30,7 +36,6 @@ extension PopularMoviesViewController {
     let spacing = (contentWidth - totalCellWidth) / 3.5
     flowLayout.minimumInteritemSpacing = spacing
     flowLayout.sectionInset = UIEdgeInsets(top: 10, left: spacing, bottom: 10, right: spacing)
-    emptyViewLabel.text = NSLocalizedString("popularMovies.empty", comment: "")
 
     self.movieIterator = AnyIterator(self.movieDb.popularMovies().lazy.filter(isNotInLibrary).makeIterator())
     fetchItems(count: 10)
