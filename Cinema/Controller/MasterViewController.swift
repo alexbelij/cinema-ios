@@ -19,10 +19,15 @@ class MasterViewController: UITableViewController {
   private var sortDescriptor = SortDescriptor.title
 
   @IBOutlet private weak var sortButton: UIBarButtonItem!
-  @IBOutlet private var emptyLibraryView: UIView!
-  @IBOutlet private weak var emptyLibraryViewLabel: UILabel!
-  @IBOutlet private var emptySearchResultsView: UIView!
-  @IBOutlet private weak var emptySearchResultsViewLabel: UILabel!
+  private lazy var emptyLibraryView: GenericEmptyView = {
+    let view = GenericEmptyView()
+    view.configure(
+        accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
+        description: .basic(NSLocalizedString("library.empty", comment: ""))
+    )
+    return view
+  }()
+  private lazy var emptySearchResultsView = GenericEmptyView()
 
   private var state: State = .initializing
 
@@ -43,7 +48,6 @@ extension MasterViewController {
     fetchLibraryData()
     super.viewDidLoad()
     title = NSLocalizedString("library", comment: "")
-    emptyLibraryViewLabel.text = NSLocalizedString("library.empty", comment: "")
     searchController.searchResultsUpdater = self
     searchController.dimsBackgroundDuringPresentation = false
     searchController.delegate = self
@@ -286,8 +290,11 @@ extension MasterViewController: UISearchResultsUpdating, UISearchControllerDeleg
         filteredMediaItems = allItems.filter { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
 
         if filteredMediaItems.isEmpty && !searchText.isEmpty {
-          self.emptySearchResultsViewLabel.text = .localizedStringWithFormat(NSLocalizedString("search.results.empty",
-                                                                                               comment: ""), searchText)
+          self.emptySearchResultsView.configure(
+              accessory: .image(#imageLiteral(resourceName: "EmptySearchResults")),
+              description: .basic(.localizedStringWithFormat(NSLocalizedString("search.results.empty", comment: ""),
+                                                             searchText))
+          )
           self.tableView.backgroundView = self.emptySearchResultsView
           self.tableView.separatorStyle = .none
         } else {

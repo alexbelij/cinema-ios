@@ -4,8 +4,7 @@ import UIKit
 class SearchResultsController: UIViewController {
 
   @IBOutlet private weak var tableView: UITableView!
-  @IBOutlet private var emptyView: UIView!
-  @IBOutlet private weak var emptyViewLabel: UILabel!
+  private lazy var emptyView = GenericEmptyView()
 
   var searchText: String?
   var searchResults = [PartialMediaItem]() {
@@ -15,8 +14,11 @@ class SearchResultsController: UIViewController {
           guard let searchText = self.searchText else {
             preconditionFailure("no search text set")
           }
-          self.emptyViewLabel.text = String.localizedStringWithFormat(NSLocalizedString("search.results.empty",
-                                                                                        comment: ""), searchText)
+          self.emptyView.configure(
+              accessory: .image(#imageLiteral(resourceName: "EmptySearchResults")),
+              description: .basic(.localizedStringWithFormat(NSLocalizedString("search.results.empty", comment: ""),
+                                                             searchText))
+          )
           self.tableView.backgroundView = self.emptyView
           self.tableView.separatorStyle = .none
           self.resultsInLibrary = nil
