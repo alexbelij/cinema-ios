@@ -38,7 +38,7 @@ class LibraryUpdateController: UIViewController {
                                         addedItemTitle)
       case let .failure(error):
         self.label.text = NSLocalizedString("addItem.failed", comment: "")
-        self.messageLabel.text = Utils.localizedErrorMessage(for: error)
+        self.messageLabel.text = L10n.localizedErrorMessage(for: error)
     }
     self.activityIndicator.stopAnimating()
     self.messageLabel.isHidden = false
