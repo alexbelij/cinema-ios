@@ -65,7 +65,7 @@ private struct TitleSortingStrategy: TableViewSortingStrategy {
     do {
       let regex = try NSRegularExpression(pattern: "^(the|der|die|das) +",
                                           options: NSRegularExpression.Options.caseInsensitive)
-      let range = NSRange(location: 0, length: str.characters.count)
+      let range = NSRange(location: 0, length: str.count)
       return regex.stringByReplacingMatches(in: str, range: range, withTemplate: "")
     } catch {
       return str
