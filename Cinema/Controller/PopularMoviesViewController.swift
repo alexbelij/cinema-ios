@@ -37,7 +37,11 @@ extension PopularMoviesViewController {
     flowLayout.minimumInteritemSpacing = spacing
     flowLayout.sectionInset = UIEdgeInsets(top: 10, left: spacing, bottom: 10, right: spacing)
 
-    self.movieIterator = AnyIterator(self.movieDb.popularMovies().lazy.filter(isNotInLibrary).makeIterator())
+    self.movieIterator = AnyIterator(self.movieDb
+                                         .popularMovies()
+                                         .lazy
+                                         .filter { !self.library.contains(id: $0.id) }
+                                         .makeIterator())
     fetchItems(count: 10)
   }
 }
@@ -119,10 +123,6 @@ extension PopularMoviesViewController {
 // MARK: - Data Management
 
 extension PopularMoviesViewController {
-  private func isNotInLibrary(_ item: PartialMediaItem) -> Bool {
-    return library.mediaItems { $0.id == item.id }.isEmpty
-  }
-
   private func fetchItems(count: Int) {
     isFetchingItems = true
     if let footerView = self.collectionView!.supplementaryView(forElementKind: UICollectionElementKindSectionFooter,

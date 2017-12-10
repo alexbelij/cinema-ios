@@ -26,9 +26,7 @@ class SearchResultsController: UIViewController {
         } else {
           self.tableView.backgroundView = nil
           self.tableView.separatorStyle = .singleLine
-          self.resultsInLibrary = self.searchResults.map { movie in
-            !self.library.mediaItems { $0.id == movie.id }.isEmpty
-          }
+          self.resultsInLibrary = self.searchResults.map { self.library.contains(id: $0.id) }
         }
         self.tableView.reloadData()
       }
