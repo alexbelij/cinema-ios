@@ -5,6 +5,7 @@ class SearchResultsController: UIViewController {
 
   @IBOutlet private weak var tableView: UITableView!
   private lazy var emptyView = GenericEmptyView()
+  private var previousTableViewInsets: UIEdgeInsets?
 
   var searchText: String?
   var searchResults = [PartialMediaItem]() {
@@ -41,7 +42,15 @@ class SearchResultsController: UIViewController {
     super.viewDidLoad()
     tableView.delegate = self
     tableView.dataSource = self
-
+    let notificationCenter = NotificationCenter.default
+    notificationCenter.addObserver(self,
+                                   selector: #selector(keyboardDidShow(_:)),
+                                   name: .UIKeyboardDidShow,
+                                   object: nil)
+    notificationCenter.addObserver(self,
+                                   selector: #selector(keyboardWillHide(_:)),
+                                   name: .UIKeyboardWillHide,
+                                   object: nil)
   }
 }
 
@@ -75,6 +84,39 @@ extension SearchResultsController: UITableViewDataSource, UITableViewDelegate {
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     delegate?.didSelectSearchResult(searchResults[indexPath.row])
     tableView.deselectRow(at: indexPath, animated: true)
+  }
+}
+
+// MARK: - Keyboard Adjustments
+
+extension SearchResultsController {
+  @objc
+  private func keyboardDidShow(_ notification: Notification) {
+    guard let keyboardFrame = notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? CGRect else { return }
+    var contentInsets: UIEdgeInsets
+    if previousTableViewInsets == nil {
+      contentInsets = tableView.contentInset
+      self.previousTableViewInsets = contentInsets
+    } else {
+      contentInsets = tableView.contentInset
+    }
+    if #available(iOS 11.0, *) {
+      contentInsets.bottom = keyboardFrame.height - view.safeAreaInsets.bottom
+    } else {
+      contentInsets.bottom = keyboardFrame.height
+    }
+    self.tableView.contentInset = contentInsets
+    self.tableView.scrollIndicatorInsets = contentInsets
+  }
+
+  @objc
+  private func keyboardWillHide(_ notification: Notification) {
+    guard let insets = self.previousTableViewInsets else { return }
+    UIView.animate(withDuration: 0.3) {
+      self.tableView.contentInset = insets
+      self.tableView.scrollIndicatorInsets = insets
+    }
+    self.previousTableViewInsets = nil
   }
 }
 
