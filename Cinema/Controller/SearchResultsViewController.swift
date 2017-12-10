@@ -7,16 +7,13 @@ class SearchResultsController: UIViewController {
   private lazy var emptyView = GenericEmptyView()
   private var previousTableViewInsets: UIEdgeInsets?
 
-  var searchText: String? {
+  var searchText: String = "" {
     didSet {
       DispatchQueue.main.async {
-        guard let searchText = self.searchText else {
-          preconditionFailure("no search text set")
-        }
         self.emptyView.configure(
             accessory: .image(#imageLiteral(resourceName: "EmptySearchResults")),
             description: .basic(.localizedStringWithFormat(NSLocalizedString("search.results.empty", comment: ""),
-                                                           searchText))
+                                                           self.searchText))
         )
       }
     }
