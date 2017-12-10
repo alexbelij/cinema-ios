@@ -31,9 +31,11 @@ class JSONFormat: DataFormat {
     }
     return version
   }
+}
 
-  // MARK: - Version 2-0-0
+// MARK: - Version 2-0-0
 
+extension JSONFormat {
   private func serializeVersion2_0_0(_ elements: [MediaItem]) throws -> Data {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -94,9 +96,11 @@ class JSONFormat: DataFormat {
     }
     return items
   }
+}
 
-  // MARK: - Version 1-0-0
+// MARK: - Version 1-0-0
 
+extension JSONFormat {
   private func serializeVersion1_0_0(_ elements: [MediaItem]) throws -> Data {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy"
@@ -148,5 +152,4 @@ class JSONFormat: DataFormat {
     }
     return items
   }
-
 }

@@ -1,7 +1,6 @@
 import UIKit
 
 class ArrayTableController<SheetItem: SheetItemProtocol>: NSObject, UITableViewDataSource, UITableViewDelegate {
-  private let selectedBackgroundColor = #colorLiteral(red: 0.9, green: 0.9, blue: 0.9, alpha: 1)
 
   private let sheetItemType: SheetItemType
   private let cellConfig: AnyTabularSheetCellConfiguration<SheetItem>
@@ -53,10 +52,6 @@ class ArrayTableController<SheetItem: SheetItemProtocol>: NSObject, UITableViewD
     tableView.deselectRow(at: indexPath, animated: true)
   }
 
-  func tableView(_ tableView: UITableView, didHighlightRowAt indexPath: IndexPath) {
-    tableView.cellForRow(at: indexPath)?.contentView.backgroundColor = selectedBackgroundColor
-  }
-
   func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
     return self.cellConfig.cellHeight
   }
@@ -75,8 +70,9 @@ private class TableViewWrapper: CellDequeuing {
   fileprivate var tableView: UITableView?
   fileprivate var indexPath: IndexPath?
 
-  func dequeueReusableCell<CellType: UITableViewCell>(withIdentifier identifier: String) -> CellType {
+  func dequeueReusableCell<CellType: UITableViewCell>(_ cellType: CellType.Type) -> CellType {
     guard let tableView = self.tableView, let indexPath = self.indexPath else { preconditionFailure() }
+    let identifier = String(describing: cellType)
     guard let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath) as? CellType else {
       preconditionFailure("cell with identifier \(identifier) is not of type \(CellType.self)")
     }

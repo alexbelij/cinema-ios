@@ -48,7 +48,8 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
     super.init(nibName: nil, bundle: nil)
     self.modalPresentationStyle = .custom
     self.transitioningDelegate = self
-    cellConfig.nibCellReuseIdentifiers.forEach { identifier in
+    cellConfig.nibCellTypes.forEach { cellType in
+      let identifier = String(describing: cellType)
       registeredCells[identifier] = UINib(nibName: identifier, bundle: cellConfig.nibCellBundle)
     }
   }
@@ -152,13 +153,13 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
 // MARK: - Cell Configuration
 
 public protocol CellDequeuing {
-  func dequeueReusableCell<CellType: UITableViewCell>(withIdentifier identifier: String) -> CellType
+  func dequeueReusableCell<CellType: UITableViewCell>(_ cellType: CellType.Type) -> CellType
 }
 
 public protocol TabularSheetCellConfiguration: class {
   associatedtype SheetItem
 
-  var nibCellReuseIdentifiers: [String] { get }
+  var nibCellTypes: [UITableViewCell.Type] { get }
 
   var nibCellBundle: Bundle? { get }
 
@@ -191,16 +192,14 @@ public extension TabularSheetCellConfiguration {
   }
 
   public func cancelCell(cellDequeuing: CellDequeuing) -> UITableViewCell {
-    guard let cell = cellDequeuing.dequeueReusableCell(withIdentifier: "CancelCell") as? CancelCell else {
-      preconditionFailure("CancelCell not registered")
-    }
+    let cell = cellDequeuing.dequeueReusableCell(CancelCell.self)
     cell.label.textColor = cell.tintColor
     cell.label.text = localizedCancelString
     return cell
   }
 }
 
-private class CancelCell: UITableViewCell {
+class CancelCell: UITableViewCell {
   fileprivate let label: UILabel
 
   override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
@@ -232,7 +231,7 @@ private class _AnyTabularSheetCellConfigurationBoxBase<SheetItem>: TabularSheetC
     fatalError("must be overridden")
   }
 
-  var nibCellReuseIdentifiers: [String] {
+  var nibCellTypes: [UITableViewCell.Type] {
     _abstract()
   }
 
@@ -269,8 +268,8 @@ private class _TabularSheetCellConfigurationBox<Base: TabularSheetCellConfigurat
     self.base = base
   }
 
-  override var nibCellReuseIdentifiers: [String] {
-    return base.nibCellReuseIdentifiers
+  override var nibCellTypes: [UITableViewCell.Type] {
+    return base.nibCellTypes
   }
 
   override var nibCellBundle: Bundle? {
@@ -304,8 +303,8 @@ public class AnyTabularSheetCellConfiguration<SheetItem>: TabularSheetCellConfig
     self.box = _TabularSheetCellConfigurationBox(base)
   }
 
-  public var nibCellReuseIdentifiers: [String] {
-    return box.nibCellReuseIdentifiers
+  public var nibCellTypes: [UITableViewCell.Type] {
+    return box.nibCellTypes
   }
 
   public var nibCellBundle: Bundle? {

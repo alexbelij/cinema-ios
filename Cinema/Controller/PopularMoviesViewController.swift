@@ -12,9 +12,19 @@ class PopularMoviesViewController: UICollectionViewController {
   private var movieIterator: AnyIterator<PartialMediaItem>!
   private var isFetchingItems = false
 
-  @IBOutlet private var emptyView: UIView!
-  @IBOutlet private weak var emptyViewLabel: UILabel!
+  private lazy var emptyView: GenericEmptyView = {
+    let view = GenericEmptyView()
+    view.configure(
+        accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
+        description: .basic(NSLocalizedString("popularMovies.empty", comment: ""))
+    )
+    return view
+  }()
 
+}
+
+// MARK: - View Controller Lifecycle
+extension PopularMoviesViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     guard let flowLayout = self.collectionView?.collectionViewLayout as? UICollectionViewFlowLayout else {
@@ -26,12 +36,89 @@ class PopularMoviesViewController: UICollectionViewController {
     let spacing = (contentWidth - totalCellWidth) / 3.5
     flowLayout.minimumInteritemSpacing = spacing
     flowLayout.sectionInset = UIEdgeInsets(top: 10, left: spacing, bottom: 10, right: spacing)
-    emptyViewLabel.text = NSLocalizedString("popularMovies.empty", comment: "")
 
     self.movieIterator = AnyIterator(self.movieDb.popularMovies().lazy.filter(isNotInLibrary).makeIterator())
     fetchItems(count: 10)
   }
+}
 
+// MARK: - UICollectionViewDataSource
+
+extension PopularMoviesViewController {
+  override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    return items.count
+  }
+
+  override func collectionView(_ collectionView: UICollectionView,
+                               cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    // swiftlint:disable:next force_cast
+    let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PosterCell", for: indexPath) as! PosterCell
+
+    let item = items[indexPath.row]
+    cell.configure(for: item)
+
+    DispatchQueue.global(qos: .userInteractive).async {
+      let poster = self.movieDb.poster(for: item.id, size: self.cellPosterSize)
+      DispatchQueue.main.sync {
+        cell.posterImageView.image = poster
+      }
+    }
+
+    return cell
+  }
+}
+
+// MARK: - UICollectionViewDelegate
+
+extension PopularMoviesViewController {
+  override func collectionView(_ collectionView: UICollectionView,
+                               viewForSupplementaryElementOfKind kind: String,
+                               at indexPath: IndexPath) -> UICollectionReusableView {
+    switch kind {
+      case UICollectionElementKindSectionHeader:
+        let reusableView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+                                                                           withReuseIdentifier: "TitleHeaderView",
+                                                                           // swiftlint:disable:next force_cast
+                                                                           for: indexPath) as! TitleHeaderView
+        reusableView.configure(title: NSLocalizedString("popularMovies", comment: ""))
+        return reusableView
+      case UICollectionElementKindSectionFooter:
+        return collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+                                                               withReuseIdentifier: "TmdbFooterView",
+                                                               for: indexPath)
+      default:
+        fatalError("Unexpected kind \(kind)")
+    }
+  }
+
+  override func collectionView(_ collectionView: UICollectionView,
+                               willDisplaySupplementaryView view: UICollectionReusableView,
+                               forElementKind elementKind: String,
+                               at indexPath: IndexPath) {
+    guard elementKind == UICollectionElementKindSectionFooter,
+          let footerView = view as? TmdbFooterView else { return }
+    if isFetchingItems {
+      footerView.activityIndicator.startAnimating()
+    }
+  }
+
+  override func collectionView(_ collectionView: UICollectionView,
+                               didEndDisplayingSupplementaryView view: UICollectionReusableView,
+                               forElementOfKind elementKind: String,
+                               at indexPath: IndexPath) {
+    guard elementKind == UICollectionElementKindSectionFooter,
+          let footerView = view as? TmdbFooterView else { return }
+    footerView.activityIndicator.stopAnimating()
+  }
+
+  override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    self.selectionDelegate?.didSelectSearchResult(items[indexPath.row])
+  }
+}
+
+// MARK: - Data Management
+
+extension PopularMoviesViewController {
   private func isNotInLibrary(_ item: PartialMediaItem) -> Bool {
     return library.mediaItems { $0.id == item.id }.isEmpty
   }
@@ -69,112 +156,38 @@ class PopularMoviesViewController: UICollectionViewController {
       }
     }
   }
+}
 
+// MARK: - Actions
+
+extension PopularMoviesViewController {
   func removeItem(_ item: PartialMediaItem) {
     guard let index = items.index(of: item) else { return }
     self.items.remove(at: index)
     collectionView!.deleteItems(at: [IndexPath(row: index, section: 0)])
     fetchItems(count: 1)
   }
-
-  // MARK: UICollectionViewDataSource
-
-  override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-    return items.count
-  }
-
-  override func collectionView(_ collectionView: UICollectionView,
-                               cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-    // swiftlint:disable:next force_cast
-    let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PosterCell", for: indexPath) as! PosterCell
-
-    let item = items[indexPath.row]
-    cell.titleLabel.text = item.title
-    cell.posterImageView.image = .genericPosterImage(minWidth: cell.posterImageView.frame.size.width)
-
-    DispatchQueue.global(qos: .userInteractive).async {
-      let poster = self.movieDb.poster(for: item.id, size: self.cellPosterSize)
-      DispatchQueue.main.sync {
-        cell.posterImageView.image = poster
-      }
-    }
-
-    return cell
-  }
-
-  // MARK: UICollectionViewDelegate
-
-  override func collectionView(_ collectionView: UICollectionView,
-                               viewForSupplementaryElementOfKind kind: String,
-                               at indexPath: IndexPath) -> UICollectionReusableView {
-    switch kind {
-      case UICollectionElementKindSectionHeader:
-        let reusableView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
-                                                                           withReuseIdentifier: "TitleHeaderView",
-                                                                           // swiftlint:disable:next force_cast
-                                                                           for: indexPath) as! TitleHeaderView
-        reusableView.label.text = NSLocalizedString("popularMovies", comment: "")
-        return reusableView
-      case UICollectionElementKindSectionFooter:
-        return collectionView.dequeueReusableSupplementaryView(ofKind: kind,
-                                                               withReuseIdentifier: "TmdbFooterView",
-                                                               for: indexPath)
-      default:
-        fatalError("Unexpected kind \(kind)")
-    }
-  }
-
-  override func collectionView(_ collectionView: UICollectionView,
-                               willDisplaySupplementaryView view: UICollectionReusableView,
-                               forElementKind elementKind: String,
-                               at indexPath: IndexPath) {
-    guard elementKind == UICollectionElementKindSectionFooter,
-          let footerView = view as? TmdbFooterView else { return }
-    if isFetchingItems {
-      footerView.activityIndicator.startAnimating()
-    }
-  }
-
-  override func collectionView(_ collectionView: UICollectionView,
-                               didEndDisplayingSupplementaryView view: UICollectionReusableView,
-                               forElementOfKind elementKind: String,
-                               at indexPath: IndexPath) {
-    guard elementKind == UICollectionElementKindSectionFooter,
-          let footerView = view as? TmdbFooterView else { return }
-    footerView.activityIndicator.stopAnimating()
-  }
-
-  override func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
-    guard let cell = collectionView.cellForItem(at: indexPath) as? PosterCell else { return }
-    cell.highlightView.alpha = 0.3
-  }
-
-  override func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
-    guard let cell = collectionView.cellForItem(at: indexPath) as? PosterCell else { return }
-    cell.highlightView.alpha = 0
-  }
-
-  override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    self.selectionDelegate?.didSelectSearchResult(items[indexPath.row])
-  }
-
 }
 
 // MARK: - Header Views, Footer Views & Cells
 
 class TitleHeaderView: UICollectionReusableView {
-  @IBOutlet fileprivate weak var label: UILabel!
+  @IBOutlet private weak var label: UILabel!
+
+  func configure(title: String) {
+    label.text = title
+  }
 }
 
 class PosterCell: UICollectionViewCell {
 
   @IBOutlet fileprivate weak var posterImageView: UIImageView!
-  @IBOutlet fileprivate weak var titleLabel: UILabel!
-  var highlightView: UIView!
+  @IBOutlet private weak var titleLabel: UILabel!
+  private var highlightView: UIView!
 
   override func awakeFromNib() {
     super.awakeFromNib()
-    posterImageView.layer.borderColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.2).cgColor
+    posterImageView.layer.borderColor = UIColor.posterBorder.cgColor
     posterImageView.layer.borderWidth = 0.5
     let posterFrame = posterImageView.frame
     self.highlightView = UIView(frame: CGRect(x: 0,
@@ -184,6 +197,21 @@ class PosterCell: UICollectionViewCell {
     self.highlightView.backgroundColor = .black
     self.highlightView.alpha = 0
     self.contentView.addSubview(highlightView)
+  }
+
+  func configure(for item: PartialMediaItem) {
+    titleLabel.text = item.title
+    posterImageView.image = .genericPosterImage(minWidth: posterImageView.frame.size.width)
+  }
+
+  override var isHighlighted: Bool {
+    didSet {
+      if isHighlighted {
+        highlightView.alpha = 0.3
+      } else {
+        highlightView.alpha = 0.0
+      }
+    }
   }
 }
 

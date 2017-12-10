@@ -60,7 +60,7 @@ class TMDBSwiftWrapper: MovieDbClient {
       }
       releaseDates = array
     }
-    return releaseDates!.first { $0.iso_3166_1 == self.country.rawValue }?.release_dates[0].certification
+    return releaseDates?.first { $0.iso_3166_1 == self.country.rawValue }?.release_dates[0].certification
   }
 
   func genreIds(for id: Int) -> [Int] {

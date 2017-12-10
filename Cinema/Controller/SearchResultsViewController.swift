@@ -1,11 +1,11 @@
 import Dispatch
 import UIKit
 
-class SearchResultsController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class SearchResultsController: UIViewController {
 
   @IBOutlet private weak var tableView: UITableView!
-  @IBOutlet private var emptyView: UIView!
-  @IBOutlet private weak var emptyViewLabel: UILabel!
+  private lazy var emptyView = GenericEmptyView()
+  private var previousTableViewInsets: UIEdgeInsets?
 
   var searchText: String?
   var searchResults = [PartialMediaItem]() {
@@ -15,8 +15,11 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
           guard let searchText = self.searchText else {
             preconditionFailure("no search text set")
           }
-          self.emptyViewLabel.text = String.localizedStringWithFormat(NSLocalizedString("search.results.empty",
-                                                                                        comment: ""), searchText)
+          self.emptyView.configure(
+              accessory: .image(#imageLiteral(resourceName: "EmptySearchResults")),
+              description: .basic(.localizedStringWithFormat(NSLocalizedString("search.results.empty", comment: ""),
+                                                             searchText))
+          )
           self.tableView.backgroundView = self.emptyView
           self.tableView.separatorStyle = .none
           self.resultsInLibrary = nil
@@ -39,11 +42,21 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
     super.viewDidLoad()
     tableView.delegate = self
     tableView.dataSource = self
-
+    let notificationCenter = NotificationCenter.default
+    notificationCenter.addObserver(self,
+                                   selector: #selector(keyboardDidShow(_:)),
+                                   name: .UIKeyboardDidShow,
+                                   object: nil)
+    notificationCenter.addObserver(self,
+                                   selector: #selector(keyboardWillHide(_:)),
+                                   name: .UIKeyboardWillHide,
+                                   object: nil)
   }
+}
 
-  // MARK: - Table view data source
+// MARK: - Table View
 
+extension SearchResultsController: UITableViewDataSource, UITableViewDelegate {
   public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     return searchResults.count
   }
@@ -54,16 +67,12 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
       let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemAddedCell",
                                                // swiftlint:disable:next force_cast
                                                for: indexPath) as! SearchItemAddedCell
-      cell.titleLabel.text = searchItem.title
+      cell.configure(for: searchItem)
       return cell
     } else {
       // swiftlint:disable:next force_cast
       let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemCell", for: indexPath) as! SearchItemCell
-      cell.titleLabel.text = searchItem.title
-      if let releaseDate = searchItem.releaseDate {
-        let calendar = Calendar.current
-        cell.yearLabel.text = String(calendar.component(.year, from: releaseDate))
-      }
+      cell.configure(for: searchItem)
       return cell
     }
   }
@@ -76,7 +85,39 @@ class SearchResultsController: UIViewController, UITableViewDelegate, UITableVie
     delegate?.didSelectSearchResult(searchResults[indexPath.row])
     tableView.deselectRow(at: indexPath, animated: true)
   }
+}
 
+// MARK: - Keyboard Adjustments
+
+extension SearchResultsController {
+  @objc
+  private func keyboardDidShow(_ notification: Notification) {
+    guard let keyboardFrame = notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? CGRect else { return }
+    var contentInsets: UIEdgeInsets
+    if previousTableViewInsets == nil {
+      contentInsets = tableView.contentInset
+      self.previousTableViewInsets = contentInsets
+    } else {
+      contentInsets = tableView.contentInset
+    }
+    if #available(iOS 11.0, *) {
+      contentInsets.bottom = keyboardFrame.height - view.safeAreaInsets.bottom
+    } else {
+      contentInsets.bottom = keyboardFrame.height
+    }
+    self.tableView.contentInset = contentInsets
+    self.tableView.scrollIndicatorInsets = contentInsets
+  }
+
+  @objc
+  private func keyboardWillHide(_ notification: Notification) {
+    guard let insets = self.previousTableViewInsets else { return }
+    UIView.animate(withDuration: 0.3) {
+      self.tableView.contentInset = insets
+      self.tableView.scrollIndicatorInsets = insets
+    }
+    self.previousTableViewInsets = nil
+  }
 }
 
 protocol SearchResultsSelectionDelegate: class {
@@ -84,16 +125,28 @@ protocol SearchResultsSelectionDelegate: class {
 }
 
 class SearchItemCell: UITableViewCell {
-  @IBOutlet fileprivate weak var titleLabel: UILabel!
-  @IBOutlet fileprivate weak var yearLabel: UILabel!
+  @IBOutlet private weak var titleLabel: UILabel!
+  @IBOutlet private weak var yearLabel: UILabel!
+
+  func configure(for searchItem: PartialMediaItem) {
+    titleLabel.text = searchItem.title
+    if let releaseDate = searchItem.releaseDate {
+      let calendar = Calendar.current
+      yearLabel.text = String(calendar.component(.year, from: releaseDate))
+    }
+  }
 }
 
 class SearchItemAddedCell: UITableViewCell {
 
-  @IBOutlet fileprivate weak var titleLabel: UILabel!
+  @IBOutlet private weak var titleLabel: UILabel!
+
+  func configure(for searchItem: PartialMediaItem) {
+    titleLabel.text = searchItem.title
+  }
 
   override func awakeFromNib() {
     super.awakeFromNib()
-    self.tintColor = #colorLiteral(red: 0.495413959, green: 0.495413959, blue: 0.495413959, alpha: 1)
+    self.tintColor = .disabledControlText
   }
 }

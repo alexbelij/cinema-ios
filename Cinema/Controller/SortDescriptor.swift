@@ -10,6 +10,14 @@ enum SortDescriptor {
       case .year: return YearSortingStrategy()
     }
   }
+
+  var localizedName: String {
+    switch self {
+      case .title: return NSLocalizedString("sort.by.title", comment: "")
+      case .runtime: return NSLocalizedString("sort.by.runtime", comment: "")
+      case .year: return NSLocalizedString("sort.by.year", comment: "")
+    }
+  }
 }
 
 private struct TitleSortingStrategy: TableViewSortingStrategy {
@@ -57,7 +65,7 @@ private struct TitleSortingStrategy: TableViewSortingStrategy {
     do {
       let regex = try NSRegularExpression(pattern: "^(the|der|die|das) +",
                                           options: NSRegularExpression.Options.caseInsensitive)
-      let range = NSRange(location: 0, length: str.characters.count)
+      let range = NSRange(location: 0, length: str.count)
       return regex.stringByReplacingMatches(in: str, range: range, withTemplate: "")
     } catch {
       return str

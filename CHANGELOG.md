@@ -2,6 +2,16 @@
 
 All notable changes to the project will be documented in this file.
 
+## v1.3.3 - 2017-12-10
+
+### Added
+- text fields allow clearing
+
+### Fixed
+- accessory view in action sheet cells is highlighted in different shade
+- crash when fetching certification for non-existent movie
+- table view is fully accessible when keyboard is visible
+
 ## v1.3.2 - 2017-10-11
 
 ## Changed

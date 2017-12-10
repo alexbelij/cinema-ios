@@ -2,7 +2,6 @@ import Foundation
 import UIKit
 
 class Utils {
-
   static func formatDuration(_ duration: Int) -> String {
     let formatter = DateComponentsFormatter()
     formatter.unitsStyle = .full
@@ -27,13 +26,26 @@ class Utils {
     }
     return dir
   }
+}
 
-  static func localizedGenreNames(for genreIds: [Int]) -> [String] {
-    return genreIds.map(localizedGenreName(for:)).filter { $0 != nil }.map { $0! }
+// MARK: - Localization
+
+extension DiskType {
+  var localizedName: String {
+    switch self {
+      case .dvd: return NSLocalizedString("mediaItem.disk.dvd", comment: "")
+      case .bluRay: return NSLocalizedString("mediaItem.disk.bluRay", comment: "")
+    }
+  }
+}
+
+extension Array where Array.Element == Int {
+  var localizedGenreNames: [String] {
+    return map(localizedGenreName(for:)).filter { $0 != nil }.map { $0! }
   }
 
   // swiftlint:disable:next cyclomatic_complexity
-  private static func localizedGenreName(for genreId: Int) -> String? {
+  private func localizedGenreName(for genreId: Int) -> String? {
     let key: String?
     switch genreId {
       case 12: key = "genre.adventure"
@@ -63,7 +75,9 @@ class Utils {
       return nil
     }
   }
+}
 
+extension Utils {
   static func localizedErrorMessage(for error: Error) -> String {
     switch error {
       case DataFormatError.unsupportedSchemaVersion:
@@ -76,24 +90,34 @@ class Utils {
         return NSLocalizedString("error.genericError", comment: "")
     }
   }
+}
 
+// MARK: - Migration
+
+extension Utils {
   static func updates(from version: SchemaVersion, using movieDb: MovieDbClient) -> [PropertyUpdate] {
     switch version {
       case .v1_0_0: return [GenreIdsUpdate(movieDb: movieDb), ReleaseDateUpdate(movieDb: movieDb)]
       case .v2_0_0: return []
     }
   }
-
 }
 
-extension UIStoryboardSegue {
-  var unwrappedDestination: UIViewController {
-    switch destination {
-      case let navigation as UINavigationController:
-        return navigation.topViewController!
-      default:
-        return destination
+// MARK: - Other Extensions
+
+extension UIStoryboard {
+  static var main = UIStoryboard(name: "Main", bundle: nil)
+  static var addItem = UIStoryboard(name: "AddItem", bundle: nil)
+  static var editItem = UIStoryboard(name: "EditItem", bundle: nil)
+  static var maintenance = UIStoryboard(name: "Maintenance", bundle: nil)
+
+  func instantiate<ViewController: UIViewController>(_ viewController: ViewController.Type) -> ViewController {
+    let identifier = String(describing: viewController)
+    guard let controller = instantiateViewController(withIdentifier: identifier)
+    as? ViewController else {
+      fatalError("could not instantiate view controller with identifier \(identifier) ")
     }
+    return controller
   }
 }
 
@@ -108,4 +132,13 @@ extension UIImage {
     }
     return UIImage(named: "GenericPoster-w\(width)")!
   }
+}
+
+extension UIColor {
+  // swiftlint:disable object_literal
+  static let disabledControlText = UIColor(white: 0.58, alpha: 1.0)
+  static let destructive = UIColor(red: 1.0, green: 0.231, blue: 0.188, alpha: 1.0)
+  static let posterBorder = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2)
+  static let dimBackground = UIColor(red: 0, green: 0, blue: 0, alpha: 0.4)
+  // swiftlint:enable object_literal
 }

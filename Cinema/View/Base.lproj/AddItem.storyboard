@@ -49,7 +49,6 @@
                     <connections>
                         <outlet property="placeholderHeightConstraint" destination="Jau-CY-5YV" id="L2a-nr-VKp"/>
                         <outlet property="searchBarPlaceholder" destination="dDh-15-iSA" id="0mP-b8-YA7"/>
-                        <segue destination="11G-x7-NBc" kind="presentation" identifier="addItem" id="6kD-tJ-ZjW"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cTT-Yk-ZSf" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -75,7 +74,7 @@
         <!--Search Results Controller-->
         <scene sceneID="nZP-5Q-lru">
             <objects>
-                <viewController storyboardIdentifier="ResultsViewController" id="u5G-L7-MWH" customClass="SearchResultsController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SearchResultsController" id="u5G-L7-MWH" customClass="SearchResultsController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="AT8-CL-3au">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -158,39 +157,10 @@
                     <nil key="simulatedTopBarMetrics"/>
                     <nil key="simulatedBottomBarMetrics"/>
                     <connections>
-                        <outlet property="emptyView" destination="4PA-MK-gXX" id="hih-MM-yur"/>
-                        <outlet property="emptyViewLabel" destination="3PQ-WE-84x" id="GnL-aW-Xhr"/>
                         <outlet property="tableView" destination="Ktz-Oi-PQD" id="diW-UB-zLj"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ofd-mQ-E2t" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <view contentMode="scaleToFill" id="4PA-MK-gXX">
-                    <rect key="frame" x="0.0" y="0.0" width="300" height="300"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                    <subviews>
-                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="qjW-Q5-xlY">
-                            <rect key="frame" x="16" y="91" width="300" height="118.5"/>
-                            <subviews>
-                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="EmptySearchResults" translatesAutoresizingMaskIntoConstraints="NO" id="xlf-TA-jBT">
-                                    <rect key="frame" x="134" y="0.0" width="90" height="90"/>
-                                </imageView>
-                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No results for &quot;Test&quot;" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3PQ-WE-84x">
-                                    <rect key="frame" x="0.0" y="98" width="300" height="20.5"/>
-                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                    <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                                    <nil key="highlightedColor"/>
-                                </label>
-                            </subviews>
-                        </stackView>
-                    </subviews>
-                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    <constraints>
-                        <constraint firstItem="qjW-Q5-xlY" firstAttribute="leading" secondItem="4PA-MK-gXX" secondAttribute="leadingMargin" id="BQO-j9-MtV"/>
-                        <constraint firstAttribute="trailingMargin" secondItem="qjW-Q5-xlY" secondAttribute="trailing" id="Whu-ud-ZoQ"/>
-                        <constraint firstItem="qjW-Q5-xlY" firstAttribute="centerY" secondItem="4PA-MK-gXX" secondAttribute="centerY" id="jgt-oo-RAn"/>
-                    </constraints>
-                    <viewLayoutGuide key="safeArea" id="9st-Fi-Vov"/>
-                </view>
             </objects>
             <point key="canvasLocation" x="1854" y="-1598"/>
         </scene>
@@ -360,37 +330,13 @@
                         </connections>
                     </collectionView>
                     <size key="freeformSize" width="375" height="667"/>
-                    <connections>
-                        <outlet property="emptyView" destination="gfi-vs-moq" id="1AO-5V-mSv"/>
-                        <outlet property="emptyViewLabel" destination="Azn-FY-1tM" id="uTg-rj-CsY"/>
-                    </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bXn-Zh-be0" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <view contentMode="scaleToFill" id="gfi-vs-moq">
-                    <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                    <subviews>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="There are no popular movies at the moment. Please, come back later." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Azn-FY-1tM">
-                            <rect key="frame" x="8" y="33.5" width="224" height="61"/>
-                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                            <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                            <nil key="highlightedColor"/>
-                        </label>
-                    </subviews>
-                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    <constraints>
-                        <constraint firstItem="Azn-FY-1tM" firstAttribute="centerY" secondItem="yTO-uR-A69" secondAttribute="centerY" id="UBn-eS-7HW"/>
-                        <constraint firstItem="yTO-uR-A69" firstAttribute="trailing" secondItem="Azn-FY-1tM" secondAttribute="trailing" constant="8" id="gds-Hb-dTI"/>
-                        <constraint firstItem="Azn-FY-1tM" firstAttribute="leading" secondItem="yTO-uR-A69" secondAttribute="leading" constant="8" id="pgM-jW-5wd"/>
-                    </constraints>
-                    <viewLayoutGuide key="safeArea" id="yTO-uR-A69"/>
-                </view>
             </objects>
             <point key="canvasLocation" x="1854" y="-125"/>
         </scene>
     </scenes>
     <resources>
-        <image name="EmptySearchResults" width="90" height="90"/>
         <image name="GenericPoster-w185" width="185" height="276"/>
         <image name="TMDB" width="101" height="40"/>
     </resources>

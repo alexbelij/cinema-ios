@@ -2,6 +2,8 @@ import Foundation
 
 class FileBasedMediaLibrary: MediaLibrary {
 
+  let delegates: MulticastDelegate<MediaLibraryDelegate> = MulticastDelegate()
+
   private let url: URL
 
   private let dataFormat: DataFormat
@@ -9,6 +11,8 @@ class FileBasedMediaLibrary: MediaLibrary {
   private var mediaItems: [MediaItem]
 
   private var isPerformingBatchUpdates = false
+
+  private var pendingContentUpdate = MediaLibraryContentUpdate()
 
   init(url: URL, dataFormat: DataFormat) throws {
     self.url = url
@@ -45,6 +49,7 @@ class FileBasedMediaLibrary: MediaLibrary {
   func add(_ mediaItem: MediaItem) throws {
     guard !mediaItems.contains(where: { $0.id == mediaItem.id }) else { return }
     mediaItems.append(mediaItem)
+    pendingContentUpdate.addedItems.append(mediaItem)
     try saveData()
   }
 
@@ -54,6 +59,7 @@ class FileBasedMediaLibrary: MediaLibrary {
     }
     mediaItems.remove(at: index)
     mediaItems.insert(mediaItem, at: index)
+    pendingContentUpdate.updatedItems[mediaItem.id] = mediaItem
     try saveData()
   }
 
@@ -62,6 +68,7 @@ class FileBasedMediaLibrary: MediaLibrary {
       throw MediaLibraryError.itemDoesNotExist(id: mediaItem.id)
     }
     mediaItems.remove(at: index)
+    pendingContentUpdate.removedItems.append(mediaItem)
     try saveData()
   }
 
@@ -74,14 +81,14 @@ class FileBasedMediaLibrary: MediaLibrary {
 
   private func saveData() throws {
     guard !isPerformingBatchUpdates else { return }
-    NotificationCenter.default.post(name: .didChangeMediaLibraryContent, object: self)
     guard let data = try? dataFormat.serialize(mediaItems) else {
       throw MediaLibraryError.storageError
     }
-    let success = FileManager.default.createFile(atPath: url.path, contents: data)
-    if !success {
+    guard FileManager.default.createFile(atPath: url.path, contents: data) else {
       throw MediaLibraryError.storageError
     }
+    delegates.invoke { $0.library(self, didUpdateContent: self.pendingContentUpdate) }
+    pendingContentUpdate = MediaLibraryContentUpdate()
   }
 
 }
