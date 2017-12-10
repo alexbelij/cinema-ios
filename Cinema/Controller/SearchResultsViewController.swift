@@ -18,24 +18,20 @@ class SearchResultsController: UIViewController {
       }
     }
   }
-  var searchResults = [PartialMediaItem]() {
+  var searchResults = [SearchResult]() {
     didSet {
       DispatchQueue.main.async {
         if self.searchResults.isEmpty {
           self.tableView.backgroundView = self.emptyView
           self.tableView.separatorStyle = .none
-          self.resultsInLibrary = nil
         } else {
           self.tableView.backgroundView = nil
           self.tableView.separatorStyle = .singleLine
-          self.resultsInLibrary = self.searchResults.map { self.library.contains(id: $0.id) }
         }
         self.tableView.reloadData()
       }
     }
   }
-  var library: MediaLibrary!
-  private var resultsInLibrary: [Bool]!
   weak var delegate: SearchResultsSelectionDelegate?
 
   override func viewDidLoad() {
@@ -52,6 +48,16 @@ class SearchResultsController: UIViewController {
                                    name: .UIKeyboardWillHide,
                                    object: nil)
   }
+
+  struct SearchResult {
+    let item: PartialMediaItem
+    let hasBeenAddedToLibrary: Bool
+
+    init(item: PartialMediaItem, hasBeenAddedToLibrary: Bool) {
+      self.item = item
+      self.hasBeenAddedToLibrary = hasBeenAddedToLibrary
+    }
+  }
 }
 
 // MARK: - Table View
@@ -62,27 +68,27 @@ extension SearchResultsController: UITableViewDataSource, UITableViewDelegate {
   }
 
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let searchItem = searchResults[indexPath.row]
-    if resultsInLibrary[indexPath.row] {
+    let searchResult = searchResults[indexPath.row]
+    if searchResult.hasBeenAddedToLibrary {
       let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemAddedCell",
                                                // swiftlint:disable:next force_cast
                                                for: indexPath) as! SearchItemAddedCell
-      cell.configure(for: searchItem)
+      cell.configure(for: searchResult.item)
       return cell
     } else {
       // swiftlint:disable:next force_cast
       let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemCell", for: indexPath) as! SearchItemCell
-      cell.configure(for: searchItem)
+      cell.configure(for: searchResult.item)
       return cell
     }
   }
 
   func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-    return resultsInLibrary[indexPath.row] ? nil : indexPath
+    return searchResults[indexPath.row].hasBeenAddedToLibrary ? nil : indexPath
   }
 
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    delegate?.didSelectSearchResult(searchResults[indexPath.row])
+    delegate?.didSelectSearchResult(searchResults[indexPath.row].item)
     tableView.deselectRow(at: indexPath, animated: true)
   }
 }
