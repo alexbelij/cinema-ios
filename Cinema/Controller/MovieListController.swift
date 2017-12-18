@@ -3,6 +3,7 @@ import UIKit
 
 protocol MovieListControllerDelegate: class {
   func movieListController(_ controller: MovieListController, didSelect item: MediaItem)
+  func movieListControllerDidDismiss(_ controller: MovieListController)
 }
 
 class MovieListItem {
@@ -63,6 +64,8 @@ class MovieListController: UITableViewController {
 
   private let emptyLibraryView = GenericEmptyView(accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
                                                   description: .basic(NSLocalizedString("library.empty", comment: "")))
+
+  var onViewDidAppear: (() -> Void)?
 }
 
 // MARK: View Controller Lifecycle
@@ -74,6 +77,18 @@ extension MovieListController {
     definesPresentationContext = true
     navigationItem.hidesSearchBarWhenScrolling = false
     reloadListData()
+  }
+
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    self.onViewDidAppear?()
+  }
+
+  override func viewDidDisappear(_ animated: Bool) {
+    super.viewDidDisappear(animated)
+    if isMovingFromParentViewController {
+      self.delegate?.movieListControllerDidDismiss(self)
+    }
   }
 }
 

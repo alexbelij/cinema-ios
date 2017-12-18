@@ -50,6 +50,7 @@ extension GenreListCoordinator: GenreListControllerDelegate {
                                                                title: L10n.localizedGenreName(for: genreId)!,
                                                                contentFilter: { $0.genreIds.contains(genreId) },
                                                                dependencies: dependencies)
+    self.libraryContentCoordinator!.dismissWhenEmpty = true
     self.libraryContentCoordinator!.presentRootViewController()
   }
 }

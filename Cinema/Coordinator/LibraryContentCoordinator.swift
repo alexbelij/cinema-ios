@@ -2,12 +2,20 @@ import Dispatch
 import Foundation
 import UIKit
 
+protocol LibraryContentCoordinatorDelegate: class {
+  func libraryContentCoordinatorDidDismiss(_ coordinator: LibraryContentCoordinator)
+}
+
 class LibraryContentCoordinator: AutoPresentableCoordinator {
   typealias Dependencies = LibraryDependency & MovieDbDependency
+
+  // coordinator stuff
+  weak var delegate: LibraryContentCoordinatorDelegate?
 
   // other properties
   private let dependencies: Dependencies
   private let contentFilter: (MediaItem) -> Bool
+  var dismissWhenEmpty = false
 
   // managed controllers
   private let navigationController: UINavigationController
@@ -59,6 +67,10 @@ extension LibraryContentCoordinator: MovieListControllerDelegate {
     editItemCoordinator = EditItemCoordinator(item: detailItem, dependencies: dependencies)
     editItemCoordinator!.delegate = self
     self.navigationController.present(editItemCoordinator!.rootViewController, animated: true)
+  }
+
+  func movieListControllerDidDismiss(_ controller: MovieListController) {
+    self.delegate?.libraryContentCoordinatorDidDismiss(self)
   }
 }
 
@@ -143,9 +155,16 @@ extension LibraryContentCoordinator: MediaLibraryDelegate {
       }
     }
 
-    // commit changes
     DispatchQueue.main.async {
-      self.movieListController.items = movieListItems
+      // commit changes only when controller is not being dismissed anyway
+      if movieListItems.isEmpty && self.dismissWhenEmpty {
+        self.movieListController.onViewDidAppear = { [weak self] in
+          guard let `self` = self else { return }
+          self.navigationController.popViewController(animated: true)
+        }
+      } else {
+        self.movieListController.items = movieListItems
+      }
     }
   }
 }
