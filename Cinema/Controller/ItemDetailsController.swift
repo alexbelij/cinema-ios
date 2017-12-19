@@ -92,7 +92,7 @@ class ItemDetailsController: UIViewController {
       self.loadViewIfNeeded()
       switch certification {
         case .loading:
-          self.certificationLabel.text = NSLocalizedString("details.loading", comment: "")
+          self.certificationLabel.text = NSLocalizedString("loading", comment: "")
         case .unavailable:
           self.certificationLabel.text = NSLocalizedString("details.missing.certification", comment: "")
         case let .available(certification):
@@ -119,7 +119,7 @@ class ItemDetailsController: UIViewController {
       self.loadViewIfNeeded()
       switch overview {
         case .loading:
-          self.overviewTextView.text = NSLocalizedString("details.loading", comment: "")
+          self.overviewTextView.text = NSLocalizedString("loading", comment: "")
         case .unavailable:
           self.overviewTextView.text = NSLocalizedString("details.missing.overview", comment: "")
         case let .available(overview):
