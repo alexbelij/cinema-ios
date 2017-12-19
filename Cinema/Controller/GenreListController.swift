@@ -25,7 +25,13 @@ class GenreListController: UITableViewController {
     }
   }
   private var viewModel = [Genre]()
-  lazy var genreImageProvider: GenreImageProvider = EmptyGenreImageProvider()
+  var genreImageProvider: GenreImageProvider = EmptyGenreImageProvider() {
+    didSet {
+      DispatchQueue.main.async {
+        self.clearGenreImages()
+      }
+    }
+  }
 
   fileprivate class Genre {
     let id: Int
@@ -51,13 +57,27 @@ class GenreListController: UITableViewController {
 extension GenreListController {
   override func viewDidLoad() {
     super.viewDidLoad()
+    self.refreshControl!.addTarget(self, action: #selector(handleRefresh(_:)), for: .valueChanged)
     reload()
+  }
+
+  @objc
+  private func handleRefresh(_ refreshControl: UIRefreshControl) {
+    self.clearGenreImages()
+    self.tableView.reloadData()
+    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
+      refreshControl.endRefreshing()
+    }
   }
 }
 
 // MARK: - Data Management
 
 extension GenreListController {
+  private func clearGenreImages() {
+    self.viewModel.forEach { $0.image = .unknown }
+  }
+
   private func reload() {
     self.setupViewModel()
     self.tableView.reloadData()
