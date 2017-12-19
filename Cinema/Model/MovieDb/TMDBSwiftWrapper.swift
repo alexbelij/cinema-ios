@@ -33,6 +33,19 @@ class TMDBSwiftWrapper: MovieDbClient {
     }
   }
 
+  func backdrop(for id: Int) -> UIImage? {
+    let size = "w780"
+    return cache.backdrop(for: "\(id)-\(language)-\(size)") {
+      if let backdropPath = movie(for: id)?.backdrop_path {
+        let path = TMDBSwiftWrapper.baseUrl + size + backdropPath
+        if let data = try? Data(contentsOf: URL(string: path)!) {
+          return UIImage(data: data)
+        }
+      }
+      return nil
+    }
+  }
+
   func overview(for id: Int) -> String? {
     return movie(for: id)?.overview
   }

@@ -11,6 +11,8 @@ protocol MovieDbClient {
 
   func poster(for id: Int, size: PosterSize) -> UIImage?
 
+  func backdrop(for id: Int) -> UIImage?
+
   func overview(for id: Int) -> String?
 
   func certification(for id: Int) -> String?
