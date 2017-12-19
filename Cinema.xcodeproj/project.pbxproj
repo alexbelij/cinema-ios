@@ -43,6 +43,9 @@
 		CBB569801EA4D6C3005F7BA7 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB5697B1EA4D6C3005F7BA7 /* MediaItem.swift */; };
 		CBB569811EA4D6C3005F7BA7 /* MediaLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB5697C1EA4D6C3005F7BA7 /* MediaLibrary.swift */; };
 		CBEA633F1FF3932E00830377 /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBEA633E1FF3932E00830377 /* L10n.swift */; };
+		CBEA63411FF3952300830377 /* GenreListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBEA63401FF3952300830377 /* GenreListController.swift */; };
+		CBEA63431FF3953600830377 /* GenreListCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBEA63421FF3953600830377 /* GenreListCoordinator.swift */; };
+		CBEA63461FF3954700830377 /* GenreList.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBEA63441FF3954700830377 /* GenreList.storyboard */; };
 		CBED94271F6BF80E00FA4045 /* PopularMoviesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED94201F6BF6C200FA4045 /* PopularMoviesViewController.swift */; };
 		CBED94281F6BF80E00FA4045 /* SearchTmdbSearchResultsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED94211F6BF6C200FA4045 /* SearchTmdbSearchResultsController.swift */; };
 		CBED94291F6BF80E00FA4045 /* SearchTmdbController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED94221F6BF6C200FA4045 /* SearchTmdbController.swift */; };
@@ -111,6 +114,9 @@
 		CBB5697B1EA4D6C3005F7BA7 /* MediaItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
 		CBB5697C1EA4D6C3005F7BA7 /* MediaLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaLibrary.swift; sourceTree = "<group>"; };
 		CBEA633E1FF3932E00830377 /* L10n.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
+		CBEA63401FF3952300830377 /* GenreListController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenreListController.swift; sourceTree = "<group>"; };
+		CBEA63421FF3953600830377 /* GenreListCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenreListCoordinator.swift; sourceTree = "<group>"; };
+		CBEA63451FF3954700830377 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/GenreList.storyboard; sourceTree = "<group>"; };
 		CBED941A1F6BF6C200FA4045 /* LibraryUpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryUpdateController.swift; sourceTree = "<group>"; };
 		CBED941B1F6BF6C200FA4045 /* ItemDetailsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailsController.swift; sourceTree = "<group>"; };
 		CBED941C1F6BF6C200FA4045 /* EditItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditItemController.swift; sourceTree = "<group>"; };
@@ -253,6 +259,7 @@
 				CBB5696C1EA4D6A2005F7BA7 /* MovieList.storyboard */,
 				CBAE5E891F3493EA0055366F /* SearchTmdb.storyboard */,
 				CBAE5E841F3486EA0055366F /* EditItem.storyboard */,
+				CBEA63441FF3954700830377 /* GenreList.storyboard */,
 				CBF3CE791FF2985C00F4B6C0 /* PopularMovies.storyboard */,
 				CB1A7B201F5C07B60091F993 /* Maintenance.storyboard */,
 				CBB5696F1EA4D6A2005F7BA7 /* Assets.xcassets */,
@@ -280,6 +287,7 @@
 				CBF3CE771FF25AA600F4B6C0 /* MovieListSearchResultsController.swift */,
 				CBED941B1F6BF6C200FA4045 /* ItemDetailsController.swift */,
 				CBED941C1F6BF6C200FA4045 /* EditItemController.swift */,
+				CBEA63401FF3952300830377 /* GenreListController.swift */,
 				CBED94211F6BF6C200FA4045 /* SearchTmdbSearchResultsController.swift */,
 				CBED94221F6BF6C200FA4045 /* SearchTmdbController.swift */,
 				CBED94201F6BF6C200FA4045 /* PopularMoviesViewController.swift */,
@@ -300,6 +308,7 @@
 				CBF3CE6D1FF250BD00F4B6C0 /* LibraryContentCoordinator.swift */,
 				CBF3CE691FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift */,
 				CBF3CE671FF23E9700F4B6C0 /* EditItemCoordinator.swift */,
+				CBEA63421FF3953600830377 /* GenreListCoordinator.swift */,
 				CB4C40621FF2A63F00A6C32B /* SearchTmdbCoordinator.swift */,
 			);
 			path = Coordinator;
@@ -386,6 +395,7 @@
 				CB9484C11EFA643500D9651E /* Localizable.strings in Resources */,
 				CBB569701EA4D6A2005F7BA7 /* Assets.xcassets in Resources */,
 				CBB5696E1EA4D6A2005F7BA7 /* MovieList.storyboard in Resources */,
+				CBEA63461FF3954700830377 /* GenreList.storyboard in Resources */,
 				CB65D7AF1F8A131F00457386 /* SelectableLabelCell.xib in Resources */,
 				CBF3CE7A1FF2985C00F4B6C0 /* PopularMovies.storyboard in Resources */,
 				CBF3CE761FF259B700F4B6C0 /* MovieListTableCell.xib in Resources */,
@@ -464,6 +474,7 @@
 				CB65D7AC1F8A108200457386 /* DimmingPresentationController.swift in Sources */,
 				CBED942B1F6BFB0E00FA4045 /* MovieListController.swift in Sources */,
 				CBB569671EA4D6A2005F7BA7 /* AppDelegate.swift in Sources */,
+				CBEA63431FF3953600830377 /* GenreListCoordinator.swift in Sources */,
 				816BF40FCCC10885A4DACB13 /* Utils.swift in Sources */,
 				816BF9965330281626DFEB45 /* MovieDbClient.swift in Sources */,
 				816BF3E5F4BC47B998CE15A6 /* TMDBSwiftWrapper.swift in Sources */,
@@ -492,6 +503,7 @@
 				816BFBB935AA13E3AC7F3E9F /* MediaItemUpdates.swift in Sources */,
 				816BF5794525B14475533BF1 /* TMDBSwiftCache.swift in Sources */,
 				CBF3CE621FF2369B00F4B6C0 /* AppCoordinator.swift in Sources */,
+				CBEA63411FF3952300830377 /* GenreListController.swift in Sources */,
 				CB4C40651FF2C65A00A6C32B /* AppDependencies.swift in Sources */,
 				CBED94291F6BF80E00FA4045 /* SearchTmdbController.swift in Sources */,
 				CB4C40631FF2A63F00A6C32B /* SearchTmdbCoordinator.swift in Sources */,
@@ -574,6 +586,14 @@
 				CBB569721EA4D6A2005F7BA7 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		CBEA63441FF3954700830377 /* GenreList.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CBEA63451FF3954700830377 /* Base */,
+			);
+			name = GenreList.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

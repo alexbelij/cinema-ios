@@ -41,6 +41,7 @@
 "genre.tvMovie" = "TV-Film";
 "genre.war" = "Kriegsfilm";
 "genre.western" = "Western";
+"genres" = "Genres";
 "import.failed" = "Hoppla!";
 "import.succeeded" = "Aktualisierung abgeschlossen.";
 "import.progress" = "Deine Mediathek wird aktualisiert …";

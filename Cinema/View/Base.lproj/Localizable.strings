@@ -41,6 +41,7 @@
 "genre.tvMovie" = "TV Movie";
 "genre.war" = "War";
 "genre.western" = "Western";
+"genres" = "Genres";
 "import.failed" = "Oh, snap!";
 "import.succeeded" = "Update completed.";
 "import.progress" = "Updating your library…";

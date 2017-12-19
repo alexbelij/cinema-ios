@@ -14,6 +14,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
 
   // child coordinators
   private let libraryContentCoordinator: LibraryContentCoordinator
+  private let genreListCoordinator: GenreListCoordinator
   private let searchTmdbCoordinator: SearchTmdbCoordinator
 
   init(dependencies: Dependencies) {
@@ -29,6 +30,13 @@ class CoreCoordinator: CustomPresentableCoordinator {
     )
     libraryContentCoordinator.presentRootViewController()
 
+    genreListCoordinator = GenreListCoordinator(dependencies: dependencies)
+    genreListCoordinator.rootViewController.tabBarItem = UITabBarItem(
+        title: NSLocalizedString("genres", comment: ""),
+        image: #imageLiteral(resourceName: "Tab-Genre-normal"),
+        selectedImage: #imageLiteral(resourceName: "Tab-Genre-selected")
+    )
+
     searchTmdbCoordinator = SearchTmdbCoordinator(dependencies: dependencies)
     searchTmdbCoordinator.rootViewController.tabBarItem = UITabBarItem(
         title: NSLocalizedString("addItem.title", comment: ""),
@@ -37,6 +45,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
     )
 
     tabBarController.viewControllers = [libraryContentNav,
+                                        genreListCoordinator.rootViewController,
                                         searchTmdbCoordinator.rootViewController]
   }
 }
