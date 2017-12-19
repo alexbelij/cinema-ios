@@ -16,23 +16,48 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="separatorColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="GenreCell" textLabel="wux-bI-LPD" style="IBUITableViewCellStyleDefault" id="bYU-q3-VQg">
-                                <rect key="frame" x="0.0" y="28" width="375" height="44"/>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="GenreCell" rowHeight="180" id="bYU-q3-VQg" customClass="GenreCell" customModule="Cinema" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="28" width="375" height="180"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="bYU-q3-VQg" id="vhQ-w7-YBI">
-                                    <rect key="frame" x="0.0" y="0.0" width="341" height="43.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="179.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="wux-bI-LPD">
-                                            <rect key="frame" x="16" y="0.0" width="324" height="43.5"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            <nil key="textColor"/>
+                                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="4cG-le-48y">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="179.5"/>
+                                        </imageView>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Genre Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yhm-NU-vyL">
+                                            <rect key="frame" x="12" y="12" width="351" height="24"/>
+                                            <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
+                                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                             <nil key="highlightedColor"/>
                                         </label>
+                                        <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="0Qo-L2-Fzx">
+                                            <rect key="frame" x="177" y="79" width="20" height="20"/>
+                                        </activityIndicatorView>
                                     </subviews>
+                                    <constraints>
+                                        <constraint firstAttribute="bottom" secondItem="4cG-le-48y" secondAttribute="bottom" id="9xq-qM-dCS"/>
+                                        <constraint firstItem="4cG-le-48y" firstAttribute="leading" secondItem="vhQ-w7-YBI" secondAttribute="leading" id="Kig-KM-7AR"/>
+                                        <constraint firstItem="0Qo-L2-Fzx" firstAttribute="centerY" secondItem="vhQ-w7-YBI" secondAttribute="centerY" id="dQi-bK-Xhd"/>
+                                        <constraint firstItem="yhm-NU-vyL" firstAttribute="top" secondItem="vhQ-w7-YBI" secondAttribute="top" constant="12" id="dSS-9X-BX5"/>
+                                        <constraint firstItem="4cG-le-48y" firstAttribute="top" secondItem="vhQ-w7-YBI" secondAttribute="top" id="etV-7y-RV7"/>
+                                        <constraint firstItem="yhm-NU-vyL" firstAttribute="leading" secondItem="vhQ-w7-YBI" secondAttribute="leading" constant="12" id="gwU-ic-O29"/>
+                                        <constraint firstItem="0Qo-L2-Fzx" firstAttribute="centerX" secondItem="vhQ-w7-YBI" secondAttribute="centerX" id="pSU-19-7VG"/>
+                                        <constraint firstAttribute="trailing" relation="lessThanOrEqual" secondItem="yhm-NU-vyL" secondAttribute="trailing" constant="12" id="pva-GV-CTJ"/>
+                                    </constraints>
                                 </tableViewCellContentView>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="4cG-le-48y" secondAttribute="trailing" id="Zzj-2A-UCL"/>
+                                </constraints>
+                                <connections>
+                                    <outlet property="activityIndicator" destination="0Qo-L2-Fzx" id="X86-4X-Efb"/>
+                                    <outlet property="backdropImageView" destination="4cG-le-48y" id="Z0y-ZB-2Ho"/>
+                                    <outlet property="genreNameLabel" destination="yhm-NU-vyL" id="bzr-4K-6Rw"/>
+                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <connections>

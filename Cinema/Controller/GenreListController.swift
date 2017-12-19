@@ -6,6 +6,16 @@ protocol GenreListControllerDelegate: class {
   func genreListController(_ controller: GenreListController, didSelectGenre genreId: Int)
 }
 
+protocol GenreImageProvider {
+  func genreImage(for genreId: Int) -> UIImage?
+}
+
+class EmptyGenreImageProvider: GenreImageProvider {
+  func genreImage(for genreId: Int) -> UIImage? {
+    return nil
+  }
+}
+
 class GenreListController: UITableViewController {
   weak var delegate: GenreListControllerDelegate?
   var genreIds: [Int]? {
@@ -15,14 +25,23 @@ class GenreListController: UITableViewController {
     }
   }
   private var viewModel = [Genre]()
+  lazy var genreImageProvider: GenreImageProvider = EmptyGenreImageProvider()
 
-  private struct Genre {
+  fileprivate class Genre {
     let id: Int
     let name: String
+    var image: Image
 
     init(id: Int, name: String) {
       self.id = id
       self.name = name
+      self.image = .unknown
+    }
+
+    enum Image {
+      case unknown
+      case available(UIImage)
+      case missing
     }
   }
 }
@@ -86,12 +105,94 @@ extension GenreListController {
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(withIdentifier: "GenreCell", for: indexPath)
-    cell.textLabel!.text = viewModel[indexPath.row].name
+    let cell = tableView.dequeueReusableCell(GenreCell.self)
+    cell.configure(for: viewModel[indexPath.row], genreImageProvider: genreImageProvider)
     return cell
+  }
+
+  override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    return 180
   }
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     self.delegate?.genreListController(self, didSelectGenre: viewModel[indexPath.row].id)
+  }
+}
+
+// MARK: - Genre Cell
+
+class GenreCell: UITableViewCell {
+  @IBOutlet private weak var backdropImageView: UIImageView!
+  @IBOutlet private weak var genreNameLabel: UILabel!
+  @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
+  private var scrim: ScrimView!
+  private var workItem: DispatchWorkItem?
+
+  override func awakeFromNib() {
+    super.awakeFromNib()
+    scrim = ScrimView()
+    contentView.insertSubview(scrim, belowSubview: genreNameLabel)
+    genreNameLabel.layer.shadowColor = UIColor.black.cgColor
+    genreNameLabel.layer.shadowOffset = .zero
+    genreNameLabel.layer.shadowRadius = 5.0
+  }
+
+  override func layoutSubviews() {
+    super.layoutSubviews()
+    scrim.frame = contentView.bounds
+  }
+
+  fileprivate func configure(for genre: GenreListController.Genre, genreImageProvider: GenreImageProvider) {
+    genreNameLabel.text = genre.name
+    configureBackdrop(genre: genre, genreImageProvider: genreImageProvider)
+  }
+
+  private func configureBackdrop(genre: GenreListController.Genre, genreImageProvider: GenreImageProvider) {
+    switch genre.image {
+      case .unknown:
+        genreNameLabel.textColor = #colorLiteral(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
+        genreNameLabel.layer.shadowOpacity = 0.0
+        backdropImageView.image = nil
+        backdropImageView.backgroundColor = .missingArtworkBackground
+        scrim.isHidden = true
+        activityIndicator.startAnimating()
+        var workItem: DispatchWorkItem?
+        workItem = DispatchWorkItem {
+          let backdrop = genreImageProvider.genreImage(for: genre.id)
+          DispatchQueue.main.async {
+            if let backdropImage = backdrop {
+              genre.image = .available(backdropImage)
+            } else {
+              genre.image = .missing
+            }
+            if !(workItem?.isCancelled ?? true) {
+              self.activityIndicator.stopAnimating()
+              self.configureBackdrop(genre: genre, genreImageProvider: genreImageProvider)
+            }
+          }
+        }
+        self.workItem = workItem
+        DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
+      case let .available(genreImage):
+        genreNameLabel.textColor = .white
+        genreNameLabel.layer.shadowOpacity = 1.0
+        backdropImageView.image = genreImage
+        backdropImageView.contentMode = .scaleAspectFill
+        scrim.isHidden = false
+      case .missing:
+        genreNameLabel.textColor = #colorLiteral(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
+        genreNameLabel.layer.shadowOpacity = 0.0
+        backdropImageView.image = #imageLiteral(resourceName: "MissingGenreImage")
+        backdropImageView.contentMode = .center
+        backdropImageView.backgroundColor = .missingArtworkBackground
+        scrim.isHidden = true
+    }
+  }
+
+  override func prepareForReuse() {
+    super.prepareForReuse()
+    self.workItem?.cancel()
+    self.workItem = nil
+    self.activityIndicator.stopAnimating()
   }
 }

@@ -78,6 +78,7 @@ extension UIColor {
   static let destructive = UIColor(red: 1.0, green: 0.231, blue: 0.188, alpha: 1.0)
   static let posterBorder = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2)
   static let dimBackground = UIColor(red: 0, green: 0, blue: 0, alpha: 0.4)
+  static let missingArtworkBackground = UIColor(white: 0.88, alpha: 1.0)
   // swiftlint:enable object_literal
 }
 

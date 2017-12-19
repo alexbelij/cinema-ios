@@ -49,3 +49,5 @@ identifier_name:
     error: 1
   excluded:
     - id
+nesting:
+  type_level: 2
