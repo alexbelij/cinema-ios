@@ -1,7 +1,7 @@
 "addItem.alert.howToAdd.title" = "Wie willst du den Film hinzufügen?";
 "addItem.failed" = "Hoppla!";
-"addItem.progress" = "Mediathek wird aktualisiert...";
-"addItem.search.placeholder" = "Gib den Filmtitel ein...";
+"addItem.progress" = "Mediathek wird aktualisiert …";
+"addItem.search.placeholder" = "Gib den Filmtitel ein …";
 "addItem.succeeded" = "Aktualisierung abgeschlossen.";
 "addItem.succeeded.changes" = "%@ wurde hinzugefügt.";
 "addItem.title" = "Film hinzufügen";
@@ -42,10 +42,10 @@
 "genre.western" = "Western";
 "import.failed" = "Hoppla!";
 "import.succeeded" = "Aktualisierung abgeschlossen.";
-"import.progress" = "Deine Mediathek wird aktualisiert...";
+"import.progress" = "Deine Mediathek wird aktualisiert …";
 "library" = "Mediathek";
 "library.empty" = "Deine Mediathek ist leer.";
-"library.search.placeholder" = "Titel durchsuchen...";
+"library.search.placeholder" = "Titel durchsuchen";
 "maintenance.failed" = "Deine Mediathek konnte nicht aktualisiert werden.";
 "maintenance.intention" = "Um die App für dich zu verbessern, müssen wir deine Mediathek aktualisieren.";
 "maintenance.start" = "Aktualisierung starten";
