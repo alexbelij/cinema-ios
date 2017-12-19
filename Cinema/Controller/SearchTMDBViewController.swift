@@ -21,7 +21,6 @@ class SearchTMDBViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     searchResultsController = storyboard!.instantiate(SearchResultsController.self)
-    searchResultsController.library = library
     searchResultsController.delegate = self
     searchController = UISearchController(searchResultsController: searchResultsController)
     searchController.delegate = self
@@ -81,7 +80,10 @@ extension SearchTMDBViewController: UISearchResultsUpdating, UISearchControllerD
           previousSearch.cancel()
         }
         self.currentSearch = DispatchWorkItem {
-          let searchResults = self.movieDb.searchMovies(searchText: searchText)
+          let searchResults = self.movieDb.searchMovies(searchText: searchText).map { movie in
+            SearchResultsController.SearchResult(item: movie,
+                                                 hasBeenAddedToLibrary: self.library.contains(id: movie.id))
+          }
           self.searchResultsController.searchText = searchText
           self.searchResultsController.searchResults = searchResults
           DispatchQueue.main.sync {
