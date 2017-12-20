@@ -46,6 +46,10 @@ class FileBasedMediaLibrary: MediaLibrary {
     return mediaItems.filter(predicate)
   }
 
+  func contains(id: Int) -> Bool {
+    return mediaItems.contains { item in item.id == id }
+  }
+
   func add(_ mediaItem: MediaItem) throws {
     guard !mediaItems.contains(where: { $0.id == mediaItem.id }) else { return }
     mediaItems.append(mediaItem)

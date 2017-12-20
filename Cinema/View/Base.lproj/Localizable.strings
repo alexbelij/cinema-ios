@@ -1,7 +1,7 @@
 "addItem.alert.howToAdd.title" = "How do you want to add the movie?";
 "addItem.failed" = "Oh, snap!";
-"addItem.progress" = "Updating library...";
-"addItem.search.placeholder" = "Enter the movie title...";
+"addItem.progress" = "Updating library…";
+"addItem.search.placeholder" = "Enter the movie title…";
 "addItem.succeeded" = "Update complete.";
 "addItem.succeeded.changes" = "Added %@.";
 "addItem.title" = "Add Movie";
@@ -42,10 +42,10 @@
 "genre.western" = "Western";
 "import.failed" = "Oh, snap!";
 "import.succeeded" = "Update completed.";
-"import.progress" = "Updating your library...";
+"import.progress" = "Updating your library…";
 "library" = "Library";
 "library.empty" = "Your library is empty.";
-"library.search.placeholder" = "Search titles...";
+"library.search.placeholder" = "Search titles";
 "maintenance.failed" = "Your library could not be updated.";
 "maintenance.intention" = "To make the app better for you, we need to update your library.";
 "maintenance.start" = "Start Update";

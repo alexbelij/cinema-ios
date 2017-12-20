@@ -2,6 +2,14 @@
 
 All notable changes to the project will be documented in this file.
 
+## v1.3.4 - 2ß17-12-20
+
+### Changed
+- 'a' and 'an' articles (as prefix) are ignored in title sorting
+
+### Fixed
+- text is drawn on top of each other in empty state views
+
 ## v1.3.3 - 2017-12-10
 
 ### Added
