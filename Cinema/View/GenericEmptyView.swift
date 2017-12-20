@@ -20,6 +20,9 @@ class GenericEmptyView: UIView {
       self.button = nil
       self.buttonAction = nil
     }
+    for subview in subviews {
+      subview.removeFromSuperview()
+    }
     let stackView = setUpStackView()
     setUpAccessory(accessoryConfig, in: stackView)
     setUpText(textConfig, in: stackView)
