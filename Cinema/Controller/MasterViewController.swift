@@ -88,9 +88,9 @@ extension MasterViewController {
   }
 
   private func fetchLibraryData() {
-    let strategy = sortDescriptor.tableViewStrategy
+    let strategy = sortDescriptor.makeTableViewStrategy()
     allItems = library.mediaItems { _ in true }
-    allItems.sort(by: SortDescriptor.title.tableViewStrategy.itemSorting)
+    allItems.sort(by: SortDescriptor.title.makeTableViewStrategy().itemSorting)
     sectionItems = [String: [MediaItem]]()
     for item in allItems {
       let sectionIndexTitle = strategy.sectionIndexTitle(for: item)

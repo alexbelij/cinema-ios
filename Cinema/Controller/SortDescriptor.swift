@@ -3,7 +3,7 @@ import Foundation
 enum SortDescriptor {
   case title, runtime, year
 
-  var tableViewStrategy: TableViewSortingStrategy {
+  func makeTableViewStrategy() -> TableViewSortingStrategy {
     switch self {
       case .title: return TitleSortingStrategy()
       case .runtime: return RuntimeSortingStrategy()
