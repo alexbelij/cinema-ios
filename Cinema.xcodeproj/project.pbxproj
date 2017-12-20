@@ -31,6 +31,7 @@
 		CB65D7AC1F8A108200457386 /* DimmingPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB65D7AA1F8A103000457386 /* DimmingPresentationController.swift */; };
 		CB65D7AD1F8A108A00457386 /* ArrayTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB65D7A91F8A103000457386 /* ArrayTableController.swift */; };
 		CB65D7AF1F8A131F00457386 /* SelectableLabelCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB65D7AE1F8A131F00457386 /* SelectableLabelCell.xib */; };
+		CB84B1891FEAF5E500B455D4 /* SortPrefixes.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB84B18B1FEAF5E500B455D4 /* SortPrefixes.plist */; };
 		CB9484C11EFA643500D9651E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = CB9484C31EFA643500D9651E /* Localizable.strings */; };
 		CBAE5E861F3486EA0055366F /* EditItem.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBAE5E841F3486EA0055366F /* EditItem.storyboard */; };
 		CBAE5E8B1F3493EA0055366F /* AddItem.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBAE5E891F3493EA0055366F /* AddItem.storyboard */; };
@@ -80,6 +81,7 @@
 		CB65D7A91F8A103000457386 /* ArrayTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayTableController.swift; sourceTree = "<group>"; };
 		CB65D7AA1F8A103000457386 /* DimmingPresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DimmingPresentationController.swift; sourceTree = "<group>"; };
 		CB65D7AE1F8A131F00457386 /* SelectableLabelCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SelectableLabelCell.xib; sourceTree = "<group>"; };
+		CB84B18A1FEAF5E500B455D4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Base; path = Base.lproj/SortPrefixes.plist; sourceTree = "<group>"; };
 		CB9484C21EFA643500D9651E /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CB9484C61EFA691100D9651E /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CBAE5E851F3486EA0055366F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/EditItem.storyboard; sourceTree = "<group>"; };
@@ -225,6 +227,7 @@
 				CB0F41321F5C526B00095350 /* Localizable.stringsdict */,
 				816BFD2D067C0F79106D9254 /* GenericEmptyView.swift */,
 				CB65D7AE1F8A131F00457386 /* SelectableLabelCell.xib */,
+				CB84B18B1FEAF5E500B455D4 /* SortPrefixes.plist */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -326,6 +329,7 @@
 				CBB569731EA4D6A2005F7BA7 /* LaunchScreen.storyboard in Resources */,
 				CB0F41301F5C526B00095350 /* Localizable.stringsdict in Resources */,
 				CBAE5E8B1F3493EA0055366F /* AddItem.storyboard in Resources */,
+				CB84B1891FEAF5E500B455D4 /* SortPrefixes.plist in Resources */,
 				CB9484C11EFA643500D9651E /* Localizable.strings in Resources */,
 				CBB569701EA4D6A2005F7BA7 /* Assets.xcassets in Resources */,
 				CBB5696E1EA4D6A2005F7BA7 /* Main.storyboard in Resources */,
@@ -453,6 +457,14 @@
 				CB1A7B1F1F5C07B60091F993 /* Base */,
 			);
 			name = Maintenance.storyboard;
+			sourceTree = "<group>";
+		};
+		CB84B18B1FEAF5E500B455D4 /* SortPrefixes.plist */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CB84B18A1FEAF5E500B455D4 /* Base */,
+			);
+			name = SortPrefixes.plist;
 			sourceTree = "<group>";
 		};
 		CB9484C31EFA643500D9651E /* Localizable.strings */ = {
