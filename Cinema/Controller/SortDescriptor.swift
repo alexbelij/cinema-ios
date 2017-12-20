@@ -5,7 +5,13 @@ enum SortDescriptor {
 
   func makeTableViewStrategy() -> TableViewSortingStrategy {
     switch self {
-      case .title: return TitleSortingStrategy()
+      case .title:
+        guard let path = Bundle.main.path(forResource: "SortPrefixes", ofType: "plist"),
+              let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
+              let prefixes = try? PropertyListDecoder().decode([String].self, from: data) else {
+          fatalError("could not load sort prefixes")
+        }
+        return TitleSortingStrategy(ignoredPrefixes: prefixes)
       case .runtime: return RuntimeSortingStrategy()
       case .year: return YearSortingStrategy()
     }
@@ -24,6 +30,11 @@ private struct TitleSortingStrategy: TableViewSortingStrategy {
 
   private let allSectionIndexTitles = ["#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
                                        "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+  private let ignoredPrefixes: [String]
+
+  init(ignoredPrefixes: [String]) {
+    self.ignoredPrefixes = ignoredPrefixes
+  }
 
   func sectionIndexTitle(for item: MediaItem) -> String {
     let title = removeArticlesAtBeginning(from: item.title)
@@ -63,7 +74,7 @@ private struct TitleSortingStrategy: TableViewSortingStrategy {
 
   private func removeArticlesAtBeginning(from str: String) -> String {
     do {
-      let regex = try NSRegularExpression(pattern: "^(the|der|die|das) +",
+      let regex = try NSRegularExpression(pattern: "^(\(ignoredPrefixes.joined(separator: "|")))",
                                           options: NSRegularExpression.Options.caseInsensitive)
       let range = NSRange(location: 0, length: str.count)
       return regex.stringByReplacingMatches(in: str, range: range, withTemplate: "")
