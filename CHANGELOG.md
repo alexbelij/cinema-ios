@@ -2,7 +2,7 @@
 
 All notable changes to the project will be documented in this file.
 
-## v1.3.4 - 2ß17-12-20
+## v1.3.4 - 2017-12-20
 
 ### Changed
 - 'a' and 'an' articles (as prefix) are ignored in title sorting
