@@ -13,6 +13,9 @@ class GenreListCoordinator: CustomPresentableCoordinator {
   // other properties
   private let dependencies: Dependencies
 
+  // other properties
+  private let backdropSize: BackdropSize
+
   // managed controller
   private let navigationController: UINavigationController
   private let genreListController: GenreListController
@@ -26,10 +29,12 @@ class GenreListCoordinator: CustomPresentableCoordinator {
     navigationController = UIStoryboard.genreList.instantiateInitialViewController() as! UINavigationController
     genreListController = navigationController.topViewController as! GenreListController
     // swiftlint:enable force_cast
+    self.backdropSize = BackdropSize(minWidth: Int(genreListController.view.bounds.width))
     self.genreListController.delegate = self
     let items = dependencies.library.mediaItems { _ in true }
     self.genreListController.genreImageProvider = RandomMovieGenreImageProvider(for: items,
-                                                                                movieDb: dependencies.movieDb)
+                                                                                movieDb: dependencies.movieDb,
+                                                                                backdropSize: backdropSize)
     self.dependencies.library.delegates.add(self)
     DispatchQueue.global(qos: .background).async {
       let ids = self.fetchGenreIdsFromLibrary()
@@ -80,7 +85,9 @@ extension GenreListCoordinator: MediaLibraryDelegate {
     } else {
       let items = dependencies.library.mediaItems { _ in true }
       updatedGenreIds = Array(Set(items.flatMap { $0.genreIds }))
-      updatedGenreImageProvider = RandomMovieGenreImageProvider(for: items, movieDb: self.dependencies.movieDb)
+      updatedGenreImageProvider = RandomMovieGenreImageProvider(for: items,
+                                                                movieDb: self.dependencies.movieDb,
+                                                                backdropSize: self.backdropSize)
     }
 
     // commit changes
@@ -99,9 +106,11 @@ private class RandomMovieGenreImageProvider: GenreImageProvider {
   private let movieDb: MovieDbClient
   private var genreGroups = [Int: [MediaItem]]()
   private let maxRetries = 2
+  var backdropSize: BackdropSize
 
-  init(for items: [MediaItem], movieDb: MovieDbClient) {
+  init(for items: [MediaItem], movieDb: MovieDbClient, backdropSize: BackdropSize) {
     self.movieDb = movieDb
+    self.backdropSize = backdropSize
     updateWithNewItems(items)
   }
 
@@ -121,7 +130,7 @@ private class RandomMovieGenreImageProvider: GenreImageProvider {
     guard let mediaItems = genreGroups[genreId] else { return nil }
     for _ in 0..<maxRetries {
       let randomIndex = Int(arc4random_uniform(UInt32(mediaItems.count)))
-      if let backdrop = movieDb.backdrop(for: mediaItems[randomIndex].id) {
+      if let backdrop = movieDb.backdrop(for: mediaItems[randomIndex].id, size: backdropSize) {
         return backdrop
       }
     }
