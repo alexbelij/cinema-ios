@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13196" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="qoX-c0-j8n">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="qoX-c0-j8n">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
@@ -20,15 +20,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dDh-15-iSA">
-                                <rect key="frame" x="0.0" y="64" width="375" height="44"/>
-                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="Jau-CY-5YV"/>
-                                </constraints>
-                            </view>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jef-Gw-Vln">
-                                <rect key="frame" x="0.0" y="108" width="375" height="559"/>
+                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
                                 <connections>
                                     <segue destination="Ima-4S-hbd" kind="embed" id="V5g-W4-oya"/>
                                 </connections>
@@ -36,20 +29,13 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="N8M-nd-gMO" firstAttribute="trailing" secondItem="dDh-15-iSA" secondAttribute="trailing" id="2xN-SH-5rc"/>
-                            <constraint firstItem="dDh-15-iSA" firstAttribute="top" secondItem="N8M-nd-gMO" secondAttribute="top" id="5W6-pv-tyw"/>
                             <constraint firstItem="jef-Gw-Vln" firstAttribute="leading" secondItem="N8M-nd-gMO" secondAttribute="leading" id="7Xh-xM-GaD"/>
-                            <constraint firstItem="jef-Gw-Vln" firstAttribute="top" secondItem="dDh-15-iSA" secondAttribute="bottom" id="HJh-Ja-fyK"/>
+                            <constraint firstItem="jef-Gw-Vln" firstAttribute="top" secondItem="N8M-nd-gMO" secondAttribute="top" id="Pe9-Ze-i1M"/>
                             <constraint firstItem="N8M-nd-gMO" firstAttribute="bottom" secondItem="jef-Gw-Vln" secondAttribute="bottom" id="QFD-Ah-hMQ"/>
-                            <constraint firstItem="dDh-15-iSA" firstAttribute="leading" secondItem="N8M-nd-gMO" secondAttribute="leading" id="alM-r5-4qs"/>
                             <constraint firstItem="N8M-nd-gMO" firstAttribute="trailing" secondItem="jef-Gw-Vln" secondAttribute="trailing" id="mEB-k2-jHh"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="N8M-nd-gMO"/>
                     </view>
-                    <connections>
-                        <outlet property="placeholderHeightConstraint" destination="Jau-CY-5YV" id="L2a-nr-VKp"/>
-                        <outlet property="searchBarPlaceholder" destination="dDh-15-iSA" id="0mP-b8-YA7"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cTT-Yk-ZSf" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -92,13 +78,13 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="2017" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="u1l-5F-RDe">
-                                                    <rect key="frame" x="329.5" y="11" width="37.5" height="21"/>
+                                                    <rect key="frame" x="322.5" y="11" width="37.5" height="21"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rah-01-zFP">
-                                                    <rect key="frame" x="8" y="11" width="313.5" height="21"/>
+                                                    <rect key="frame" x="15" y="11" width="299.5" height="21"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
@@ -125,7 +111,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="U0n-cg-xYo">
-                                                    <rect key="frame" x="8" y="11.5" width="328" height="21"/>
+                                                    <rect key="frame" x="15" y="11.5" width="321" height="21"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" name="disabledControlTextColor" catalog="System" colorSpace="catalog"/>
                                                     <nil key="highlightedColor"/>

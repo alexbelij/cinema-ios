@@ -106,11 +106,7 @@ extension SearchResultsController {
     } else {
       contentInsets = tableView.contentInset
     }
-    if #available(iOS 11.0, *) {
-      contentInsets.bottom = keyboardFrame.height - view.safeAreaInsets.bottom
-    } else {
-      contentInsets.bottom = keyboardFrame.height
-    }
+    contentInsets.bottom = keyboardFrame.height - view.safeAreaInsets.bottom
     self.tableView.contentInset = contentInsets
     self.tableView.scrollIndicatorInsets = contentInsets
   }

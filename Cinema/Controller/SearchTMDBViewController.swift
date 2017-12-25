@@ -7,8 +7,6 @@ class SearchTMDBViewController: UIViewController {
   private let searchQueue = DispatchQueue(label: "de.martinbauer.cinema.tmdb-search", qos: .userInitiated)
   private var currentSearch: DispatchWorkItem?
   private var searchController: UISearchController!
-  @IBOutlet private weak var searchBarPlaceholder: UIView!
-  @IBOutlet private weak var placeholderHeightConstraint: NSLayoutConstraint!
   private var popularMoviesVC: PopularMoviesViewController!
 
   private var searchResultsController: SearchResultsController!
@@ -29,14 +27,8 @@ class SearchTMDBViewController: UIViewController {
     searchController.dimsBackgroundDuringPresentation = false
     definesPresentationContext = true
     searchController.searchBar.placeholder = NSLocalizedString("addItem.search.placeholder", comment: "")
-    if #available(iOS 11.0, *) {
-      self.navigationItem.searchController = searchController
-      self.navigationItem.hidesSearchBarWhenScrolling = false
-      self.placeholderHeightConstraint.constant = 0
-    } else {
-      searchController.searchBar.sizeToFit()
-      searchBarPlaceholder.addSubview(searchController.searchBar)
-    }
+    self.navigationItem.searchController = searchController
+    self.navigationItem.hidesSearchBarWhenScrolling = false
     title = NSLocalizedString("addItem.title", comment: "")
   }
 

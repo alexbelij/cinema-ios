@@ -57,21 +57,15 @@ extension MasterViewController {
     clearsSelectionOnViewWillAppear = true
 
     library.delegates.add(self)
-    if #available(iOS 11.0, *) {
-    } else {
-      scrollToTop(animated: false)
-    }
     showEmptyLibraryViewIfNecessary()
   }
 
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
-    if #available(iOS 11.0, *) {
-      if addSearchBarOnViewDidAppear {
-        self.navigationItem.searchController = searchController
-        self.navigationItem.hidesSearchBarWhenScrolling = false
-        addSearchBarOnViewDidAppear = false
-      }
+    if addSearchBarOnViewDidAppear {
+      self.navigationItem.searchController = searchController
+      self.navigationItem.hidesSearchBarWhenScrolling = false
+      addSearchBarOnViewDidAppear = false
     }
   }
 }
@@ -104,11 +98,7 @@ extension MasterViewController {
     }
     sectionIndexTitles = Array(sectionItems.keys)
     sectionIndexTitles.sort(by: strategy.sectionIndexTitleSorting)
-    if #available(iOS 11.0, *) {
-      visibleSectionIndexTitles = strategy.refineSectionIndexTitles(sectionIndexTitles)
-    } else {
-      visibleSectionIndexTitles = [UITableViewIndexSearch] + strategy.refineSectionIndexTitles(sectionIndexTitles)
-    }
+    visibleSectionIndexTitles = strategy.refineSectionIndexTitles(sectionIndexTitles)
     sectionTitles = sectionIndexTitles.map { strategy.sectionTitle(for: $0) }
   }
 
@@ -119,11 +109,7 @@ extension MasterViewController {
           self.tableView.backgroundView = emptyLibraryView
           self.tableView.separatorStyle = .none
           self.searchController.isActive = false
-          if #available(iOS 11.0, *) {
-            self.navigationItem.searchController = nil
-          } else {
-            self.tableView.tableHeaderView = nil
-          }
+          self.navigationItem.searchController = nil
           self.sortButton.isEnabled = false
           self.state = .noData
         case .noData: break
@@ -133,11 +119,7 @@ extension MasterViewController {
         case .initializing, .noData:
           self.tableView.backgroundView = nil
           self.tableView.separatorStyle = .singleLine
-          if #available(iOS 11.0, *) {
-            self.addSearchBarOnViewDidAppear = true
-          } else {
-            self.tableView.tableHeaderView = self.searchController.searchBar
-          }
+          self.addSearchBarOnViewDidAppear = true
           self.sortButton.isEnabled = true
           self.state = .data
         case .data: fallthrough
@@ -214,13 +196,7 @@ extension MasterViewController {
   public override func tableView(_ tableView: UITableView,
                                  sectionForSectionIndexTitle title: String,
                                  at index: Int) -> Int {
-    if title == UITableViewIndexSearch {
-      let frame = searchController.searchBar.frame
-      tableView.scrollRectToVisible(frame, animated: false)
-      return -1
-    } else {
-      return sectionIndexTitles.index(of: title) ?? -1
-    }
+    return sectionIndexTitles.index(of: title) ?? -1
   }
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -236,12 +212,7 @@ extension MasterViewController {
   private func scrollToTop(animated: Bool) {
     switch state {
       case .initializing:
-        if #available(iOS 11.0, *) {
-          fatalError("search bar is hidden by default")
-        } else {
-          let offset = searchController.searchBar.frame.height
-          self.tableView.setContentOffset(CGPoint(x: 0, y: offset), animated: animated)
-        }
+        fatalError("search bar is hidden by default")
       case .noData: break
       case .searching:
         if filteredMediaItems.isEmpty {
@@ -249,12 +220,7 @@ extension MasterViewController {
         }
         fallthrough
       case .data:
-        if #available(iOS 11.0, *) {
-          tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
-        } else {
-          let offset = -UIApplication.shared.statusBarFrame.height
-          self.tableView.setContentOffset(CGPoint(x: 0, y: offset), animated: animated)
-        }
+        tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
     }
   }
 }
