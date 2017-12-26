@@ -51,6 +51,8 @@
 		CBED942E1F6BFB0E00FA4045 /* TableViewSortingStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED94241F6BF6C200FA4045 /* TableViewSortingStrategy.swift */; };
 		CBED94301F6BFB0E00FA4045 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED941B1F6BF6C200FA4045 /* DetailViewController.swift */; };
 		CBED94311F6BFB0E00FA4045 /* MaintenanceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED941E1F6BF6C200FA4045 /* MaintenanceViewController.swift */; };
+		CBF3CE601FF2366700F4B6C0 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE5F1FF2366700F4B6C0 /* Coordinator.swift */; };
+		CBF3CE621FF2369B00F4B6C0 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE611FF2369B00F4B6C0 /* AppCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -104,6 +106,8 @@
 		CBED94221F6BF6C200FA4045 /* SearchTMDBViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTMDBViewController.swift; sourceTree = "<group>"; };
 		CBED94231F6BF6C200FA4045 /* SortDescriptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortDescriptor.swift; sourceTree = "<group>"; };
 		CBED94241F6BF6C200FA4045 /* TableViewSortingStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewSortingStrategy.swift; sourceTree = "<group>"; };
+		CBF3CE5F1FF2366700F4B6C0 /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
+		CBF3CE611FF2369B00F4B6C0 /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -159,6 +163,7 @@
 		CBB569651EA4D6A2005F7BA7 /* Cinema */ = {
 			isa = PBXGroup;
 			children = (
+				CBF3CE5E1FF2364000F4B6C0 /* Coordinator */,
 				CBED94321F6BFB9900FA4045 /* Controller */,
 				CBED94251F6BF70900FA4045 /* View */,
 				CBED94131F6BF62600FA4045 /* Model */,
@@ -250,6 +255,15 @@
 				CBED941E1F6BF6C200FA4045 /* MaintenanceViewController.swift */,
 			);
 			path = Controller;
+			sourceTree = "<group>";
+		};
+		CBF3CE5E1FF2364000F4B6C0 /* Coordinator */ = {
+			isa = PBXGroup;
+			children = (
+				CBF3CE5F1FF2366700F4B6C0 /* Coordinator.swift */,
+				CBF3CE611FF2369B00F4B6C0 /* AppCoordinator.swift */,
+			);
+			path = Coordinator;
 			sourceTree = "<group>";
 		};
 		EEC46C40729C5E38D2943CD0 /* Frameworks */ = {
@@ -413,6 +427,7 @@
 				CB096BB81F16B18200FBFD78 /* Config.swift in Sources */,
 				816BF3E5F4BC47B998CE15A6 /* TMDBSwiftWrapper.swift in Sources */,
 				CBED94311F6BFB0E00FA4045 /* MaintenanceViewController.swift in Sources */,
+				CBF3CE601FF2366700F4B6C0 /* Coordinator.swift in Sources */,
 				CBED942D1F6BFB0E00FA4045 /* EditItemTableViewController.swift in Sources */,
 				CBED94301F6BFB0E00FA4045 /* DetailViewController.swift in Sources */,
 				CB65D7AB1F8A107F00457386 /* TabularSheetController.swift in Sources */,
@@ -429,6 +444,7 @@
 				816BFABF5256F0205876AE33 /* PropertyUpdateAction.swift in Sources */,
 				816BFBB935AA13E3AC7F3E9F /* MediaItemUpdates.swift in Sources */,
 				816BF5794525B14475533BF1 /* TMDBSwiftCache.swift in Sources */,
+				CBF3CE621FF2369B00F4B6C0 /* AppCoordinator.swift in Sources */,
 				CBED94291F6BF80E00FA4045 /* SearchTMDBViewController.swift in Sources */,
 				816BF8AD896393450AFBB602 /* ImportAction.swift in Sources */,
 				CB65D7AD1F8A108A00457386 /* ArrayTableController.swift in Sources */,
