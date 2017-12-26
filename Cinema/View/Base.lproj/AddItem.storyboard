@@ -11,10 +11,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--SearchTMDB View Controller-->
+        <!--Search Tmdb Controller-->
         <scene sceneID="Irz-nF-inq">
             <objects>
-                <viewController id="lEX-SM-kxr" customClass="SearchTMDBViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SearchTmdbController" id="lEX-SM-kxr" customClass="SearchTmdbController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Hfw-gI-ZTd">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -56,10 +56,10 @@
             </objects>
             <point key="canvasLocation" x="990" y="-879"/>
         </scene>
-        <!--Search Results Controller-->
+        <!--Search Tmdb Search Results Controller-->
         <scene sceneID="nZP-5Q-lru">
             <objects>
-                <viewController storyboardIdentifier="SearchResultsController" id="u5G-L7-MWH" customClass="SearchResultsController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SearchTmdbSearchResultsController" id="u5G-L7-MWH" customClass="SearchTmdbSearchResultsController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="AT8-CL-3au">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

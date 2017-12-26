@@ -28,7 +28,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
 
     // swiftlint:disable force_cast
     let addItemNavController = UIStoryboard.addItem.instantiateInitialViewController() as! UINavigationController
-    let searchController = addItemNavController.topViewController as! SearchTMDBViewController
+    let searchController = addItemNavController.topViewController as! SearchTmdbController
     // swiftlint:enable force_cast
     searchController.library = library
     searchController.movieDb = movieDb

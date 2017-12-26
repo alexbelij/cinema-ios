@@ -2,7 +2,7 @@ import Dispatch
 import Foundation
 import UIKit
 
-class SearchTMDBViewController: UIViewController {
+class SearchTmdbController: UIViewController {
 
   private let searchQueue = DispatchQueue(label: "de.martinbauer.cinema.tmdb-search", qos: .userInitiated)
   private var currentSearch: DispatchWorkItem?
@@ -10,7 +10,7 @@ class SearchTMDBViewController: UIViewController {
   @IBOutlet private weak var containerView: UIView!
   private var popularMoviesController: PopularMoviesController!
 
-  private var searchResultsController: SearchResultsController!
+  private var searchResultsController: SearchTmdbSearchResultsController!
 
   var library: MediaLibrary!
   var movieDb: MovieDbClient!
@@ -19,7 +19,7 @@ class SearchTMDBViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    searchResultsController = storyboard!.instantiate(SearchResultsController.self)
+    searchResultsController = storyboard!.instantiate(SearchTmdbSearchResultsController.self)
     searchResultsController.delegate = self
     searchController = UISearchController(searchResultsController: searchResultsController)
     searchController.delegate = self
@@ -58,7 +58,7 @@ class SearchTMDBViewController: UIViewController {
   }
 }
 
-extension SearchTMDBViewController: UISearchResultsUpdating, UISearchControllerDelegate {
+extension SearchTmdbController: UISearchResultsUpdating, UISearchControllerDelegate {
   func didPresentSearchController(_ searchController: UISearchController) {
     searchController.searchBar.becomeFirstResponder()
   }
@@ -72,8 +72,8 @@ extension SearchTMDBViewController: UISearchResultsUpdating, UISearchControllerD
         }
         self.currentSearch = DispatchWorkItem {
           let searchResults = self.movieDb.searchMovies(searchText: searchText).map { movie in
-            SearchResultsController.SearchResult(item: movie,
-                                                 hasBeenAddedToLibrary: self.library.contains(id: movie.id))
+            SearchTmdbSearchResultsController.SearchResult(item: movie,
+                                                           hasBeenAddedToLibrary: self.library.contains(id: movie.id))
           }
           self.searchResultsController.searchText = searchText
           self.searchResultsController.searchResults = searchResults
@@ -87,7 +87,7 @@ extension SearchTMDBViewController: UISearchResultsUpdating, UISearchControllerD
   }
 }
 
-extension SearchTMDBViewController: SearchResultsSelectionDelegate {
+extension SearchTmdbController: SearchResultsSelectionDelegate {
   func didSelectSearchResult(_ searchResult: PartialMediaItem) {
     showAddAlert(for: searchResult)
   }
@@ -145,7 +145,7 @@ extension SearchTMDBViewController: SearchResultsSelectionDelegate {
   }
 }
 
-extension SearchTMDBViewController: PopularMoviesControllerDelegate {
+extension SearchTmdbController: PopularMoviesControllerDelegate {
   func popularMoviesController(_ controller: PopularMoviesController, didSelect movie: PartialMediaItem) {
     self.showAddAlert(for: movie)
   }
