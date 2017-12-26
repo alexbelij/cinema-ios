@@ -95,6 +95,9 @@ extension MovieListController {
     } else {
       hideEmptyView()
       tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
+      if searchController.isActive {
+        updateSearchResults(for: searchController)
+      }
     }
   }
 }
