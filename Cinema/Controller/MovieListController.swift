@@ -11,7 +11,6 @@ protocol MediaItemCellConfig {
 }
 
 class MovieListController: UITableViewController {
-
   weak var delegate: MovieListControllerDelegate?
   var library: MediaLibrary!
 
@@ -23,7 +22,6 @@ class MovieListController: UITableViewController {
   }
 
   private var allItems = [MediaItem]()
-
   private var sectionItems = [String: [MediaItem]]()
   private var sectionIndexTitles = [String]()
   private var visibleSectionIndexTitles = [String]()
@@ -44,8 +42,8 @@ class MovieListController: UITableViewController {
   }()
 
   private var sortDescriptor = SortDescriptor.title
-
   @IBOutlet private weak var sortButton: UIBarButtonItem!
+
   private lazy var emptyLibraryView: GenericEmptyView = {
     let view = GenericEmptyView()
     view.configure(
@@ -54,59 +52,42 @@ class MovieListController: UITableViewController {
     )
     return view
   }()
-
-  private var state: State = .initializing
-
-  private var addSearchBarOnViewDidAppear = false
-
-  private enum State {
-    case initializing
-    case noData
-    case data
-  }
 }
 
 // MARK: View Controller Lifecycle
 
 extension MovieListController {
   override func viewDidLoad() {
-    fetchLibraryData()
     super.viewDidLoad()
     title = NSLocalizedString("library", comment: "")
-    definesPresentationContext = true
     tableView.sectionIndexBackgroundColor = UIColor.clear
-    clearsSelectionOnViewWillAppear = true
+    definesPresentationContext = true
+    navigationItem.hidesSearchBarWhenScrolling = false
 
     library.delegates.add(self)
-    showEmptyLibraryViewIfNecessary()
-  }
-
-  override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-    if addSearchBarOnViewDidAppear {
-      self.navigationItem.searchController = searchController
-      self.navigationItem.hidesSearchBarWhenScrolling = false
-      addSearchBarOnViewDidAppear = false
-    }
+    reloadListData()
   }
 }
 
 // MARK: - Data Management
 
 extension MovieListController {
-  private func reloadLibraryData() {
+  private func reloadListData() {
     fetchLibraryData()
-    DispatchQueue.main.async {
-      self.showEmptyLibraryViewIfNecessary()
-      self.tableView.reloadData()
+    tableView.reloadData()
+    if allItems.isEmpty {
+      showEmptyView()
+    } else {
+      hideEmptyView()
+      tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
     }
   }
 
   private func fetchLibraryData() {
-    let strategy = sortDescriptor.makeTableViewStrategy()
     allItems = library.mediaItems { _ in true }
     allItems.sort(by: SortDescriptor.title.makeTableViewStrategy().itemSorting)
     sectionItems = [String: [MediaItem]]()
+    let strategy = sortDescriptor.makeTableViewStrategy()
     for item in allItems {
       let sectionIndexTitle = strategy.sectionIndexTitle(for: item)
       if sectionItems[sectionIndexTitle] == nil {
@@ -122,30 +103,24 @@ extension MovieListController {
     visibleSectionIndexTitles = strategy.refineSectionIndexTitles(sectionIndexTitles)
     sectionTitles = sectionIndexTitles.map { strategy.sectionTitle(for: $0) }
   }
+}
 
-  private func showEmptyLibraryViewIfNecessary() {
-    if self.allItems.isEmpty {
-      switch state {
-        case .initializing, .data:
-          self.tableView.backgroundView = emptyLibraryView
-          self.tableView.separatorStyle = .none
-          self.searchController.isActive = false
-          self.navigationItem.searchController = nil
-          self.sortButton.isEnabled = false
-          self.state = .noData
-        case .noData: break
-      }
-    } else {
-      switch state {
-        case .initializing, .noData:
-          self.tableView.backgroundView = nil
-          self.tableView.separatorStyle = .singleLine
-          self.addSearchBarOnViewDidAppear = true
-          self.sortButton.isEnabled = true
-          self.state = .data
-        case .data: break
-      }
-    }
+// MARK: - Empty View
+
+extension MovieListController {
+  private func showEmptyView() {
+    tableView.backgroundView = emptyLibraryView
+    tableView.separatorStyle = .none
+    sortButton.isEnabled = false
+    searchController.isActive = false
+    navigationItem.searchController = nil
+  }
+
+  private func hideEmptyView() {
+    tableView.backgroundView = nil
+    tableView.separatorStyle = .singleLine
+    sortButton.isEnabled = true
+    navigationItem.searchController = searchController
   }
 }
 
@@ -198,16 +173,6 @@ extension MovieListController {
       self.delegate?.movieListController(self, didSelect: item(for: selectedIndexPath))
     }
   }
-
-  private func scrollToTop(animated: Bool) {
-    switch state {
-      case .initializing:
-        fatalError("search bar is hidden by default")
-      case .noData: break
-      case .data:
-        tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
-    }
-  }
 }
 
 // MARK: - Search
@@ -229,7 +194,9 @@ extension MovieListController: UISearchResultsUpdating {
 
 extension MovieListController: MediaLibraryDelegate {
   func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
-    self.reloadLibraryData()
+    DispatchQueue.main.async {
+      self.reloadListData()
+    }
   }
 }
 
@@ -243,11 +210,8 @@ extension MovieListController {
                                                        showCheckmark: descriptor == self.sortDescriptor) { _ in
         guard self.sortDescriptor != descriptor else { return }
         self.sortDescriptor = descriptor
-        DispatchQueue.global(qos: .userInitiated).async {
-          self.reloadLibraryData()
-          DispatchQueue.main.async {
-            self.scrollToTop(animated: false)
-          }
+        DispatchQueue.main.async {
+          self.reloadListData()
         }
       })
     }
