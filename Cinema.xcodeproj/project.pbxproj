@@ -36,7 +36,7 @@
 		CBAE5E861F3486EA0055366F /* EditItem.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBAE5E841F3486EA0055366F /* EditItem.storyboard */; };
 		CBAE5E8B1F3493EA0055366F /* AddItem.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBAE5E891F3493EA0055366F /* AddItem.storyboard */; };
 		CBB569671EA4D6A2005F7BA7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB569661EA4D6A2005F7BA7 /* AppDelegate.swift */; };
-		CBB5696E1EA4D6A2005F7BA7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBB5696C1EA4D6A2005F7BA7 /* Main.storyboard */; };
+		CBB5696E1EA4D6A2005F7BA7 /* MovieList.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBB5696C1EA4D6A2005F7BA7 /* MovieList.storyboard */; };
 		CBB569701EA4D6A2005F7BA7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CBB5696F1EA4D6A2005F7BA7 /* Assets.xcassets */; };
 		CBB569731EA4D6A2005F7BA7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBB569711EA4D6A2005F7BA7 /* LaunchScreen.storyboard */; };
 		CBB569801EA4D6C3005F7BA7 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB5697B1EA4D6C3005F7BA7 /* MediaItem.swift */; };
@@ -57,6 +57,7 @@
 		CBF3CE661FF23A4300F4B6C0 /* DataUpdateCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE651FF23A4300F4B6C0 /* DataUpdateCoordinator.swift */; };
 		CBF3CE681FF23E9700F4B6C0 /* EditItemCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE671FF23E9700F4B6C0 /* EditItemCoordinator.swift */; };
 		CBF3CE6A1FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE691FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift */; };
+		CBF3CE6E1FF250BD00F4B6C0 /* LibraryContentCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE6D1FF250BD00F4B6C0 /* LibraryContentCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -94,7 +95,7 @@
 		CBAE5E8A1F3493EA0055366F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/AddItem.storyboard; sourceTree = "<group>"; };
 		CBB569631EA4D6A2005F7BA7 /* Cinema.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cinema.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBB569661EA4D6A2005F7BA7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		CBB5696D1EA4D6A2005F7BA7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		CBB5696D1EA4D6A2005F7BA7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MovieList.storyboard; sourceTree = "<group>"; };
 		CBB5696F1EA4D6A2005F7BA7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CBB569721EA4D6A2005F7BA7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		CBB569741EA4D6A2005F7BA7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -116,6 +117,7 @@
 		CBF3CE651FF23A4300F4B6C0 /* DataUpdateCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataUpdateCoordinator.swift; sourceTree = "<group>"; };
 		CBF3CE671FF23E9700F4B6C0 /* EditItemCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditItemCoordinator.swift; sourceTree = "<group>"; };
 		CBF3CE691FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailsCoordinator.swift; sourceTree = "<group>"; };
+		CBF3CE6D1FF250BD00F4B6C0 /* LibraryContentCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryContentCoordinator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -231,7 +233,7 @@
 			isa = PBXGroup;
 			children = (
 				CBB569711EA4D6A2005F7BA7 /* LaunchScreen.storyboard */,
-				CBB5696C1EA4D6A2005F7BA7 /* Main.storyboard */,
+				CBB5696C1EA4D6A2005F7BA7 /* MovieList.storyboard */,
 				CBAE5E891F3493EA0055366F /* AddItem.storyboard */,
 				CBAE5E841F3486EA0055366F /* EditItem.storyboard */,
 				CB1A7B201F5C07B60091F993 /* Maintenance.storyboard */,
@@ -272,6 +274,7 @@
 				CBF3CE611FF2369B00F4B6C0 /* AppCoordinator.swift */,
 				CBF3CE631FF2385C00F4B6C0 /* CoreCoordinator.swift */,
 				CBF3CE651FF23A4300F4B6C0 /* DataUpdateCoordinator.swift */,
+				CBF3CE6D1FF250BD00F4B6C0 /* LibraryContentCoordinator.swift */,
 				CBF3CE691FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift */,
 				CBF3CE671FF23E9700F4B6C0 /* EditItemCoordinator.swift */,
 			);
@@ -358,7 +361,7 @@
 				CB84B1891FEAF5E500B455D4 /* SortPrefixes.plist in Resources */,
 				CB9484C11EFA643500D9651E /* Localizable.strings in Resources */,
 				CBB569701EA4D6A2005F7BA7 /* Assets.xcassets in Resources */,
-				CBB5696E1EA4D6A2005F7BA7 /* Main.storyboard in Resources */,
+				CBB5696E1EA4D6A2005F7BA7 /* MovieList.storyboard in Resources */,
 				CB65D7AF1F8A131F00457386 /* SelectableLabelCell.xib in Resources */,
 				CBAE5E861F3486EA0055366F /* EditItem.storyboard in Resources */,
 			);
@@ -451,6 +454,7 @@
 				816BFA30AFFD31F1A07CD0B6 /* KeyedArchivalFormat.swift in Sources */,
 				CBED942A1F6BF80E00FA4045 /* AddItemViewController.swift in Sources */,
 				816BF52DDE5A95DE54EE1FEF /* JSONFormat.swift in Sources */,
+				CBF3CE6E1FF250BD00F4B6C0 /* LibraryContentCoordinator.swift in Sources */,
 				CBED94281F6BF80E00FA4045 /* SearchResultsViewController.swift in Sources */,
 				CBED942C1F6BFB0E00FA4045 /* SortDescriptor.swift in Sources */,
 				816BF274AE17D0FDCEB2C994 /* MaintenanceAction.swift in Sources */,
@@ -524,12 +528,12 @@
 			name = AddItem.storyboard;
 			sourceTree = "<group>";
 		};
-		CBB5696C1EA4D6A2005F7BA7 /* Main.storyboard */ = {
+		CBB5696C1EA4D6A2005F7BA7 /* MovieList.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
 				CBB5696D1EA4D6A2005F7BA7 /* Base */,
 			);
-			name = Main.storyboard;
+			name = MovieList.storyboard;
 			sourceTree = "<group>";
 		};
 		CBB569711EA4D6A2005F7BA7 /* LaunchScreen.storyboard */ = {

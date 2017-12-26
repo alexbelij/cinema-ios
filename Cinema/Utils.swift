@@ -106,7 +106,7 @@ extension Utils {
 // MARK: - Other Extensions
 
 extension UIStoryboard {
-  static var main = UIStoryboard(name: "Main", bundle: nil)
+  static var movieList = UIStoryboard(name: "MovieList", bundle: nil)
   static var addItem = UIStoryboard(name: "AddItem", bundle: nil)
   static var editItem = UIStoryboard(name: "EditItem", bundle: nil)
   static var maintenance = UIStoryboard(name: "Maintenance", bundle: nil)

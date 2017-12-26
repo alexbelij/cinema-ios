@@ -31,7 +31,7 @@ class ItemDetailsCoordinator: AutoPresentableCoordinator {
     self.movieDb = movieDb
     self.detailItem = detailItem
 
-    itemDetailsController = UIStoryboard.main.instantiate(ItemDetailsController.self)
+    itemDetailsController = UIStoryboard.movieList.instantiate(ItemDetailsController.self)
     itemDetailsController.delegate = self
     configure(for: self.detailItem, resetRemoteProperties: true)
     fetchRemoteData(for: self.detailItem.id)

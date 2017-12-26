@@ -1,8 +1,13 @@
 import Dispatch
 import UIKit
 
+protocol MovieListControllerDelegate: class {
+  func movieListController(_ controller: MovieListController, didSelect item: MediaItem)
+}
+
 class MovieListController: UITableViewController {
 
+  weak var delegate: MovieListControllerDelegate?
   var library: MediaLibrary!
   var movieDb: MovieDbClient!
 
@@ -32,8 +37,6 @@ class MovieListController: UITableViewController {
   private var state: State = .initializing
 
   private var addSearchBarOnViewDidAppear = false
-
-  private var detailsCoordinator: ItemDetailsCoordinator?
 
   private enum State {
     case initializing
@@ -203,12 +206,7 @@ extension MovieListController {
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     if let selectedIndexPath = tableView.indexPathForSelectedRow {
-      detailsCoordinator = ItemDetailsCoordinator(navigationController: navigationController!,
-                                                  library: library,
-                                                  movieDb: movieDb,
-                                                  detailItem: item(for: selectedIndexPath))
-      detailsCoordinator!.delegate = self
-      detailsCoordinator!.presentRootViewController()
+      self.delegate?.movieListController(self, didSelect: item(for: selectedIndexPath))
     }
   }
 
@@ -318,11 +316,5 @@ extension MovieListController {
       })
     }
     self.present(controller, animated: true)
-  }
-}
-
-extension MovieListController: ItemDetailsCoordinatorDelegate {
-  func itemDetailsCoordinatorDidDismiss(_ coordinator: ItemDetailsCoordinator) {
-    self.detailsCoordinator = nil
   }
 }
