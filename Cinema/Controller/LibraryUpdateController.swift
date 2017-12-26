@@ -1,7 +1,7 @@
 import Dispatch
 import UIKit
 
-class AddItemViewController: UIViewController {
+class LibraryUpdateController: UIViewController {
 
   private var library: MediaLibrary!
   private var movieDb: MovieDbClient!

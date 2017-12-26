@@ -107,7 +107,7 @@ extension SearchTMDBViewController: SearchResultsSelectionDelegate {
   }
 
   private func add(_ searchResult: PartialMediaItem, withDiskType diskType: DiskType) {
-    let controller = UIStoryboard.addItem.instantiate(AddItemViewController.self)
+    let controller = UIStoryboard.addItem.instantiate(LibraryUpdateController.self)
     controller.add(item: searchResult, as: diskType, to: self.library, movieDb: self.movieDb)
     self.present(controller, animated: true)
   }

@@ -149,10 +149,10 @@
             </objects>
             <point key="canvasLocation" x="1854" y="-1598"/>
         </scene>
-        <!--Add Item View Controller-->
+        <!--Library Update Controller-->
         <scene sceneID="q6N-Wa-AF6">
             <objects>
-                <viewController storyboardIdentifier="AddItemViewController" id="11G-x7-NBc" customClass="AddItemViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="LibraryUpdateController" id="11G-x7-NBc" customClass="LibraryUpdateController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="pEO-9p-nSK">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

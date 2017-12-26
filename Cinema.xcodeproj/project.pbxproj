@@ -44,7 +44,7 @@
 		CBED94271F6BF80E00FA4045 /* PopularMoviesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED94201F6BF6C200FA4045 /* PopularMoviesViewController.swift */; };
 		CBED94281F6BF80E00FA4045 /* SearchResultsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED94211F6BF6C200FA4045 /* SearchResultsViewController.swift */; };
 		CBED94291F6BF80E00FA4045 /* SearchTMDBViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED94221F6BF6C200FA4045 /* SearchTMDBViewController.swift */; };
-		CBED942A1F6BF80E00FA4045 /* AddItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED941A1F6BF6C200FA4045 /* AddItemViewController.swift */; };
+		CBED942A1F6BF80E00FA4045 /* LibraryUpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED941A1F6BF6C200FA4045 /* LibraryUpdateController.swift */; };
 		CBED942B1F6BFB0E00FA4045 /* MovieListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED941F1F6BF6C200FA4045 /* MovieListController.swift */; };
 		CBED942C1F6BFB0E00FA4045 /* SortDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED94231F6BF6C200FA4045 /* SortDescriptor.swift */; };
 		CBED942D1F6BFB0E00FA4045 /* EditItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED941C1F6BF6C200FA4045 /* EditItemController.swift */; };
@@ -107,7 +107,7 @@
 		CBB569741EA4D6A2005F7BA7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CBB5697B1EA4D6C3005F7BA7 /* MediaItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
 		CBB5697C1EA4D6C3005F7BA7 /* MediaLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaLibrary.swift; sourceTree = "<group>"; };
-		CBED941A1F6BF6C200FA4045 /* AddItemViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemViewController.swift; sourceTree = "<group>"; };
+		CBED941A1F6BF6C200FA4045 /* LibraryUpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryUpdateController.swift; sourceTree = "<group>"; };
 		CBED941B1F6BF6C200FA4045 /* ItemDetailsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailsController.swift; sourceTree = "<group>"; };
 		CBED941C1F6BF6C200FA4045 /* EditItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditItemController.swift; sourceTree = "<group>"; };
 		CBED941E1F6BF6C200FA4045 /* MaintenanceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaintenanceViewController.swift; sourceTree = "<group>"; };
@@ -279,7 +279,7 @@
 				CBED94211F6BF6C200FA4045 /* SearchResultsViewController.swift */,
 				CBED94221F6BF6C200FA4045 /* SearchTMDBViewController.swift */,
 				CBED94201F6BF6C200FA4045 /* PopularMoviesViewController.swift */,
-				CBED941A1F6BF6C200FA4045 /* AddItemViewController.swift */,
+				CBED941A1F6BF6C200FA4045 /* LibraryUpdateController.swift */,
 				CBED941E1F6BF6C200FA4045 /* MaintenanceViewController.swift */,
 			);
 			path = Controller;
@@ -475,7 +475,7 @@
 				816BFFC1026534FCA7432523 /* DataFormat.swift in Sources */,
 				CBF3CE781FF25AA600F4B6C0 /* MovieListSearchResultsController.swift in Sources */,
 				816BFA30AFFD31F1A07CD0B6 /* KeyedArchivalFormat.swift in Sources */,
-				CBED942A1F6BF80E00FA4045 /* AddItemViewController.swift in Sources */,
+				CBED942A1F6BF80E00FA4045 /* LibraryUpdateController.swift in Sources */,
 				816BF52DDE5A95DE54EE1FEF /* JSONFormat.swift in Sources */,
 				CBF3CE6E1FF250BD00F4B6C0 /* LibraryContentCoordinator.swift in Sources */,
 				CBED94281F6BF80E00FA4045 /* SearchResultsViewController.swift in Sources */,
