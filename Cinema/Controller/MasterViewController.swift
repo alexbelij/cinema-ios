@@ -33,6 +33,8 @@ class MasterViewController: UITableViewController {
 
   private var addSearchBarOnViewDidAppear = false
 
+  private var detailsCoordinator: ItemDetailsCoordinator?
+
   private enum State {
     case initializing
     case noData
@@ -201,11 +203,12 @@ extension MasterViewController {
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     if let selectedIndexPath = tableView.indexPathForSelectedRow {
-      let detailVC = UIStoryboard.main.instantiate(ItemDetailsController.self)
-      detailVC.detailItem = item(for: selectedIndexPath)
-      detailVC.movieDb = movieDb
-      detailVC.library = library
-      self.navigationController!.pushViewController(detailVC, animated: true)
+      detailsCoordinator = ItemDetailsCoordinator(navigationController: navigationController!,
+                                                  library: library,
+                                                  movieDb: movieDb,
+                                                  detailItem: item(for: selectedIndexPath))
+      detailsCoordinator!.delegate = self
+      detailsCoordinator!.presentRootViewController()
     }
   }
 
@@ -315,5 +318,11 @@ extension MasterViewController {
       })
     }
     self.present(controller, animated: true)
+  }
+}
+
+extension MasterViewController: ItemDetailsCoordinatorDelegate {
+  func itemDetailsCoordinatorDidDismiss(_ coordinator: ItemDetailsCoordinator) {
+    self.detailsCoordinator = nil
   }
 }

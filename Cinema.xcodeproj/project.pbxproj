@@ -56,6 +56,7 @@
 		CBF3CE641FF2385C00F4B6C0 /* CoreCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE631FF2385C00F4B6C0 /* CoreCoordinator.swift */; };
 		CBF3CE661FF23A4300F4B6C0 /* DataUpdateCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE651FF23A4300F4B6C0 /* DataUpdateCoordinator.swift */; };
 		CBF3CE681FF23E9700F4B6C0 /* EditItemCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE671FF23E9700F4B6C0 /* EditItemCoordinator.swift */; };
+		CBF3CE6A1FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE691FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -114,6 +115,7 @@
 		CBF3CE631FF2385C00F4B6C0 /* CoreCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreCoordinator.swift; sourceTree = "<group>"; };
 		CBF3CE651FF23A4300F4B6C0 /* DataUpdateCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataUpdateCoordinator.swift; sourceTree = "<group>"; };
 		CBF3CE671FF23E9700F4B6C0 /* EditItemCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditItemCoordinator.swift; sourceTree = "<group>"; };
+		CBF3CE691FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailsCoordinator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -270,6 +272,7 @@
 				CBF3CE611FF2369B00F4B6C0 /* AppCoordinator.swift */,
 				CBF3CE631FF2385C00F4B6C0 /* CoreCoordinator.swift */,
 				CBF3CE651FF23A4300F4B6C0 /* DataUpdateCoordinator.swift */,
+				CBF3CE691FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift */,
 				CBF3CE671FF23E9700F4B6C0 /* EditItemCoordinator.swift */,
 			);
 			path = Coordinator;
@@ -436,6 +439,7 @@
 				CB096BB81F16B18200FBFD78 /* Config.swift in Sources */,
 				816BF3E5F4BC47B998CE15A6 /* TMDBSwiftWrapper.swift in Sources */,
 				CBED94311F6BFB0E00FA4045 /* MaintenanceViewController.swift in Sources */,
+				CBF3CE6A1FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift in Sources */,
 				CBF3CE601FF2366700F4B6C0 /* Coordinator.swift in Sources */,
 				CBED942D1F6BFB0E00FA4045 /* EditItemController.swift in Sources */,
 				CBED94301F6BFB0E00FA4045 /* ItemDetailsController.swift in Sources */,

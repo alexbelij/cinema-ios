@@ -207,7 +207,7 @@
                     <navigationItem key="navigationItem" id="mOI-FS-AaM">
                         <barButtonItem key="rightBarButtonItem" systemItem="edit" id="bBS-e7-XCY">
                             <connections>
-                                <action selector="presentEditViewController" destination="JEX-9P-axG" id="GEJ-VA-vMh"/>
+                                <action selector="editButtonTapped" destination="JEX-9P-axG" id="NmT-cg-fvk"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -216,11 +216,11 @@
                         <outlet property="certificationLabel" destination="1oE-tC-Pti" id="5qY-AG-Xbf"/>
                         <outlet property="diskLabel" destination="lu0-Yv-0Bi" id="3cW-0q-2wX"/>
                         <outlet property="genreLabel" destination="Di6-NW-eKI" id="a2U-Hw-jpV"/>
-                        <outlet property="imageView" destination="G5A-3g-BU1" id="Yd2-cw-1JD"/>
+                        <outlet property="overviewTextView" destination="juI-mP-94u" id="7fo-Fn-3gk"/>
+                        <outlet property="posterView" destination="G5A-3g-BU1" id="VUl-lS-EQT"/>
                         <outlet property="releaseDateLabel" destination="swd-vr-IQS" id="hiG-oH-rYP"/>
                         <outlet property="runtimeLabel" destination="5gG-ms-RwD" id="SMu-2V-5k6"/>
                         <outlet property="subtitleLabel" destination="RdX-7n-C4l" id="cwJ-o7-Tt4"/>
-                        <outlet property="textView" destination="juI-mP-94u" id="97j-Ss-7RJ"/>
                         <outlet property="titleLabel" destination="gZA-AT-KDO" id="Roc-CX-GKg"/>
                     </connections>
                 </viewController>

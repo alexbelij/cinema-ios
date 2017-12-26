@@ -7,6 +7,7 @@
 "addItem.title" = "Film hinzufügen";
 "cancel" = "Abbrechen";
 "continue" = "Fortfahren";
+"details.loading" = "Lädt …";
 "details.missing.certification" = "Keine Altersfreigabe verfügbar.";
 "details.missing.genre" = "Kein Genre verfügbar.";
 "details.missing.overview" = "Keine Beschreibung vorhanden.";
