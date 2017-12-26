@@ -12,7 +12,12 @@ protocol MediaItemCellConfig {
 
 class MovieListController: UITableViewController {
   weak var delegate: MovieListControllerDelegate?
-  var library: MediaLibrary!
+  var items = [MediaItem]() {
+    didSet {
+      loadViewIfNeeded()
+      reloadListData()
+    }
+  }
 
   var cellConfiguration: MediaItemCellConfig? {
     didSet {
@@ -63,8 +68,6 @@ extension MovieListController {
     tableView.sectionIndexBackgroundColor = UIColor.clear
     definesPresentationContext = true
     navigationItem.hidesSearchBarWhenScrolling = false
-
-    library.delegates.add(self)
     reloadListData()
   }
 }
@@ -73,7 +76,7 @@ extension MovieListController {
 
 extension MovieListController {
   private func reloadListData() {
-    fetchLibraryData()
+    groupListData()
     tableView.reloadData()
     if allItems.isEmpty {
       showEmptyView()
@@ -83,9 +86,8 @@ extension MovieListController {
     }
   }
 
-  private func fetchLibraryData() {
-    allItems = library.mediaItems { _ in true }
-    allItems.sort(by: SortDescriptor.title.makeTableViewStrategy().itemSorting)
+  private func groupListData() {
+    allItems = items.sorted(by: SortDescriptor.title.makeTableViewStrategy().itemSorting)
     sectionItems = [String: [MediaItem]]()
     let strategy = sortDescriptor.makeTableViewStrategy()
     for item in allItems {
@@ -187,16 +189,6 @@ extension MovieListController: UISearchResultsUpdating {
     let lowercasedSearchText = searchText.lowercased()
     resultsController.searchText = searchText
     resultsController.items = allItems.filter { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
-  }
-}
-
-// MARK: - Library Events
-
-extension MovieListController: MediaLibraryDelegate {
-  func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
-    DispatchQueue.main.async {
-      self.reloadListData()
-    }
   }
 }
 

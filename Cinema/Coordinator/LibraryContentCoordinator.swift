@@ -27,7 +27,8 @@ class LibraryContentCoordinator: CustomPresentableCoordinator {
     movieListController.delegate = self
     let posterProvider = MovieDbPosterProvider(movieDb)
     movieListController.cellConfiguration = StandardMediaItemCellConfig(posterProvider: posterProvider)
-    movieListController.library = library
+    movieListController.items = library.mediaItems { _ in true }
+    library.delegates.add(self)
   }
 }
 
@@ -49,6 +50,19 @@ extension LibraryContentCoordinator: MovieListControllerDelegate {
 extension LibraryContentCoordinator: ItemDetailsCoordinatorDelegate {
   func itemDetailsCoordinatorDidDismiss(_ coordinator: ItemDetailsCoordinator) {
     self.itemDetailsCoordinator = nil
+  }
+}
+
+// MARK: - Library Events
+
+extension LibraryContentCoordinator: MediaLibraryDelegate {
+  func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
+    DispatchQueue.global(qos: .background).async {
+      let items = library.mediaItems { _ in true }
+      DispatchQueue.main.async {
+        self.movieListController.items = items
+      }
+    }
   }
 }
 
