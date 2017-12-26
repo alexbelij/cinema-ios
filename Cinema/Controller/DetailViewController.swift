@@ -152,7 +152,7 @@ extension DetailViewController {
   @IBAction private func presentEditViewController() {
     // swiftlint:disable force_cast
     let navController = UIStoryboard.editItem.instantiateInitialViewController() as! UINavigationController
-    let editVC = navController.topViewController as! EditItemTableViewController
+    let editVC = navController.topViewController as! EditItemController
     // swiftlint:enable force_cast
     editVC.item = detailItem
     editVC.library = library

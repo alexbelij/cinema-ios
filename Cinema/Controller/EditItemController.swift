@@ -1,6 +1,6 @@
 import UIKit
 
-class EditItemTableViewController: UITableViewController {
+class EditItemController: UITableViewController {
 
   var item: MediaItem!
   var library: MediaLibrary!
@@ -13,7 +13,7 @@ class EditItemTableViewController: UITableViewController {
 
 // MARK: - View Controller Lifecycle
 
-extension EditItemTableViewController {
+extension EditItemController {
   override func viewDidLoad() {
     super.viewDidLoad()
     titleTextField.text = item.title
@@ -26,7 +26,7 @@ extension EditItemTableViewController {
 
 // MARK: - Table View
 
-extension EditItemTableViewController {
+extension EditItemController {
   public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
     switch section {
       case 0: return NSLocalizedString("edit.sectionHeader.title", comment: "")
@@ -38,7 +38,7 @@ extension EditItemTableViewController {
 
 // MARK: - UITextFieldDelegate
 
-extension EditItemTableViewController: UITextFieldDelegate {
+extension EditItemController: UITextFieldDelegate {
   func textFieldShouldReturn(_ textField: UITextField) -> Bool {
     if let nextField = self.view.viewWithTag(textField.tag + 1) as? UITextField {
       nextField.becomeFirstResponder()
@@ -51,7 +51,7 @@ extension EditItemTableViewController: UITextFieldDelegate {
 
 // MARK: - Edit Management
 
-extension EditItemTableViewController {
+extension EditItemController {
   private func acceptEdits() {
     if isValidEdit() {
       guard titleTextField.text != item.title
@@ -117,7 +117,7 @@ extension EditItemTableViewController {
 
 // MARK: - User Actions
 
-extension EditItemTableViewController {
+extension EditItemController {
   @IBAction func cancelButtonClicked() {
     self.dismiss(animated: true)
   }
