@@ -5,11 +5,22 @@ protocol MovieListControllerDelegate: class {
   func movieListController(_ controller: MovieListController, didSelect item: MediaItem)
 }
 
+protocol MediaItemCellConfig {
+  func registerCells(in cellRegistering: CellRegistering)
+  func cell(for item: MediaItem, cellDequeuing: CellDequeuing) -> UITableViewCell
+}
+
 class MovieListController: UITableViewController {
 
   weak var delegate: MovieListControllerDelegate?
   var library: MediaLibrary!
-  var movieDb: MovieDbClient!
+
+  var cellConfiguration: MediaItemCellConfig? {
+    didSet {
+      loadViewIfNeeded()
+      cellConfiguration?.registerCells(in: tableView)
+    }
+  }
 
   private var allItems = [MediaItem]()
   private var filteredMediaItems = [MediaItem]()
@@ -170,20 +181,10 @@ extension MovieListController {
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    // swiftlint:disable:next force_cast
-    let cell = tableView.dequeueReusableCell(withIdentifier: "MovieTableCell", for: indexPath) as! MovieTableCell
-
-    let mediaItem = item(for: indexPath)
-    cell.configure(for: mediaItem)
-    DispatchQueue.global(qos: .userInteractive).async {
-      if let poster = self.movieDb.poster(for: mediaItem.id, size: PosterSize(minWidth: 46)) {
-        DispatchQueue.main.async {
-          (tableView.cellForRow(at: indexPath) as? MovieTableCell)?.posterView.image = poster
-        }
-      }
+    guard let config = self.cellConfiguration else {
+      fatalError("cell configuration has not been specified")
     }
-
-    return cell
+    return config.cell(for: item(for: indexPath), cellDequeuing: tableView)
   }
 
   public override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

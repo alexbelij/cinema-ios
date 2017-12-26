@@ -25,7 +25,8 @@ class LibraryContentCoordinator: CustomPresentableCoordinator {
     self.movieListController = navigationController.topViewController! as! MovieListController
     // swiftlint:enable force_cast
     movieListController.delegate = self
-    movieListController.movieDb = movieDb
+    let posterProvider = MovieDbPosterProvider(movieDb)
+    movieListController.cellConfiguration = StandardMediaItemCellConfig(posterProvider: posterProvider)
     movieListController.library = library
   }
 }
@@ -48,5 +49,23 @@ extension LibraryContentCoordinator: MovieListControllerDelegate {
 extension LibraryContentCoordinator: ItemDetailsCoordinatorDelegate {
   func itemDetailsCoordinatorDidDismiss(_ coordinator: ItemDetailsCoordinator) {
     self.itemDetailsCoordinator = nil
+  }
+}
+
+class StandardMediaItemCellConfig: MediaItemCellConfig {
+  private let posterProvider: PosterProvider
+
+  init(posterProvider: PosterProvider) {
+    self.posterProvider = posterProvider
+  }
+
+  func registerCells(in cellRegistering: CellRegistering) {
+    cellRegistering.registerNibCell(MovieListTableCell.self, bundle: nil)
+  }
+
+  func cell(for item: MediaItem, cellDequeuing: CellDequeuing) -> UITableViewCell {
+    let cell = cellDequeuing.dequeueReusableCell(MovieListTableCell.self)
+    cell.configure(for: item, posterFetching: posterProvider)
+    return cell
   }
 }

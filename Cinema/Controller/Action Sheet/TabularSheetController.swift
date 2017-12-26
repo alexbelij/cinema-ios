@@ -147,10 +147,6 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
 
 // MARK: - Cell Configuration
 
-public protocol CellDequeuing {
-  func dequeueReusableCell<CellType: UITableViewCell>(_ cellType: CellType.Type) -> CellType
-}
-
 public protocol TabularSheetCellConfiguration: class {
   associatedtype SheetItem
 

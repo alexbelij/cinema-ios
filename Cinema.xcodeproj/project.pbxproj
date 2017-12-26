@@ -58,6 +58,10 @@
 		CBF3CE681FF23E9700F4B6C0 /* EditItemCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE671FF23E9700F4B6C0 /* EditItemCoordinator.swift */; };
 		CBF3CE6A1FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE691FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift */; };
 		CBF3CE6E1FF250BD00F4B6C0 /* LibraryContentCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE6D1FF250BD00F4B6C0 /* LibraryContentCoordinator.swift */; };
+		CBF3CE701FF2568D00F4B6C0 /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE6F1FF2568D00F4B6C0 /* Provider.swift */; };
+		CBF3CE721FF256AC00F4B6C0 /* CellHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE711FF256AC00F4B6C0 /* CellHandling.swift */; };
+		CBF3CE741FF257FF00F4B6C0 /* MovieListTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE731FF257FF00F4B6C0 /* MovieListTableCell.swift */; };
+		CBF3CE761FF259B700F4B6C0 /* MovieListTableCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CBF3CE751FF259B700F4B6C0 /* MovieListTableCell.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -118,6 +122,10 @@
 		CBF3CE671FF23E9700F4B6C0 /* EditItemCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditItemCoordinator.swift; sourceTree = "<group>"; };
 		CBF3CE691FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailsCoordinator.swift; sourceTree = "<group>"; };
 		CBF3CE6D1FF250BD00F4B6C0 /* LibraryContentCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryContentCoordinator.swift; sourceTree = "<group>"; };
+		CBF3CE6F1FF2568D00F4B6C0 /* Provider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Provider.swift; sourceTree = "<group>"; };
+		CBF3CE711FF256AC00F4B6C0 /* CellHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellHandling.swift; sourceTree = "<group>"; };
+		CBF3CE731FF257FF00F4B6C0 /* MovieListTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieListTableCell.swift; sourceTree = "<group>"; };
+		CBF3CE751FF259B700F4B6C0 /* MovieListTableCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MovieListTableCell.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -243,6 +251,10 @@
 				816BFD2D067C0F79106D9254 /* GenericEmptyView.swift */,
 				CB65D7AE1F8A131F00457386 /* SelectableLabelCell.xib */,
 				CB84B18B1FEAF5E500B455D4 /* SortPrefixes.plist */,
+				CBF3CE6F1FF2568D00F4B6C0 /* Provider.swift */,
+				CBF3CE711FF256AC00F4B6C0 /* CellHandling.swift */,
+				CBF3CE731FF257FF00F4B6C0 /* MovieListTableCell.swift */,
+				CBF3CE751FF259B700F4B6C0 /* MovieListTableCell.xib */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -363,6 +375,7 @@
 				CBB569701EA4D6A2005F7BA7 /* Assets.xcassets in Resources */,
 				CBB5696E1EA4D6A2005F7BA7 /* MovieList.storyboard in Resources */,
 				CB65D7AF1F8A131F00457386 /* SelectableLabelCell.xib in Resources */,
+				CBF3CE761FF259B700F4B6C0 /* MovieListTableCell.xib in Resources */,
 				CBAE5E861F3486EA0055366F /* EditItem.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -447,9 +460,11 @@
 				CBED942D1F6BFB0E00FA4045 /* EditItemController.swift in Sources */,
 				CBED94301F6BFB0E00FA4045 /* ItemDetailsController.swift in Sources */,
 				CB65D7AB1F8A107F00457386 /* TabularSheetController.swift in Sources */,
+				CBF3CE741FF257FF00F4B6C0 /* MovieListTableCell.swift in Sources */,
 				CBED942E1F6BFB0E00FA4045 /* TableViewSortingStrategy.swift in Sources */,
 				CBED94271F6BF80E00FA4045 /* PopularMoviesViewController.swift in Sources */,
 				816BF78402385BCBF434A807 /* FileBasedMediaLibrary.swift in Sources */,
+				CBF3CE721FF256AC00F4B6C0 /* CellHandling.swift in Sources */,
 				816BFFC1026534FCA7432523 /* DataFormat.swift in Sources */,
 				816BFA30AFFD31F1A07CD0B6 /* KeyedArchivalFormat.swift in Sources */,
 				CBED942A1F6BF80E00FA4045 /* AddItemViewController.swift in Sources */,
@@ -466,6 +481,7 @@
 				CBED94291F6BF80E00FA4045 /* SearchTMDBViewController.swift in Sources */,
 				816BF8AD896393450AFBB602 /* ImportAction.swift in Sources */,
 				CBF3CE681FF23E9700F4B6C0 /* EditItemCoordinator.swift in Sources */,
+				CBF3CE701FF2568D00F4B6C0 /* Provider.swift in Sources */,
 				CB65D7AD1F8A108A00457386 /* ArrayTableController.swift in Sources */,
 				816BF7B198C9B80F6C055AF0 /* MulticastDelegate.swift in Sources */,
 				CBF3CE661FF23A4300F4B6C0 /* DataUpdateCoordinator.swift in Sources */,
