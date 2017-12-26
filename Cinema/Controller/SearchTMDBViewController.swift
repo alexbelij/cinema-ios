@@ -7,7 +7,8 @@ class SearchTMDBViewController: UIViewController {
   private let searchQueue = DispatchQueue(label: "de.martinbauer.cinema.tmdb-search", qos: .userInitiated)
   private var currentSearch: DispatchWorkItem?
   private var searchController: UISearchController!
-  private var popularMoviesVC: PopularMoviesViewController!
+  @IBOutlet private weak var containerView: UIView!
+  private var popularMoviesController: PopularMoviesController!
 
   private var searchResultsController: SearchResultsController!
 
@@ -30,13 +31,22 @@ class SearchTMDBViewController: UIViewController {
     self.navigationItem.searchController = searchController
     self.navigationItem.hidesSearchBarWhenScrolling = false
     title = NSLocalizedString("addItem.title", comment: "")
+    popularMoviesController = UIStoryboard.popularMovies.instantiate(PopularMoviesController.self)
+    let movies = movieDb.popularMovies().lazy.filter { !self.library.contains(id: $0.id) }
+    popularMoviesController.movieIterator = AnyIterator(movies.makeIterator())
+    popularMoviesController.posterProvider = MovieDbPosterProvider(movieDb)
+    popularMoviesController.delegate = self
+    addChildViewController(popularMoviesController)
+    popularMoviesController.view.frame = containerView.bounds
+    containerView.addSubview(popularMoviesController.view)
+    popularMoviesController.didMove(toParentViewController: self)
   }
 
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     if let removedItem = self.removedItem {
       DispatchQueue.main.async {
-        self.popularMoviesVC.removeItem(removedItem)
+        self.popularMoviesController.removeItem(removedItem)
       }
       self.removedItem = nil
     }
@@ -45,17 +55,6 @@ class SearchTMDBViewController: UIViewController {
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
     searchController.isActive = false
-  }
-
-  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    switch segue.destination {
-      case let popularMoviesVC as PopularMoviesViewController:
-        self.popularMoviesVC = popularMoviesVC
-        popularMoviesVC.library = library
-        popularMoviesVC.movieDb = movieDb
-        popularMoviesVC.selectionDelegate = self
-      default: fatalError("Unexpected segue: '\(self)' -> '\(segue.destination)'")
-    }
   }
 }
 
@@ -90,6 +89,10 @@ extension SearchTMDBViewController: UISearchResultsUpdating, UISearchControllerD
 
 extension SearchTMDBViewController: SearchResultsSelectionDelegate {
   func didSelectSearchResult(_ searchResult: PartialMediaItem) {
+    showAddAlert(for: searchResult)
+  }
+
+  private func showAddAlert(for searchResult: PartialMediaItem) {
     let alert = UIAlertController(title: NSLocalizedString("addItem.alert.howToAdd.title", comment: ""),
                                   message: nil,
                                   preferredStyle: .alert)
@@ -107,5 +110,11 @@ extension SearchTMDBViewController: SearchResultsSelectionDelegate {
     let controller = UIStoryboard.addItem.instantiate(AddItemViewController.self)
     controller.add(item: searchResult, as: diskType, to: self.library, movieDb: self.movieDb)
     self.present(controller, animated: true)
+  }
+}
+
+extension SearchTMDBViewController: PopularMoviesControllerDelegate {
+  func popularMoviesController(_ controller: PopularMoviesController, didSelect movie: PartialMediaItem) {
+    self.showAddAlert(for: movie)
   }
 }

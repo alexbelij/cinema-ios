@@ -63,6 +63,7 @@
 		CBF3CE741FF257FF00F4B6C0 /* MovieListTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE731FF257FF00F4B6C0 /* MovieListTableCell.swift */; };
 		CBF3CE761FF259B700F4B6C0 /* MovieListTableCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CBF3CE751FF259B700F4B6C0 /* MovieListTableCell.xib */; };
 		CBF3CE781FF25AA600F4B6C0 /* MovieListSearchResultsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE771FF25AA600F4B6C0 /* MovieListSearchResultsController.swift */; };
+		CBF3CE7A1FF2985C00F4B6C0 /* PopularMovies.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBF3CE791FF2985C00F4B6C0 /* PopularMovies.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -128,6 +129,7 @@
 		CBF3CE731FF257FF00F4B6C0 /* MovieListTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieListTableCell.swift; sourceTree = "<group>"; };
 		CBF3CE751FF259B700F4B6C0 /* MovieListTableCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MovieListTableCell.xib; sourceTree = "<group>"; };
 		CBF3CE771FF25AA600F4B6C0 /* MovieListSearchResultsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieListSearchResultsController.swift; sourceTree = "<group>"; };
+		CBF3CE791FF2985C00F4B6C0 /* PopularMovies.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = PopularMovies.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -246,6 +248,7 @@
 				CBB5696C1EA4D6A2005F7BA7 /* MovieList.storyboard */,
 				CBAE5E891F3493EA0055366F /* AddItem.storyboard */,
 				CBAE5E841F3486EA0055366F /* EditItem.storyboard */,
+				CBF3CE791FF2985C00F4B6C0 /* PopularMovies.storyboard */,
 				CB1A7B201F5C07B60091F993 /* Maintenance.storyboard */,
 				CBB5696F1EA4D6A2005F7BA7 /* Assets.xcassets */,
 				CB9484C31EFA643500D9651E /* Localizable.strings */,
@@ -378,6 +381,7 @@
 				CBB569701EA4D6A2005F7BA7 /* Assets.xcassets in Resources */,
 				CBB5696E1EA4D6A2005F7BA7 /* MovieList.storyboard in Resources */,
 				CB65D7AF1F8A131F00457386 /* SelectableLabelCell.xib in Resources */,
+				CBF3CE7A1FF2985C00F4B6C0 /* PopularMovies.storyboard in Resources */,
 				CBF3CE761FF259B700F4B6C0 /* MovieListTableCell.xib in Resources */,
 				CBAE5E861F3486EA0055366F /* EditItem.storyboard in Resources */,
 			);
