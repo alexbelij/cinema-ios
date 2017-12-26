@@ -2,54 +2,66 @@ import Dispatch
 import Foundation
 import UIKit
 
+protocol SearchTmdbControllerDelegate: class {
+  func searchTmdbController(_ controller: SearchTmdbController,
+                            searchResultsFor searchText: String) -> [SearchTmdbController.SearchResult]
+  func searchTmdbController(_ controller: SearchTmdbController,
+                            didSelectSearchResult searchResult: SearchTmdbController.SearchResult)
+}
+
 class SearchTmdbController: UIViewController {
+  struct SearchResult {
+    let item: PartialMediaItem
+    let hasBeenAddedToLibrary: Bool
+
+    init(item: PartialMediaItem, hasBeenAddedToLibrary: Bool) {
+      self.item = item
+      self.hasBeenAddedToLibrary = hasBeenAddedToLibrary
+    }
+  }
 
   private let searchQueue = DispatchQueue(label: "de.martinbauer.cinema.tmdb-search", qos: .userInitiated)
   private var currentSearch: DispatchWorkItem?
-  private var searchController: UISearchController!
-  @IBOutlet private weak var containerView: UIView!
-  private var popularMoviesController: PopularMoviesController!
-
-  private var searchResultsController: SearchTmdbSearchResultsController!
-
-  var library: MediaLibrary!
-  var movieDb: MovieDbClient!
-
-  private var removedItem: PartialMediaItem?
-
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    searchResultsController = storyboard!.instantiate(SearchTmdbSearchResultsController.self)
-    searchResultsController.delegate = self
-    searchController = UISearchController(searchResultsController: searchResultsController)
+  private lazy var searchController: UISearchController = {
+    let resultsController = UIStoryboard.searchTmdb.instantiate(SearchTmdbSearchResultsController.self)
+    resultsController.selectionHandler = { [weak self] searchResult in
+      guard let `self` = self else { return }
+      self.delegate?.searchTmdbController(self, didSelectSearchResult: searchResult)
+    }
+    let searchController = UISearchController(searchResultsController: resultsController)
     searchController.delegate = self
     searchController.searchResultsUpdater = self
     searchController.hidesNavigationBarDuringPresentation = false
-    searchController.dimsBackgroundDuringPresentation = false
-    definesPresentationContext = true
     searchController.searchBar.placeholder = NSLocalizedString("addItem.search.placeholder", comment: "")
-    self.navigationItem.searchController = searchController
-    self.navigationItem.hidesSearchBarWhenScrolling = false
-    title = NSLocalizedString("addItem.title", comment: "")
-    popularMoviesController = UIStoryboard.popularMovies.instantiate(PopularMoviesController.self)
-    let movies = movieDb.popularMovies().lazy.filter { !self.library.contains(id: $0.id) }
-    popularMoviesController.movieIterator = AnyIterator(movies.makeIterator())
-    popularMoviesController.posterProvider = MovieDbPosterProvider(movieDb)
-    popularMoviesController.delegate = self
-    addChildViewController(popularMoviesController)
-    popularMoviesController.view.frame = containerView.bounds
-    containerView.addSubview(popularMoviesController.view)
-    popularMoviesController.didMove(toParentViewController: self)
-  }
-
-  override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-    if let removedItem = self.removedItem {
-      DispatchQueue.main.async {
-        self.popularMoviesController.removeItem(removedItem)
-      }
-      self.removedItem = nil
+    return searchController
+  }()
+  weak var delegate: SearchTmdbControllerDelegate?
+  var additionalViewController: UIViewController? {
+    get {
+      return childViewControllers.first
     }
+    set {
+      loadViewIfNeeded()
+      if let child = newValue {
+        addChildViewController(child)
+        child.view.frame = containerView.bounds
+        containerView.addSubview(child.view)
+        child.didMove(toParentViewController: self)
+      } else if let child = childViewControllers.first {
+        child.willMove(toParentViewController: nil)
+        child.view.removeFromSuperview()
+        child.removeFromParentViewController()
+      }
+    }
+  }
+  @IBOutlet private weak var containerView: UIView!
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    definesPresentationContext = true
+    navigationItem.searchController = searchController
+    navigationItem.hidesSearchBarWhenScrolling = false
+    title = NSLocalizedString("addItem.title", comment: "")
   }
 
   override func viewWillDisappear(_ animated: Bool) {
@@ -59,94 +71,25 @@ class SearchTmdbController: UIViewController {
 }
 
 extension SearchTmdbController: UISearchResultsUpdating, UISearchControllerDelegate {
-  func didPresentSearchController(_ searchController: UISearchController) {
-    searchController.searchBar.becomeFirstResponder()
-  }
-
   public func updateSearchResults(for searchController: UISearchController) {
+    guard searchController.isActive else { return }
+    guard let resultsController = searchController.searchResultsController as? SearchTmdbSearchResultsController else {
+      preconditionFailure("unexpected SearchResultsController class")
+    }
     let searchText = searchController.searchBar.text!
     if !searchText.isEmpty {
-      DispatchQueue.main.async {
-        if let previousSearch = self.currentSearch {
-          previousSearch.cancel()
-        }
-        self.currentSearch = DispatchWorkItem {
-          let searchResults = self.movieDb.searchMovies(searchText: searchText).map { movie in
-            SearchTmdbSearchResultsController.SearchResult(item: movie,
-                                                           hasBeenAddedToLibrary: self.library.contains(id: movie.id))
-          }
-          self.searchResultsController.searchText = searchText
-          self.searchResultsController.searchResults = searchResults
-          DispatchQueue.main.sync {
-            self.currentSearch = nil
-          }
-        }
-        self.searchQueue.async(execute: self.currentSearch!)
+      if let previousSearch = self.currentSearch {
+        previousSearch.cancel()
       }
-    }
-  }
-}
-
-extension SearchTmdbController: SearchResultsSelectionDelegate {
-  func didSelectSearchResult(_ searchResult: PartialMediaItem) {
-    showAddAlert(for: searchResult)
-  }
-
-  private func showAddAlert(for item: PartialMediaItem) {
-    let alert = UIAlertController(title: NSLocalizedString("addItem.alert.howToAdd.title", comment: ""),
-                                  message: nil,
-                                  preferredStyle: .alert)
-    for diskType in [DiskType.dvd, .bluRay] {
-      alert.addAction(UIAlertAction(title: diskType.localizedName, style: .default) { _ in
-        self.showLibraryUpdateController(for: item, diskType: diskType)
-      })
-    }
-    alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
-    present(alert, animated: true)
-  }
-
-  private func showLibraryUpdateController(for item: PartialMediaItem,
-                                           diskType: DiskType) {
-    let libraryUpdateController = UIStoryboard.addItem.instantiate(LibraryUpdateController.self)
-    DispatchQueue.global(qos: .userInitiated).async {
-      if let poster = self.movieDb.poster(for: item.id, size: PosterSize(minWidth: 185)) {
-        DispatchQueue.main.async {
-          libraryUpdateController.poster = poster
+      self.currentSearch = DispatchWorkItem {
+        let searchResults = self.delegate?.searchTmdbController(self, searchResultsFor: searchText) ?? []
+        DispatchQueue.main.sync {
+          resultsController.searchText = searchText
+          resultsController.searchResults = searchResults
+          self.currentSearch = nil
         }
       }
+      self.searchQueue.async(execute: self.currentSearch!)
     }
-    present(libraryUpdateController, animated: true)
-    DispatchQueue.global(qos: .userInitiated).async {
-      let fullItem = MediaItem(id: item.id,
-                               title: item.title,
-                               runtime: self.movieDb.runtime(for: item.id),
-                               releaseDate: item.releaseDate,
-                               diskType: diskType,
-                               genreIds: self.movieDb.genreIds(for: item.id))
-      do {
-        try self.library.add(fullItem)
-        DispatchQueue.main.async {
-          libraryUpdateController.endUpdate(result: .success(addedItemTitle: item.title))
-          DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
-            libraryUpdateController.dismiss(animated: true) {
-              self.popularMoviesController.removeItem(item)
-            }
-          }
-        }
-      } catch let error {
-        DispatchQueue.main.async {
-          libraryUpdateController.endUpdate(result: .failure(error))
-          DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
-            libraryUpdateController.dismiss(animated: true)
-          }
-        }
-      }
-    }
-  }
-}
-
-extension SearchTmdbController: PopularMoviesControllerDelegate {
-  func popularMoviesController(_ controller: PopularMoviesController, didSelect movie: PartialMediaItem) {
-    self.showAddAlert(for: movie)
   }
 }

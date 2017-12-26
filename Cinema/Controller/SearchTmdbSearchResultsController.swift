@@ -1,38 +1,32 @@
-import Dispatch
 import UIKit
 
 class SearchTmdbSearchResultsController: UIViewController {
-
   @IBOutlet private weak var tableView: UITableView!
   private lazy var emptyView = GenericEmptyView()
   private var previousTableViewInsets: UIEdgeInsets?
 
   var searchText: String = "" {
     didSet {
-      DispatchQueue.main.async {
-        self.emptyView.configure(
-            accessory: .image(#imageLiteral(resourceName: "EmptySearchResults")),
-            description: .basic(.localizedStringWithFormat(NSLocalizedString("search.results.empty", comment: ""),
-                                                           self.searchText))
-        )
-      }
+      self.emptyView.configure(
+          accessory: .image(#imageLiteral(resourceName: "EmptySearchResults")),
+          description: .basic(.localizedStringWithFormat(NSLocalizedString("search.results.empty", comment: ""),
+                                                         self.searchText))
+      )
     }
   }
-  var searchResults = [SearchResult]() {
+  var searchResults = [SearchTmdbController.SearchResult]() {
     didSet {
-      DispatchQueue.main.async {
-        if self.searchResults.isEmpty {
-          self.tableView.backgroundView = self.emptyView
-          self.tableView.separatorStyle = .none
-        } else {
-          self.tableView.backgroundView = nil
-          self.tableView.separatorStyle = .singleLine
-        }
-        self.tableView.reloadData()
+      if self.searchResults.isEmpty {
+        self.tableView.backgroundView = self.emptyView
+        self.tableView.separatorStyle = .none
+      } else {
+        self.tableView.backgroundView = nil
+        self.tableView.separatorStyle = .singleLine
       }
+      self.tableView.reloadData()
     }
   }
-  weak var delegate: SearchResultsSelectionDelegate?
+  var selectionHandler: ((SearchTmdbController.SearchResult) -> Void)?
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -47,16 +41,6 @@ class SearchTmdbSearchResultsController: UIViewController {
                                    selector: #selector(keyboardWillHide(_:)),
                                    name: .UIKeyboardWillHide,
                                    object: nil)
-  }
-
-  struct SearchResult {
-    let item: PartialMediaItem
-    let hasBeenAddedToLibrary: Bool
-
-    init(item: PartialMediaItem, hasBeenAddedToLibrary: Bool) {
-      self.item = item
-      self.hasBeenAddedToLibrary = hasBeenAddedToLibrary
-    }
   }
 }
 
@@ -88,7 +72,7 @@ extension SearchTmdbSearchResultsController: UITableViewDataSource, UITableViewD
   }
 
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    delegate?.didSelectSearchResult(searchResults[indexPath.row].item)
+    selectionHandler?(searchResults[indexPath.row])
     tableView.deselectRow(at: indexPath, animated: true)
   }
 }
@@ -120,10 +104,6 @@ extension SearchTmdbSearchResultsController {
     }
     self.previousTableViewInsets = nil
   }
-}
-
-protocol SearchResultsSelectionDelegate: class {
-  func didSelectSearchResult(_ searchResult: PartialMediaItem)
 }
 
 class SearchItemCell: UITableViewCell {
