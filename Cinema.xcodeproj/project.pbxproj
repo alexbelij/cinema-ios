@@ -159,9 +159,9 @@
 		CBB569651EA4D6A2005F7BA7 /* Cinema */ = {
 			isa = PBXGroup;
 			children = (
-				CBED94131F6BF62600FA4045 /* Model */,
-				CBED94251F6BF70900FA4045 /* View */,
 				CBED94321F6BFB9900FA4045 /* Controller */,
+				CBED94251F6BF70900FA4045 /* View */,
+				CBED94131F6BF62600FA4045 /* Model */,
 				816BFC4887FE2604E5FB8233 /* Utils.swift */,
 				CBB569741EA4D6A2005F7BA7 /* Info.plist */,
 			);
@@ -172,8 +172,8 @@
 			isa = PBXGroup;
 			children = (
 				CBED94151F6BF64800FA4045 /* Library */,
-				CBED94161F6BF66200FA4045 /* Maintenance */,
 				CBED94141F6BF63500FA4045 /* MovieDb */,
+				CBED94161F6BF66200FA4045 /* Maintenance */,
 				816BF1736861B92F3C805B3D /* MulticastDelegate.swift */,
 			);
 			path = Model;
