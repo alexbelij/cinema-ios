@@ -194,61 +194,92 @@ extension MovieListController {
 }
 
 private class SectioningWrapper {
-  private var allItems = [MovieListItem]()
-  private var sectionItems = [String: [MovieListItem]]()
-  private var internalSectionIndexTitles = [String]()
-  private var visibleSectionIndexTitles = [String]()
-  private var sectionTitles = [String]()
+  private struct Section {
+    let indexTitle: String?
+    let title: String?
+    let rows: [MovieListItem]?
+
+    // standard section
+    init(indexTitle: String, title: String, rows: [MovieListItem]) {
+      self.indexTitle = indexTitle
+      self.title = title
+      self.rows = rows
+    }
+
+    // section index is shown, but no corresponding data
+    init(indexTitle: String) {
+      self.indexTitle = indexTitle
+      self.title = nil
+      self.rows = nil
+    }
+
+    // appended at the end
+    init(title: String, rows: [MovieListItem]) {
+      self.indexTitle = nil
+      self.title = title
+      self.rows = rows
+    }
+  }
+
+  private let sections: [Section]
 
   init(_ items: [MediaItem], sortingStrategy: SectionSortingStrategy) {
-    allItems = items.sorted(by: SortDescriptor.title.makeTableViewStrategy().itemSorting)
-                    .map { MovieListItem(movie: $0) }
-    sectionItems = [String: [MovieListItem]]()
-    for item in allItems {
-      let sectionIndexTitle = sortingStrategy.sectionIndexTitle(for: item.movie)
-      if sectionItems[sectionIndexTitle] == nil {
-        sectionItems[sectionIndexTitle] = [MovieListItem]()
+    var sections = [Section]()
+    let sectionData: [String: [MediaItem]] = Dictionary(grouping: items) { sortingStrategy.sectionIndexTitle(for: $0) }
+    let existingSectionIndexTitles = Array(sectionData.keys).sorted(by: sortingStrategy.sectionIndexTitleSorting)
+    let refinedSectionIndexTitles = sortingStrategy.refineSectionIndexTitles(existingSectionIndexTitles)
+    for index in refinedSectionIndexTitles.startIndex..<refinedSectionIndexTitles.endIndex {
+      let indexTitle = refinedSectionIndexTitles[index]
+      if existingSectionIndexTitles.contains(indexTitle) {
+        sections.append(Section(indexTitle: indexTitle,
+                                title: sortingStrategy.sectionTitle(for: indexTitle),
+                                rows: sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
+                                                              .map { MovieListItem(movie: $0) }))
+      } else {
+        sections.append(Section(indexTitle: indexTitle))
       }
-      sectionItems[sectionIndexTitle]!.append(item)
     }
-    for key in sectionItems.keys {
-      sectionItems[key]!.sort { sortingStrategy.itemSorting(left: $0.movie, right: $1.movie) }
+    let additionalIndexTitles = Set(existingSectionIndexTitles).subtracting(Set(refinedSectionIndexTitles))
+    for indexTitle in additionalIndexTitles {
+      sections.append(Section(title: sortingStrategy.sectionTitle(for: indexTitle),
+                              rows: sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
+                                                            .map { MovieListItem(movie: $0) }))
     }
-    internalSectionIndexTitles = Array(sectionItems.keys)
-    internalSectionIndexTitles.sort(by: sortingStrategy.sectionIndexTitleSorting)
-    visibleSectionIndexTitles = sortingStrategy.refineSectionIndexTitles(internalSectionIndexTitles)
-    sectionTitles = internalSectionIndexTitles.map { sortingStrategy.sectionTitle(for: $0) }
+    self.sections = sections
   }
 
   func item(at indexPath: IndexPath) -> MovieListItem {
-    return sectionItems[internalSectionIndexTitles[indexPath.section]]![indexPath.row]
+    guard let item = sections[indexPath.section].rows?[indexPath.row] else {
+      fatalError("accessing invalid row \(indexPath.row) in section \(indexPath)")
+    }
+    return item
   }
 
   var numberOfSections: Int {
-    return internalSectionIndexTitles.count
+    return sections.count
   }
 
   func numberOfRowsInSection(_ section: Int) -> Int {
-    return sectionItems[internalSectionIndexTitles[section]]!.count
+    guard let rows = sections[section].rows else { return 0 }
+    return rows.count
   }
 
   func titleForHeaderInSection(_ section: Int) -> String? {
-    return sectionTitles[section]
+    guard let title = sections[section].title else { return nil }
+    return title
   }
 
   lazy var sectionIndexTitles: [String]? = {
-    guard !self.allItems.isEmpty else { return nil }
-    guard visibleSectionIndexTitles.count > 2 else {
-      return nil
-    }
-    return visibleSectionIndexTitles
+    let titles = sections.flatMap { $0.indexTitle }
+    return titles.isEmpty ? nil : titles
   }()
 
   func sectionForSectionIndexTitle(_ title: String, at index: Int) -> Int {
-    return internalSectionIndexTitles.index(of: title) ?? -1
+    return sections[index].rows == nil ? -1 : index
   }
 
   func filtered(by filter: (MediaItem) -> Bool) -> [MovieListItem] {
+    let allItems: [MovieListItem] = sections.flatMap { $0.rows ?? [] }
     return allItems.filter { filter($0.movie) }
   }
 }
