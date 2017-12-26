@@ -15,6 +15,7 @@
 "discard" = "Verwerfen";
 "edit.deleteMovie" = "Film löschen";
 "edit.noTitleAlert" = "Ein Film braucht einen Titel.";
+"edit.rejected.title" = "Hoppla!";
 "edit.sectionHeader.subtitle" = "Untertitel (optional)";
 "edit.sectionHeader.title" = "Titel";
 "error.genericError" = "Es ist ein unbekannter Fehler aufgetreten.";

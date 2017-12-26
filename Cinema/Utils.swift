@@ -142,3 +142,9 @@ extension UIColor {
   static let dimBackground = UIColor(red: 0, green: 0, blue: 0, alpha: 0.4)
   // swiftlint:enable object_literal
 }
+
+extension String {
+  var nilIfEmptyString: String? {
+    return self.isEmpty ? nil : self
+  }
+}

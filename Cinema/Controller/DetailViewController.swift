@@ -23,6 +23,8 @@ class DetailViewController: UIViewController {
   var library: MediaLibrary!
 
   private var popAfterDidAppear = false
+
+  private var editCoordinator: EditItemCoordinator?
 }
 
 // MARK: - View Controller Lifecycle
@@ -150,12 +152,51 @@ extension DetailViewController: MediaLibraryDelegate {
 
 extension DetailViewController {
   @IBAction private func presentEditViewController() {
-    // swiftlint:disable force_cast
-    let navController = UIStoryboard.editItem.instantiateInitialViewController() as! UINavigationController
-    let editVC = navController.topViewController as! EditItemController
-    // swiftlint:enable force_cast
-    editVC.item = detailItem
-    editVC.library = library
-    self.present(navController, animated: true)
+    guard let detailItem = self.detailItem else {
+      preconditionFailure("ItemDetailsCoordinator should present detail item")
+    }
+    editCoordinator = EditItemCoordinator(library: library, item: detailItem)
+    editCoordinator!.delegate = self
+    self.present(editCoordinator!.rootViewController, animated: true)
+  }
+}
+
+extension DetailViewController: EditItemCoordinatorDelegate {
+  func editItemCoordinator(_ coordinator: EditItemCoordinator,
+                           didFinishEditingWithResult editResult: EditItemCoordinator.EditResult) {
+    switch editResult {
+      case .edited:
+        coordinator.rootViewController.dismiss(animated: true)
+      case .deleted:
+        coordinator.rootViewController.dismiss(animated: true) {
+          self.navigationController!.popViewController(animated: true)
+        }
+      case .canceled:
+        coordinator.rootViewController.dismiss(animated: true)
+    }
+    self.editCoordinator = nil
+  }
+
+  func editItemCoordinator(_ coordinator: EditItemCoordinator, didFailWithError error: Error) {
+    switch error {
+      case MediaLibraryError.itemDoesNotExist:
+        guard let detailItem = self.detailItem else {
+          preconditionFailure("should only be called when presenting detail item")
+        }
+        fatalError("tried to edit item which is not in library: \(detailItem)")
+      default:
+        DispatchQueue.main.async {
+          let alert = UIAlertController(title: Utils.localizedErrorMessage(for: error),
+                                        message: nil,
+                                        preferredStyle: .alert)
+          alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
+          alert.addAction(UIAlertAction(title: NSLocalizedString("discard", comment: ""),
+                                        style: .destructive) { _ in
+            coordinator.rootViewController.dismiss(animated: true)
+            self.editCoordinator = nil
+          })
+          coordinator.rootViewController.present(alert, animated: true)
+        }
+    }
   }
 }

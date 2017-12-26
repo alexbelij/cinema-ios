@@ -1,14 +1,64 @@
+import Foundation
 import UIKit
 
+protocol EditItemControllerDelegate: class {
+  func editItemController(_ controller: EditItemController,
+                          shouldAcceptEdits edits: Set<EditItemController.Edit>) -> EditItemController.EditApproval
+  func editItemControllerDidCancelEditing(_ controller: EditItemController)
+  func editItemController(_ controller: EditItemController,
+                          didFinishEditingWithResult editResult: EditItemController.EditResult)
+}
+
 class EditItemController: UITableViewController {
+  weak var delegate: EditItemControllerDelegate?
 
-  var item: MediaItem!
-  var library: MediaLibrary!
-
+  var itemTitle: String = "" {
+    didSet {
+      self.loadViewIfNeeded()
+      self.titleTextField.text = itemTitle
+    }
+  }
   @IBOutlet private weak var titleTextField: UITextField!
+
+  var subtitle: String? {
+    didSet {
+      self.loadViewIfNeeded()
+      self.subtitleTextField.text = subtitle
+    }
+  }
   @IBOutlet private weak var subtitleTextField: UITextField!
+
   @IBOutlet private weak var deleteMovieButton: UIButton!
 
+  enum Edit: Equatable, Hashable {
+    case titleChange(String)
+    case subtitleChange(String?)
+
+    static func == (lhs: Edit, rhs: Edit) -> Bool {
+      switch (lhs, rhs) {
+        case let (.titleChange(title1), .titleChange(title2)): return title1 == title2
+        case let (.subtitleChange(subtitle1), .subtitleChange(subtitle2)): return subtitle1 == subtitle2
+        default: return false
+      }
+    }
+
+    var hashValue: Int {
+      switch self {
+        case .titleChange: return 0
+        case .subtitleChange: return 1
+      }
+    }
+  }
+
+  enum EditResult {
+    case edited(Set<Edit>)
+    case deleted
+  }
+
+  enum EditApproval {
+    case accepted
+    case rejected(reason: String)
+  }
 }
 
 // MARK: - View Controller Lifecycle
@@ -16,11 +66,17 @@ class EditItemController: UITableViewController {
 extension EditItemController {
   override func viewDidLoad() {
     super.viewDidLoad()
-    titleTextField.text = item.title
     titleTextField.delegate = self
-    subtitleTextField.text = item.subtitle
     subtitleTextField.delegate = self
     deleteMovieButton.setTitle(NSLocalizedString("edit.deleteMovie", comment: ""), for: .normal)
+
+    reassign(property: \EditItemController.itemTitle)
+    reassign(property: \EditItemController.subtitle)
+  }
+
+  private func reassign<Type>(property: ReferenceWritableKeyPath<EditItemController, Type>) {
+    let value = self[keyPath: property]
+    self[keyPath: property] = value
   }
 }
 
@@ -33,6 +89,23 @@ extension EditItemController {
       case 1: return NSLocalizedString("edit.sectionHeader.subtitle", comment: "")
       default: return nil
     }
+  }
+}
+
+// MARK: - Edit Management
+
+extension EditItemController {
+  private var allEdits: Set<Edit> {
+    var edits = [Edit]()
+    let newTitle = self.titleTextField.text ?? ""
+    if newTitle != itemTitle {
+      edits.append(.titleChange(newTitle))
+    }
+    let newSubtitle = self.subtitleTextField.text?.nilIfEmptyString
+    if newSubtitle != subtitle {
+      edits.append(.subtitleChange(newSubtitle))
+    }
+    return Set(edits)
   }
 }
 
@@ -49,95 +122,40 @@ extension EditItemController: UITextFieldDelegate {
   }
 }
 
-// MARK: - Edit Management
-
-extension EditItemController {
-  private func acceptEdits() {
-    if isValidEdit() {
-      guard titleTextField.text != item.title
-            || subtitleTextField.text != item.subtitle else {
-        self.dismiss(animated: true)
-        return
-      }
-
-      item.title = self.titleTextField.text!
-      var subtitle = self.subtitleTextField.text
-      if subtitle != nil && subtitle!.isEmpty {
-        subtitle = nil
-      }
-      item.subtitle = subtitle
-
-      DispatchQueue.global(qos: .userInitiated).async {
-        self.performLibraryUpdate { try self.library.update(self.item) }
-      }
-    } else {
-      let alertController = UIAlertController(title: NSLocalizedString("edit.noTitleAlert", comment: ""),
-                                              message: nil,
-                                              preferredStyle: .alert)
-      alertController.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default))
-      self.present(alertController, animated: true)
-    }
-  }
-
-  private func isValidEdit() -> Bool {
-    guard let newTitle = titleTextField.text else { return false }
-    return !newTitle.isEmpty
-  }
-
-  private func performLibraryUpdate(action: @escaping () throws -> Void) {
-    do {
-      try action()
-      DispatchQueue.main.async {
-        self.dismiss(animated: true)
-      }
-    } catch let error {
-      switch error {
-        case MediaLibraryError.itemDoesNotExist:
-          fatalError("updating non-existing item \(self.item)")
-        default:
-          DispatchQueue.main.async {
-            self.showCancelOrDiscardAlert(title: Utils.localizedErrorMessage(for: error))
-          }
-      }
-    }
-  }
-
-  private func showCancelOrDiscardAlert(title: String) {
-    let alertController = UIAlertController(title: title,
-                                            message: nil,
-                                            preferredStyle: .alert)
-    alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
-    alertController.addAction(UIAlertAction(title: NSLocalizedString("discard", comment: ""),
-                                            style: .destructive) { _ in
-      self.dismiss(animated: true)
-    })
-    self.present(alertController, animated: true)
-  }
-}
-
 // MARK: - User Actions
 
 extension EditItemController {
-  @IBAction func cancelButtonClicked() {
-    self.dismiss(animated: true)
+  @IBAction private func cancelButtonClicked() {
+    delegate?.editItemControllerDidCancelEditing(self)
   }
 
-  @IBAction func doneButtonClicked() {
-    self.acceptEdits()
-  }
-
-  @IBAction func deleteButtonClicked() {
-    let alertController = UIAlertController(title: nil,
-                                            message: nil,
-                                            preferredStyle: .actionSheet)
-    alertController.addAction(UIAlertAction(title: NSLocalizedString("edit.deleteMovie", comment: ""),
-                                            style: .destructive) { _ in
-      DispatchQueue.global(qos: .userInitiated).async {
-        self.performLibraryUpdate { try self.library.remove(self.item) }
+  @IBAction private func doneButtonClicked() {
+    guard let delegate = self.delegate else { return }
+    let edits = self.allEdits
+    if edits.isEmpty {
+      delegate.editItemControllerDidCancelEditing(self)
+    } else {
+      switch delegate.editItemController(self, shouldAcceptEdits: edits) {
+        case .accepted:
+          delegate.editItemController(self, didFinishEditingWithResult: .edited(edits))
+        case let .rejected(reason):
+          let alert = UIAlertController(title: NSLocalizedString("edit.rejected.title", comment: ""),
+                                        message: reason,
+                                        preferredStyle: .alert)
+          alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default))
+          self.present(alert, animated: true)
       }
+    }
+  }
+
+  @IBAction private func deleteButtonClicked() {
+    let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+    alert.addAction(UIAlertAction(title: NSLocalizedString("edit.deleteMovie", comment: ""),
+                                  style: .destructive) { _ in
+      self.delegate?.editItemController(self, didFinishEditingWithResult: .deleted)
     })
-    alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
-    self.present(alertController, animated: true)
+    alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
+    self.present(alert, animated: true)
   }
 
   @IBAction private func dismissKeyboard() {
