@@ -92,24 +92,56 @@ extension SearchTMDBViewController: SearchResultsSelectionDelegate {
     showAddAlert(for: searchResult)
   }
 
-  private func showAddAlert(for searchResult: PartialMediaItem) {
+  private func showAddAlert(for item: PartialMediaItem) {
     let alert = UIAlertController(title: NSLocalizedString("addItem.alert.howToAdd.title", comment: ""),
                                   message: nil,
                                   preferredStyle: .alert)
     for diskType in [DiskType.dvd, .bluRay] {
       alert.addAction(UIAlertAction(title: diskType.localizedName, style: .default) { _ in
-        self.removedItem = searchResult
-        self.add(searchResult, withDiskType: diskType)
+        self.showLibraryUpdateController(for: item, diskType: diskType)
       })
     }
     alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     present(alert, animated: true)
   }
 
-  private func add(_ searchResult: PartialMediaItem, withDiskType diskType: DiskType) {
-    let controller = UIStoryboard.addItem.instantiate(LibraryUpdateController.self)
-    controller.add(item: searchResult, as: diskType, to: self.library, movieDb: self.movieDb)
-    self.present(controller, animated: true)
+  private func showLibraryUpdateController(for item: PartialMediaItem,
+                                           diskType: DiskType) {
+    let libraryUpdateController = UIStoryboard.addItem.instantiate(LibraryUpdateController.self)
+    DispatchQueue.global(qos: .userInitiated).async {
+      if let poster = self.movieDb.poster(for: item.id, size: PosterSize(minWidth: 185)) {
+        DispatchQueue.main.async {
+          libraryUpdateController.poster = poster
+        }
+      }
+    }
+    present(libraryUpdateController, animated: true)
+    DispatchQueue.global(qos: .userInitiated).async {
+      let fullItem = MediaItem(id: item.id,
+                               title: item.title,
+                               runtime: self.movieDb.runtime(for: item.id),
+                               releaseDate: item.releaseDate,
+                               diskType: diskType,
+                               genreIds: self.movieDb.genreIds(for: item.id))
+      do {
+        try self.library.add(fullItem)
+        DispatchQueue.main.async {
+          libraryUpdateController.endUpdate(result: .success(addedItemTitle: item.title))
+          DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
+            libraryUpdateController.dismiss(animated: true) {
+              self.popularMoviesController.removeItem(item)
+            }
+          }
+        }
+      } catch let error {
+        DispatchQueue.main.async {
+          libraryUpdateController.endUpdate(result: .failure(error))
+          DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
+            libraryUpdateController.dismiss(animated: true)
+          }
+        }
+      }
+    }
   }
 }
 
