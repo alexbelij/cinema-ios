@@ -8,6 +8,13 @@ class GenericEmptyView: UIView {
     super.init(frame: frame)
   }
 
+  convenience init(accessory accessoryConfig: AccessoryConfig = .none,
+                   description textConfig: TextConfig = .none,
+                   action buttonConfig: ButtonConfig = .none) {
+    self.init()
+    self.configure(accessory: accessoryConfig, description: textConfig, action: buttonConfig)
+  }
+
   required init?(coder aDecoder: NSCoder) {
     fatalError("GenericEmptyView must be initialized using GenericEmptyView(frame:)")
   }

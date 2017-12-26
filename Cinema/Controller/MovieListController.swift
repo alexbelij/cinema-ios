@@ -61,14 +61,8 @@ class MovieListController: UITableViewController {
   private var sortDescriptor = SortDescriptor.title
   @IBOutlet private weak var sortButton: UIBarButtonItem!
 
-  private lazy var emptyLibraryView: GenericEmptyView = {
-    let view = GenericEmptyView()
-    view.configure(
-        accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
-        description: .basic(NSLocalizedString("library.empty", comment: ""))
-    )
-    return view
-  }()
+  private let emptyLibraryView = GenericEmptyView(accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
+                                                  description: .basic(NSLocalizedString("library.empty", comment: "")))
 }
 
 // MARK: View Controller Lifecycle
