@@ -1,7 +1,7 @@
 import Dispatch
 import UIKit
 
-class MasterViewController: UITableViewController {
+class MovieListController: UITableViewController {
 
   var library: MediaLibrary!
   var movieDb: MovieDbClient!
@@ -45,7 +45,7 @@ class MasterViewController: UITableViewController {
 
 // MARK: View Controller Lifecycle
 
-extension MasterViewController {
+extension MovieListController {
   override func viewDidLoad() {
     fetchLibraryData()
     super.viewDidLoad()
@@ -74,7 +74,7 @@ extension MasterViewController {
 
 // MARK: - Data Management
 
-extension MasterViewController {
+extension MovieListController {
   private func reloadLibraryData() {
     fetchLibraryData()
     DispatchQueue.main.async {
@@ -133,7 +133,7 @@ extension MasterViewController {
 
 // MARK: - Table View
 
-extension MasterViewController {
+extension MovieListController {
   override func numberOfSections(in tableView: UITableView) -> Int {
     return searchController.isActive ? 1 : sectionIndexTitles.count
   }
@@ -250,7 +250,7 @@ class MovieTableCell: UITableViewCell {
 
 // MARK: - Search
 
-extension MasterViewController: UISearchResultsUpdating, UISearchControllerDelegate {
+extension MovieListController: UISearchResultsUpdating, UISearchControllerDelegate {
   public func updateSearchResults(for searchController: UISearchController) {
     switch state {
       case .searching:
@@ -293,7 +293,7 @@ extension MasterViewController: UISearchResultsUpdating, UISearchControllerDeleg
 
 // MARK: - Library Events
 
-extension MasterViewController: MediaLibraryDelegate {
+extension MovieListController: MediaLibraryDelegate {
   func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
     self.reloadLibraryData()
   }
@@ -301,7 +301,7 @@ extension MasterViewController: MediaLibraryDelegate {
 
 // MARK: - User Actions
 
-extension MasterViewController {
+extension MovieListController {
   @IBAction func showSortDescriptorSheet() {
     let controller = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
     for descriptor in [SortDescriptor.title, .runtime, .year] {
@@ -321,7 +321,7 @@ extension MasterViewController {
   }
 }
 
-extension MasterViewController: ItemDetailsCoordinatorDelegate {
+extension MovieListController: ItemDetailsCoordinatorDelegate {
   func itemDetailsCoordinatorDidDismiss(_ coordinator: ItemDetailsCoordinator) {
     self.detailsCoordinator = nil
   }

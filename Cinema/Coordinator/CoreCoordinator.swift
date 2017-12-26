@@ -19,7 +19,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
     // swiftlint:disable force_cast
     let mainNavController = UIStoryboard.main.instantiateInitialViewController() as! UINavigationController
 
-    let masterViewController = mainNavController.topViewController! as! MasterViewController
+    let masterViewController = mainNavController.topViewController! as! MovieListController
     masterViewController.library = library
     masterViewController.movieDb = movieDb
 
