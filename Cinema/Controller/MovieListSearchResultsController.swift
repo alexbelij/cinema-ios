@@ -6,7 +6,7 @@ class MovieListSearchResultsController: UITableViewController {
       reload()
     }
   }
-  var items = [MediaItem]() {
+  var items = [MovieListItem]() {
     didSet {
       reload()
     }
@@ -75,6 +75,6 @@ extension MovieListSearchResultsController {
   }
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    self.onSelection?(items[indexPath.row])
+    self.onSelection?(items[indexPath.row].movie)
   }
 }

@@ -77,9 +77,9 @@ class StandardMediaItemCellConfig: MediaItemCellConfig {
     cellRegistering.registerNibCell(MovieListTableCell.self, bundle: nil)
   }
 
-  func cell(for item: MediaItem, cellDequeuing: CellDequeuing) -> UITableViewCell {
+  func cell(for item: MovieListItem, cellDequeuing: CellDequeuing) -> UITableViewCell {
     let cell = cellDequeuing.dequeueReusableCell(MovieListTableCell.self)
-    cell.configure(for: item, posterFetching: posterProvider)
+    cell.configure(for: item, posterProvider: posterProvider)
     return cell
   }
 }

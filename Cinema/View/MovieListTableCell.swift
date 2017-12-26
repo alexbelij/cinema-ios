@@ -13,23 +13,39 @@ class MovieListTableCell: UITableViewCell {
     posterView.layer.borderWidth = 0.5
   }
 
-  func configure(for item: MediaItem, posterFetching: PosterProvider) {
-    titleLabel!.text = item.fullTitle
-    runtimeLabel!.text = item.runtime == nil
+  func configure(for item: MovieListItem, posterProvider: PosterProvider) {
+    titleLabel!.text = item.movie.fullTitle
+    runtimeLabel!.text = item.movie.runtime == nil
         ? NSLocalizedString("details.missing.runtime", comment: "")
-        : Utils.formatDuration(item.runtime!)
-    posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
-    var workItem: DispatchWorkItem?
-    workItem = DispatchWorkItem {
-      guard !workItem!.isCancelled else { return }
-      if let poster = posterFetching.poster(for: item.id, size: PosterSize(minWidth: 46)) {
-        DispatchQueue.main.async {
-          self.posterView.image = poster
+        : Utils.formatDuration(item.movie.runtime!)
+    configurePoster(for: item, posterProvider: posterProvider)
+  }
+
+  private func configurePoster(for item: MovieListItem, posterProvider: PosterProvider) {
+    switch item.image {
+      case .unknown:
+        posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
+        var workItem: DispatchWorkItem?
+        workItem = DispatchWorkItem {
+          let poster = posterProvider.poster(for: item.movie.id, size: PosterSize(minWidth: 46))
+          DispatchQueue.main.async {
+            if let posterImage = poster {
+              item.image = .available(posterImage)
+            } else {
+              item.image = .unavailable
+            }
+            if !workItem!.isCancelled {
+              self.configurePoster(for: item, posterProvider: posterProvider)
+            }
+          }
         }
-      }
+        self.workItem = workItem
+        DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
+      case let .available(posterImage):
+        posterView.image = posterImage
+      case .unavailable:
+        posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
     }
-    self.workItem = workItem
-    DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
   }
 
   override func prepareForReuse() {

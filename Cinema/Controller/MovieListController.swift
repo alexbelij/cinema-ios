@@ -5,9 +5,25 @@ protocol MovieListControllerDelegate: class {
   func movieListController(_ controller: MovieListController, didSelect item: MediaItem)
 }
 
+class MovieListItem {
+  let movie: MediaItem
+  var image: Image
+
+  init(movie: MediaItem) {
+    self.movie = movie
+    self.image = .unknown
+  }
+
+  enum Image {
+    case unknown
+    case available(UIImage)
+    case unavailable
+  }
+}
+
 protocol MediaItemCellConfig {
   func registerCells(in cellRegistering: CellRegistering)
-  func cell(for item: MediaItem, cellDequeuing: CellDequeuing) -> UITableViewCell
+  func cell(for item: MovieListItem, cellDequeuing: CellDequeuing) -> UITableViewCell
 }
 
 class MovieListController: UITableViewController {
@@ -139,7 +155,7 @@ extension MovieListController {
   }
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    self.delegate?.movieListController(self, didSelect: sectioningWrapper.item(at: indexPath))
+    self.delegate?.movieListController(self, didSelect: sectioningWrapper.item(at: indexPath).movie)
   }
 }
 
@@ -155,7 +171,9 @@ extension MovieListController: UISearchResultsUpdating {
     let lowercasedSearchText = searchText.lowercased()
     resultsController.searchText = searchText
     resultsController.items = sectioningWrapper.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
-                                               .sorted { titleSortingStrategy.itemSorting(left: $0, right: $1) }
+                                               .sorted {
+                                                 titleSortingStrategy.itemSorting(left: $0.movie, right: $1.movie)
+                                               }
   }
 }
 
@@ -179,24 +197,25 @@ extension MovieListController {
 }
 
 private class SectioningWrapper {
-  private var allItems = [MediaItem]()
-  private var sectionItems = [String: [MediaItem]]()
+  private var allItems = [MovieListItem]()
+  private var sectionItems = [String: [MovieListItem]]()
   private var internalSectionIndexTitles = [String]()
   private var visibleSectionIndexTitles = [String]()
   private var sectionTitles = [String]()
 
   init(_ items: [MediaItem], sortingStrategy: SectionSortingStrategy) {
     allItems = items.sorted(by: SortDescriptor.title.makeTableViewStrategy().itemSorting)
-    sectionItems = [String: [MediaItem]]()
+                    .map { MovieListItem(movie: $0) }
+    sectionItems = [String: [MovieListItem]]()
     for item in allItems {
-      let sectionIndexTitle = sortingStrategy.sectionIndexTitle(for: item)
+      let sectionIndexTitle = sortingStrategy.sectionIndexTitle(for: item.movie)
       if sectionItems[sectionIndexTitle] == nil {
-        sectionItems[sectionIndexTitle] = [MediaItem]()
+        sectionItems[sectionIndexTitle] = [MovieListItem]()
       }
       sectionItems[sectionIndexTitle]!.append(item)
     }
     for key in sectionItems.keys {
-      sectionItems[key]!.sort(by: sortingStrategy.itemSorting)
+      sectionItems[key]!.sort { sortingStrategy.itemSorting(left: $0.movie, right: $1.movie) }
     }
     internalSectionIndexTitles = Array(sectionItems.keys)
     internalSectionIndexTitles.sort(by: sortingStrategy.sectionIndexTitleSorting)
@@ -204,7 +223,7 @@ private class SectioningWrapper {
     sectionTitles = internalSectionIndexTitles.map { sortingStrategy.sectionTitle(for: $0) }
   }
 
-  func item(at indexPath: IndexPath) -> MediaItem {
+  func item(at indexPath: IndexPath) -> MovieListItem {
     return sectionItems[internalSectionIndexTitles[indexPath.section]]![indexPath.row]
   }
 
@@ -232,7 +251,7 @@ private class SectioningWrapper {
     return internalSectionIndexTitles.index(of: title) ?? -1
   }
 
-  func filtered(by filter: (MediaItem) -> Bool) -> [MediaItem] {
-    return allItems.filter { filter($0) }
+  func filtered(by filter: (MediaItem) -> Bool) -> [MovieListItem] {
+    return allItems.filter { filter($0.movie) }
   }
 }
