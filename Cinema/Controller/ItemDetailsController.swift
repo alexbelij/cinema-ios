@@ -1,7 +1,6 @@
 import UIKit
 
 protocol ItemDetailsControllerDelegate: class {
-  func itemDetailsControllerDidTapEdit(_ controller: ItemDetailsController)
   func itemDetailsControllerDidDismiss(_ controller: ItemDetailsController)
 }
 
@@ -160,13 +159,5 @@ extension ItemDetailsController {
     if isMovingFromParentViewController {
       self.delegate?.itemDetailsControllerDidDismiss(self)
     }
-  }
-}
-
-// MARK: - User Action
-
-extension ItemDetailsController {
-  @IBAction private func editButtonTapped() {
-    self.delegate?.itemDetailsControllerDidTapEdit(self)
   }
 }

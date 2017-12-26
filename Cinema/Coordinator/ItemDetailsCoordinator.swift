@@ -6,8 +6,11 @@ protocol ItemDetailsCoordinatorDelegate: class {
   func itemDetailsCoordinatorDidDismiss(_ coordinator: ItemDetailsCoordinator)
 }
 
-class ItemDetailsCoordinator: AutoPresentableCoordinator {
+class ItemDetailsCoordinator: CustomPresentableCoordinator {
   // coordinator stuff
+  var rootViewController: UIViewController {
+    return itemDetailsController
+  }
   weak var delegate: ItemDetailsCoordinatorDelegate?
 
   // other properties
@@ -16,17 +19,9 @@ class ItemDetailsCoordinator: AutoPresentableCoordinator {
   private(set) var detailItem: MediaItem
 
   // managed controller
-  private let navigationController: UINavigationController
   private var itemDetailsController: ItemDetailsController
 
-  // child coordinator
-  private var editItemCoordinator: EditItemCoordinator?
-
-  init(navigationController: UINavigationController,
-       library: MediaLibrary,
-       movieDb: MovieDbClient,
-       detailItem: MediaItem) {
-    self.navigationController = navigationController
+  init(library: MediaLibrary, movieDb: MovieDbClient, detailItem: MediaItem) {
     self.library = library
     self.movieDb = movieDb
     self.detailItem = detailItem
@@ -35,10 +30,6 @@ class ItemDetailsCoordinator: AutoPresentableCoordinator {
     itemDetailsController.delegate = self
     configure(for: self.detailItem, resetRemoteProperties: true)
     fetchRemoteData(for: self.detailItem.id)
-  }
-
-  func presentRootViewController() {
-    navigationController.pushViewController(itemDetailsController, animated: true)
   }
 }
 
@@ -113,52 +104,7 @@ extension ItemDetailsCoordinator {
 // MARK: - ItemDetailsControllerDelegate
 
 extension ItemDetailsCoordinator: ItemDetailsControllerDelegate {
-  func itemDetailsControllerDidTapEdit(_ controller: ItemDetailsController) {
-    editItemCoordinator = EditItemCoordinator(library: library, item: detailItem)
-    editItemCoordinator!.delegate = self
-    self.navigationController.present(editItemCoordinator!.rootViewController, animated: true)
-  }
-
   func itemDetailsControllerDidDismiss(_ controller: ItemDetailsController) {
     self.delegate?.itemDetailsCoordinatorDidDismiss(self)
-  }
-}
-
-extension ItemDetailsCoordinator: EditItemCoordinatorDelegate {
-  func editItemCoordinator(_ coordinator: EditItemCoordinator,
-                           didFinishEditingWithResult editResult: EditItemCoordinator.EditResult) {
-    switch editResult {
-      case let .edited(editedItem):
-        updateNonRemoteProperties(with: editedItem)
-        coordinator.rootViewController.dismiss(animated: true)
-      case .deleted:
-        coordinator.rootViewController.dismiss(animated: true) {
-          self.navigationController.popViewController(animated: true)
-          self.delegate?.itemDetailsCoordinatorDidDismiss(self)
-        }
-      case .canceled:
-        coordinator.rootViewController.dismiss(animated: true)
-    }
-    self.editItemCoordinator = nil
-  }
-
-  func editItemCoordinator(_ coordinator: EditItemCoordinator, didFailWithError error: Error) {
-    switch error {
-      case MediaLibraryError.itemDoesNotExist:
-        fatalError("tried to edit item which is not in library: \(detailItem)")
-      default:
-        DispatchQueue.main.async {
-          let alert = UIAlertController(title: Utils.localizedErrorMessage(for: error),
-                                        message: nil,
-                                        preferredStyle: .alert)
-          alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
-          alert.addAction(UIAlertAction(title: NSLocalizedString("discard", comment: ""),
-                                        style: .destructive) { _ in
-            coordinator.rootViewController.dismiss(animated: true)
-            self.editItemCoordinator = nil
-          })
-          coordinator.rootViewController.present(alert, animated: true)
-        }
-    }
   }
 }

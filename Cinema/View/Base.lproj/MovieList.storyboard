@@ -204,14 +204,6 @@
                         <viewLayoutGuide key="safeArea" id="22T-kn-pVr"/>
                     </view>
                     <toolbarItems/>
-                    <navigationItem key="navigationItem" id="mOI-FS-AaM">
-                        <barButtonItem key="rightBarButtonItem" systemItem="edit" id="bBS-e7-XCY">
-                            <connections>
-                                <action selector="editButtonTapped" destination="JEX-9P-axG" id="NmT-cg-fvk"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
-                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <connections>
                         <outlet property="certificationLabel" destination="1oE-tC-Pti" id="5qY-AG-Xbf"/>
                         <outlet property="diskLabel" destination="lu0-Yv-0Bi" id="3cW-0q-2wX"/>
