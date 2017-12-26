@@ -37,9 +37,7 @@ class LibraryContentCoordinator: CustomPresentableCoordinator {
 
 extension LibraryContentCoordinator: MovieListControllerDelegate {
   func movieListController(_ controller: MovieListController, didSelect item: MediaItem) {
-    itemDetailsCoordinator = ItemDetailsCoordinator(library: library,
-                                                    movieDb: movieDb,
-                                                    detailItem: item)
+    itemDetailsCoordinator = ItemDetailsCoordinator(movieDb: movieDb, detailItem: item)
     itemDetailsCoordinator!.delegate = self
     let editButton = UIBarButtonItem(barButtonSystemItem: .edit,
                                      target: self,

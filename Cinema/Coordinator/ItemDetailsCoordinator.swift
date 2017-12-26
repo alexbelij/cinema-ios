@@ -14,15 +14,13 @@ class ItemDetailsCoordinator: CustomPresentableCoordinator {
   weak var delegate: ItemDetailsCoordinatorDelegate?
 
   // other properties
-  private let library: MediaLibrary
   private let movieDb: MovieDbClient
   private(set) var detailItem: MediaItem
 
   // managed controller
   private var itemDetailsController: ItemDetailsController
 
-  init(library: MediaLibrary, movieDb: MovieDbClient, detailItem: MediaItem) {
-    self.library = library
+  init(movieDb: MovieDbClient, detailItem: MediaItem) {
     self.movieDb = movieDb
     self.detailItem = detailItem
 
