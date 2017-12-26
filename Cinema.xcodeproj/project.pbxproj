@@ -62,6 +62,7 @@
 		CBF3CE721FF256AC00F4B6C0 /* CellHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE711FF256AC00F4B6C0 /* CellHandling.swift */; };
 		CBF3CE741FF257FF00F4B6C0 /* MovieListTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE731FF257FF00F4B6C0 /* MovieListTableCell.swift */; };
 		CBF3CE761FF259B700F4B6C0 /* MovieListTableCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CBF3CE751FF259B700F4B6C0 /* MovieListTableCell.xib */; };
+		CBF3CE781FF25AA600F4B6C0 /* MovieListSearchResultsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE771FF25AA600F4B6C0 /* MovieListSearchResultsController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -126,6 +127,7 @@
 		CBF3CE711FF256AC00F4B6C0 /* CellHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellHandling.swift; sourceTree = "<group>"; };
 		CBF3CE731FF257FF00F4B6C0 /* MovieListTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieListTableCell.swift; sourceTree = "<group>"; };
 		CBF3CE751FF259B700F4B6C0 /* MovieListTableCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MovieListTableCell.xib; sourceTree = "<group>"; };
+		CBF3CE771FF25AA600F4B6C0 /* MovieListSearchResultsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieListSearchResultsController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -268,6 +270,7 @@
 				CBED941F1F6BF6C200FA4045 /* MovieListController.swift */,
 				CBED94241F6BF6C200FA4045 /* TableViewSortingStrategy.swift */,
 				CBED94231F6BF6C200FA4045 /* SortDescriptor.swift */,
+				CBF3CE771FF25AA600F4B6C0 /* MovieListSearchResultsController.swift */,
 				CBED941B1F6BF6C200FA4045 /* ItemDetailsController.swift */,
 				CBED941C1F6BF6C200FA4045 /* EditItemController.swift */,
 				CBED94211F6BF6C200FA4045 /* SearchResultsViewController.swift */,
@@ -466,6 +469,7 @@
 				816BF78402385BCBF434A807 /* FileBasedMediaLibrary.swift in Sources */,
 				CBF3CE721FF256AC00F4B6C0 /* CellHandling.swift in Sources */,
 				816BFFC1026534FCA7432523 /* DataFormat.swift in Sources */,
+				CBF3CE781FF25AA600F4B6C0 /* MovieListSearchResultsController.swift in Sources */,
 				816BFA30AFFD31F1A07CD0B6 /* KeyedArchivalFormat.swift in Sources */,
 				CBED942A1F6BF80E00FA4045 /* AddItemViewController.swift in Sources */,
 				816BF52DDE5A95DE54EE1FEF /* JSONFormat.swift in Sources */,

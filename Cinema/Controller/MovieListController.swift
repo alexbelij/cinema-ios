@@ -23,14 +23,25 @@ class MovieListController: UITableViewController {
   }
 
   private var allItems = [MediaItem]()
-  private var filteredMediaItems = [MediaItem]()
 
   private var sectionItems = [String: [MediaItem]]()
   private var sectionIndexTitles = [String]()
   private var visibleSectionIndexTitles = [String]()
   private var sectionTitles = [String]()
 
-  private let searchController: UISearchController = UISearchController(searchResultsController: nil)
+  private lazy var searchController: UISearchController = {
+    let resultsController = MovieListSearchResultsController()
+    resultsController.onSelection = { [weak self] selectedItem in
+      guard let `self` = self else { return }
+      self.delegate?.movieListController(self, didSelect: selectedItem)
+    }
+    resultsController.cellConfiguration = cellConfiguration
+    let searchController = UISearchController(searchResultsController: resultsController)
+    searchController.searchResultsUpdater = self
+    searchController.dimsBackgroundDuringPresentation = false
+    searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
+    return searchController
+  }()
 
   private var sortDescriptor = SortDescriptor.title
 
@@ -43,7 +54,6 @@ class MovieListController: UITableViewController {
     )
     return view
   }()
-  private lazy var emptySearchResultsView = GenericEmptyView()
 
   private var state: State = .initializing
 
@@ -53,7 +63,6 @@ class MovieListController: UITableViewController {
     case initializing
     case noData
     case data
-    case searching
   }
 }
 
@@ -64,11 +73,7 @@ extension MovieListController {
     fetchLibraryData()
     super.viewDidLoad()
     title = NSLocalizedString("library", comment: "")
-    searchController.searchResultsUpdater = self
-    searchController.dimsBackgroundDuringPresentation = false
-    searchController.delegate = self
     definesPresentationContext = true
-    searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
     tableView.sectionIndexBackgroundColor = UIColor.clear
     clearsSelectionOnViewWillAppear = true
 
@@ -121,7 +126,7 @@ extension MovieListController {
   private func showEmptyLibraryViewIfNecessary() {
     if self.allItems.isEmpty {
       switch state {
-        case .initializing, .data, .searching:
+        case .initializing, .data:
           self.tableView.backgroundView = emptyLibraryView
           self.tableView.separatorStyle = .none
           self.searchController.isActive = false
@@ -138,8 +143,7 @@ extension MovieListController {
           self.addSearchBarOnViewDidAppear = true
           self.sortButton.isEnabled = true
           self.state = .data
-        case .data: fallthrough
-        case .searching: break
+        case .data: break
       }
     }
   }
@@ -149,35 +153,19 @@ extension MovieListController {
 
 extension MovieListController {
   override func numberOfSections(in tableView: UITableView) -> Int {
-    return searchController.isActive ? 1 : sectionIndexTitles.count
+    return sectionIndexTitles.count
   }
 
   private func item(for indexPath: IndexPath) -> MediaItem {
-    if searchController.isActive {
-      if searchController.searchBar.text == "" {
-        return allItems[indexPath.row]
-      } else {
-        return filteredMediaItems[indexPath.row]
-      }
-    } else {
-      return sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
-    }
+    return sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
   }
 
   public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    return searchController.isActive ? nil : sectionTitles[section]
+    return sectionTitles[section]
   }
 
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    if searchController.isActive {
-      if searchController.searchBar.text == "" {
-        return allItems.count
-      } else {
-        return filteredMediaItems.count
-      }
-    } else {
-      return sectionItems[sectionIndexTitles[section]]!.count
-    }
+    return sectionItems[sectionIndexTitles[section]]!.count
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -196,7 +184,7 @@ extension MovieListController {
     guard visibleSectionIndexTitles.count > 2 else {
       return nil
     }
-    return searchController.isActive ? nil : visibleSectionIndexTitles
+    return visibleSectionIndexTitles
   }
 
   public override func tableView(_ tableView: UITableView,
@@ -216,77 +204,24 @@ extension MovieListController {
       case .initializing:
         fatalError("search bar is hidden by default")
       case .noData: break
-      case .searching:
-        if filteredMediaItems.isEmpty {
-          break
-        }
-        fallthrough
       case .data:
         tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
     }
   }
 }
 
-class MovieTableCell: UITableViewCell {
-  @IBOutlet fileprivate weak var posterView: UIImageView!
-  @IBOutlet private weak var titleLabel: UILabel!
-  @IBOutlet private weak var runtimeLabel: UILabel!
-
-  override func awakeFromNib() {
-    super.awakeFromNib()
-    posterView.layer.borderColor = UIColor.posterBorder.cgColor
-    posterView.layer.borderWidth = 0.5
-  }
-
-  func configure(for mediaItem: MediaItem) {
-    titleLabel!.text = mediaItem.fullTitle
-    runtimeLabel!.text = mediaItem.runtime == nil
-        ? NSLocalizedString("details.missing.runtime", comment: "")
-        : Utils.formatDuration(mediaItem.runtime!)
-    posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
-  }
-}
-
 // MARK: - Search
 
-extension MovieListController: UISearchResultsUpdating, UISearchControllerDelegate {
-  public func updateSearchResults(for searchController: UISearchController) {
-    switch state {
-      case .searching:
-        let searchText = searchController.searchBar.text!
-        let lowercasedSearchText = searchText.lowercased()
-        filteredMediaItems = allItems.filter { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
-
-        if filteredMediaItems.isEmpty && !searchText.isEmpty {
-          self.emptySearchResultsView.configure(
-              accessory: .image(#imageLiteral(resourceName: "EmptySearchResults")),
-              description: .basic(.localizedStringWithFormat(NSLocalizedString("search.results.empty", comment: ""),
-                                                             searchText))
-          )
-          self.tableView.backgroundView = self.emptySearchResultsView
-          self.tableView.separatorStyle = .none
-        } else {
-          self.tableView.backgroundView = nil
-          self.tableView.separatorStyle = .singleLine
-        }
-      case .data:
-        self.tableView.backgroundView = nil
-        self.tableView.separatorStyle = .singleLine
-      case .noData:
-        self.tableView.backgroundView = emptyLibraryView
-        self.tableView.separatorStyle = .none
-      case .initializing: fatalError("should not be called during initialization")
+extension MovieListController: UISearchResultsUpdating {
+  func updateSearchResults(for searchController: UISearchController) {
+    guard searchController.isActive else { return }
+    guard let resultsController = searchController.searchResultsController as? MovieListSearchResultsController else {
+      preconditionFailure("unexpected SearchResultsController class")
     }
-    tableView.reloadData()
-    self.scrollToTop(animated: false)
-  }
-
-  func willPresentSearchController(_ searchController: UISearchController) {
-    state = .searching
-  }
-
-  func willDismissSearchController(_ searchController: UISearchController) {
-    state = allItems.isEmpty ? .noData : .data
+    let searchText = searchController.searchBar.text ?? ""
+    let lowercasedSearchText = searchText.lowercased()
+    resultsController.searchText = searchText
+    resultsController.items = allItems.filter { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
   }
 }
 
