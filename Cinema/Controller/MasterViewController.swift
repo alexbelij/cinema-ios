@@ -201,7 +201,7 @@ extension MasterViewController {
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     if let selectedIndexPath = tableView.indexPathForSelectedRow {
-      let detailVC = UIStoryboard.main.instantiate(DetailViewController.self)
+      let detailVC = UIStoryboard.main.instantiate(ItemDetailsController.self)
       detailVC.detailItem = item(for: selectedIndexPath)
       detailVC.movieDb = movieDb
       detailVC.library = library

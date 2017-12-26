@@ -1,7 +1,7 @@
 import Dispatch
 import UIKit
 
-class DetailViewController: UIViewController {
+class ItemDetailsController: UIViewController {
 
   var detailItem: MediaItem? {
     didSet {
@@ -29,7 +29,7 @@ class DetailViewController: UIViewController {
 
 // MARK: - View Controller Lifecycle
 
-extension DetailViewController {
+extension ItemDetailsController {
   override func viewDidLoad() {
     UIApplication.shared.isNetworkActivityIndicatorVisible = true
     imageView.image = .genericPosterImage(minWidth: imageView.frame.size.width)
@@ -57,7 +57,7 @@ extension DetailViewController {
 
 // MARK: - Detail Item Configuration
 
-extension DetailViewController {
+extension ItemDetailsController {
   func configureView() {
     guard isViewLoaded else { return }
     if let mediaItem = detailItem {
@@ -136,7 +136,7 @@ extension DetailViewController {
 
 // MARK: - Library Events
 
-extension DetailViewController: MediaLibraryDelegate {
+extension ItemDetailsController: MediaLibraryDelegate {
   func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
     DispatchQueue.main.async {
       if let updatedItem = contentUpdate.updatedItems[self.detailItem!.id] {
@@ -150,7 +150,7 @@ extension DetailViewController: MediaLibraryDelegate {
 
 // MARK: - User Actions
 
-extension DetailViewController {
+extension ItemDetailsController {
   @IBAction private func presentEditViewController() {
     guard let detailItem = self.detailItem else {
       preconditionFailure("ItemDetailsCoordinator should present detail item")
@@ -161,7 +161,7 @@ extension DetailViewController {
   }
 }
 
-extension DetailViewController: EditItemCoordinatorDelegate {
+extension ItemDetailsController: EditItemCoordinatorDelegate {
   func editItemCoordinator(_ coordinator: EditItemCoordinator,
                            didFinishEditingWithResult editResult: EditItemCoordinator.EditResult) {
     switch editResult {
