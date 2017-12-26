@@ -2,45 +2,37 @@ import Foundation
 import UIKit
 
 class AppCoordinator: AutoPresentableCoordinator {
-  private let window = UIWindow(frame: UIScreen.main.bounds)
-  private var dependencies: AppDependencies!
+  enum State {
+    case launched
+    case gatheringDependencies
+    case checkingForDataUpdates(AppDependencies)
+    case updatingData(AppDependencies, DataUpdateCoordinator)
+    case upAndRunning(AppDependencies, CoreCoordinator)
+  }
 
-  // child coordinators
-  private var coreCoordinator: CoreCoordinator!
-  private var dataUpdateCoordinator: DataUpdateCoordinator!
+  private let window = UIWindow(frame: UIScreen.main.bounds)
+  private var state: State = .launched {
+    didSet {
+      switch state {
+        case .launched: fatalError("unreachable")
+        case .gatheringDependencies:
+          transition(to: .checkingForDataUpdates(makeDependencies()))
+        case let .checkingForDataUpdates(dependencies):
+          checkForDataUpdates(dependencies: dependencies)
+        case let .updatingData(_, dataUpdateCoordinator):
+          window.rootViewController = dataUpdateCoordinator.rootViewController
+        case let .upAndRunning(_, mainCoordinator):
+          replaceRootViewController(of: window, with: mainCoordinator.rootViewController)
+      }
+    }
+  }
 
   func presentRootViewController() {
-    // Media Library
-    let url = Utils.directoryUrl(for: .documentDirectory).appendingPathComponent("cinema.data")
-    moveLegacyLibraryFile(to: url)
-    let dataFormat = KeyedArchivalFormat()
-    dataFormat.defaultSchemaVersion = .v2_0_0
-    // swiftlint:disable:next force_try
-    let library = try! FileBasedMediaLibrary(url: url, dataFormat: dataFormat)
-
-    // MovieDb Client
-    let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en
-    let country = MovieDbCountry(rawValue: Locale.current.regionCode ?? "US") ?? .unitedStates
-    let movieDb = TMDBSwiftWrapper(language: language, country: country, cache: StandardTMDBSwiftCache())
-
-    dependencies = AppDependencies(library: library, movieDb: movieDb)
-
-    let rootViewController: UIViewController
-    let updates = Utils.updates(from: library.persistentSchemaVersion, using: movieDb)
-    if updates.isEmpty {
-      coreCoordinator = CoreCoordinator(dependencies: dependencies)
-      rootViewController = coreCoordinator.rootViewController
-    } else {
-      dataUpdateCoordinator = DataUpdateCoordinator(updates: updates, dependencies: dependencies)
-      dataUpdateCoordinator.delegate = self
-      rootViewController = dataUpdateCoordinator.rootViewController
-    }
-
-    window.rootViewController = rootViewController
+    transition(to: .gatheringDependencies)
     window.makeKeyAndVisible()
   }
 
-  private func replaceRootViewControllerAnimated(newController: UIViewController) {
+  private func replaceRootViewController(of window: UIWindow, with newController: UIViewController) {
     if let snapShot = window.snapshotView(afterScreenUpdates: true) {
       newController.view.addSubview(snapShot)
       window.rootViewController = newController
@@ -58,9 +50,26 @@ class AppCoordinator: AutoPresentableCoordinator {
   }
 }
 
-// MARK: - Legacy
+// MARK: - Making Dependencies
 
 extension AppCoordinator {
+  private func makeDependencies() -> AppDependencies {
+    // Media Library
+    let url = Utils.directoryUrl(for: .documentDirectory).appendingPathComponent("cinema.data")
+    moveLegacyLibraryFile(to: url)
+    let dataFormat = KeyedArchivalFormat()
+    dataFormat.defaultSchemaVersion = .v2_0_0
+    // swiftlint:disable:next force_try
+    let library = try! FileBasedMediaLibrary(url: url, dataFormat: dataFormat)
+
+    // MovieDb Client
+    let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en
+    let country = MovieDbCountry(rawValue: Locale.current.regionCode ?? "US") ?? .unitedStates
+    let movieDb = TMDBSwiftWrapper(language: language, country: country, cache: StandardTMDBSwiftCache())
+
+    return AppDependencies(library: library, movieDb: movieDb)
+  }
+
   private func moveLegacyLibraryFile(to url: URL) {
     let legacyUrl = Utils.directoryUrl(for: .applicationSupportDirectory, createIfNecessary: false)
                          .appendingPathComponent(Bundle.main.bundleIdentifier!, isDirectory: true)
@@ -75,12 +84,25 @@ extension AppCoordinator {
   }
 }
 
-// MARK: - DataUpdateCoordinatorDelegate
+// MARK: - Data Updates
 
 extension AppCoordinator: DataUpdateCoordinatorDelegate {
+  private func checkForDataUpdates(dependencies: AppDependencies) {
+    let updates = Utils.updates(from: dependencies.library.persistentSchemaVersion, using: dependencies.movieDb)
+    if updates.isEmpty {
+      transition(to: .upAndRunning(dependencies, CoreCoordinator(dependencies: dependencies)))
+    } else {
+      let dataUpdateCoordinator = DataUpdateCoordinator(updates: updates, dependencies: dependencies)
+      dataUpdateCoordinator.delegate = self
+      transition(to: .updatingData(dependencies, dataUpdateCoordinator))
+    }
+  }
+
   func dataUpdateCoordinatorDidFinish(_ coordinator: DataUpdateCoordinator) {
-    coreCoordinator = CoreCoordinator(dependencies: dependencies)
-    replaceRootViewControllerAnimated(newController: coreCoordinator.rootViewController)
+    guard case let State.updatingData(dependencies, _) = state else {
+      preconditionFailure("delegate method called but not in appropriate state: \(state)")
+    }
+    transition(to: .upAndRunning(dependencies, CoreCoordinator(dependencies: dependencies)))
   }
 }
 
@@ -88,6 +110,7 @@ extension AppCoordinator: DataUpdateCoordinatorDelegate {
 
 extension AppCoordinator {
   func handleImport(from url: URL) -> Bool {
+    guard case let State.upAndRunning(dependencies, mainCoordinator) = state else { return false }
     let controller = UIStoryboard.maintenance.instantiate(MaintenanceViewController.self)
     controller.run(ImportAndUpdateAction(library: dependencies.library, movieDb: dependencies.movieDb, from: url),
                    initiation: .runAutomatically) { result in
@@ -102,7 +125,45 @@ extension AppCoordinator {
       }
     }
     controller.primaryText = NSLocalizedString("import.progress", comment: "")
-    window.rootViewController!.present(controller, animated: true)
+    mainCoordinator.rootViewController.present(controller, animated: true)
     return true
+  }
+}
+
+// MARK: - Finite State Machine Validation
+
+extension AppCoordinator {
+  // swiftlint:disable:next cyclomatic_complexity
+  func transition(to nextState: State) {
+    let isValidNextState: Bool
+    switch state {
+      case .launched:
+        switch nextState {
+          case .gatheringDependencies: isValidNextState = true
+          default: isValidNextState = false
+        }
+      case .gatheringDependencies:
+        switch nextState {
+          case .checkingForDataUpdates: isValidNextState = true
+          default: isValidNextState = false
+        }
+      case .checkingForDataUpdates:
+        switch nextState {
+          case .updatingData, .upAndRunning: isValidNextState = true
+          default: isValidNextState = false
+        }
+      case .updatingData:
+        switch nextState {
+          case .upAndRunning: isValidNextState = true
+          default: isValidNextState = false
+        }
+      case .upAndRunning:
+        isValidNextState = false
+    }
+    if isValidNextState {
+      state = nextState
+    } else {
+      fatalError("illegal state transition from \(state) to \(nextState)")
+    }
   }
 }
