@@ -2,29 +2,35 @@ import Dispatch
 import UIKit
 
 class SearchTmdbCoordinator: CustomPresentableCoordinator {
+  typealias Dependencies = LibraryDependency & MovieDbDependency
+
   // coordinator stuff
   var rootViewController: UIViewController {
     return navigationController
   }
 
   // other properties
-  private let library: MediaLibrary
-  private let movieDb: MovieDbClient
+  private let dependencies: Dependencies
+  private var library: MediaLibrary {
+    return dependencies.library
+  }
+  private var movieDb: MovieDbClient {
+    return dependencies.movieDb
+  }
 
   // managed controllers
   private let navigationController: UINavigationController
   private let popularMoviesController: PopularMoviesController
 
-  init(library: MediaLibrary, movieDb: MovieDbClient) {
-    self.library = library
-    self.movieDb = movieDb
+  init(dependencies: Dependencies) {
+    self.dependencies = dependencies
 
     // swiftlint:disable:next force_cast
     self.navigationController = UIStoryboard.searchTmdb.instantiateInitialViewController() as! UINavigationController
 
     popularMoviesController = UIStoryboard.popularMovies.instantiate(PopularMoviesController.self)
     popularMoviesController.delegate = self
-    let movies = movieDb.popularMovies().lazy.filter { !library.contains(id: $0.id) }
+    let movies = movieDb.popularMovies().lazy.filter { !self.library.contains(id: $0.id) }
     popularMoviesController.movieIterator = AnyIterator(movies.makeIterator())
     popularMoviesController.posterProvider = MovieDbPosterProvider(movieDb)
 

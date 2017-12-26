@@ -2,32 +2,29 @@ import Foundation
 import UIKit
 
 class CoreCoordinator: CustomPresentableCoordinator {
+  typealias Dependencies = LibraryDependency & MovieDbDependency
+
   // coordinator stuff
   var rootViewController: UIViewController {
     return tabBarController
   }
 
   // other properties
-  private let library: MediaLibrary
-  private let movieDb: MovieDbClient
   private let tabBarController = UITabBarController()
 
   // child coordinators
   private let libraryContentCoordinator: LibraryContentCoordinator
   private let searchTmdbCoordinator: SearchTmdbCoordinator
 
-  init(library: MediaLibrary, movieDb: MovieDbClient) {
-    self.library = library
-    self.movieDb = movieDb
-
-    libraryContentCoordinator = LibraryContentCoordinator(library: library, movieDb: movieDb)
+  init(dependencies: Dependencies) {
+    libraryContentCoordinator = LibraryContentCoordinator(dependencies: dependencies)
     libraryContentCoordinator.rootViewController.tabBarItem = UITabBarItem(
         title: NSLocalizedString("library", comment: ""),
         image: #imageLiteral(resourceName: "Tab-Library-normal"),
         selectedImage: #imageLiteral(resourceName: "Tab-Library-selected")
     )
 
-    searchTmdbCoordinator = SearchTmdbCoordinator(library: library, movieDb: movieDb)
+    searchTmdbCoordinator = SearchTmdbCoordinator(dependencies: dependencies)
     searchTmdbCoordinator.rootViewController.tabBarItem = UITabBarItem(
         title: NSLocalizedString("addItem.title", comment: ""),
         image: #imageLiteral(resourceName: "Tab-AddItem-normal"),

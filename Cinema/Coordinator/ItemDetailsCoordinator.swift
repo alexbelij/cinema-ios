@@ -7,6 +7,8 @@ protocol ItemDetailsCoordinatorDelegate: class {
 }
 
 class ItemDetailsCoordinator: CustomPresentableCoordinator {
+  typealias Dependencies = MovieDbDependency
+
   // coordinator stuff
   var rootViewController: UIViewController {
     return itemDetailsController
@@ -14,14 +16,17 @@ class ItemDetailsCoordinator: CustomPresentableCoordinator {
   weak var delegate: ItemDetailsCoordinatorDelegate?
 
   // other properties
-  private let movieDb: MovieDbClient
+  private let dependencies: Dependencies
+  private var movieDb: MovieDbClient {
+    return dependencies.movieDb
+  }
   private(set) var detailItem: MediaItem
 
   // managed controller
   private var itemDetailsController: ItemDetailsController
 
-  init(movieDb: MovieDbClient, detailItem: MediaItem) {
-    self.movieDb = movieDb
+  init(detailItem: MediaItem, dependencies: Dependencies) {
+    self.dependencies = dependencies
     self.detailItem = detailItem
 
     itemDetailsController = UIStoryboard.movieList.instantiate(ItemDetailsController.self)

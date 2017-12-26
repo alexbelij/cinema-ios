@@ -8,6 +8,8 @@ protocol EditItemCoordinatorDelegate: class {
 }
 
 class EditItemCoordinator: CustomPresentableCoordinator {
+  typealias Dependencies = LibraryDependency
+
   // coordinator stuff
   var rootViewController: UIViewController {
     return navigationController
@@ -15,7 +17,10 @@ class EditItemCoordinator: CustomPresentableCoordinator {
   weak var delegate: EditItemCoordinatorDelegate?
 
   // other properties
-  private let library: MediaLibrary
+  private let dependencies: Dependencies
+  private var library: MediaLibrary {
+    return dependencies.library
+  }
   private var itemToEdit: MediaItem
 
   // managed controller
@@ -27,8 +32,8 @@ class EditItemCoordinator: CustomPresentableCoordinator {
     case deleted
   }
 
-  init(library: MediaLibrary, item: MediaItem) {
-    self.library = library
+  init(item: MediaItem, dependencies: Dependencies) {
+    self.dependencies = dependencies
     self.itemToEdit = item
     // swiftlint:disable force_cast
     navigationController = UIStoryboard.editItem.instantiateInitialViewController() as! UINavigationController

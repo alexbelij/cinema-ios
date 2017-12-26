@@ -5,24 +5,20 @@ protocol DataUpdateCoordinatorDelegate: class {
 }
 
 class DataUpdateCoordinator: CustomPresentableCoordinator {
+  typealias Dependencies = LibraryDependency
+
   // coordinator stuff
   var rootViewController: UIViewController {
     return maintenanceController
   }
   weak var delegate: DataUpdateCoordinatorDelegate?
 
-  // other properties
-  private let library: MediaLibrary
-  private let movieDb: MovieDbClient
-
   // managed controller
   private let maintenanceController: MaintenanceViewController
 
-  init(library: MediaLibrary, movieDb: MovieDbClient, updates: [PropertyUpdate]) {
-    self.library = library
-    self.movieDb = movieDb
+  init(updates: [PropertyUpdate], dependencies: Dependencies) {
     maintenanceController = UIStoryboard.maintenance.instantiate(MaintenanceViewController.self)
-    maintenanceController.run(PropertyUpdateAction(library: library, updates: updates),
+    maintenanceController.run(PropertyUpdateAction(library: dependencies.library, updates: updates),
                               initiation: .button(title: NSLocalizedString("maintenance.start", comment: "")),
                               completion: maintenanceActionDidComplete)
     maintenanceController.primaryText = NSLocalizedString("maintenance.intention", comment: "")

@@ -3,8 +3,7 @@ import UIKit
 
 class AppCoordinator: AutoPresentableCoordinator {
   private let window = UIWindow(frame: UIScreen.main.bounds)
-  private var library: MediaLibrary!
-  private var movieDb: MovieDbClient!
+  private var dependencies: AppDependencies!
 
   // child coordinators
   private var coreCoordinator: CoreCoordinator!
@@ -17,20 +16,22 @@ class AppCoordinator: AutoPresentableCoordinator {
     let dataFormat = KeyedArchivalFormat()
     dataFormat.defaultSchemaVersion = .v2_0_0
     // swiftlint:disable:next force_try
-    library = try! FileBasedMediaLibrary(url: url, dataFormat: dataFormat)
+    let library = try! FileBasedMediaLibrary(url: url, dataFormat: dataFormat)
 
     // MovieDb Client
     let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en
     let country = MovieDbCountry(rawValue: Locale.current.regionCode ?? "US") ?? .unitedStates
-    movieDb = TMDBSwiftWrapper(language: language, country: country, cache: StandardTMDBSwiftCache())
+    let movieDb = TMDBSwiftWrapper(language: language, country: country, cache: StandardTMDBSwiftCache())
+
+    dependencies = AppDependencies(library: library, movieDb: movieDb)
 
     let rootViewController: UIViewController
     let updates = Utils.updates(from: library.persistentSchemaVersion, using: movieDb)
     if updates.isEmpty {
-      coreCoordinator = CoreCoordinator(library: library, movieDb: movieDb)
+      coreCoordinator = CoreCoordinator(dependencies: dependencies)
       rootViewController = coreCoordinator.rootViewController
     } else {
-      dataUpdateCoordinator = DataUpdateCoordinator(library: library, movieDb: movieDb, updates: updates)
+      dataUpdateCoordinator = DataUpdateCoordinator(updates: updates, dependencies: dependencies)
       dataUpdateCoordinator.delegate = self
       rootViewController = dataUpdateCoordinator.rootViewController
     }
@@ -78,7 +79,7 @@ extension AppCoordinator {
 
 extension AppCoordinator: DataUpdateCoordinatorDelegate {
   func dataUpdateCoordinatorDidFinish(_ coordinator: DataUpdateCoordinator) {
-    coreCoordinator = CoreCoordinator(library: library, movieDb: movieDb)
+    coreCoordinator = CoreCoordinator(dependencies: dependencies)
     replaceRootViewControllerAnimated(newController: coreCoordinator.rootViewController)
   }
 }
@@ -88,7 +89,7 @@ extension AppCoordinator: DataUpdateCoordinatorDelegate {
 extension AppCoordinator {
   func handleImport(from url: URL) -> Bool {
     let controller = UIStoryboard.maintenance.instantiate(MaintenanceViewController.self)
-    controller.run(ImportAndUpdateAction(library: library, movieDb: movieDb, from: url),
+    controller.run(ImportAndUpdateAction(library: dependencies.library, movieDb: dependencies.movieDb, from: url),
                    initiation: .runAutomatically) { result in
       switch result {
         case let .result(addedItems):

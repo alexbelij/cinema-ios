@@ -3,12 +3,13 @@ import Foundation
 import UIKit
 
 class LibraryContentCoordinator: CustomPresentableCoordinator {
+  typealias Dependencies = LibraryDependency & MovieDbDependency
+
   var rootViewController: UIViewController {
     return navigationController
   }
   // other properties
-  private let library: MediaLibrary
-  private let movieDb: MovieDbClient
+  private let dependencies: Dependencies
 
   // managed controllers
   private let navigationController: UINavigationController
@@ -18,18 +19,17 @@ class LibraryContentCoordinator: CustomPresentableCoordinator {
   private var itemDetailsCoordinator: ItemDetailsCoordinator?
   private var editItemCoordinator: EditItemCoordinator?
 
-  init(library: MediaLibrary, movieDb: MovieDbClient) {
-    self.library = library
-    self.movieDb = movieDb
+  init(dependencies: Dependencies) {
+    self.dependencies = dependencies
     // swiftlint:disable force_cast
     self.navigationController = UIStoryboard.movieList.instantiateInitialViewController() as! UINavigationController
     self.movieListController = navigationController.topViewController! as! MovieListController
     // swiftlint:enable force_cast
     movieListController.delegate = self
-    let posterProvider = MovieDbPosterProvider(movieDb)
+    let posterProvider = MovieDbPosterProvider(dependencies.movieDb)
     movieListController.cellConfiguration = StandardMediaItemCellConfig(posterProvider: posterProvider)
-    movieListController.items = library.mediaItems { _ in true }
-    library.delegates.add(self)
+    movieListController.items = dependencies.library.mediaItems { _ in true }
+    dependencies.library.delegates.add(self)
   }
 }
 
@@ -37,7 +37,7 @@ class LibraryContentCoordinator: CustomPresentableCoordinator {
 
 extension LibraryContentCoordinator: MovieListControllerDelegate {
   func movieListController(_ controller: MovieListController, didSelect item: MediaItem) {
-    itemDetailsCoordinator = ItemDetailsCoordinator(movieDb: movieDb, detailItem: item)
+    itemDetailsCoordinator = ItemDetailsCoordinator(detailItem: item, dependencies: dependencies)
     itemDetailsCoordinator!.delegate = self
     let editButton = UIBarButtonItem(barButtonSystemItem: .edit,
                                      target: self,
@@ -51,7 +51,7 @@ extension LibraryContentCoordinator: MovieListControllerDelegate {
     guard let detailItem = self.itemDetailsCoordinator?.detailItem else {
       preconditionFailure("ItemDetailsCoordinator should present detail item")
     }
-    editItemCoordinator = EditItemCoordinator(library: library, item: detailItem)
+    editItemCoordinator = EditItemCoordinator(item: detailItem, dependencies: dependencies)
     editItemCoordinator!.delegate = self
     self.navigationController.present(editItemCoordinator!.rootViewController, animated: true)
   }
