@@ -8,6 +8,7 @@ class AppCoordinator: AutoPresentableCoordinator {
 
   // child coordinators
   private var coreCoordinator: CoreCoordinator!
+  private var dataUpdateCoordinator: DataUpdateCoordinator!
 
   func presentRootViewController() {
     movieDb = Config.initMovieDb()
@@ -19,32 +20,13 @@ class AppCoordinator: AutoPresentableCoordinator {
       coreCoordinator = CoreCoordinator(library: library, movieDb: movieDb)
       rootViewController = coreCoordinator.rootViewController
     } else {
-      rootViewController = loadMaintenanceViewController(updates: updates)
+      dataUpdateCoordinator = DataUpdateCoordinator(library: library, movieDb: movieDb, updates: updates)
+      dataUpdateCoordinator.delegate = self
+      rootViewController = dataUpdateCoordinator.rootViewController
     }
 
     window.rootViewController = rootViewController
     window.makeKeyAndVisible()
-  }
-
-  private func loadMaintenanceViewController(updates: [PropertyUpdate]) -> UIViewController {
-    let controller = UIStoryboard.maintenance.instantiate(MaintenanceViewController.self)
-    controller.run(PropertyUpdateAction(library: library, updates: updates),
-                   initiation: .button(title: NSLocalizedString("maintenance.start", comment: ""))) { result in
-      switch result {
-        case .result:
-          controller.primaryText = NSLocalizedString("maintenance.succeeded", comment: "")
-        case let .error(error):
-          controller.primaryText = NSLocalizedString("maintenance.failed", comment: "")
-          controller.secondaryText = Utils.localizedErrorMessage(for: error)
-      }
-    }
-    controller.primaryText = NSLocalizedString("maintenance.intention", comment: "")
-    controller.dismissHandler = .custom(handler: { [weak self] in
-      guard let `self` = self else { return }
-      self.coreCoordinator = CoreCoordinator(library: self.library, movieDb: self.movieDb)
-      self.replaceRootViewControllerAnimated(newController: self.coreCoordinator.rootViewController)
-    })
-    return controller
   }
 
   private func replaceRootViewControllerAnimated(newController: UIViewController) {
@@ -62,6 +44,15 @@ class AppCoordinator: AutoPresentableCoordinator {
     } else {
       window.rootViewController = newController
     }
+  }
+}
+
+// MARK: - DataUpdateCoordinatorDelegate
+
+extension AppCoordinator: DataUpdateCoordinatorDelegate {
+  func dataUpdateCoordinatorDidFinish(_ coordinator: DataUpdateCoordinator) {
+    coreCoordinator = CoreCoordinator(library: library, movieDb: movieDb)
+    replaceRootViewControllerAnimated(newController: coreCoordinator.rootViewController)
   }
 }
 
