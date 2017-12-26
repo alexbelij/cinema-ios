@@ -53,6 +53,7 @@
 		CBED94311F6BFB0E00FA4045 /* MaintenanceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED941E1F6BF6C200FA4045 /* MaintenanceViewController.swift */; };
 		CBF3CE601FF2366700F4B6C0 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE5F1FF2366700F4B6C0 /* Coordinator.swift */; };
 		CBF3CE621FF2369B00F4B6C0 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE611FF2369B00F4B6C0 /* AppCoordinator.swift */; };
+		CBF3CE641FF2385C00F4B6C0 /* CoreCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF3CE631FF2385C00F4B6C0 /* CoreCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -108,6 +109,7 @@
 		CBED94241F6BF6C200FA4045 /* TableViewSortingStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewSortingStrategy.swift; sourceTree = "<group>"; };
 		CBF3CE5F1FF2366700F4B6C0 /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
 		CBF3CE611FF2369B00F4B6C0 /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
+		CBF3CE631FF2385C00F4B6C0 /* CoreCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreCoordinator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -262,6 +264,7 @@
 			children = (
 				CBF3CE5F1FF2366700F4B6C0 /* Coordinator.swift */,
 				CBF3CE611FF2369B00F4B6C0 /* AppCoordinator.swift */,
+				CBF3CE631FF2385C00F4B6C0 /* CoreCoordinator.swift */,
 			);
 			path = Coordinator;
 			sourceTree = "<group>";
@@ -442,6 +445,7 @@
 				CBED942C1F6BFB0E00FA4045 /* SortDescriptor.swift in Sources */,
 				816BF274AE17D0FDCEB2C994 /* MaintenanceAction.swift in Sources */,
 				816BFABF5256F0205876AE33 /* PropertyUpdateAction.swift in Sources */,
+				CBF3CE641FF2385C00F4B6C0 /* CoreCoordinator.swift in Sources */,
 				816BFBB935AA13E3AC7F3E9F /* MediaItemUpdates.swift in Sources */,
 				816BF5794525B14475533BF1 /* TMDBSwiftCache.swift in Sources */,
 				CBF3CE621FF2369B00F4B6C0 /* AppCoordinator.swift in Sources */,

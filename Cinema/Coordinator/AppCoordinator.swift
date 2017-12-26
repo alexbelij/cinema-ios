@@ -6,6 +6,9 @@ class AppCoordinator: AutoPresentableCoordinator {
   private var library: MediaLibrary!
   private var movieDb: MovieDbClient!
 
+  // child coordinators
+  private var coreCoordinator: CoreCoordinator!
+
   func presentRootViewController() {
     movieDb = Config.initMovieDb()
     library = Config.initLibrary()
@@ -13,38 +16,14 @@ class AppCoordinator: AutoPresentableCoordinator {
     let rootViewController: UIViewController
     let updates = Utils.updates(from: library.persistentSchemaVersion, using: movieDb)
     if updates.isEmpty {
-      rootViewController = loadMainViewController()
+      coreCoordinator = CoreCoordinator(library: library, movieDb: movieDb)
+      rootViewController = coreCoordinator.rootViewController
     } else {
       rootViewController = loadMaintenanceViewController(updates: updates)
     }
 
     window.rootViewController = rootViewController
     window.makeKeyAndVisible()
-  }
-
-  private func loadMainViewController() -> UIViewController {
-    // swiftlint:disable force_cast
-    let mainNavController = UIStoryboard.main.instantiateInitialViewController() as! UINavigationController
-
-    let masterViewController = mainNavController.topViewController! as! MasterViewController
-    masterViewController.library = library
-    masterViewController.movieDb = movieDb
-
-    let addItemNavController = UIStoryboard.addItem.instantiateInitialViewController() as! UINavigationController
-    let searchController = addItemNavController.topViewController as! SearchTMDBViewController
-    searchController.library = library
-    searchController.movieDb = movieDb
-    // swiftlint:enable force_cast
-
-    mainNavController.tabBarItem = UITabBarItem(title: NSLocalizedString("library", comment: ""),
-                                                image: #imageLiteral(resourceName: "Tab-Library-normal"),
-                                                selectedImage: #imageLiteral(resourceName: "Tab-Library-selected"))
-    addItemNavController.tabBarItem = UITabBarItem(title: NSLocalizedString("addItem.title", comment: ""),
-                                                   image: #imageLiteral(resourceName: "Tab-AddItem-normal"),
-                                                   selectedImage: #imageLiteral(resourceName: "Tab-AddItem-selected"))
-    let tabBarController = UITabBarController()
-    tabBarController.viewControllers = [mainNavController, addItemNavController]
-    return tabBarController
   }
 
   private func loadMaintenanceViewController(updates: [PropertyUpdate]) -> UIViewController {
@@ -62,7 +41,8 @@ class AppCoordinator: AutoPresentableCoordinator {
     controller.primaryText = NSLocalizedString("maintenance.intention", comment: "")
     controller.dismissHandler = .custom(handler: { [weak self] in
       guard let `self` = self else { return }
-      self.replaceRootViewControllerAnimated(newController: self.loadMainViewController())
+      self.coreCoordinator = CoreCoordinator(library: self.library, movieDb: self.movieDb)
+      self.replaceRootViewControllerAnimated(newController: self.coreCoordinator.rootViewController)
     })
     return controller
   }
