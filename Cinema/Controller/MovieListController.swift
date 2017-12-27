@@ -25,13 +25,9 @@ class MovieListController: UITableViewController {
       cellConfiguration?.registerCells(in: tableView)
     }
   }
+  private var sectioningWrapper: SectioningWrapper!
 
-  private var allItems = [MediaItem]()
-  private var sectionItems = [String: [MediaItem]]()
-  private var sectionIndexTitles = [String]()
-  private var visibleSectionIndexTitles = [String]()
-  private var sectionTitles = [String]()
-
+  private let titleSortingStrategy = SortDescriptor.title.makeTableViewStrategy()
   private lazy var searchController: UISearchController = {
     let resultsController = MovieListSearchResultsController()
     resultsController.onSelection = { [weak self] selectedItem in
@@ -76,34 +72,14 @@ extension MovieListController {
 
 extension MovieListController {
   private func reloadListData() {
-    groupListData()
+    sectioningWrapper = SectioningWrapper(items, sortingStrategy: sortDescriptor.makeTableViewStrategy())
     tableView.reloadData()
-    if allItems.isEmpty {
+    if items.isEmpty {
       showEmptyView()
     } else {
       hideEmptyView()
       tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
     }
-  }
-
-  private func groupListData() {
-    allItems = items.sorted(by: SortDescriptor.title.makeTableViewStrategy().itemSorting)
-    sectionItems = [String: [MediaItem]]()
-    let strategy = sortDescriptor.makeTableViewStrategy()
-    for item in allItems {
-      let sectionIndexTitle = strategy.sectionIndexTitle(for: item)
-      if sectionItems[sectionIndexTitle] == nil {
-        sectionItems[sectionIndexTitle] = [MediaItem]()
-      }
-      sectionItems[sectionIndexTitle]!.append(item)
-    }
-    for key in sectionItems.keys {
-      sectionItems[key]!.sort(by: strategy.itemSorting)
-    }
-    sectionIndexTitles = Array(sectionItems.keys)
-    sectionIndexTitles.sort(by: strategy.sectionIndexTitleSorting)
-    visibleSectionIndexTitles = strategy.refineSectionIndexTitles(sectionIndexTitles)
-    sectionTitles = sectionIndexTitles.map { strategy.sectionTitle(for: $0) }
   }
 }
 
@@ -130,50 +106,40 @@ extension MovieListController {
 
 extension MovieListController {
   override func numberOfSections(in tableView: UITableView) -> Int {
-    return sectionIndexTitles.count
-  }
-
-  private func item(for indexPath: IndexPath) -> MediaItem {
-    return sectionItems[sectionIndexTitles[indexPath.section]]![indexPath.row]
-  }
-
-  public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    return sectionTitles[section]
+    return sectioningWrapper.numberOfSections
   }
 
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return sectionItems[sectionIndexTitles[section]]!.count
+    return sectioningWrapper.numberOfRowsInSection(section)
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     guard let config = self.cellConfiguration else {
       fatalError("cell configuration has not been specified")
     }
-    return config.cell(for: item(for: indexPath), cellDequeuing: tableView)
+    return config.cell(for: sectioningWrapper.item(at: indexPath), cellDequeuing: tableView)
+  }
+
+  public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    return sectioningWrapper.titleForHeaderInSection(section)
+  }
+
+  public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+    return sectioningWrapper.sectionIndexTitles
+  }
+
+  public override func tableView(_ tableView: UITableView,
+                                 sectionForSectionIndexTitle title: String,
+                                 at index: Int) -> Int {
+    return sectioningWrapper.sectionForSectionIndexTitle(title, at: index)
   }
 
   public override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
     return 75
   }
 
-  public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
-    guard !self.allItems.isEmpty else { return nil }
-    guard visibleSectionIndexTitles.count > 2 else {
-      return nil
-    }
-    return visibleSectionIndexTitles
-  }
-
-  public override func tableView(_ tableView: UITableView,
-                                 sectionForSectionIndexTitle title: String,
-                                 at index: Int) -> Int {
-    return sectionIndexTitles.index(of: title) ?? -1
-  }
-
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    if let selectedIndexPath = tableView.indexPathForSelectedRow {
-      self.delegate?.movieListController(self, didSelect: item(for: selectedIndexPath))
-    }
+    self.delegate?.movieListController(self, didSelect: sectioningWrapper.item(at: indexPath))
   }
 }
 
@@ -188,7 +154,8 @@ extension MovieListController: UISearchResultsUpdating {
     let searchText = searchController.searchBar.text ?? ""
     let lowercasedSearchText = searchText.lowercased()
     resultsController.searchText = searchText
-    resultsController.items = allItems.filter { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
+    resultsController.items = sectioningWrapper.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
+                                               .sorted { titleSortingStrategy.itemSorting(left: $0, right: $1) }
   }
 }
 
@@ -208,5 +175,64 @@ extension MovieListController {
       })
     }
     self.present(controller, animated: true)
+  }
+}
+
+private class SectioningWrapper {
+  private var allItems = [MediaItem]()
+  private var sectionItems = [String: [MediaItem]]()
+  private var internalSectionIndexTitles = [String]()
+  private var visibleSectionIndexTitles = [String]()
+  private var sectionTitles = [String]()
+
+  init(_ items: [MediaItem], sortingStrategy: SectionSortingStrategy) {
+    allItems = items.sorted(by: SortDescriptor.title.makeTableViewStrategy().itemSorting)
+    sectionItems = [String: [MediaItem]]()
+    for item in allItems {
+      let sectionIndexTitle = sortingStrategy.sectionIndexTitle(for: item)
+      if sectionItems[sectionIndexTitle] == nil {
+        sectionItems[sectionIndexTitle] = [MediaItem]()
+      }
+      sectionItems[sectionIndexTitle]!.append(item)
+    }
+    for key in sectionItems.keys {
+      sectionItems[key]!.sort(by: sortingStrategy.itemSorting)
+    }
+    internalSectionIndexTitles = Array(sectionItems.keys)
+    internalSectionIndexTitles.sort(by: sortingStrategy.sectionIndexTitleSorting)
+    visibleSectionIndexTitles = sortingStrategy.refineSectionIndexTitles(internalSectionIndexTitles)
+    sectionTitles = internalSectionIndexTitles.map { sortingStrategy.sectionTitle(for: $0) }
+  }
+
+  func item(at indexPath: IndexPath) -> MediaItem {
+    return sectionItems[internalSectionIndexTitles[indexPath.section]]![indexPath.row]
+  }
+
+  var numberOfSections: Int {
+    return internalSectionIndexTitles.count
+  }
+
+  func numberOfRowsInSection(_ section: Int) -> Int {
+    return sectionItems[internalSectionIndexTitles[section]]!.count
+  }
+
+  func titleForHeaderInSection(_ section: Int) -> String? {
+    return sectionTitles[section]
+  }
+
+  lazy var sectionIndexTitles: [String]? = {
+    guard !self.allItems.isEmpty else { return nil }
+    guard visibleSectionIndexTitles.count > 2 else {
+      return nil
+    }
+    return visibleSectionIndexTitles
+  }()
+
+  func sectionForSectionIndexTitle(_ title: String, at index: Int) -> Int {
+    return internalSectionIndexTitles.index(of: title) ?? -1
+  }
+
+  func filtered(by filter: (MediaItem) -> Bool) -> [MediaItem] {
+    return allItems.filter { filter($0) }
   }
 }
