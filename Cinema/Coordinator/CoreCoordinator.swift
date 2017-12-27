@@ -17,13 +17,16 @@ class CoreCoordinator: CustomPresentableCoordinator {
   private let searchTmdbCoordinator: SearchTmdbCoordinator
 
   init(dependencies: Dependencies) {
-    libraryContentCoordinator = LibraryContentCoordinator(title: NSLocalizedString("library", comment: ""),
+    let libraryContentNav = UINavigationController()
+    libraryContentCoordinator = LibraryContentCoordinator(navigationController: libraryContentNav,
+                                                          title: NSLocalizedString("library", comment: ""),
                                                           dependencies: dependencies)
-    libraryContentCoordinator.rootViewController.tabBarItem = UITabBarItem(
+    libraryContentNav.tabBarItem = UITabBarItem(
         title: NSLocalizedString("library", comment: ""),
         image: #imageLiteral(resourceName: "Tab-Library-normal"),
         selectedImage: #imageLiteral(resourceName: "Tab-Library-selected")
     )
+    libraryContentCoordinator.presentRootViewController()
 
     searchTmdbCoordinator = SearchTmdbCoordinator(dependencies: dependencies)
     searchTmdbCoordinator.rootViewController.tabBarItem = UITabBarItem(
@@ -32,7 +35,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
         selectedImage: #imageLiteral(resourceName: "Tab-AddItem-selected")
     )
 
-    tabBarController.viewControllers = [libraryContentCoordinator.rootViewController,
+    tabBarController.viewControllers = [libraryContentNav,
                                         searchTmdbCoordinator.rootViewController]
   }
 }

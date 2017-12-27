@@ -2,12 +2,9 @@ import Dispatch
 import Foundation
 import UIKit
 
-class LibraryContentCoordinator: CustomPresentableCoordinator {
+class LibraryContentCoordinator: AutoPresentableCoordinator {
   typealias Dependencies = LibraryDependency & MovieDbDependency
 
-  var rootViewController: UIViewController {
-    return navigationController
-  }
   // other properties
   private let dependencies: Dependencies
 
@@ -19,18 +16,20 @@ class LibraryContentCoordinator: CustomPresentableCoordinator {
   private var itemDetailsCoordinator: ItemDetailsCoordinator?
   private var editItemCoordinator: EditItemCoordinator?
 
-  init(title: String, dependencies: Dependencies) {
+  init(navigationController: UINavigationController, title: String, dependencies: Dependencies) {
     self.dependencies = dependencies
-    // swiftlint:disable force_cast
-    self.navigationController = UIStoryboard.movieList.instantiateInitialViewController() as! UINavigationController
-    self.movieListController = navigationController.topViewController! as! MovieListController
-    // swiftlint:enable force_cast
+    self.navigationController = navigationController
+    self.movieListController = UIStoryboard.movieList.instantiate(MovieListController.self)
     movieListController.delegate = self
     movieListController.title = title
     let posterProvider = MovieDbPosterProvider(dependencies.movieDb)
     movieListController.cellConfiguration = StandardMediaItemCellConfig(posterProvider: posterProvider)
     movieListController.items = dependencies.library.mediaItems { _ in true }
     dependencies.library.delegates.add(self)
+  }
+
+  func presentRootViewController() {
+    self.navigationController.pushViewController(movieListController, animated: true)
   }
 }
 
