@@ -46,6 +46,7 @@ class GenreListController: UITableViewController {
 
     enum Image {
       case unknown
+      case loading
       case available(UIImage)
       case missing
     }
@@ -57,6 +58,7 @@ class GenreListController: UITableViewController {
 extension GenreListController {
   override func viewDidLoad() {
     super.viewDidLoad()
+    tableView.prefetchDataSource = self
     self.refreshControl!.addTarget(self, action: #selector(handleRefresh(_:)), for: .valueChanged)
     reload()
   }
@@ -119,7 +121,7 @@ extension GenreListController {
 
 // MARK: - Table View
 
-extension GenreListController {
+extension GenreListController: UITableViewDataSourcePrefetching {
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     return viewModel.count
   }
@@ -136,6 +138,28 @@ extension GenreListController {
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     self.delegate?.genreListController(self, didSelectGenre: viewModel[indexPath.row].id)
+  }
+
+  func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+    for indexPath in indexPaths {
+      let genre = viewModel[indexPath.row]
+      if case Genre.Image.unknown = genre.image {
+        genre.image = .loading
+        DispatchQueue.global(qos: .background).async {
+          let backdrop = self.genreImageProvider.genreImage(for: genre.id)
+          DispatchQueue.main.async {
+            if let backdropImage = backdrop {
+              genre.image = .available(backdropImage)
+              if let cell = tableView.cellForRow(at: indexPath) as? GenreCell {
+                cell.configure(for: genre, genreImageProvider: self.genreImageProvider)
+              }
+            } else {
+              genre.image = .missing
+            }
+          }
+        }
+      }
+    }
   }
 }
 
@@ -170,12 +194,8 @@ class GenreCell: UITableViewCell {
   private func configureBackdrop(genre: GenreListController.Genre, genreImageProvider: GenreImageProvider) {
     switch genre.image {
       case .unknown:
-        genreNameLabel.textColor = #colorLiteral(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
-        genreNameLabel.layer.shadowOpacity = 0.0
-        backdropImageView.image = nil
-        backdropImageView.backgroundColor = .missingArtworkBackground
-        scrim.isHidden = true
-        activityIndicator.startAnimating()
+        configureBackdropForUnknownOrLoadingImageState()
+        genre.image = .loading
         var workItem: DispatchWorkItem?
         workItem = DispatchWorkItem {
           let backdrop = genreImageProvider.genreImage(for: genre.id)
@@ -193,6 +213,8 @@ class GenreCell: UITableViewCell {
         }
         self.workItem = workItem
         DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
+      case .loading:
+        configureBackdropForUnknownOrLoadingImageState()
       case let .available(genreImage):
         genreNameLabel.textColor = .white
         genreNameLabel.layer.shadowOpacity = 1.0
@@ -207,6 +229,15 @@ class GenreCell: UITableViewCell {
         backdropImageView.backgroundColor = .missingArtworkBackground
         scrim.isHidden = true
     }
+  }
+
+  private func configureBackdropForUnknownOrLoadingImageState() {
+    genreNameLabel.textColor = #colorLiteral(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
+    genreNameLabel.layer.shadowOpacity = 0.0
+    backdropImageView.image = nil
+    backdropImageView.backgroundColor = .missingArtworkBackground
+    scrim.isHidden = true
+    activityIndicator.startAnimating()
   }
 
   override func prepareForReuse() {
