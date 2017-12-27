@@ -121,7 +121,7 @@ extension AppCoordinator {
           controller.secondaryText = .localizedStringWithFormat(format, addedItems.count)
         case let .error(error):
           controller.primaryText = NSLocalizedString("import.failed", comment: "")
-          controller.secondaryText = Utils.localizedErrorMessage(for: error)
+          controller.secondaryText = L10n.localizedErrorMessage(for: error)
       }
     }
     controller.primaryText = NSLocalizedString("import.progress", comment: "")

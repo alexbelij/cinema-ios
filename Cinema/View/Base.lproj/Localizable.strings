@@ -7,7 +7,6 @@
 "addItem.title" = "Add Movie";
 "cancel" = "Cancel";
 "continue" = "Continue";
-"details.loading" = "Loading…";
 "details.missing.certification" = "No certification available.";
 "details.missing.genre" = "No genre available.";
 "details.missing.overview" = "No overview available.";
@@ -42,12 +41,14 @@
 "genre.tvMovie" = "TV Movie";
 "genre.war" = "War";
 "genre.western" = "Western";
+"genres" = "Genres";
 "import.failed" = "Oh, snap!";
 "import.succeeded" = "Update completed.";
 "import.progress" = "Updating your library…";
 "library" = "Library";
 "library.empty" = "Your library is empty.";
 "library.search.placeholder" = "Search titles";
+"loading" = "Loading…";
 "maintenance.failed" = "Your library could not be updated.";
 "maintenance.intention" = "To make the app better for you, we need to update your library.";
 "maintenance.start" = "Start Update";

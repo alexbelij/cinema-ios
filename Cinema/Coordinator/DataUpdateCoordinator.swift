@@ -34,7 +34,7 @@ class DataUpdateCoordinator: CustomPresentableCoordinator {
         maintenanceController.primaryText = NSLocalizedString("maintenance.succeeded", comment: "")
       case let .error(error):
         maintenanceController.primaryText = NSLocalizedString("maintenance.failed", comment: "")
-        maintenanceController.secondaryText = Utils.localizedErrorMessage(for: error)
+        maintenanceController.secondaryText = L10n.localizedErrorMessage(for: error)
     }
   }
 }

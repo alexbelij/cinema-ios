@@ -11,6 +11,8 @@ protocol MovieDbClient {
 
   func poster(for id: Int, size: PosterSize) -> UIImage?
 
+  func backdrop(for id: Int, size: BackdropSize) -> UIImage?
+
   func overview(for id: Int) -> String?
 
   func certification(for id: Int) -> String?
@@ -50,6 +52,19 @@ public enum PosterSize: String {
       case 186...342: self = .w342
       case 343...500: self = .w500
       default:        self = .w780
+    }
+  }
+}
+
+public enum BackdropSize: String {
+  case w300, w780, w1280, original
+
+  init(minWidth: Int, scaleFactor: CGFloat = UIScreen.main.scale) {
+    switch minWidth * Int(scaleFactor) {
+      case 0...300:    self =  .w300
+      case 301...780:  self =  .w780
+      case 781...1280: self = .w1280
+      default:         self = .w1280
     }
   }
 }

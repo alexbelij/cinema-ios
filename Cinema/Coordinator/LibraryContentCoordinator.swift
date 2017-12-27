@@ -2,14 +2,20 @@ import Dispatch
 import Foundation
 import UIKit
 
-class LibraryContentCoordinator: CustomPresentableCoordinator {
+protocol LibraryContentCoordinatorDelegate: class {
+  func libraryContentCoordinatorDidDismiss(_ coordinator: LibraryContentCoordinator)
+}
+
+class LibraryContentCoordinator: AutoPresentableCoordinator {
   typealias Dependencies = LibraryDependency & MovieDbDependency
 
-  var rootViewController: UIViewController {
-    return navigationController
-  }
+  // coordinator stuff
+  weak var delegate: LibraryContentCoordinatorDelegate?
+
   // other properties
   private let dependencies: Dependencies
+  private let contentFilter: (MediaItem) -> Bool
+  var dismissWhenEmpty = false
 
   // managed controllers
   private let navigationController: UINavigationController
@@ -19,17 +25,24 @@ class LibraryContentCoordinator: CustomPresentableCoordinator {
   private var itemDetailsCoordinator: ItemDetailsCoordinator?
   private var editItemCoordinator: EditItemCoordinator?
 
-  init(dependencies: Dependencies) {
+  init(navigationController: UINavigationController,
+       title: String,
+       contentFilter: @escaping (MediaItem) -> Bool,
+       dependencies: Dependencies) {
     self.dependencies = dependencies
-    // swiftlint:disable force_cast
-    self.navigationController = UIStoryboard.movieList.instantiateInitialViewController() as! UINavigationController
-    self.movieListController = navigationController.topViewController! as! MovieListController
-    // swiftlint:enable force_cast
+    self.contentFilter = contentFilter
+    self.navigationController = navigationController
+    self.movieListController = UIStoryboard.movieList.instantiate(MovieListController.self)
     movieListController.delegate = self
+    movieListController.title = title
     let posterProvider = MovieDbPosterProvider(dependencies.movieDb)
     movieListController.cellConfiguration = StandardMediaItemCellConfig(posterProvider: posterProvider)
-    movieListController.items = dependencies.library.mediaItems { _ in true }
+    movieListController.items = dependencies.library.mediaItems(where: contentFilter)
     dependencies.library.delegates.add(self)
+  }
+
+  func presentRootViewController() {
+    self.navigationController.pushViewController(movieListController, animated: true)
   }
 }
 
@@ -54,6 +67,10 @@ extension LibraryContentCoordinator: MovieListControllerDelegate {
     editItemCoordinator = EditItemCoordinator(item: detailItem, dependencies: dependencies)
     editItemCoordinator!.delegate = self
     self.navigationController.present(editItemCoordinator!.rootViewController, animated: true)
+  }
+
+  func movieListControllerDidDismiss(_ controller: MovieListController) {
+    self.delegate?.libraryContentCoordinatorDidDismiss(self)
   }
 }
 
@@ -97,7 +114,7 @@ extension LibraryContentCoordinator: EditItemCoordinatorDelegate {
         fatalError("tried to edit item which is not in library: \(detailItem)")
       default:
         DispatchQueue.main.async {
-          let alert = UIAlertController(title: Utils.localizedErrorMessage(for: error),
+          let alert = UIAlertController(title: L10n.localizedErrorMessage(for: error),
                                         message: nil,
                                         preferredStyle: .alert)
           alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
@@ -116,10 +133,43 @@ extension LibraryContentCoordinator: EditItemCoordinatorDelegate {
 
 extension LibraryContentCoordinator: MediaLibraryDelegate {
   func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
-    DispatchQueue.global(qos: .background).async {
-      let items = library.mediaItems { _ in true }
+    var movieListItems = movieListController.items
+
+    // updated movies
+    if !contentUpdate.updatedItems.isEmpty {
+      for (id, item) in contentUpdate.updatedItems {
+        guard let index = movieListItems.index(where: { $0.id == id }) else { continue }
+        movieListItems.remove(at: index)
+        movieListItems.insert(item, at: index)
+      }
       DispatchQueue.main.async {
-        self.movieListController.items = items
+        if let itemDetailsCoordinator = self.itemDetailsCoordinator,
+           let updatedDetailItem = contentUpdate.updatedItems[itemDetailsCoordinator.detailItem.id] {
+          self.itemDetailsCoordinator!.updateNonRemoteProperties(with: updatedDetailItem)
+        }
+      }
+    }
+
+    // new movies
+    movieListItems.append(contentsOf: contentUpdate.addedItems.filter(self.contentFilter))
+
+    // removed movies
+    if !contentUpdate.removedItems.isEmpty {
+      for item in contentUpdate.removedItems {
+        guard let index = movieListItems.index(of: item) else { continue }
+        movieListItems.remove(at: index)
+      }
+    }
+
+    DispatchQueue.main.async {
+      // commit changes only when controller is not being dismissed anyway
+      if movieListItems.isEmpty && self.dismissWhenEmpty {
+        self.movieListController.onViewDidAppear = { [weak self] in
+          guard let `self` = self else { return }
+          self.navigationController.popViewController(animated: true)
+        }
+      } else {
+        self.movieListController.items = movieListItems
       }
     }
   }
