@@ -26,10 +26,10 @@
             </objects>
             <point key="canvasLocation" x="1478" y="127"/>
         </scene>
-        <!--Edit Item Table View Controller-->
+        <!--Edit Item Controller-->
         <scene sceneID="IEv-md-RNt">
             <objects>
-                <tableViewController id="dNn-o6-z2I" customClass="EditItemTableViewController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController id="dNn-o6-z2I" customClass="EditItemController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" allowsSelection="NO" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="tCM-ap-dJj">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

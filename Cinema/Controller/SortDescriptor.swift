@@ -3,7 +3,7 @@ import Foundation
 enum SortDescriptor {
   case title, runtime, year
 
-  func makeTableViewStrategy() -> TableViewSortingStrategy {
+  func makeTableViewStrategy() -> SectionSortingStrategy {
     switch self {
       case .title:
         guard let path = Bundle.main.path(forResource: "SortPrefixes", ofType: "plist"),
@@ -26,7 +26,7 @@ enum SortDescriptor {
   }
 }
 
-private struct TitleSortingStrategy: TableViewSortingStrategy {
+private struct TitleSortingStrategy: SectionSortingStrategy {
 
   private let allSectionIndexTitles = ["#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
                                        "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
@@ -85,7 +85,7 @@ private struct TitleSortingStrategy: TableViewSortingStrategy {
 
 }
 
-private struct RuntimeSortingStrategy: TableViewSortingStrategy {
+private struct RuntimeSortingStrategy: SectionSortingStrategy {
 
   private let unknownSymbol = "?"
 
@@ -133,7 +133,7 @@ private struct RuntimeSortingStrategy: TableViewSortingStrategy {
   }
 }
 
-private struct YearSortingStrategy: TableViewSortingStrategy {
+private struct YearSortingStrategy: SectionSortingStrategy {
 
   private let unknownSymbol = "?"
 

@@ -7,6 +7,7 @@
 "addItem.title" = "Film hinzufügen";
 "cancel" = "Abbrechen";
 "continue" = "Fortfahren";
+"details.loading" = "Lädt …";
 "details.missing.certification" = "Keine Altersfreigabe verfügbar.";
 "details.missing.genre" = "Kein Genre verfügbar.";
 "details.missing.overview" = "Keine Beschreibung vorhanden.";
@@ -15,6 +16,7 @@
 "discard" = "Verwerfen";
 "edit.deleteMovie" = "Film löschen";
 "edit.noTitleAlert" = "Ein Film braucht einen Titel.";
+"edit.rejected.title" = "Hoppla!";
 "edit.sectionHeader.subtitle" = "Untertitel (optional)";
 "edit.sectionHeader.title" = "Titel";
 "error.genericError" = "Es ist ein unbekannter Fehler aufgetreten.";

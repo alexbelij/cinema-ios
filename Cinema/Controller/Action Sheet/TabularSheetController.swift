@@ -79,15 +79,10 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
 
   public override func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
-    let bottomInset: CGFloat
-    if #available(iOS 11.0, *) {
-      bottomInset = presentingViewController!.view.safeAreaInsets.bottom
-    } else {
-      bottomInset = 0
-    }
     let bounds = presentingViewController!.view.bounds
     view.frame = CGRect(x: (bounds.width - self.contentWidth) / 2,
-                        y: bounds.origin.y + bounds.height - self.contentHeight - bottomInset,
+                        y: bounds.origin.y + bounds.height - self.contentHeight
+                           - presentingViewController!.view.safeAreaInsets.bottom,
                         width: contentWidth,
                         height: contentHeight)
   }
@@ -151,10 +146,6 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
 }
 
 // MARK: - Cell Configuration
-
-public protocol CellDequeuing {
-  func dequeueReusableCell<CellType: UITableViewCell>(_ cellType: CellType.Type) -> CellType
-}
 
 public protocol TabularSheetCellConfiguration: class {
   associatedtype SheetItem

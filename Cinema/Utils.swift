@@ -106,8 +106,9 @@ extension Utils {
 // MARK: - Other Extensions
 
 extension UIStoryboard {
-  static var main = UIStoryboard(name: "Main", bundle: nil)
-  static var addItem = UIStoryboard(name: "AddItem", bundle: nil)
+  static var movieList = UIStoryboard(name: "MovieList", bundle: nil)
+  static var searchTmdb = UIStoryboard(name: "SearchTmdb", bundle: nil)
+  static var popularMovies = UIStoryboard(name: "PopularMovies", bundle: nil)
   static var editItem = UIStoryboard(name: "EditItem", bundle: nil)
   static var maintenance = UIStoryboard(name: "Maintenance", bundle: nil)
 
@@ -141,4 +142,10 @@ extension UIColor {
   static let posterBorder = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2)
   static let dimBackground = UIColor(red: 0, green: 0, blue: 0, alpha: 0.4)
   // swiftlint:enable object_literal
+}
+
+extension String {
+  var nilIfEmptyString: String? {
+    return self.isEmpty ? nil : self
+  }
 }
