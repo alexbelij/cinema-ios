@@ -121,11 +121,31 @@ extension LibraryContentCoordinator: EditItemCoordinatorDelegate {
 
 extension LibraryContentCoordinator: MediaLibraryDelegate {
   func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
-    DispatchQueue.global(qos: .background).async {
-      let items = library.mediaItems(where: self.contentFilter)
-      DispatchQueue.main.async {
-        self.movieListController.items = items
+    var movieListItems = movieListController.items
+
+    // updated movies
+    if !contentUpdate.updatedItems.isEmpty {
+      for (id, item) in contentUpdate.updatedItems {
+        guard let index = movieListItems.index(where: { $0.id == id }) else { continue }
+        movieListItems.remove(at: index)
+        movieListItems.insert(item, at: index)
       }
+    }
+
+    // new movies
+    movieListItems.append(contentsOf: contentUpdate.addedItems.filter(self.contentFilter))
+
+    // removed movies
+    if !contentUpdate.removedItems.isEmpty {
+      for item in contentUpdate.removedItems {
+        guard let index = movieListItems.index(of: item) else { continue }
+        movieListItems.remove(at: index)
+      }
+    }
+
+    // commit changes
+    DispatchQueue.main.async {
+      self.movieListController.items = movieListItems
     }
   }
 }
