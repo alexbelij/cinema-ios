@@ -7,6 +7,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 
   // other properties
   private let dependencies: Dependencies
+  private let contentFilter: (MediaItem) -> Bool
 
   // managed controllers
   private let navigationController: UINavigationController
@@ -16,15 +17,19 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
   private var itemDetailsCoordinator: ItemDetailsCoordinator?
   private var editItemCoordinator: EditItemCoordinator?
 
-  init(navigationController: UINavigationController, title: String, dependencies: Dependencies) {
+  init(navigationController: UINavigationController,
+       title: String,
+       contentFilter: @escaping (MediaItem) -> Bool,
+       dependencies: Dependencies) {
     self.dependencies = dependencies
+    self.contentFilter = contentFilter
     self.navigationController = navigationController
     self.movieListController = UIStoryboard.movieList.instantiate(MovieListController.self)
     movieListController.delegate = self
     movieListController.title = title
     let posterProvider = MovieDbPosterProvider(dependencies.movieDb)
     movieListController.cellConfiguration = StandardMediaItemCellConfig(posterProvider: posterProvider)
-    movieListController.items = dependencies.library.mediaItems { _ in true }
+    movieListController.items = dependencies.library.mediaItems(where: contentFilter)
     dependencies.library.delegates.add(self)
   }
 
@@ -117,7 +122,7 @@ extension LibraryContentCoordinator: EditItemCoordinatorDelegate {
 extension LibraryContentCoordinator: MediaLibraryDelegate {
   func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
     DispatchQueue.global(qos: .background).async {
-      let items = library.mediaItems { _ in true }
+      let items = library.mediaItems(where: self.contentFilter)
       DispatchQueue.main.async {
         self.movieListController.items = items
       }

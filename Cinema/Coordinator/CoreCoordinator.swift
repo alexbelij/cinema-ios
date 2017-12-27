@@ -20,6 +20,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
     let libraryContentNav = UINavigationController()
     libraryContentCoordinator = LibraryContentCoordinator(navigationController: libraryContentNav,
                                                           title: NSLocalizedString("library", comment: ""),
+                                                          contentFilter: { _ in true },
                                                           dependencies: dependencies)
     libraryContentNav.tabBarItem = UITabBarItem(
         title: NSLocalizedString("library", comment: ""),
