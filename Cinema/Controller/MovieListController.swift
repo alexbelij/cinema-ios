@@ -138,6 +138,7 @@ extension MovieListController {
   }
 
   public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+    guard !items.isEmpty else { return nil }
     return sectioningWrapper.sectionIndexTitles
   }
 
