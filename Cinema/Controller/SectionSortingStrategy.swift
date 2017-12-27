@@ -1,4 +1,4 @@
-protocol TableViewSortingStrategy {
+protocol SectionSortingStrategy {
 
   func sectionIndexTitle(for item: MediaItem) -> String
   func refineSectionIndexTitles(_: [String]) -> [String]
@@ -10,7 +10,7 @@ protocol TableViewSortingStrategy {
 
 }
 
-extension TableViewSortingStrategy {
+extension SectionSortingStrategy {
   func refineSectionIndexTitles(_ sections: [String]) -> [String] {
     return sections
   }

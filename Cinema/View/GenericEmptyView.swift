@@ -8,6 +8,13 @@ class GenericEmptyView: UIView {
     super.init(frame: frame)
   }
 
+  convenience init(accessory accessoryConfig: AccessoryConfig = .none,
+                   description textConfig: TextConfig = .none,
+                   action buttonConfig: ButtonConfig = .none) {
+    self.init()
+    self.configure(accessory: accessoryConfig, description: textConfig, action: buttonConfig)
+  }
+
   required init?(coder aDecoder: NSCoder) {
     fatalError("GenericEmptyView must be initialized using GenericEmptyView(frame:)")
   }
@@ -37,24 +44,13 @@ class GenericEmptyView: UIView {
     stackView.distribution = .fill
     stackView.spacing = 8.0
     addSubview(stackView)
-
-    if #available(iOS 11.0, *) {
-      NSLayoutConstraint.activate(
-          [
-            stackView.leftAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leftAnchor, constant: 15),
-            stackView.rightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.rightAnchor, constant: -15),
-            stackView.centerYAnchor.constraint(equalTo: self.centerYAnchor)
-          ]
-      )
-    } else {
-      NSLayoutConstraint.activate(
-          [
-            stackView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 15),
-            stackView.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -15),
-            stackView.centerYAnchor.constraint(equalTo: self.centerYAnchor)
-          ]
-      )
-    }
+    NSLayoutConstraint.activate(
+        [
+          stackView.leftAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leftAnchor, constant: 15),
+          stackView.rightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.rightAnchor, constant: -15),
+          stackView.centerYAnchor.constraint(equalTo: self.centerYAnchor)
+        ]
+    )
     return stackView
   }
 

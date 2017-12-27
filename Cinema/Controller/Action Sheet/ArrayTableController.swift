@@ -4,7 +4,6 @@ class ArrayTableController<SheetItem: SheetItemProtocol>: NSObject, UITableViewD
 
   private let sheetItemType: SheetItemType
   private let cellConfig: AnyTabularSheetCellConfiguration<SheetItem>
-  private let tableViewWrapper = TableViewWrapper()
   private unowned let presentingViewController: UIViewController
 
   init(sheetItemType: SheetItemType,
@@ -25,13 +24,11 @@ class ArrayTableController<SheetItem: SheetItemProtocol>: NSObject, UITableViewD
   }
 
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    self.tableViewWrapper.tableView = tableView
-    self.tableViewWrapper.indexPath = indexPath
     switch sheetItemType {
       case let .array(array):
-        return self.cellConfig.cell(for: array[indexPath.item], cellDequeuing: tableViewWrapper)
+        return self.cellConfig.cell(for: array[indexPath.item], cellDequeuing: tableView)
       case .cancel:
-        return self.cellConfig.cancelCell(cellDequeuing: tableViewWrapper)
+        return self.cellConfig.cancelCell(cellDequeuing: tableView)
     }
   }
 
@@ -63,19 +60,5 @@ class ArrayTableController<SheetItem: SheetItemProtocol>: NSObject, UITableViewD
   enum SheetItemType {
     case array([SheetItem])
     case cancel
-  }
-}
-
-private class TableViewWrapper: CellDequeuing {
-  fileprivate var tableView: UITableView?
-  fileprivate var indexPath: IndexPath?
-
-  func dequeueReusableCell<CellType: UITableViewCell>(_ cellType: CellType.Type) -> CellType {
-    guard let tableView = self.tableView, let indexPath = self.indexPath else { preconditionFailure() }
-    let identifier = String(describing: cellType)
-    guard let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath) as? CellType else {
-      preconditionFailure("cell with identifier \(identifier) is not of type \(CellType.self)")
-    }
-    return cell
   }
 }

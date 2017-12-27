@@ -15,6 +15,7 @@
 "discard" = "Verwerfen";
 "edit.deleteMovie" = "Film löschen";
 "edit.noTitleAlert" = "Ein Film braucht einen Titel.";
+"edit.rejected.title" = "Hoppla!";
 "edit.sectionHeader.subtitle" = "Untertitel (optional)";
 "edit.sectionHeader.title" = "Titel";
 "error.genericError" = "Es ist ein unbekannter Fehler aufgetreten.";
@@ -40,12 +41,14 @@
 "genre.tvMovie" = "TV-Film";
 "genre.war" = "Kriegsfilm";
 "genre.western" = "Western";
+"genres" = "Genres";
 "import.failed" = "Hoppla!";
 "import.succeeded" = "Aktualisierung abgeschlossen.";
 "import.progress" = "Deine Mediathek wird aktualisiert …";
 "library" = "Mediathek";
 "library.empty" = "Deine Mediathek ist leer.";
 "library.search.placeholder" = "Titel durchsuchen";
+"loading" = "Laden …";
 "maintenance.failed" = "Deine Mediathek konnte nicht aktualisiert werden.";
 "maintenance.intention" = "Um die App für dich zu verbessern, müssen wir deine Mediathek aktualisieren.";
 "maintenance.start" = "Aktualisierung starten";

@@ -36,7 +36,8 @@ class MaintenanceViewController: UIViewController {
                            initiation: ActionInitiation,
                            completion: @escaping (ActionResult<Result>) -> Void)
       where Action: MaintenanceAction, Action.ResultType == Result {
-    self.performActionFunction = {
+    self.performActionFunction = { [weak self] in
+      guard let `self` = self else { return }
       action.performAction { result in
         completion(result)
         DispatchQueue.main.async {

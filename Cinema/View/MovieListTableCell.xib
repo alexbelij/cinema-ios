@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="MovieListTableCell" rowHeight="75" id="5Xu-0J-t5t" customClass="MovieListTableCell" customModule="Cinema" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="75"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="5Xu-0J-t5t" id="1oG-2F-Q1b">
+                <rect key="frame" x="0.0" y="0.0" width="341" height="74.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="e8U-0d-ply">
+                        <rect key="frame" x="16" y="0.0" width="325" height="74.5"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" verticalHuggingPriority="252" image="GenericPoster-w92" translatesAutoresizingMaskIntoConstraints="NO" id="mYL-DM-gdX">
+                                <rect key="frame" x="0.0" y="3" width="46" height="69"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="mYL-DM-gdX" secondAttribute="height" multiplier="2:3" id="UhR-ud-MT4"/>
+                                    <constraint firstAttribute="height" constant="69" id="bgZ-V3-HLi"/>
+                                </constraints>
+                            </imageView>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="UGw-ZD-9jj">
+                                <rect key="frame" x="54" y="19.5" width="271" height="36"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Kmr-cD-uhK">
+                                        <rect key="frame" x="0.0" y="0.0" width="271" height="19.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="123 minutes" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vpp-ee-pI3">
+                                        <rect key="frame" x="0.0" y="21.5" width="271" height="14.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                        <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                    </stackView>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="e8U-0d-ply" firstAttribute="top" secondItem="1oG-2F-Q1b" secondAttribute="top" id="1RA-BT-1MT"/>
+                    <constraint firstItem="e8U-0d-ply" firstAttribute="leading" secondItem="1oG-2F-Q1b" secondAttribute="leadingMargin" id="8MQ-s8-Xyo"/>
+                    <constraint firstAttribute="trailing" secondItem="e8U-0d-ply" secondAttribute="trailing" id="Wib-6S-D4q"/>
+                    <constraint firstAttribute="bottom" secondItem="e8U-0d-ply" secondAttribute="bottom" id="q0u-QR-xXX"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="posterView" destination="mYL-DM-gdX" id="D4K-4R-S4i"/>
+                <outlet property="runtimeLabel" destination="vpp-ee-pI3" id="aHw-iz-Iuz"/>
+                <outlet property="titleLabel" destination="Kmr-cD-uhK" id="1I1-vc-YBl"/>
+            </connections>
+            <point key="canvasLocation" x="26.5" y="-91.5"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="GenericPoster-w92" width="92" height="138"/>
+    </resources>
+</document>
