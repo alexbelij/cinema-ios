@@ -2,13 +2,19 @@
 
 All notable changes to the project will be documented in this file.
 
-## v1.3.4 - 2017-12-20
+## v1.4 - 2017-12-27
+
+### Added
+- genre tab
 
 ### Changed
+- dropped iOS 10 support
+- rewritten with coordinator layer on top of MVC
 - 'a' and 'an' articles (as prefix) are ignored in title sorting
 
 ### Fixed
 - text is drawn on top of each other in empty state views
+- launch screen bars misaligned on iPhone X
 
 ## v1.3.3 - 2017-12-10
 
