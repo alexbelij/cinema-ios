@@ -19,6 +19,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     self.language = language
     self.country = country
     self.cache = cache
+    TMDBConfig.apikey = TMDBSwiftWrapper.apiKey
   }
 
   func poster(for id: Int, size: PosterSize) -> UIImage? {
@@ -54,7 +55,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     let certificationJson = cache.string(for: "certification-\(id)") {
       var jsonString: String?
       waitUntil { done in
-        MovieMDB.release_dates(TMDBSwiftWrapper.apiKey, movieID: id) { apiReturn, releaseDates1 in
+        MovieMDB.release_dates(movieID: id) { apiReturn, releaseDates1 in
           if let json = apiReturn.json, apiReturn.json!["results"].exists(),
              let releaseDates1 = releaseDates1 {
             jsonString = json["results"].rawString()
@@ -87,7 +88,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     let movieJson = cache.string(for: "movie-\(id)-\(language.rawValue)") {
       var jsonString: String?
       waitUntil { done in
-        MovieMDB.movie(TMDBSwiftWrapper.apiKey, movieID: id, language: language.rawValue) { apiReturn, movie in
+        MovieMDB.movie(movieID: id, language: language.rawValue) { apiReturn, movie in
           if let json = apiReturn.json, apiReturn.json!["id"].exists() {
             jsonString = json.rawString()
             createdMovie = movie
@@ -106,8 +107,7 @@ class TMDBSwiftWrapper: MovieDbClient {
   func searchMovies(searchText: String) -> [PartialMediaItem] {
     var value = [PartialMediaItem]()
     waitUntil { done in
-      SearchMDB.movie(TMDBSwiftWrapper.apiKey,
-                      query: searchText,
+      SearchMDB.movie(query: searchText,
                       language: language.rawValue,
                       page: 1,
                       includeAdult: false,
@@ -136,7 +136,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     return PagingSequence<PartialMediaItem> { page -> [PartialMediaItem]? in
       var movies = [PartialMediaItem]()
       self.waitUntil { done in
-        MovieMDB.popular(TMDBSwiftWrapper.apiKey, language: self.language.rawValue, page: page) { _, result in
+        MovieMDB.popular(language: self.language.rawValue, page: page) { _, result in
           if let result = result {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd"
