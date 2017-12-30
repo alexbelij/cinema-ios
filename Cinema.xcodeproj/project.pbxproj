@@ -283,7 +283,6 @@
 			isa = PBXGroup;
 			children = (
 				CB65D7A71F8A102400457386 /* Action Sheet */,
-				CBB569661EA4D6A2005F7BA7 /* AppDelegate.swift */,
 				CBED941F1F6BF6C200FA4045 /* MovieListController.swift */,
 				CBED94241F6BF6C200FA4045 /* SectionSortingStrategy.swift */,
 				CBED94231F6BF6C200FA4045 /* SortDescriptor.swift */,
@@ -305,6 +304,7 @@
 			children = (
 				CBF3CE5F1FF2366700F4B6C0 /* Coordinator.swift */,
 				CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */,
+				CBB569661EA4D6A2005F7BA7 /* AppDelegate.swift */,
 				CBF3CE611FF2369B00F4B6C0 /* AppCoordinator.swift */,
 				CBF3CE631FF2385C00F4B6C0 /* CoreCoordinator.swift */,
 				CBF3CE651FF23A4300F4B6C0 /* DataUpdateCoordinator.swift */,
