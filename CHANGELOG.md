@@ -28,7 +28,7 @@ All notable changes to the project will be documented in this file.
 
 ## v1.3.2 - 2017-10-11
 
-## Changed
+### Changed
 - sorting selection via alert sheet
 
 ## v1.3.1 - 2017-09-26
