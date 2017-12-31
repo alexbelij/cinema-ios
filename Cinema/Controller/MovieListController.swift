@@ -17,6 +17,7 @@ class MovieListItem {
 
   enum Image {
     case unknown
+    case loading
     case available(UIImage)
     case unavailable
   }
@@ -64,6 +65,7 @@ extension MovieListController {
   override func viewDidLoad() {
     super.viewDidLoad()
     tableView.register(UINib(nibName: "MovieListTableCell", bundle: nil), forCellReuseIdentifier: "MovieListTableCell")
+    tableView.prefetchDataSource = self
     tableView.sectionIndexBackgroundColor = UIColor.clear
     definesPresentationContext = true
     navigationItem.hidesSearchBarWhenScrolling = false
@@ -122,7 +124,7 @@ extension MovieListController {
 
 // MARK: - Table View
 
-extension MovieListController {
+extension MovieListController: UITableViewDataSourcePrefetching {
   override func numberOfSections(in tableView: UITableView) -> Int {
     return sectioningWrapper.numberOfSections
   }
@@ -158,6 +160,28 @@ extension MovieListController {
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     self.delegate?.movieListController(self, didSelect: sectioningWrapper.item(at: indexPath).movie)
+  }
+
+  func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+    for indexPath in indexPaths {
+      let movieListItem = sectioningWrapper.item(at: indexPath)
+      if case MovieListItem.Image.unknown = movieListItem.image {
+        movieListItem.image = .loading
+        DispatchQueue.global(qos: .background).async {
+          let poster = self.posterProvider.poster(for: movieListItem.movie.id, size: PosterSize(minWidth: 46))
+          DispatchQueue.main.async {
+            if let posterImage = poster {
+              movieListItem.image = .available(posterImage)
+              if let cell = tableView.cellForRow(at: indexPath) as? MovieListTableCell {
+                cell.configure(for: movieListItem, posterProvider: self.posterProvider)
+              }
+            } else {
+              movieListItem.image = .unavailable
+            }
+          }
+        }
+      }
+    }
   }
 }
 
@@ -312,7 +336,8 @@ class MovieListTableCell: UITableViewCell {
   private func configurePoster(for item: MovieListItem, posterProvider: PosterProvider) {
     switch item.image {
       case .unknown:
-        posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
+        configurePosterForUnknownOrLoadingImageState()
+        item.image = .loading
         var workItem: DispatchWorkItem?
         workItem = DispatchWorkItem {
           let poster = posterProvider.poster(for: item.movie.id, size: PosterSize(minWidth: 46))
@@ -329,11 +354,17 @@ class MovieListTableCell: UITableViewCell {
         }
         self.workItem = workItem
         DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
+      case .loading:
+        configurePosterForUnknownOrLoadingImageState()
       case let .available(posterImage):
         posterView.image = posterImage
       case .unavailable:
         posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
     }
+  }
+
+  private func configurePosterForUnknownOrLoadingImageState() {
+    posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
   }
 
   override func prepareForReuse() {
