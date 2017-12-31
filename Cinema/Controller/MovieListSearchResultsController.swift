@@ -12,12 +12,7 @@ class MovieListSearchResultsController: UITableViewController {
     }
   }
   var onSelection: ((MediaItem) -> Void)?
-  var cellConfiguration: MediaItemCellConfig? {
-    didSet {
-      loadViewIfNeeded()
-      cellConfiguration?.registerCells(in: self.tableView)
-    }
-  }
+  var posterProvider: PosterProvider = EmptyPosterProvider()
   private lazy var emptyView = GenericEmptyView()
 
   convenience init() {
@@ -32,6 +27,15 @@ class MovieListSearchResultsController: UITableViewController {
       hideEmptyView()
       tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
     }
+  }
+}
+
+// MARK: - View Controller Lifecycle
+
+extension MovieListSearchResultsController {
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    tableView.register(UINib(nibName: "MovieListTableCell", bundle: nil), forCellReuseIdentifier: "MovieListTableCell")
   }
 }
 
@@ -64,10 +68,9 @@ extension MovieListSearchResultsController {
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    guard let config = self.cellConfiguration else {
-      fatalError("cell configuration has not been specified")
-    }
-    return config.cell(for: items[indexPath.row], cellDequeuing: tableView)
+    let cell = tableView.dequeueReusableCell(MovieListTableCell.self)
+    cell.configure(for: items[indexPath.row], posterProvider: posterProvider)
+    return cell
   }
 
   public override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

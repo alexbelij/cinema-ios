@@ -35,8 +35,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     self.movieListController = UIStoryboard.movieList.instantiate(MovieListController.self)
     movieListController.delegate = self
     movieListController.title = title
-    let posterProvider = MovieDbPosterProvider(dependencies.movieDb)
-    movieListController.cellConfiguration = StandardMediaItemCellConfig(posterProvider: posterProvider)
+    movieListController.posterProvider = MovieDbPosterProvider(dependencies.movieDb)
     movieListController.items = dependencies.library.mediaItems(where: contentFilter)
     dependencies.library.delegates.add(self)
   }
@@ -172,23 +171,5 @@ extension LibraryContentCoordinator: MediaLibraryDelegate {
         self.movieListController.items = movieListItems
       }
     }
-  }
-}
-
-class StandardMediaItemCellConfig: MediaItemCellConfig {
-  private let posterProvider: PosterProvider
-
-  init(posterProvider: PosterProvider) {
-    self.posterProvider = posterProvider
-  }
-
-  func registerCells(in cellRegistering: CellRegistering) {
-    cellRegistering.registerNibCell(MovieListTableCell.self, bundle: nil)
-  }
-
-  func cell(for item: MovieListItem, cellDequeuing: CellDequeuing) -> UITableViewCell {
-    let cell = cellDequeuing.dequeueReusableCell(MovieListTableCell.self)
-    cell.configure(for: item, posterProvider: posterProvider)
-    return cell
   }
 }
