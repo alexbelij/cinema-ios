@@ -29,6 +29,7 @@
 		CB0F41301F5C526B00095350 /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = CB0F41321F5C526B00095350 /* Localizable.stringsdict */; };
 		CB1A7B1E1F5C07B60091F993 /* Maintenance.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CB1A7B201F5C07B60091F993 /* Maintenance.storyboard */; };
 		CB370C1C1FFCFC710034BB2F /* GenericPages.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CB370C1B1FFCFC710034BB2F /* GenericPages.storyboard */; };
+		CB370C1F1FFD08270034BB2F /* PageCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB370C1E1FFD08270034BB2F /* PageCoordinator.swift */; };
 		CB4C40631FF2A63F00A6C32B /* SearchTmdbCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4C40621FF2A63F00A6C32B /* SearchTmdbCoordinator.swift */; };
 		CB4C40651FF2C65A00A6C32B /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */; };
 		CB65D7AB1F8A107F00457386 /* TabularSheetController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB65D7A81F8A103000457386 /* TabularSheetController.swift */; };
@@ -100,6 +101,7 @@
 		CB0F41331F5C526D00095350 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = de; path = de.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		CB1A7B1F1F5C07B60091F993 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Maintenance.storyboard; sourceTree = "<group>"; };
 		CB370C1B1FFCFC710034BB2F /* GenericPages.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = GenericPages.storyboard; sourceTree = "<group>"; };
+		CB370C1E1FFD08270034BB2F /* PageCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PageCoordinator.swift; sourceTree = "<group>"; };
 		CB4C40621FF2A63F00A6C32B /* SearchTmdbCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTmdbCoordinator.swift; sourceTree = "<group>"; };
 		CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
 		CB65D7A81F8A103000457386 /* TabularSheetController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabularSheetController.swift; sourceTree = "<group>"; };
@@ -326,6 +328,7 @@
 				CBF3CE671FF23E9700F4B6C0 /* EditItemCoordinator.swift */,
 				CBEA63421FF3953600830377 /* GenreListCoordinator.swift */,
 				CB4C40621FF2A63F00A6C32B /* SearchTmdbCoordinator.swift */,
+				CB370C1E1FFD08270034BB2F /* PageCoordinator.swift */,
 				816BFC5A4FCEC7B899C4E47E /* ImportCoordinator.swift */,
 			);
 			path = Coordinator;
@@ -515,6 +518,7 @@
 				CBF3CE6E1FF250BD00F4B6C0 /* LibraryContentCoordinator.swift in Sources */,
 				CBED94281F6BF80E00FA4045 /* SearchTmdbSearchResultsController.swift in Sources */,
 				CBED942C1F6BFB0E00FA4045 /* SortDescriptor.swift in Sources */,
+				CB370C1F1FFD08270034BB2F /* PageCoordinator.swift in Sources */,
 				816BF274AE17D0FDCEB2C994 /* MaintenanceAction.swift in Sources */,
 				816BFABF5256F0205876AE33 /* PropertyUpdateAction.swift in Sources */,
 				CBF3CE641FF2385C00F4B6C0 /* CoreCoordinator.swift in Sources */,
