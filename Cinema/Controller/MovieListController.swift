@@ -28,7 +28,7 @@ class MovieListController: UITableViewController {
   var items = [MediaItem]() {
     didSet {
       loadViewIfNeeded()
-      reloadListData()
+      setup()
     }
   }
 
@@ -69,7 +69,7 @@ extension MovieListController {
     tableView.sectionIndexBackgroundColor = UIColor.clear
     definesPresentationContext = true
     navigationItem.hidesSearchBarWhenScrolling = false
-    reloadListData()
+    setup()
   }
 
   override func viewDidAppear(_ animated: Bool) {
@@ -88,18 +88,22 @@ extension MovieListController {
 // MARK: - Data Management
 
 extension MovieListController {
-  private func reloadListData() {
-    sectioningWrapper = SectioningWrapper(items, sortingStrategy: sortDescriptor.makeTableViewStrategy())
-    tableView.reloadData()
+  private func setup() {
+    reloadListData()
     if items.isEmpty {
       showEmptyView()
     } else {
       hideEmptyView()
-      tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
       if searchController.isActive {
         updateSearchResults(for: searchController)
       }
     }
+  }
+
+  private func reloadListData() {
+    sectioningWrapper = SectioningWrapper(items, sortingStrategy: sortDescriptor.makeTableViewStrategy())
+    tableView.reloadData()
+    tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
   }
 }
 
