@@ -56,6 +56,9 @@ class MovieListController: UITableViewController {
   private let emptyLibraryView = GenericEmptyView(accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
                                                   description: .basic(NSLocalizedString("library.empty", comment: "")))
 
+  @IBOutlet private var summaryView: UIView!
+  @IBOutlet private var movieCountLabel: UILabel!
+
   var onViewDidAppear: (() -> Void)?
 }
 
@@ -93,12 +96,16 @@ extension MovieListController {
     if items.isEmpty {
       tableView.backgroundView = emptyLibraryView
       tableView.separatorStyle = .none
+      tableView.tableFooterView = nil
       sortButton.isEnabled = false
       searchController.isActive = false
       navigationItem.searchController = nil
     } else {
       tableView.backgroundView = nil
       tableView.separatorStyle = .singleLine
+      tableView.tableFooterView = summaryView
+      let format = NSLocalizedString("movieList.summary.movieCount", comment: "")
+      movieCountLabel.text = .localizedStringWithFormat(format, items.count)
       sortButton.isEnabled = true
       navigationItem.searchController = searchController
       if searchController.isActive {

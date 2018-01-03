@@ -2,6 +2,22 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>movieList.summary.movieCount</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@movies@</string>
+		<key>movies</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>1 Movie</string>
+			<key>other</key>
+			<string>%d Movies</string>
+		</dict>
+	</dict>
 	<key>import.succeeded.changes</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
