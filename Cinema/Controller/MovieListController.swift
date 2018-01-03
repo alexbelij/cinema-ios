@@ -91,9 +91,16 @@ extension MovieListController {
   private func setup() {
     reloadListData()
     if items.isEmpty {
-      showEmptyView()
+      tableView.backgroundView = emptyLibraryView
+      tableView.separatorStyle = .none
+      sortButton.isEnabled = false
+      searchController.isActive = false
+      navigationItem.searchController = nil
     } else {
-      hideEmptyView()
+      tableView.backgroundView = nil
+      tableView.separatorStyle = .singleLine
+      sortButton.isEnabled = true
+      navigationItem.searchController = searchController
       if searchController.isActive {
         updateSearchResults(for: searchController)
       }
@@ -104,25 +111,6 @@ extension MovieListController {
     sectioningWrapper = SectioningWrapper(items, sortingStrategy: sortDescriptor.makeTableViewStrategy())
     tableView.reloadData()
     tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
-  }
-}
-
-// MARK: - Empty View
-
-extension MovieListController {
-  private func showEmptyView() {
-    tableView.backgroundView = emptyLibraryView
-    tableView.separatorStyle = .none
-    sortButton.isEnabled = false
-    searchController.isActive = false
-    navigationItem.searchController = nil
-  }
-
-  private func hideEmptyView() {
-    tableView.backgroundView = nil
-    tableView.separatorStyle = .singleLine
-    sortButton.isEnabled = true
-    navigationItem.searchController = searchController
   }
 }
 
