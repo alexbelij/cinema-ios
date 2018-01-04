@@ -42,7 +42,7 @@ class SelectableLabelCellConfig: TabularSheetCellConfiguration {
     return cell
   }
 
-  var cancelString: String {
+  var localizedCancelString: String {
     return NSLocalizedString("cancel", comment: "")
   }
 }
