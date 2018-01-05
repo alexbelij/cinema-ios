@@ -206,7 +206,6 @@ class GenreCell: UITableViewCell {
               genre.image = .missing
             }
             if !(workItem?.isCancelled ?? true) {
-              self.activityIndicator.stopAnimating()
               self.configureBackdrop(genre: genre, genreImageProvider: genreImageProvider)
             }
           }
@@ -221,6 +220,7 @@ class GenreCell: UITableViewCell {
         backdropImageView.image = genreImage
         backdropImageView.contentMode = .scaleAspectFill
         scrim.isHidden = false
+        self.activityIndicator.stopAnimating()
       case .missing:
         genreNameLabel.textColor = #colorLiteral(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
         genreNameLabel.layer.shadowOpacity = 0.0
@@ -228,6 +228,7 @@ class GenreCell: UITableViewCell {
         backdropImageView.contentMode = .center
         backdropImageView.backgroundColor = .missingArtworkBackground
         scrim.isHidden = true
+        self.activityIndicator.stopAnimating()
     }
   }
 

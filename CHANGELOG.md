@@ -2,6 +2,15 @@
 
 All notable changes to the project will be documented in this file.
 
+## v.1.4.1 - 2018-01-05
+
+### Added
+- summary footer in Library tab
+
+### Fixed
+- activity indicator does not stop for some cells in Genre tab
+- cancel button in sorting sheet is not translated
+
 ## v1.4 - 2017-12-27
 
 ### Added
@@ -28,7 +37,7 @@ All notable changes to the project will be documented in this file.
 
 ## v1.3.2 - 2017-10-11
 
-## Changed
+### Changed
 - sorting selection via alert sheet
 
 ## v1.3.1 - 2017-09-26

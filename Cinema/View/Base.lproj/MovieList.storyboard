@@ -225,10 +225,35 @@
                     </navigationItem>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <connections>
+                        <outlet property="movieCountLabel" destination="Oba-vD-IOZ" id="phm-56-IY3"/>
                         <outlet property="sortButton" destination="xa6-xy-PhH" id="7CV-Ad-eUf"/>
+                        <outlet property="summaryView" destination="Ie1-W6-J5z" id="1yL-Zi-M15"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Rux-fX-hf1" sceneMemberID="firstResponder"/>
+                <view contentMode="scaleToFill" id="Ie1-W6-J5z">
+                    <rect key="frame" x="0.0" y="0.0" width="240" height="53"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <subviews>
+                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="WtM-iR-zLd">
+                            <rect key="frame" x="25" y="18" width="190" height="17"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="123 Movies" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Oba-vD-IOZ">
+                                    <rect key="frame" x="0.0" y="0.0" width="190" height="17"/>
+                                    <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
+                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                        </stackView>
+                    </subviews>
+                    <constraints>
+                        <constraint firstItem="WtM-iR-zLd" firstAttribute="centerY" secondItem="Ie1-W6-J5z" secondAttribute="centerY" id="eaB-ZR-nBq"/>
+                        <constraint firstItem="Gwz-yR-1N7" firstAttribute="trailing" secondItem="WtM-iR-zLd" secondAttribute="trailing" constant="25" id="ev3-RC-5ql"/>
+                        <constraint firstItem="WtM-iR-zLd" firstAttribute="leading" secondItem="Gwz-yR-1N7" secondAttribute="leading" constant="25" id="fDs-cb-UET"/>
+                    </constraints>
+                    <viewLayoutGuide key="safeArea" id="Gwz-yR-1N7"/>
+                </view>
             </objects>
             <point key="canvasLocation" x="709" y="-630"/>
         </scene>
