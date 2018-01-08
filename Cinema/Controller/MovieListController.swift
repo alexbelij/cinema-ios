@@ -33,7 +33,7 @@ class MovieListController: UITableViewController {
   }
 
   var posterProvider: PosterProvider = EmptyPosterProvider()
-  private var sectioningWrapper: SectioningWrapper!
+  private var viewModel: ViewModel!
 
   private let titleSortingStrategy = SortDescriptor.title.makeTableViewStrategy()
   private lazy var searchController: UISearchController = {
@@ -92,11 +92,11 @@ extension MovieListController {
 
 extension MovieListController {
   private func setup() {
-    reloadListData()
+    setupViewModel()
     tableView.reloadData()
     tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
     configureBackgroundView()
-    if sectioningWrapper == nil || sectioningWrapper.isEmpty {
+    if viewModel == nil || viewModel.isEmpty {
       sortButton.isEnabled = false
       searchController.isActive = false
       navigationItem.searchController = nil
@@ -109,15 +109,15 @@ extension MovieListController {
     }
   }
 
-  private func reloadListData() {
-    sectioningWrapper = SectioningWrapper(items, sortingStrategy: sortDescriptor.makeTableViewStrategy())
+  private func setupViewModel() {
+    viewModel = ViewModel(items, sortingStrategy: sortDescriptor.makeTableViewStrategy())
   }
 
   private func configureBackgroundView() {
     let backgroundView: GenericEmptyView?
     let separatorStyle: UITableViewCellSeparatorStyle
     let footerView: UIView?
-    if sectioningWrapper.isEmpty {
+    if viewModel.isEmpty {
       backgroundView = emptyLibraryView
       separatorStyle = .none
       footerView = nil
@@ -138,32 +138,32 @@ extension MovieListController {
 
 extension MovieListController: UITableViewDataSourcePrefetching {
   override func numberOfSections(in tableView: UITableView) -> Int {
-    return sectioningWrapper.numberOfSections
+    return viewModel.numberOfSections
   }
 
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return sectioningWrapper.numberOfRowsInSection(section)
+    return viewModel.numberOfRowsInSection(section)
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(MovieListTableCell.self)
-    cell.configure(for: sectioningWrapper.item(at: indexPath), posterProvider: posterProvider)
+    cell.configure(for: viewModel.item(at: indexPath), posterProvider: posterProvider)
     return cell
   }
 
   public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    return sectioningWrapper.titleForHeaderInSection(section)
+    return viewModel.titleForHeaderInSection(section)
   }
 
   public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
     guard !items.isEmpty else { return nil }
-    return sectioningWrapper.sectionIndexTitles
+    return viewModel.sectionIndexTitles
   }
 
   public override func tableView(_ tableView: UITableView,
                                  sectionForSectionIndexTitle title: String,
                                  at index: Int) -> Int {
-    return sectioningWrapper.sectionForSectionIndexTitle(title, at: index)
+    return viewModel.sectionForSectionIndexTitle(title, at: index)
   }
 
   public override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -171,12 +171,12 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   }
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    self.delegate?.movieListController(self, didSelect: sectioningWrapper.item(at: indexPath).movie)
+    self.delegate?.movieListController(self, didSelect: viewModel.item(at: indexPath).movie)
   }
 
   func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
     for indexPath in indexPaths {
-      let movieListItem = sectioningWrapper.item(at: indexPath)
+      let movieListItem = viewModel.item(at: indexPath)
       if case MovieListItem.Image.unknown = movieListItem.image {
         movieListItem.image = .loading
         DispatchQueue.global(qos: .background).async {
@@ -208,10 +208,8 @@ extension MovieListController: UISearchResultsUpdating {
     let searchText = searchController.searchBar.text ?? ""
     let lowercasedSearchText = searchText.lowercased()
     resultsController.searchText = searchText
-    resultsController.items = sectioningWrapper.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
-                                               .sorted {
-                                                 titleSortingStrategy.itemSorting(left: $0.movie, right: $1.movie)
-                                               }
+    resultsController.items = viewModel.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
+                                       .sorted { titleSortingStrategy.itemSorting(left: $0.movie, right: $1.movie) }
   }
 }
 
@@ -226,7 +224,7 @@ extension MovieListController {
         guard self.sortDescriptor != descriptor else { return }
         self.sortDescriptor = descriptor
         DispatchQueue.main.async {
-          self.reloadListData()
+          self.setupViewModel()
           self.tableView.reloadData()
         }
       })
@@ -235,7 +233,7 @@ extension MovieListController {
   }
 }
 
-private class SectioningWrapper {
+private class ViewModel {
   private struct Section {
     let indexTitle: String?
     let title: String?
