@@ -31,16 +31,21 @@ class GenreListCoordinator: CustomPresentableCoordinator {
     // swiftlint:enable force_cast
     self.backdropSize = BackdropSize(minWidth: Int(genreListController.view.bounds.width))
     self.genreListController.delegate = self
-    let items = dependencies.library.fetchAllMediaItems()
-    self.genreListController.genreImageProvider = RandomMovieGenreImageProvider(for: items,
-                                                                                movieDb: dependencies.movieDb,
-                                                                                backdropSize: backdropSize)
     self.dependencies.library.delegates.add(self)
-    DispatchQueue.global(qos: .background).async {
-      let ids = Array(Set(items.flatMap { $0.genreIds }))
-      DispatchQueue.main.async {
-        self.genreListController.genreIds = ids
-      }
+    DispatchQueue.global(qos: .default).async {
+      self.fetchListData()
+    }
+  }
+
+  private func fetchListData() {
+    let items = dependencies.library.fetchAllMediaItems()
+    let imageProvider = RandomMovieGenreImageProvider(for: items,
+                                                      movieDb: dependencies.movieDb,
+                                                      backdropSize: self.backdropSize)
+    let ids = Array(Set(items.flatMap { $0.genreIds }))
+    DispatchQueue.main.async {
+      self.genreListController.genreImageProvider = imageProvider
+      self.genreListController.genreIds = ids
     }
   }
 }

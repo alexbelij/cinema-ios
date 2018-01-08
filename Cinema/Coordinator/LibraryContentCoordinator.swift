@@ -42,16 +42,30 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     dependencies.library.delegates.add(self)
     switch content {
       case .all:
-        movieListController.items = dependencies.library.fetchAllMediaItems()
         movieListController.title = NSLocalizedString("library", comment: "")
       case let .allWithGenreId(genreId):
-        movieListController.items = dependencies.library.fetchMediaItems(withGenreId: genreId)
         movieListController.title = L10n.genreName(for: genreId)!
+    }
+    DispatchQueue.global(qos: .default).async {
+      self.fetchListData()
     }
   }
 
   func presentRootViewController() {
     self.navigationController.pushViewController(movieListController, animated: true)
+  }
+
+  private func fetchListData() {
+    let items: [MediaItem]
+    switch content {
+      case .all:
+        items = dependencies.library.fetchAllMediaItems()
+      case let .allWithGenreId(genreId):
+        items = dependencies.library.fetchMediaItems(withGenreId: genreId)
+    }
+    DispatchQueue.main.async {
+      self.movieListController.items = items
+    }
   }
 }
 
