@@ -93,19 +93,14 @@ extension MovieListController {
 extension MovieListController {
   private func setup() {
     reloadListData()
-    if items.isEmpty {
-      tableView.backgroundView = emptyLibraryView
-      tableView.separatorStyle = .none
-      tableView.tableFooterView = nil
+    tableView.reloadData()
+    tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
+    configureBackgroundView()
+    if sectioningWrapper == nil || sectioningWrapper.isEmpty {
       sortButton.isEnabled = false
       searchController.isActive = false
       navigationItem.searchController = nil
     } else {
-      tableView.backgroundView = nil
-      tableView.separatorStyle = .singleLine
-      tableView.tableFooterView = summaryView
-      let format = NSLocalizedString("movieList.summary.movieCount", comment: "")
-      movieCountLabel.text = .localizedStringWithFormat(format, items.count)
       sortButton.isEnabled = true
       navigationItem.searchController = searchController
       if searchController.isActive {
@@ -116,8 +111,26 @@ extension MovieListController {
 
   private func reloadListData() {
     sectioningWrapper = SectioningWrapper(items, sortingStrategy: sortDescriptor.makeTableViewStrategy())
-    tableView.reloadData()
-    tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
+  }
+
+  private func configureBackgroundView() {
+    let backgroundView: GenericEmptyView?
+    let separatorStyle: UITableViewCellSeparatorStyle
+    let footerView: UIView?
+    if sectioningWrapper.isEmpty {
+      backgroundView = emptyLibraryView
+      separatorStyle = .none
+      footerView = nil
+    } else {
+      backgroundView = nil
+      separatorStyle = .singleLine
+      let format = NSLocalizedString("movieList.summary.movieCount", comment: "")
+      movieCountLabel.text = .localizedStringWithFormat(format, items.count)
+      footerView = summaryView
+    }
+    self.tableView.backgroundView = backgroundView
+    self.tableView.separatorStyle = separatorStyle
+    self.tableView.tableFooterView = footerView
   }
 }
 
@@ -214,6 +227,7 @@ extension MovieListController {
         self.sortDescriptor = descriptor
         DispatchQueue.main.async {
           self.reloadListData()
+          self.tableView.reloadData()
         }
       })
     }
@@ -250,6 +264,7 @@ private class SectioningWrapper {
   }
 
   private let sections: [Section]
+  let isEmpty: Bool
 
   init(_ items: [MediaItem], sortingStrategy: SectionSortingStrategy) {
     var sections = [Section]()
@@ -274,6 +289,7 @@ private class SectioningWrapper {
                                                             .map { MovieListItem(movie: $0) }))
     }
     self.sections = sections
+    isEmpty = items.isEmpty
   }
 
   func item(at indexPath: IndexPath) -> MovieListItem {
