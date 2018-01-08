@@ -37,15 +37,11 @@ class GenreListCoordinator: CustomPresentableCoordinator {
                                                                                 backdropSize: backdropSize)
     self.dependencies.library.delegates.add(self)
     DispatchQueue.global(qos: .background).async {
-      let ids = self.fetchGenreIdsFromLibrary()
+      let ids = Array(Set(items.flatMap { $0.genreIds }))
       DispatchQueue.main.async {
         self.genreListController.genreIds = ids
       }
     }
-  }
-
-  private func fetchGenreIdsFromLibrary() -> [Int] {
-    return Array(Set(dependencies.library.mediaItems { _ in true }.flatMap { $0.genreIds }))
   }
 }
 
