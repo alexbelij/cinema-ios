@@ -61,6 +61,10 @@ class GenericEmptyView: UIView {
         let imageView = UIImageView(image: image)
         imageView.contentMode = .scaleAspectFit
         stackView.addArrangedSubview(imageView)
+      case .activityIndicator:
+        let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        indicatorView.startAnimating()
+        stackView.addArrangedSubview(indicatorView)
     }
   }
 
@@ -124,6 +128,7 @@ class GenericEmptyView: UIView {
   enum AccessoryConfig {
     case none
     case image(UIImage)
+    case activityIndicator
   }
 
   enum TextConfig {

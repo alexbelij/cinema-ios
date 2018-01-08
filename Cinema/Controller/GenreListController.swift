@@ -101,6 +101,7 @@ extension GenreListController {
     switch listData {
       case .loading:
         backgroundView = GenericEmptyView(
+            accessory: .activityIndicator,
             description: .basic(NSLocalizedString("loading", comment: ""))
         )
         separatorStyle = .none
