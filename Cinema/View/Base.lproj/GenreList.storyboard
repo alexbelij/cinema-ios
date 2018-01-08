@@ -66,9 +66,6 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Genres" id="LXq-yr-ReO"/>
-                    <refreshControl key="refreshControl" opaque="NO" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" id="Ui5-tl-Hp7">
-                        <autoresizingMask key="autoresizingMask"/>
-                    </refreshControl>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="8Rj-fx-LYL" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

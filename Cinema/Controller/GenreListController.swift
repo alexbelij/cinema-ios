@@ -59,7 +59,6 @@ extension GenreListController {
   override func viewDidLoad() {
     super.viewDidLoad()
     tableView.prefetchDataSource = self
-    self.refreshControl!.addTarget(self, action: #selector(handleRefresh(_:)), for: .valueChanged)
     reload()
   }
 }
@@ -69,6 +68,14 @@ extension GenreListController {
 extension GenreListController {
   private func reload() {
     self.setupViewModel()
+    if viewModel.isEmpty {
+      self.refreshControl?.removeTarget(self, action: #selector(handleRefresh(_:)), for: .valueChanged)
+      self.refreshControl = nil
+    } else {
+      let refreshControl = UIRefreshControl()
+      refreshControl.addTarget(self, action: #selector(handleRefresh(_:)), for: .valueChanged)
+      self.refreshControl = refreshControl
+    }
     self.tableView.reloadData()
     self.configureBackgroundView()
   }
