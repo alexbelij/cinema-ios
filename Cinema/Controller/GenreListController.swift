@@ -62,24 +62,11 @@ extension GenreListController {
     self.refreshControl!.addTarget(self, action: #selector(handleRefresh(_:)), for: .valueChanged)
     reload()
   }
-
-  @objc
-  private func handleRefresh(_ refreshControl: UIRefreshControl) {
-    self.clearGenreImages()
-    self.tableView.reloadData()
-    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
-      refreshControl.endRefreshing()
-    }
-  }
 }
 
 // MARK: - Data Management
 
 extension GenreListController {
-  private func clearGenreImages() {
-    self.viewModel.forEach { $0.image = .unknown }
-  }
-
   private func reload() {
     self.setupViewModel()
     self.tableView.reloadData()
@@ -117,6 +104,18 @@ extension GenreListController {
     self.tableView.separatorStyle = separatorStyle
   }
 
+  private func clearGenreImages() {
+    self.viewModel.forEach { $0.image = .unknown }
+  }
+
+  @objc
+  private func handleRefresh(_ refreshControl: UIRefreshControl) {
+    self.clearGenreImages()
+    self.tableView.reloadData()
+    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
+      refreshControl.endRefreshing()
+    }
+  }
 }
 
 // MARK: - Table View
