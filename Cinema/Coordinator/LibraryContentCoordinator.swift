@@ -7,6 +7,11 @@ protocol LibraryContentCoordinatorDelegate: class {
 }
 
 class LibraryContentCoordinator: AutoPresentableCoordinator {
+  enum ContentSpecification {
+    case all
+    case allWithGenreId(Int)
+  }
+
   typealias Dependencies = LibraryDependency & MovieDbDependency
 
   // coordinator stuff
@@ -14,7 +19,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 
   // other properties
   private let dependencies: Dependencies
-  private let contentFilter: (MediaItem) -> Bool
+  private let content: ContentSpecification
   var dismissWhenEmpty = false
 
   // managed controllers
@@ -26,18 +31,23 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
   private var editItemCoordinator: EditItemCoordinator?
 
   init(navigationController: UINavigationController,
-       title: String,
-       contentFilter: @escaping (MediaItem) -> Bool,
+       content: ContentSpecification,
        dependencies: Dependencies) {
     self.dependencies = dependencies
-    self.contentFilter = contentFilter
+    self.content = content
     self.navigationController = navigationController
     self.movieListController = UIStoryboard.movieList.instantiate(MovieListController.self)
     movieListController.delegate = self
-    movieListController.title = title
     movieListController.posterProvider = MovieDbPosterProvider(dependencies.movieDb)
-    movieListController.items = dependencies.library.mediaItems(where: contentFilter)
     dependencies.library.delegates.add(self)
+    switch content {
+      case .all:
+        movieListController.items = dependencies.library.mediaItems(where: { _ in true })
+        movieListController.title = NSLocalizedString("library", comment: "")
+      case let .allWithGenreId(genreId):
+        movieListController.items = dependencies.library.mediaItems(where: { $0.genreIds.contains(genreId) })
+        movieListController.title = L10n.localizedGenreName(for: genreId)!
+    }
   }
 
   func presentRootViewController() {
@@ -150,7 +160,14 @@ extension LibraryContentCoordinator: MediaLibraryDelegate {
     }
 
     // new movies
-    movieListItems.append(contentsOf: contentUpdate.addedItems.filter(self.contentFilter))
+    let newMovies: [MediaItem]
+    switch content {
+      case .all:
+        newMovies = contentUpdate.addedItems
+      case let .allWithGenreId(genreId):
+        newMovies = contentUpdate.addedItems.filter { $0.genreIds.contains(genreId) }
+    }
+    movieListItems.append(contentsOf: newMovies)
 
     // removed movies
     if !contentUpdate.removedItems.isEmpty {

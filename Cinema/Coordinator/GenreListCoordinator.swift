@@ -55,8 +55,7 @@ extension GenreListCoordinator: GenreListControllerDelegate {
   func genreListController(_ controller: GenreListController,
                            didSelectGenre genreId: Int) {
     self.libraryContentCoordinator = LibraryContentCoordinator(navigationController: navigationController,
-                                                               title: L10n.localizedGenreName(for: genreId)!,
-                                                               contentFilter: { $0.genreIds.contains(genreId) },
+                                                               content: .allWithGenreId(genreId),
                                                                dependencies: dependencies)
     self.libraryContentCoordinator!.dismissWhenEmpty = true
     self.libraryContentCoordinator!.presentRootViewController()
