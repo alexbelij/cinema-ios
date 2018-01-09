@@ -21,6 +21,7 @@ class GenreListController: UITableViewController {
   enum ListData {
     case loading
     case available([GenreIdentifier])
+    case unavailable(Error)
   }
 
   weak var delegate: GenreListControllerDelegate?
@@ -81,7 +82,7 @@ extension GenreListController {
 
   private func setupViewModel() {
     switch listData {
-      case .loading:
+      case .loading, .unavailable:
         viewModel = nil
       case let .available(genreIds):
         viewModel = genreIds.compactMap { id in L10n.genreName(for: id).map { name in Genre(id: id, name: name) } }
@@ -110,6 +111,11 @@ extension GenreListController {
           backgroundView = nil
           separatorStyle = .singleLine
         }
+      case let .unavailable(error):
+        backgroundView = GenericEmptyView(
+            description: .basic(L10n.errorMessage(for: error))
+        )
+        separatorStyle = .none
     }
     self.tableView.backgroundView = backgroundView
     self.tableView.separatorStyle = separatorStyle

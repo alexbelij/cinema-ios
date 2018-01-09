@@ -11,6 +11,7 @@ class MovieListController: UITableViewController {
   enum ListData {
     case loading
     case available([Movie])
+    case unavailable(Error)
   }
 
   final class ListItem: PosterHaving {
@@ -144,7 +145,7 @@ extension MovieListController {
 
   private func setupViewModel() {
     switch listData {
-      case .loading:
+      case .loading, .unavailable:
         viewModel = nil
       case let .available(movies):
         viewModel = ViewModel(movies, sortingStrategy: sortDescriptor.makeTableViewStrategy())
@@ -172,6 +173,11 @@ extension MovieListController {
           backgroundView = nil
           separatorStyle = .singleLine
         }
+      case let .unavailable(error):
+        backgroundView = GenericEmptyView(
+            description: .basic(L10n.errorMessage(for: error))
+        )
+        separatorStyle = .none
     }
     self.tableView.backgroundView = backgroundView
     self.tableView.separatorStyle = separatorStyle

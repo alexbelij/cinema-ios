@@ -41,7 +41,9 @@ class GenreListCoordinator: CustomPresentableCoordinator {
     library.fetchMovies { result in
       switch result {
         case let .failure(error):
-          fatalError("unable to fetch movies: \(error)")
+          DispatchQueue.main.async {
+            self.genreListController.listData = .unavailable(error)
+          }
         case let .success(movies):
           DispatchQueue.main.async {
             let imageProvider = RandomMovieGenreImageProvider(for: movies,
