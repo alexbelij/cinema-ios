@@ -151,10 +151,10 @@ extension LibraryContentCoordinator: MediaLibraryDelegate {
         movieListItems.remove(at: index)
         movieListItems.insert(item, at: index)
       }
-      DispatchQueue.main.async {
-        if let itemDetailsCoordinator = self.itemDetailsCoordinator,
-           let updatedDetailItem = contentUpdate.updatedItems[itemDetailsCoordinator.detailItem.id] {
-          self.itemDetailsCoordinator!.updateNonRemoteProperties(with: updatedDetailItem)
+      if let itemDetailsCoordinator = self.itemDetailsCoordinator,
+         let updatedDetailItem = contentUpdate.updatedItems[itemDetailsCoordinator.detailItem.id] {
+        DispatchQueue.main.async {
+          itemDetailsCoordinator.updateNonRemoteProperties(with: updatedDetailItem)
         }
       }
     }
