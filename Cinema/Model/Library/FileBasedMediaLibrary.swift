@@ -46,7 +46,7 @@ class FileBasedMediaLibrary: MediaLibrary {
     return mediaItems.filter(predicate)
   }
 
-  func contains(id: Int) -> Bool {
+  func containsMediaItem(withId id: Int) -> Bool {
     return mediaItems.contains { item in item.id == id }
   }
 

@@ -30,7 +30,7 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
 
     popularMoviesController = UIStoryboard.popularMovies.instantiate(PopularMoviesController.self)
     popularMoviesController.delegate = self
-    let movies = movieDb.popularMovies().lazy.filter { !self.library.contains(id: $0.id) }
+    let movies = movieDb.popularMovies().lazy.filter { !self.library.containsMediaItem(withId: $0.id) }
     popularMoviesController.movieIterator = AnyIterator(movies.makeIterator())
     popularMoviesController.posterProvider = MovieDbPosterProvider(movieDb)
 
@@ -46,7 +46,7 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
                             searchResultsFor searchText: String) -> [SearchTmdbController.SearchResult] {
     return self.movieDb.searchMovies(searchText: searchText).map { movie in
       SearchTmdbController.SearchResult(item: movie,
-                                        hasBeenAddedToLibrary: self.library.contains(id: movie.id))
+                                        hasBeenAddedToLibrary: self.library.containsMediaItem(withId: movie.id))
     }
   }
 

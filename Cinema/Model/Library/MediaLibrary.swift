@@ -8,7 +8,7 @@ protocol MediaLibrary {
 
   func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem]
 
-  func contains(id: Int) -> Bool
+  func containsMediaItem(withId id: Int) -> Bool
 
   func add(_ mediaItem: MediaItem) throws
 
