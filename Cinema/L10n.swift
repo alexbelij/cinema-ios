@@ -2,7 +2,7 @@ import Foundation
 
 final class L10n {
   // swiftlint:disable:next cyclomatic_complexity
-  static func localizedGenreName(for genreId: Int) -> String? {
+  static func genreName(for genreId: Int) -> String? {
     let key: String?
     switch genreId {
       case 12: key = "genre.adventure"
@@ -33,7 +33,7 @@ final class L10n {
     }
   }
 
-  static func localizedErrorMessage(for error: Error) -> String {
+  static func errorMessage(for error: Error) -> String {
     switch error {
       case DataFormatError.unsupportedSchemaVersion:
         return NSLocalizedString("error.unsupportedSchemaVersion", comment: "")
