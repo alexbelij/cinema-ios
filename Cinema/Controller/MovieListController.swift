@@ -53,9 +53,6 @@ class MovieListController: UITableViewController {
   private var sortDescriptor = SortDescriptor.title
   @IBOutlet private weak var sortButton: UIBarButtonItem!
 
-  private let emptyLibraryView = GenericEmptyView(accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
-                                                  description: .basic(NSLocalizedString("library.empty", comment: "")))
-
   @IBOutlet private var summaryView: UIView!
   @IBOutlet private var movieCountLabel: UILabel!
 
@@ -118,7 +115,8 @@ extension MovieListController {
     let separatorStyle: UITableViewCellSeparatorStyle
     let footerView: UIView?
     if viewModel.isEmpty {
-      backgroundView = emptyLibraryView
+      backgroundView = GenericEmptyView(accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
+                                        description: .basic(NSLocalizedString("library.empty", comment: "")))
       separatorStyle = .none
       footerView = nil
     } else {
