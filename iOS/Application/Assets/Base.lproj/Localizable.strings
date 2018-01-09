@@ -15,6 +15,7 @@
 "edit.noTitleAlert" = "A movie must have a title.";
 "edit.sectionHeader.subtitle" = "Subtitle (optional)";
 "edit.sectionHeader.title" = "Title";
+"error.dataAccessError" = "The library could not be loaded.";
 "error.genericError" = "An unknown error occurred.";
 "error.genericTitle" = "Oh, snap!";
 "error.invalidDataFormat" = "The file can't be opened. Home-Cinema couldn't read the file.";
