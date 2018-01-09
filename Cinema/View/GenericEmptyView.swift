@@ -61,6 +61,10 @@ class GenericEmptyView: UIView {
         let imageView = UIImageView(image: image)
         imageView.contentMode = .scaleAspectFit
         stackView.addArrangedSubview(imageView)
+      case .activityIndicator:
+        let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        indicatorView.startAnimating()
+        stackView.addArrangedSubview(indicatorView)
     }
   }
 
@@ -69,14 +73,14 @@ class GenericEmptyView: UIView {
       case .none: break
       case let .basic(text):
         let titleLabel = makeCenteredMultiLineLabel(text: text)
-        titleLabel.textColor = .disabledControlText
+        titleLabel.textColor = .secondaryText
         stackView.addArrangedSubview(titleLabel)
       case let .detailed(title, message):
         let titleLabel = makeCenteredMultiLineLabel(text: title)
         titleLabel.font = UIFont.boldSystemFont(ofSize: titleLabel.font.pointSize)
         stackView.addArrangedSubview(titleLabel)
         let messageLabel = makeCenteredMultiLineLabel(text: message)
-        messageLabel.textColor = .disabledControlText
+        messageLabel.textColor = .secondaryText
         messageLabel.font = UIFont.systemFont(ofSize: UIFont.systemFontSize)
         stackView.addArrangedSubview(messageLabel)
     }
@@ -124,6 +128,7 @@ class GenericEmptyView: UIView {
   enum AccessoryConfig {
     case none
     case image(UIImage)
+    case activityIndicator
   }
 
   enum TextConfig {

@@ -31,16 +31,21 @@ class GenreListCoordinator: CustomPresentableCoordinator {
     // swiftlint:enable force_cast
     self.backdropSize = BackdropSize(minWidth: Int(genreListController.view.bounds.width))
     self.genreListController.delegate = self
-    let items = dependencies.library.fetchAllMediaItems()
-    self.genreListController.genreImageProvider = RandomMovieGenreImageProvider(for: items,
-                                                                                movieDb: dependencies.movieDb,
-                                                                                backdropSize: backdropSize)
     self.dependencies.library.delegates.add(self)
-    DispatchQueue.global(qos: .background).async {
-      let ids = Array(Set(items.flatMap { $0.genreIds }))
-      DispatchQueue.main.async {
-        self.genreListController.genreIds = ids
-      }
+    DispatchQueue.global(qos: .default).async {
+      self.fetchListData()
+    }
+  }
+
+  private func fetchListData() {
+    let items = dependencies.library.fetchAllMediaItems()
+    let imageProvider = RandomMovieGenreImageProvider(for: items,
+                                                      movieDb: dependencies.movieDb,
+                                                      backdropSize: self.backdropSize)
+    let ids = Array(Set(items.flatMap { $0.genreIds }))
+    DispatchQueue.main.async {
+      self.genreListController.genreImageProvider = imageProvider
+      self.genreListController.listData = .available(ids)
     }
   }
 }
@@ -70,8 +75,9 @@ extension GenreListCoordinator: MediaLibraryDelegate {
     // The easiest way is to query the entire library again.
     // But if no movies have been deleted (the most common use case) we can simplify
     // the process by adding only the new genre ids to the already computed ones.
-    if contentUpdate.removedItems.isEmpty {
-      var existingGenreIds = Set(genreListController.genreIds ?? [])
+    if contentUpdate.removedItems.isEmpty,
+       case let .available(genreListItems) = genreListController.listData {
+      var existingGenreIds = Set(genreListItems)
       contentUpdate.addedItems.flatMap { $0.genreIds }.forEach { existingGenreIds.insert($0) }
       updatedGenreIds = Array(existingGenreIds)
       // swiftlint:disable:next force_cast
@@ -87,7 +93,7 @@ extension GenreListCoordinator: MediaLibraryDelegate {
 
     // commit changes
     DispatchQueue.main.async {
-      self.genreListController.genreIds = updatedGenreIds
+      self.genreListController.listData = .available(updatedGenreIds)
       if let provider = updatedGenreImageProvider {
         self.genreListController.genreImageProvider = provider
       }

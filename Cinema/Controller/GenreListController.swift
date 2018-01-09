@@ -17,14 +17,19 @@ class EmptyGenreImageProvider: GenreImageProvider {
 }
 
 class GenreListController: UITableViewController {
+  enum ListData {
+    case loading
+    case available([Int])
+  }
+
   weak var delegate: GenreListControllerDelegate?
-  var genreIds: [Int]? {
+  var listData: ListData = .loading {
     didSet {
       guard self.isViewLoaded else { return }
       reload()
     }
   }
-  private var viewModel = [Genre]()
+  private var viewModel: [Genre]!
   var genreImageProvider: GenreImageProvider = EmptyGenreImageProvider() {
     didSet {
       DispatchQueue.main.async {
@@ -68,7 +73,7 @@ extension GenreListController {
 extension GenreListController {
   private func reload() {
     self.setupViewModel()
-    if viewModel.isEmpty {
+    if viewModel == nil || viewModel.isEmpty {
       self.refreshControl?.removeTarget(self, action: #selector(handleRefresh(_:)), for: .valueChanged)
       self.refreshControl = nil
     } else {
@@ -81,38 +86,43 @@ extension GenreListController {
   }
 
   private func setupViewModel() {
-    if let genreIds = self.genreIds {
-      viewModel = genreIds.flatMap { id in L10n.genreName(for: id).map { name in Genre(id: id, name: name) } }
-                          .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-    } else {
-      viewModel = [Genre]()
+    switch listData {
+      case .loading:
+        viewModel = nil
+      case let .available(genreIds):
+        viewModel = genreIds.flatMap { id in L10n.genreName(for: id).map { name in Genre(id: id, name: name) } }
+                            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
   }
 
   private func configureBackgroundView() {
     let backgroundView: GenericEmptyView?
     let separatorStyle: UITableViewCellSeparatorStyle
-    if genreIds == nil {
-      backgroundView = GenericEmptyView(
-          description: .basic(NSLocalizedString("loading", comment: ""))
-      )
-      separatorStyle = .none
-    } else if viewModel.isEmpty {
-      backgroundView = GenericEmptyView(
-          accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
-          description: .basic(NSLocalizedString("library.empty", comment: ""))
-      )
-      separatorStyle = .none
-    } else {
-      backgroundView = nil
-      separatorStyle = .singleLine
+    switch listData {
+      case .loading:
+        backgroundView = GenericEmptyView(
+            accessory: .activityIndicator,
+            description: .basic(NSLocalizedString("loading", comment: ""))
+        )
+        separatorStyle = .none
+      case let .available(genreIds):
+        if genreIds.isEmpty {
+          backgroundView = GenericEmptyView(
+              accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
+              description: .basic(NSLocalizedString("library.empty", comment: ""))
+          )
+          separatorStyle = .none
+        } else {
+          backgroundView = nil
+          separatorStyle = .singleLine
+        }
     }
     self.tableView.backgroundView = backgroundView
     self.tableView.separatorStyle = separatorStyle
   }
 
   private func clearGenreImages() {
-    self.viewModel.forEach { $0.image = .unknown }
+    self.viewModel?.forEach { $0.image = .unknown }
   }
 
   @objc
@@ -129,6 +139,7 @@ extension GenreListController {
 
 extension GenreListController: UITableViewDataSourcePrefetching {
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    guard let viewModel = self.viewModel else { return 0 }
     return viewModel.count
   }
 
