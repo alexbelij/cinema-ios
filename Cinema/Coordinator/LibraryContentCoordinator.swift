@@ -64,7 +64,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
         items = dependencies.library.fetchMediaItems(withGenreId: genreId)
     }
     DispatchQueue.main.async {
-      self.movieListController.items = items
+      self.movieListController.listData = .available(items)
     }
   }
 }
@@ -156,7 +156,7 @@ extension LibraryContentCoordinator: EditItemCoordinatorDelegate {
 
 extension LibraryContentCoordinator: MediaLibraryDelegate {
   func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
-    var movieListItems = movieListController.items
+    guard case var .available(movieListItems) = movieListController.listData else { return }
 
     // updated movies
     if !contentUpdate.updatedItems.isEmpty {
@@ -199,7 +199,7 @@ extension LibraryContentCoordinator: MediaLibraryDelegate {
           self.navigationController.popViewController(animated: true)
         }
       } else {
-        self.movieListController.items = movieListItems
+        self.movieListController.listData = .available(movieListItems)
       }
     }
   }

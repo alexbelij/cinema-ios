@@ -24,14 +24,18 @@ class MovieListItem {
 }
 
 class MovieListController: UITableViewController {
+  enum ListData {
+    case loading
+    case available([MediaItem])
+  }
+
   weak var delegate: MovieListControllerDelegate?
-  var items = [MediaItem]() {
+  var listData: ListData = .loading {
     didSet {
       loadViewIfNeeded()
       setup()
     }
   }
-
   var posterProvider: PosterProvider = EmptyPosterProvider()
   private var viewModel: ViewModel!
 
@@ -107,24 +111,40 @@ extension MovieListController {
   }
 
   private func setupViewModel() {
-    viewModel = ViewModel(items, sortingStrategy: sortDescriptor.makeTableViewStrategy())
+    switch listData {
+      case .loading:
+        viewModel = nil
+      case let .available(items):
+        viewModel = ViewModel(items, sortingStrategy: sortDescriptor.makeTableViewStrategy())
+    }
   }
 
   private func configureBackgroundView() {
     let backgroundView: GenericEmptyView?
     let separatorStyle: UITableViewCellSeparatorStyle
     let footerView: UIView?
-    if viewModel.isEmpty {
-      backgroundView = GenericEmptyView(accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
-                                        description: .basic(NSLocalizedString("library.empty", comment: "")))
-      separatorStyle = .none
-      footerView = nil
-    } else {
-      backgroundView = nil
-      separatorStyle = .singleLine
-      let format = NSLocalizedString("movieList.summary.movieCount", comment: "")
-      movieCountLabel.text = .localizedStringWithFormat(format, items.count)
-      footerView = summaryView
+    switch listData {
+      case .loading:
+        backgroundView = GenericEmptyView(
+            description: .basic(NSLocalizedString("loading", comment: ""))
+        )
+        separatorStyle = .none
+        footerView = nil
+      case let .available(items):
+        if items.isEmpty {
+          backgroundView = GenericEmptyView(
+              accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
+              description: .basic(NSLocalizedString("library.empty", comment: ""))
+          )
+          separatorStyle = .none
+          footerView = nil
+        } else {
+          backgroundView = nil
+          separatorStyle = .singleLine
+          let format = NSLocalizedString("movieList.summary.movieCount", comment: "")
+          movieCountLabel.text = .localizedStringWithFormat(format, items.count)
+          footerView = summaryView
+        }
     }
     self.tableView.backgroundView = backgroundView
     self.tableView.separatorStyle = separatorStyle
@@ -136,6 +156,7 @@ extension MovieListController {
 
 extension MovieListController: UITableViewDataSourcePrefetching {
   override func numberOfSections(in tableView: UITableView) -> Int {
+    guard let viewModel = self.viewModel else { return 0 }
     return viewModel.numberOfSections
   }
 
@@ -154,7 +175,7 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   }
 
   public override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
-    guard !items.isEmpty else { return nil }
+    guard let viewModel = self.viewModel, !viewModel.isEmpty else { return nil }
     return viewModel.sectionIndexTitles
   }
 
