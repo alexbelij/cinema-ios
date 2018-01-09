@@ -31,7 +31,7 @@ class GenreListCoordinator: CustomPresentableCoordinator {
     // swiftlint:enable force_cast
     self.backdropSize = BackdropSize(minWidth: Int(genreListController.view.bounds.width))
     self.genreListController.delegate = self
-    let items = dependencies.library.mediaItems { _ in true }
+    let items = dependencies.library.fetchAllMediaItems()
     self.genreListController.genreImageProvider = RandomMovieGenreImageProvider(for: items,
                                                                                 movieDb: dependencies.movieDb,
                                                                                 backdropSize: backdropSize)
@@ -78,7 +78,7 @@ extension GenreListCoordinator: MediaLibraryDelegate {
       (self.genreListController.genreImageProvider as! RandomMovieGenreImageProvider)
           .updateWithNewItems(contentUpdate.addedItems)
     } else {
-      let items = dependencies.library.mediaItems { _ in true }
+      let items = dependencies.library.fetchAllMediaItems()
       updatedGenreIds = Array(Set(items.flatMap { $0.genreIds }))
       updatedGenreImageProvider = RandomMovieGenreImageProvider(for: items,
                                                                 movieDb: self.dependencies.movieDb,

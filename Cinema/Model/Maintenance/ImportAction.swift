@@ -21,7 +21,7 @@ class ImportAction: MaintenanceAction {
       let itemsToImport = try dataFormat.deserialize(from: data)
       progress.completedUnitCount += 3
 
-      let existingItems = self.library.mediaItems { _ in true }
+      let existingItems = self.library.fetchAllMediaItems()
       let newItems = itemsToImport.filter { itemToImport in
         !existingItems.contains { existingItem in
           itemToImport.id == existingItem.id

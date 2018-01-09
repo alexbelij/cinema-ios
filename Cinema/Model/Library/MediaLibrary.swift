@@ -6,7 +6,9 @@ protocol MediaLibrary {
 
   var persistentSchemaVersion: SchemaVersion { get }
 
-  func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem]
+  func fetchAllMediaItems() -> [MediaItem]
+
+  func fetchMediaItems(withGenreId id: Int) -> [MediaItem]
 
   func containsMediaItem(withId id: Int) -> Bool
 

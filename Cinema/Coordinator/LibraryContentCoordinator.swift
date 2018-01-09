@@ -42,10 +42,10 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     dependencies.library.delegates.add(self)
     switch content {
       case .all:
-        movieListController.items = dependencies.library.mediaItems(where: { _ in true })
+        movieListController.items = dependencies.library.fetchAllMediaItems()
         movieListController.title = NSLocalizedString("library", comment: "")
       case let .allWithGenreId(genreId):
-        movieListController.items = dependencies.library.mediaItems(where: { $0.genreIds.contains(genreId) })
+        movieListController.items = dependencies.library.fetchMediaItems(withGenreId: genreId)
         movieListController.title = L10n.localizedGenreName(for: genreId)!
     }
   }

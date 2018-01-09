@@ -20,7 +20,7 @@ class PropertyUpdateAction: MaintenanceAction {
   func performAction(completion: (ActionResult<Void>) -> Void) {
     let itemsToUpdate: [MediaItem]
     switch updateSource {
-      case .all: itemsToUpdate = library.mediaItems { _ in true }
+      case .all: itemsToUpdate = library.fetchAllMediaItems()
       case let .only(items): itemsToUpdate = items
     }
     progress.totalUnitCount = Int64(itemsToUpdate.count)

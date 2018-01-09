@@ -42,8 +42,12 @@ class FileBasedMediaLibrary: MediaLibrary {
     }
   }
 
-  func mediaItems(where predicate: (MediaItem) -> Bool) -> [MediaItem] {
-    return mediaItems.filter(predicate)
+  func fetchAllMediaItems() -> [MediaItem] {
+    return mediaItems
+  }
+
+  func fetchMediaItems(withGenreId id: Int) -> [MediaItem] {
+    return mediaItems.filter { $0.genreIds.contains(id) }
   }
 
   func containsMediaItem(withId id: Int) -> Bool {
