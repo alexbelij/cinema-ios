@@ -73,7 +73,7 @@ class MaintenanceViewController: UIViewController {
     }
   }
 
-  @IBAction func actionButtonClicked(_ sender: Any) {
+  @IBAction private func actionButtonClicked(_ sender: Any) {
     switch buttonState {
       case .startAction:
         actionButton.isHidden = true

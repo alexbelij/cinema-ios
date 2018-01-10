@@ -236,7 +236,7 @@ extension MovieListController: UISearchResultsUpdating {
 // MARK: - User Actions
 
 extension MovieListController {
-  @IBAction func showSortDescriptorSheet() {
+  @IBAction private func showSortDescriptorSheet() {
     let controller = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
     for descriptor in [SortDescriptor.title, .runtime, .year] {
       controller.addSheetItem(SelectableLabelSheetItem(title: descriptor.localizedName,
