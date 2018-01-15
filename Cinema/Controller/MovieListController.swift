@@ -97,6 +97,7 @@ extension MovieListController {
     tableView.reloadData()
     tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
     configureBackgroundView()
+    configureFooterView()
     if viewModel == nil || viewModel.isEmpty {
       sortButton.isEnabled = false
       searchController.isActive = false
@@ -122,7 +123,6 @@ extension MovieListController {
   private func configureBackgroundView() {
     let backgroundView: GenericEmptyView?
     let separatorStyle: UITableViewCellSeparatorStyle
-    let footerView: UIView?
     switch listData {
       case .loading:
         backgroundView = GenericEmptyView(
@@ -130,7 +130,6 @@ extension MovieListController {
             description: .basic(NSLocalizedString("loading", comment: ""))
         )
         separatorStyle = .none
-        footerView = nil
       case let .available(items):
         if items.isEmpty {
           backgroundView = GenericEmptyView(
@@ -138,18 +137,24 @@ extension MovieListController {
               description: .basic(NSLocalizedString("library.empty", comment: ""))
           )
           separatorStyle = .none
-          footerView = nil
         } else {
           backgroundView = nil
           separatorStyle = .singleLine
-          let format = NSLocalizedString("movieList.summary.movieCount", comment: "")
-          movieCountLabel.text = .localizedStringWithFormat(format, items.count)
-          footerView = summaryView
         }
     }
     self.tableView.backgroundView = backgroundView
     self.tableView.separatorStyle = separatorStyle
-    self.tableView.tableFooterView = footerView
+  }
+
+  private func configureFooterView() {
+    if case let .available(items) = listData, !items.isEmpty {
+      let format = NSLocalizedString("movieList.summary.movieCount", comment: "")
+      movieCountLabel.text = .localizedStringWithFormat(format, items.count)
+      tableView.tableFooterView = summaryView
+    } else {
+      tableView.tableFooterView = nil
+    }
+  }
   }
 }
 
