@@ -94,10 +94,9 @@ extension MovieListController {
 extension MovieListController {
   private func setup() {
     setupViewModel()
-    tableView.reloadData()
-    tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
     configureBackgroundView()
     configureFooterView()
+    tableView.reloadData()
     if viewModel == nil || viewModel.isEmpty {
       sortButton.isEnabled = false
       searchController.isActive = false
@@ -109,6 +108,7 @@ extension MovieListController {
         updateSearchResults(for: searchController)
       }
     }
+    scrollToTop()
   }
 
   private func setupViewModel() {
@@ -155,6 +155,9 @@ extension MovieListController {
       tableView.tableFooterView = nil
     }
   }
+
+  private func scrollToTop() {
+    tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
   }
 }
 
