@@ -254,6 +254,7 @@ extension MovieListController {
         DispatchQueue.main.async {
           self.setupViewModel()
           self.tableView.reloadData()
+          self.scrollToTop()
         }
       })
     }
