@@ -7,6 +7,13 @@
 "addItem.title" = "Add Movie";
 "cancel" = "Cancel";
 "continue" = "Continue";
+"dataUpdate.failed" = "Your library could not be updated.";
+"dataUpdate.intention" = "To make the app better for you, we need to update your library.";
+"dataUpdate.progress" = "Updating Your Library";
+"dataUpdate.update" = "Update";
+"dataUpdate.start" = "Start Update";
+"dataUpdate.succeeded" = "Update completed";
+"dataUpdate.succeeded.description" = "Your library has been updated successfully.";
 "details.missing.certification" = "No certification available.";
 "details.missing.genre" = "No genre available.";
 "details.missing.overview" = "No overview available.";
@@ -49,10 +56,6 @@
 "library.empty" = "Your library is empty.";
 "library.search.placeholder" = "Search titles";
 "loading" = "Loading…";
-"maintenance.failed" = "Your library could not be updated.";
-"maintenance.intention" = "To make the app better for you, we need to update your library.";
-"maintenance.start" = "Start Update";
-"maintenance.succeeded" = "Your library has been updated.";
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";
 "no" = "No";

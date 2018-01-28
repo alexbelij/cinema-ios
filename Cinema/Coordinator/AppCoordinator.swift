@@ -94,7 +94,7 @@ extension AppCoordinator: DataUpdateCoordinatorDelegate {
     if updates.isEmpty {
       transition(to: .upAndRunning(dependencies, CoreCoordinator(dependencies: dependencies)))
     } else {
-      let dataUpdateCoordinator = DataUpdateCoordinator(updates: updates, dependencies: dependencies)
+      let dataUpdateCoordinator = DataUpdateCoordinator(library: dependencies.library, updates: updates)
       dataUpdateCoordinator.delegate = self
       transition(to: .updatingData(dependencies, dataUpdateCoordinator))
     }

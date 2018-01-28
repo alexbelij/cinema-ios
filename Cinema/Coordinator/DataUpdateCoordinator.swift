@@ -1,40 +1,55 @@
+import Dispatch
 import UIKit
 
 protocol DataUpdateCoordinatorDelegate: class {
   func dataUpdateCoordinatorDidFinish(_ coordinator: DataUpdateCoordinator)
 }
 
-class DataUpdateCoordinator: CustomPresentableCoordinator {
-  typealias Dependencies = LibraryDependency
-
-  // coordinator stuff
-  var rootViewController: UIViewController {
-    return maintenanceController
-  }
+class DataUpdateCoordinator: PageCoordinator {
   weak var delegate: DataUpdateCoordinatorDelegate?
+  private let updateAction: PropertyUpdateAction
 
-  // managed controller
-  private let maintenanceController: MaintenanceViewController
+  init(library: MediaLibrary, updates: [PropertyUpdate]) {
+    self.updateAction = PropertyUpdateAction(library: library, updates: updates)
+    super.init()
+    showSetupPage()
+  }
 
-  init(updates: [PropertyUpdate], dependencies: Dependencies) {
-    maintenanceController = UIStoryboard.maintenance.instantiate(MaintenanceViewController.self)
-    maintenanceController.run(PropertyUpdateAction(library: dependencies.library, updates: updates),
-                              initiation: .button(title: NSLocalizedString("maintenance.start", comment: "")),
-                              completion: maintenanceActionDidComplete)
-    maintenanceController.primaryText = NSLocalizedString("maintenance.intention", comment: "")
-    maintenanceController.dismissHandler = .custom(handler: { [weak self] in
-      guard let `self` = self else { return }
-      self.delegate?.dataUpdateCoordinatorDidFinish(self)
+  private func showSetupPage() {
+    showPage(ActionPage.initWith(primaryText: NSLocalizedString("dataUpdate.update", comment: ""),
+                                 secondaryText: NSLocalizedString("dataUpdate.intention", comment: ""),
+                                 actionTitle: NSLocalizedString("dataUpdate.start", comment: "")) { [weak self] in
+      self?.showProgressPage()
     })
   }
 
-  private func maintenanceActionDidComplete(with result: ActionResult<Void>) {
-    switch result {
-      case .result:
-        maintenanceController.primaryText = NSLocalizedString("maintenance.succeeded", comment: "")
-      case let .error(error):
-        maintenanceController.primaryText = NSLocalizedString("maintenance.failed", comment: "")
-        maintenanceController.secondaryText = L10n.errorMessage(for: error)
+  private func showProgressPage() {
+    showPage(ProgressPage.initWith(primaryText: NSLocalizedString("dataUpdate.progress", comment: ""),
+                                   progress: updateAction.progress))
+    DispatchQueue.global(qos: .userInitiated).async {
+      self.updateAction.performAction { result in
+        switch result {
+          case .result:
+            DispatchQueue.main.async {
+              self.showContinuePage(primaryText: NSLocalizedString("dataUpdate.succeeded", comment: ""),
+                                    secondaryText: NSLocalizedString("dataUpdate.succeeded.description", comment: ""))
+            }
+          case let .error(error):
+            DispatchQueue.main.async {
+              self.showContinuePage(primaryText: NSLocalizedString("dataUpdate.failed", comment: ""),
+                                    secondaryText: L10n.errorMessage(for: error))
+            }
+        }
+      }
     }
+  }
+
+  private func showContinuePage(primaryText: String, secondaryText: String) {
+    showPage(ActionPage.initWith(primaryText: primaryText,
+                                 secondaryText: secondaryText,
+                                 actionTitle: NSLocalizedString("continue", comment: "")) { [weak self] in
+      guard let `self` = self else { return }
+      self.delegate?.dataUpdateCoordinatorDidFinish(self)
+    })
   }
 }
