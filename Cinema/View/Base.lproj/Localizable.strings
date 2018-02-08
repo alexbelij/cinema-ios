@@ -43,8 +43,8 @@
 "genre.western" = "Western";
 "genres" = "Genres";
 "import.failed" = "Oh, snap!";
-"import.succeeded" = "Update completed.";
-"import.progress" = "Updating your library…";
+"import.succeeded" = "Import Complete";
+"import.progress" = "Importing into your Library";
 "library" = "Library";
 "library.empty" = "Your library is empty.";
 "library.search.placeholder" = "Search titles";

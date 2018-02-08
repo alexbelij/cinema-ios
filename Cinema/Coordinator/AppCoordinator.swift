@@ -27,6 +27,8 @@ class AppCoordinator: AutoPresentableCoordinator {
     }
   }
 
+  private var importCoordinator: ImportCoordinator?
+
   func presentRootViewController() {
     transition(to: .gatheringDependencies)
     window.makeKeyAndVisible()
@@ -108,25 +110,18 @@ extension AppCoordinator: DataUpdateCoordinatorDelegate {
 
 // MARK: - Importing from URL
 
-extension AppCoordinator {
+extension AppCoordinator: ImportCoordinatorDelegate {
   func handleImport(from url: URL) -> Bool {
     guard case let State.upAndRunning(dependencies, mainCoordinator) = state else { return false }
-    let controller = UIStoryboard.maintenance.instantiate(MaintenanceViewController.self)
-    controller.run(ImportAndUpdateAction(library: dependencies.library, movieDb: dependencies.movieDb, from: url),
-                   initiation: .runAutomatically) { result in
-      switch result {
-        case let .result(addedItems):
-          controller.primaryText = NSLocalizedString("import.succeeded", comment: "")
-          let format = NSLocalizedString("import.succeeded.changes", comment: "")
-          controller.secondaryText = .localizedStringWithFormat(format, addedItems.count)
-        case let .error(error):
-          controller.primaryText = NSLocalizedString("import.failed", comment: "")
-          controller.secondaryText = L10n.errorMessage(for: error)
-      }
-    }
-    controller.primaryText = NSLocalizedString("import.progress", comment: "")
-    mainCoordinator.rootViewController.present(controller, animated: true)
+    importCoordinator = ImportCoordinator(importUrl: url, dependencies: dependencies)
+    importCoordinator!.delegate = self
+    mainCoordinator.rootViewController.present(importCoordinator!.rootViewController, animated: true)
     return true
+  }
+
+  func importCoordinatorDidFinish(_ coordinator: ImportCoordinator) {
+    coordinator.rootViewController.dismiss(animated: true)
+    self.importCoordinator = nil
   }
 }
 

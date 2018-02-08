@@ -43,8 +43,8 @@
 "genre.western" = "Western";
 "genres" = "Genres";
 "import.failed" = "Hoppla!";
-"import.succeeded" = "Aktualisierung abgeschlossen.";
-"import.progress" = "Deine Mediathek wird aktualisiert …";
+"import.succeeded" = "Aktualisierung abgeschlossen";
+"import.progress" = "Deine Mediathek wird aktualisiert";
 "library" = "Mediathek";
 "library.empty" = "Deine Mediathek ist leer.";
 "library.search.placeholder" = "Titel durchsuchen";
