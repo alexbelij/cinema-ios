@@ -2,17 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "Disk_16x16.png",
+      "filename" : "Disk.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "Disk_16x16@2x.png",
+      "filename" : "Disk@2x.png",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "filename" : "Disk_16x16@3x.png",
+      "filename" : "Disk@3x.png",
       "scale" : "3x"
     }
   ],
