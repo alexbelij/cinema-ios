@@ -5,6 +5,8 @@ class PageCoordinator: NSObject, CustomPresentableCoordinator {
     return navigationController
   }
   private let navigationController = UINavigationController()
+  private var isPresenting = false
+  private let transitionDuration: TimeInterval = 0.3
 
   override init() {
     super.init()
@@ -25,31 +27,19 @@ extension PageCoordinator: UINavigationControllerDelegate {
                             animationControllerFor operation: UINavigationControllerOperation,
                             from fromVC: UIViewController,
                             to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-    switch operation {
-      case .push:
-        return ScrollAnimator(isPresenting: true)
-      default:
-        return ScrollAnimator(isPresenting: false)
-    }
+    isPresenting = operation == .push
+    return self
   }
 }
 
-private class ScrollAnimator: NSObject, UIViewControllerAnimatedTransitioning {
-  private var duration: TimeInterval
-  private var isPresenting: Bool
-
-  init(isPresenting: Bool) {
-    self.duration = 0.3
-    self.isPresenting = isPresenting
-  }
-
+extension PageCoordinator: UIViewControllerAnimatedTransitioning {
   func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
     guard let fromView = transitionContext.view(forKey: UITransitionContextViewKey.from) else { return }
     guard let toView = transitionContext.view(forKey: UITransitionContextViewKey.to) else { return }
     transitionContext.containerView.addSubview(toView)
     let width = (isPresenting ? 1 : -1) * fromView.frame.size.width
     toView.frame.origin.x += width
-    UIView.animate(withDuration: duration,
+    UIView.animate(withDuration: transitionDuration,
                    animations: {
                      fromView.frame.origin.x -= width
                      toView.frame.origin.x -= width
@@ -60,6 +50,6 @@ private class ScrollAnimator: NSObject, UIViewControllerAnimatedTransitioning {
   }
 
   func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-    return duration
+    return transitionDuration
   }
 }
