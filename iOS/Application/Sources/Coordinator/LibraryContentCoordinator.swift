@@ -4,6 +4,7 @@ import Foundation
 import UIKit
 
 protocol LibraryContentCoordinatorDelegate: class {
+  func libraryContentCoordinatorShowLibraryList(_ coordinator: LibraryContentCoordinator)
   func libraryContentCoordinatorDidDismiss(_ coordinator: LibraryContentCoordinator)
 }
 
@@ -21,6 +22,19 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
   private let library: MovieLibrary
   private let content: ContentSpecification
   var dismissWhenEmpty = false
+  var showsLibrarySwitch = false {
+    didSet {
+      if showsLibrarySwitch {
+        let button = UIBarButtonItem(image: #imageLiteral(resourceName: "SwitchLibrary"),
+                                     style: .done,
+                                     target: self,
+                                     action: #selector(showLibraryListSheet))
+        movieListController.navigationItem.leftBarButtonItem = button
+      } else {
+        movieListController.navigationItem.leftBarButtonItem = nil
+      }
+    }
+  }
 
   // managed controllers
   private let navigationController: UINavigationController
@@ -158,6 +172,15 @@ extension LibraryContentCoordinator: EditMovieCoordinatorDelegate {
           coordinator.rootViewController.present(alert, animated: true)
         }
     }
+  }
+}
+
+// MARK: - Switching Libraries
+
+extension LibraryContentCoordinator {
+  @objc
+  private func showLibraryListSheet() {
+    self.delegate?.libraryContentCoordinatorShowLibraryList(self)
   }
 }
 

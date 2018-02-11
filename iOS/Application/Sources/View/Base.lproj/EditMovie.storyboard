@@ -123,7 +123,7 @@
                                 <action selector="cancelButtonClicked" destination="dNn-o6-z2I" id="EHb-wK-MC4"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="5Qk-ob-Rtc">
+                        <barButtonItem key="rightBarButtonItem" style="done" systemItem="done" id="5Qk-ob-Rtc">
                             <connections>
                                 <action selector="doneButtonClicked" destination="dNn-o6-z2I" id="iFA-IH-Rdm"/>
                             </connections>

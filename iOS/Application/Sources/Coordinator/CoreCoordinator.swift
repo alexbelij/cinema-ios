@@ -21,6 +21,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
     libraryContentCoordinator = LibraryContentCoordinator(navigationController: libraryContentNav,
                                                           content: .all,
                                                           dependencies: dependencies)
+    libraryContentCoordinator.showsLibrarySwitch = true
     libraryContentNav.tabBarItem = UITabBarItem(
         title: NSLocalizedString("library", comment: ""),
         image: #imageLiteral(resourceName: "Tab-Library-normal"),
@@ -45,5 +46,22 @@ class CoreCoordinator: CustomPresentableCoordinator {
     tabBarController.viewControllers = [libraryContentNav,
                                         genreListCoordinator.rootViewController,
                                         searchTmdbCoordinator.rootViewController]
+
+    libraryContentCoordinator.delegate = self
+  }
+}
+
+// MARK: - Switching Libraries
+
+extension CoreCoordinator: LibraryContentCoordinatorDelegate {
+  func libraryContentCoordinatorShowLibraryList(_ coordinator: LibraryContentCoordinator) {
+    let controller = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
+    controller.addSheetItem(SelectableLabelSheetItem(title: NSLocalizedString("library", comment: ""),
+                                                     showCheckmark: true))
+    self.tabBarController.present(controller, animated: true)
+  }
+
+  func libraryContentCoordinatorDidDismiss(_ coordinator: LibraryContentCoordinator) {
+    fatalError("root should not be dismissed")
   }
 }
