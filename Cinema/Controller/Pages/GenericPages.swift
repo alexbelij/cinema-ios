@@ -3,6 +3,7 @@ import UIKit
 class ProgressPage: UIViewController {
   var primaryText: String! {
     didSet {
+      guard isViewLoaded else { return }
       primaryLabel.text = primaryText
     }
   }
@@ -10,19 +11,25 @@ class ProgressPage: UIViewController {
 
   var secondaryText: String? {
     didSet {
+      guard isViewLoaded else { return }
       secondaryLabel.text = secondaryText
     }
   }
   @IBOutlet private var secondaryLabel: UILabel!
 
+  var progress: Progress! {
+    didSet {
+      guard isViewLoaded else { return }
+      progressView.observedProgress = progress
+    }
+  }
   @IBOutlet private var progressView: UIProgressView!
 
   static func initWith(primaryText: String, secondaryText: String? = nil, progress: Progress) -> ProgressPage {
     let page = UIStoryboard(name: "GenericPages", bundle: nil).instantiate(ProgressPage.self)
-    page.loadViewIfNeeded()
     page.primaryText = primaryText
     page.secondaryText = secondaryText
-    page.progressView.observedProgress = progress
+    page.progress = progress
     return page
   }
 
@@ -30,12 +37,14 @@ class ProgressPage: UIViewController {
     super.viewDidLoad()
     primaryLabel.text = primaryText
     secondaryLabel.text = secondaryText
+    progressView.observedProgress = progress
   }
 }
 
 class ActionPage: UIViewController {
   var primaryText: String! {
     didSet {
+      guard isViewLoaded else { return }
       primaryLabel.text = primaryText
     }
   }
@@ -43,6 +52,7 @@ class ActionPage: UIViewController {
 
   var secondaryText: String? {
     didSet {
+      guard isViewLoaded else { return }
       secondaryLabel.text = secondaryText
     }
   }
@@ -50,6 +60,7 @@ class ActionPage: UIViewController {
 
   var actionTitle: String! {
     didSet {
+      guard isViewLoaded else { return }
       button.setTitle(actionTitle, for: .normal)
     }
   }
@@ -62,7 +73,6 @@ class ActionPage: UIViewController {
                        actionTitle: String,
                        actionHandler: @escaping () -> Void) -> ActionPage {
     let page = UIStoryboard(name: "GenericPages", bundle: nil).instantiate(ActionPage.self)
-    page.loadViewIfNeeded()
     page.primaryText = primaryText
     page.secondaryText = secondaryText
     page.actionTitle = actionTitle
