@@ -18,27 +18,28 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="egB-DD-Wor">
-                            <size key="itemSize" width="130" height="230"/>
+                            <size key="itemSize" width="150" height="230"/>
                             <size key="headerReferenceSize" width="50" height="40"/>
                             <size key="footerReferenceSize" width="50" height="80"/>
                             <inset key="sectionInset" minX="10" minY="10" maxX="10" maxY="10"/>
                         </collectionViewFlowLayout>
                         <cells>
                             <collectionViewCell opaque="NO" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PosterCell" id="XXR-x3-I0h" customClass="PosterCell" customModule="Cinema" customModuleProvider="target">
-                                <rect key="frame" x="10" y="50" width="130" height="230"/>
+                                <rect key="frame" x="10" y="50" width="150" height="230"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                    <rect key="frame" x="0.0" y="0.0" width="130" height="230"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="150" height="230"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="GenericPoster-w185" translatesAutoresizingMaskIntoConstraints="NO" id="wd4-JF-0Co">
-                                            <rect key="frame" x="0.0" y="0.0" width="130" height="195"/>
+                                            <rect key="frame" x="10" y="0.0" width="130" height="195"/>
                                             <constraints>
+                                                <constraint firstAttribute="width" constant="130" id="6Ik-ie-Nzw"/>
                                                 <constraint firstAttribute="width" secondItem="wd4-JF-0Co" secondAttribute="height" multiplier="2:3" id="dwp-iA-58s"/>
                                             </constraints>
                                         </imageView>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A long title reaching into the second line" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EMQ-UV-WWr">
-                                            <rect key="frame" x="0.0" y="199" width="130" height="29"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A long title reaching into the second line" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EMQ-UV-WWr">
+                                            <rect key="frame" x="0.0" y="199" width="150" height="29"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
@@ -48,12 +49,11 @@
                                 <constraints>
                                     <constraint firstItem="wd4-JF-0Co" firstAttribute="centerX" secondItem="XXR-x3-I0h" secondAttribute="centerX" id="CXn-VM-h22"/>
                                     <constraint firstItem="EMQ-UV-WWr" firstAttribute="top" secondItem="wd4-JF-0Co" secondAttribute="bottom" constant="4" id="G5W-jC-gtf"/>
-                                    <constraint firstItem="wd4-JF-0Co" firstAttribute="width" secondItem="XXR-x3-I0h" secondAttribute="width" id="Q1v-sp-lfS"/>
                                     <constraint firstItem="wd4-JF-0Co" firstAttribute="top" secondItem="XXR-x3-I0h" secondAttribute="top" id="YeS-R4-ad5"/>
                                     <constraint firstAttribute="trailing" secondItem="EMQ-UV-WWr" secondAttribute="trailing" id="a8O-FP-C2n"/>
                                     <constraint firstItem="EMQ-UV-WWr" firstAttribute="leading" secondItem="XXR-x3-I0h" secondAttribute="leading" id="mRY-df-BsQ"/>
                                 </constraints>
-                                <size key="customSize" width="130" height="230"/>
+                                <size key="customSize" width="150" height="230"/>
                                 <connections>
                                     <outlet property="posterImageView" destination="wd4-JF-0Co" id="wu8-Rk-OYc"/>
                                     <outlet property="titleLabel" destination="EMQ-UV-WWr" id="qry-t9-kfW"/>

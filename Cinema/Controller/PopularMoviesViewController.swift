@@ -177,11 +177,7 @@ class PosterCell: UICollectionViewCell {
     posterImageView.layer.shadowRadius = 2
     posterImageView.layer.shadowOpacity = 0.5
     posterImageView.layer.shadowOffset = CGSize(width: 0.0, height: 1.0)
-    let posterFrame = posterImageView.frame
-    self.highlightView = UIView(frame: CGRect(x: 0,
-                                              y: 0,
-                                              width: posterFrame.size.width,
-                                              height: posterFrame.size.height))
+    self.highlightView = UIView(frame: posterImageView.frame)
     self.highlightView.backgroundColor = .black
     self.highlightView.alpha = 0
     self.contentView.addSubview(highlightView)
