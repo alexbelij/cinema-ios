@@ -173,8 +173,10 @@ class PosterCell: UICollectionViewCell {
 
   override func awakeFromNib() {
     super.awakeFromNib()
-    posterImageView.layer.borderColor = UIColor.posterBorder.cgColor
-    posterImageView.layer.borderWidth = 0.5
+    posterImageView.layer.shadowColor = UIColor.black.cgColor
+    posterImageView.layer.shadowRadius = 2
+    posterImageView.layer.shadowOpacity = 0.5
+    posterImageView.layer.shadowOffset = CGSize(width: 0.0, height: 1.0)
     let posterFrame = posterImageView.frame
     self.highlightView = UIView(frame: CGRect(x: 0,
                                               y: 0,
