@@ -261,6 +261,7 @@
                                         <constraint firstItem="2Km-GV-Wuk" firstAttribute="top" secondItem="hHE-PW-p05" secondAttribute="top" id="nCc-3V-0Wz"/>
                                     </constraints>
                                 </tableViewCellContentView>
+                                <inset key="separatorInset" minX="73" minY="0.0" maxX="15" maxY="0.0"/>
                                 <connections>
                                     <outlet property="posterView" destination="aMW-mt-aKk" id="TIN-Mt-PVx"/>
                                     <outlet property="secondaryLabel" destination="xWn-Pf-ON2" id="is5-gg-ly2"/>
@@ -381,6 +382,7 @@
                                         <constraint firstAttribute="trailing" secondItem="QJl-Yp-3UJ" secondAttribute="trailing" id="yMW-Q3-UlA"/>
                                     </constraints>
                                 </tableViewCellContentView>
+                                <inset key="separatorInset" minX="73" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <connections>
                                     <outlet property="posterView" destination="cSr-et-OvE" id="OMO-0S-xzs"/>
                                     <outlet property="secondaryLabel" destination="qeN-DP-vUh" id="mDD-Qz-nsQ"/>
