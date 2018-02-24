@@ -41,7 +41,7 @@ class MovieListController: UITableViewController {
 
   private let titleSortingStrategy = SortDescriptor.title.makeTableViewStrategy()
   private lazy var searchController: UISearchController = {
-    let resultsController = MovieListSearchResultsController()
+    let resultsController = storyboard!.instantiate(MovieListSearchResultsController.self)
     resultsController.onSelection = { [weak self] selectedItem in
       guard let `self` = self else { return }
       self.delegate?.movieListController(self, didSelect: selectedItem)
@@ -68,7 +68,6 @@ class MovieListController: UITableViewController {
 extension MovieListController {
   override func viewDidLoad() {
     super.viewDidLoad()
-    tableView.register(UINib(nibName: "MovieListTableCell", bundle: nil), forCellReuseIdentifier: "MovieListTableCell")
     tableView.prefetchDataSource = self
     tableView.sectionIndexBackgroundColor = UIColor.clear
     definesPresentationContext = true
