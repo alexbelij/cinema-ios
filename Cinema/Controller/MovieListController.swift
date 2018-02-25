@@ -354,6 +354,7 @@ class MovieListTableCell: UITableViewCell {
   @IBOutlet private weak var posterView: UIImageView!
   @IBOutlet private weak var titleLabel: UILabel!
   @IBOutlet private weak var secondaryLabel: UILabel!
+  @IBOutlet private weak var tertiaryLabel: UILabel!
   private var workItem: DispatchWorkItem?
 
   override func awakeFromNib() {
@@ -367,6 +368,7 @@ class MovieListTableCell: UITableViewCell {
     secondaryLabel.text = item.movie.runtime == nil
         ? NSLocalizedString("details.missing.runtime", comment: "")
         : Utils.formatDuration(item.movie.runtime!)
+    tertiaryLabel.text = item.movie.diskType.localizedName
     configurePoster(for: item, posterProvider: posterProvider)
   }
 
