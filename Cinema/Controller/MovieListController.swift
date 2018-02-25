@@ -357,7 +357,7 @@ private class ViewModel {
 class MovieListTableCell: UITableViewCell {
   @IBOutlet private weak var posterView: UIImageView!
   @IBOutlet private weak var titleLabel: UILabel!
-  @IBOutlet private weak var runtimeLabel: UILabel!
+  @IBOutlet private weak var secondaryLabel: UILabel!
   private var workItem: DispatchWorkItem?
 
   override func awakeFromNib() {
@@ -367,8 +367,8 @@ class MovieListTableCell: UITableViewCell {
   }
 
   func configure(for item: MovieListItem, posterProvider: PosterProvider) {
-    titleLabel!.text = item.movie.fullTitle
-    runtimeLabel!.text = item.movie.runtime == nil
+    titleLabel.text = item.movie.fullTitle
+    secondaryLabel.text = item.movie.runtime == nil
         ? NSLocalizedString("details.missing.runtime", comment: "")
         : Utils.formatDuration(item.movie.runtime!)
     configurePoster(for: item, posterProvider: posterProvider)
@@ -379,9 +379,10 @@ class MovieListTableCell: UITableViewCell {
       case .unknown:
         configurePosterForUnknownOrLoadingImageState()
         item.image = .loading
+        let size = PosterSize(minWidth: Int(posterView.frame.size.width))
         var workItem: DispatchWorkItem?
         workItem = DispatchWorkItem {
-          let poster = posterProvider.poster(for: item.movie.tmdbID, size: PosterSize(minWidth: 46))
+          let poster = posterProvider.poster(for: item.movie.tmdbID, size: size)
           DispatchQueue.main.async {
             if let posterImage = poster {
               item.image = .available(posterImage)

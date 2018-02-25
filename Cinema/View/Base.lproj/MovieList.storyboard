@@ -257,7 +257,7 @@
                                 </tableViewCellContentView>
                                 <connections>
                                     <outlet property="posterView" destination="aMW-mt-aKk" id="TIN-Mt-PVx"/>
-                                    <outlet property="runtimeLabel" destination="xWn-Pf-ON2" id="vuT-gI-fzF"/>
+                                    <outlet property="secondaryLabel" destination="xWn-Pf-ON2" id="is5-gg-ly2"/>
                                     <outlet property="titleLabel" destination="cSZ-py-AyO" id="m6y-l9-8Pf"/>
                                 </connections>
                             </tableViewCell>
@@ -370,7 +370,7 @@
                                 </tableViewCellContentView>
                                 <connections>
                                     <outlet property="posterView" destination="cSr-et-OvE" id="OMO-0S-xzs"/>
-                                    <outlet property="runtimeLabel" destination="qeN-DP-vUh" id="PLx-5E-Dqt"/>
+                                    <outlet property="secondaryLabel" destination="qeN-DP-vUh" id="mDD-Qz-nsQ"/>
                                     <outlet property="titleLabel" destination="lHj-qh-f4a" id="lGf-ks-elW"/>
                                 </connections>
                             </tableViewCell>
