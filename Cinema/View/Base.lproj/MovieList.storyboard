@@ -205,40 +205,40 @@
         <scene sceneID="smW-Zh-WAh">
             <objects>
                 <tableViewController storyboardIdentifier="MovieListController" id="7bK-jq-Zjz" customClass="MovieListController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="r7i-6Z-zg0">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="90" sectionHeaderHeight="28" sectionFooterHeight="28" id="r7i-6Z-zg0">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <inset key="separatorInset" minX="8" minY="0.0" maxX="0.0" maxY="0.0"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="MovieListTableCell" rowHeight="75" id="glJ-S8-7Ki" customClass="MovieListTableCell" customModule="Cinema" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="28" width="375" height="75"/>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="MovieListTableCell" rowHeight="90" id="glJ-S8-7Ki" customClass="MovieListTableCell" customModule="Cinema" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="28" width="375" height="90"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="glJ-S8-7Ki" id="hHE-PW-p05">
-                                    <rect key="frame" x="0.0" y="0.0" width="341" height="74.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="341" height="89.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="2Km-GV-Wuk">
-                                            <rect key="frame" x="16" y="0.0" width="325" height="74.5"/>
+                                            <rect key="frame" x="16" y="0.0" width="325" height="89.5"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" verticalHuggingPriority="252" image="GenericPoster-w92" translatesAutoresizingMaskIntoConstraints="NO" id="aMW-mt-aKk">
-                                                    <rect key="frame" x="0.0" y="3" width="46" height="69"/>
+                                                    <rect key="frame" x="0.0" y="5" width="53.5" height="80"/>
                                                     <constraints>
-                                                        <constraint firstAttribute="height" constant="69" id="O1H-YI-rTx"/>
+                                                        <constraint firstAttribute="height" constant="80" id="O1H-YI-rTx"/>
                                                         <constraint firstAttribute="width" secondItem="aMW-mt-aKk" secondAttribute="height" multiplier="2:3" id="oXv-ew-4To"/>
                                                     </constraints>
                                                 </imageView>
                                                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="SHZ-R5-EUR">
-                                                    <rect key="frame" x="54" y="19.5" width="271" height="36"/>
+                                                    <rect key="frame" x="61.5" y="27" width="263.5" height="36"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cSZ-py-AyO">
-                                                            <rect key="frame" x="0.0" y="0.0" width="271" height="19.5"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="263.5" height="19.5"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="123 minutes" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xWn-Pf-ON2">
-                                                            <rect key="frame" x="0.0" y="21.5" width="271" height="14.5"/>
+                                                            <rect key="frame" x="0.0" y="21.5" width="263.5" height="14.5"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                             <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                             <nil key="highlightedColor"/>
@@ -313,45 +313,45 @@
         <scene sceneID="5G6-2Z-iyr">
             <objects>
                 <tableViewController storyboardIdentifier="MovieListSearchResultsController" id="yvx-i9-nAq" customClass="MovieListSearchResultsController" customModule="Cinema" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="z6Q-wN-qIv">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="90" sectionHeaderHeight="28" sectionFooterHeight="28" id="z6Q-wN-qIv">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <inset key="separatorInset" minX="8" minY="0.0" maxX="0.0" maxY="0.0"/>
                         <view key="tableFooterView" contentMode="scaleToFill" id="y5h-eD-h7k">
-                            <rect key="frame" x="0.0" y="103" width="375" height="1"/>
+                            <rect key="frame" x="0.0" y="118" width="375" height="1"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         </view>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="MovieListTableCell" rowHeight="75" id="7VN-7x-124" customClass="MovieListTableCell" customModule="Cinema" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="28" width="375" height="75"/>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="MovieListTableCell" rowHeight="90" id="7VN-7x-124" customClass="MovieListTableCell" customModule="Cinema" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="28" width="375" height="90"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="7VN-7x-124" id="nCy-bc-lJR">
-                                    <rect key="frame" x="0.0" y="0.0" width="341" height="74.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="341" height="89.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="QJl-Yp-3UJ">
-                                            <rect key="frame" x="16" y="0.0" width="325" height="74.5"/>
+                                            <rect key="frame" x="16" y="0.0" width="325" height="89.5"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" verticalHuggingPriority="252" image="GenericPoster-w92" translatesAutoresizingMaskIntoConstraints="NO" id="cSr-et-OvE">
-                                                    <rect key="frame" x="0.0" y="3" width="46" height="69"/>
+                                                    <rect key="frame" x="0.0" y="5" width="53.5" height="80"/>
                                                     <constraints>
-                                                        <constraint firstAttribute="height" constant="69" id="FeM-aZ-KxZ"/>
+                                                        <constraint firstAttribute="height" constant="80" id="FeM-aZ-KxZ"/>
                                                         <constraint firstAttribute="width" secondItem="cSr-et-OvE" secondAttribute="height" multiplier="2:3" id="qNV-dq-gyL"/>
                                                     </constraints>
                                                 </imageView>
                                                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="peT-fU-Tdk">
-                                                    <rect key="frame" x="54" y="19.5" width="271" height="36"/>
+                                                    <rect key="frame" x="61.5" y="27" width="263.5" height="36"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lHj-qh-f4a">
-                                                            <rect key="frame" x="0.0" y="0.0" width="271" height="19.5"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="263.5" height="19.5"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="123 minutes" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qeN-DP-vUh">
-                                                            <rect key="frame" x="0.0" y="21.5" width="271" height="14.5"/>
+                                                            <rect key="frame" x="0.0" y="21.5" width="263.5" height="14.5"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                             <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                             <nil key="highlightedColor"/>

@@ -193,10 +193,6 @@ extension MovieListController: UITableViewDataSourcePrefetching {
     return viewModel.sectionForSectionIndexTitle(title, at: index)
   }
 
-  public override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-    return 75
-  }
-
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     self.delegate?.movieListController(self, didSelect: viewModel.item(at: indexPath).movie)
   }

@@ -68,10 +68,6 @@ extension MovieListSearchResultsController {
     return cell
   }
 
-  public override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-    return 75
-  }
-
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     self.onSelection?(items[indexPath.row].movie)
   }
