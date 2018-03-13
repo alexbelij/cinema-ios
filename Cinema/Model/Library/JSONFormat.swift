@@ -109,7 +109,7 @@ extension JSONFormat {
         "id": item.id,
         "title": item.title,
         "runtime": item.runtime ?? -1,
-        "year": item.releaseDate.map { dateFormatter.string(from: $0) } ?? -1,
+        "year": item.releaseDate.map { Int(dateFormatter.string(from: $0))! } ?? -1,
         "diskType": item.diskType.rawValue
       ]
       if let subtitle = item.subtitle {
