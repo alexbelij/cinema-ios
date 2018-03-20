@@ -90,7 +90,7 @@ extension GenreListController {
       case .loading:
         viewModel = nil
       case let .available(genreIds):
-        viewModel = genreIds.flatMap { id in L10n.genreName(for: id).map { name in Genre(id: id, name: name) } }
+        viewModel = genreIds.compactMap { id in L10n.genreName(for: id).map { name in Genre(id: id, name: name) } }
                             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
   }

@@ -341,7 +341,7 @@ private class ViewModel {
   }
 
   lazy var sectionIndexTitles: [String]? = {
-    let titles = sections.flatMap { $0.indexTitle }
+    let titles = sections.compactMap { $0.indexTitle }
     return titles.isEmpty ? nil : titles
   }()
 
