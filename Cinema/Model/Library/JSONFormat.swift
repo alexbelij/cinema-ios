@@ -50,7 +50,7 @@ extension JSONFormat {
         dictionary["subtitle"] = subtitle
       }
       if let runtime = item.runtime {
-        dictionary["runtime"] = runtime
+        dictionary["runtime"] = Int(runtime.converted(to: UnitDuration.minutes).value)
       }
       if let releaseDate = item.releaseDate {
         dictionary["releaseDate"] = dateFormatter.string(from: releaseDate)
@@ -72,7 +72,7 @@ extension JSONFormat {
       let id = jsonItem["id"].int.map(TmdbIdentifier.init)
       let title = jsonItem["title"].string
       let subtitle = jsonItem["subtitle"].string
-      let runtime = jsonItem["runtime"].int
+      let runtime = jsonItem["runtime"].int.map { Measurement(value: Double($0), unit: UnitDuration.minutes) }
       let releaseDate = jsonItem["releaseDate"].string.flatMap { dateFormatter.date(from: $0) }
       let diskType = DiskType(rawValue: jsonItem["diskType"].string ?? "")
       let genreIds: [GenreIdentifier]
@@ -108,7 +108,7 @@ extension JSONFormat {
       var dictionary: [String: Any] = [
         "id": item.tmdbID.rawValue,
         "title": item.title,
-        "runtime": item.runtime ?? -1,
+        "runtime": item.runtime.map { Int($0.converted(to: UnitDuration.minutes).value) } ?? -1,
         "year": item.releaseDate.map { Int(dateFormatter.string(from: $0))! } ?? -1,
         "diskType": item.diskType.rawValue
       ]
@@ -128,7 +128,12 @@ extension JSONFormat {
       let id = jsonItem["id"].int.map(TmdbIdentifier.init)
       let title = jsonItem["title"].string
       let subtitle = jsonItem["subtitle"].string
-      let runtime = jsonItem["runtime"].int
+      let runtime: Measurement<UnitDuration>?
+      if let rawRuntime = jsonItem["runtime"].int, rawRuntime > 0 {
+        runtime = Measurement(value: Double(rawRuntime), unit: UnitDuration.minutes)
+      } else {
+        runtime = nil
+      }
       let year = jsonItem["year"].int
       let diskType = DiskType(rawValue: jsonItem["diskType"].string ?? "")
       if let id = id, let title = title, let runtime = runtime, let year = year, let diskType = diskType {

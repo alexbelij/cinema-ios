@@ -91,7 +91,8 @@ private struct RuntimeSortingStrategy: SectionSortingStrategy {
 
   func sectionIndexTitle(for item: MediaItem) -> String {
     guard let runtime = item.runtime else { return unknownSymbol }
-    return String(runtime / 10 * 10)
+    let minutes = Int(runtime.converted(to: UnitDuration.minutes).value)
+    return String(minutes / 10 * 10)
   }
 
   func refineSectionIndexTitles(_ sections: [String]) -> [String] {

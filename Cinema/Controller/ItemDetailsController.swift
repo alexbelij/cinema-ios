@@ -60,7 +60,7 @@ class ItemDetailsController: UIViewController {
   }
   @IBOutlet private weak var genreLabel: UILabel!
 
-  var runtime: Int? {
+  var runtime: Measurement<UnitDuration>? {
     didSet {
       self.loadViewIfNeeded()
       if let runtime = self.runtime {

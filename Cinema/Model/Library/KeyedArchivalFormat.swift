@@ -49,7 +49,7 @@ extension KeyedArchivalFormat {
         dictionary["subtitle"] = subtitle
       }
       if let runtime = item.runtime {
-        dictionary["runtime"] = runtime
+        dictionary["runtime"] = Int(runtime.converted(to: UnitDuration.minutes).value)
       }
       if let releaseDate = item.releaseDate {
         dictionary["releaseDate"] = dateFormatter.string(from: releaseDate)
@@ -77,7 +77,7 @@ extension KeyedArchivalFormat {
       let id = (dict["id"] as? Int).map(TmdbIdentifier.init)
       let title = dict["title"] as? String
       let subtitle = dict["subtitle"] as? String
-      let runtime = dict["runtime"] as? Int
+      let runtime = (dict["runtime"] as? Int).map { Measurement(value: Double($0), unit: UnitDuration.minutes) }
       let releaseDate = (dict["releaseDate"] as? String).flatMap { dateFormatter.date(from: $0) }
       let diskType = DiskType(rawValue: dict["diskType"] as? String ?? "")
       let genreIds = dict["genreIds"] as? [Int] ?? []
@@ -108,7 +108,7 @@ extension KeyedArchivalFormat {
       var dictionary: [String: Any] = [
         "id": item.tmdbID.rawValue,
         "title": item.title,
-        "runtime": item.runtime ?? -1,
+        "runtime": item.runtime.map { Int($0.converted(to: UnitDuration.minutes).value) } ?? -1,
         "year": item.releaseDate.map { Int(dateFormatter.string(from: $0))! } ?? -1,
         "diskType": item.diskType.rawValue
       ]
@@ -131,7 +131,12 @@ extension KeyedArchivalFormat {
       let id = (dict["id"] as? Int).map(TmdbIdentifier.init)
       let title = dict["title"] as? String
       let subtitle = dict["subtitle"] as? String
-      let runtime = dict["runtime"] as? Int
+      let runtime: Measurement<UnitDuration>?
+      if let rawRuntime = dict["runtime"] as? Int, rawRuntime > 0 {
+        runtime = Measurement(value: Double(rawRuntime), unit: UnitDuration.minutes)
+      } else {
+        runtime = nil
+      }
       let year = dict["year"] as? Int
       let diskType = DiskType(rawValue: dict["diskType"] as? String ?? "")
       if let id = id, let title = title, let runtime = runtime, let year = year, let diskType = diskType {

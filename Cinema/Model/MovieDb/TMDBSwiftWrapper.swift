@@ -128,8 +128,9 @@ class TMDBSwiftWrapper: MovieDbClient {
     return value
   }
 
-  func runtime(for id: TmdbIdentifier) -> Int? {
-    return movie(for: id)?.runtime
+  func runtime(for id: TmdbIdentifier) -> Measurement<UnitDuration>? {
+    guard let runtime = movie(for: id)?.runtime, runtime > 0 else { return nil }
+    return Measurement(value: Double(runtime), unit: UnitDuration.minutes)
   }
 
   func popularMovies() -> PagingSequence<PartialMediaItem> {

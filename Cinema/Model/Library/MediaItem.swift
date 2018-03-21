@@ -28,7 +28,7 @@ struct MediaItem: Equatable, Hashable {
   let tmdbID: TmdbIdentifier
   var title: String
   var subtitle: String?
-  let runtime: Int?
+  let runtime: Measurement<UnitDuration>?
   var releaseDate: Date?
   let diskType: DiskType
   var genreIds: [GenreIdentifier]
@@ -36,18 +36,14 @@ struct MediaItem: Equatable, Hashable {
   init(tmdbID: TmdbIdentifier,
        title: String,
        subtitle: String? = nil,
-       runtime: Int? = nil,
+       runtime: Measurement<UnitDuration>? = nil,
        releaseDate: Date? = nil,
        diskType: DiskType = .bluRay,
        genreIds: [GenreIdentifier] = []) {
     self.tmdbID = tmdbID
     self.title = title
     self.subtitle = subtitle
-    if let runtime = runtime, runtime > 0 {
-      self.runtime = runtime
-    } else {
-      self.runtime = nil
-    }
+    self.runtime = runtime
     self.releaseDate = releaseDate
     self.diskType = diskType
     self.genreIds = genreIds

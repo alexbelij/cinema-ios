@@ -21,7 +21,7 @@ protocol MovieDbClient {
 
   func searchMovies(searchText: String) -> [PartialMediaItem]
 
-  func runtime(for id: TmdbIdentifier) -> Int?
+  func runtime(for id: TmdbIdentifier) -> Measurement<UnitDuration>?
 
   func popularMovies() -> PagingSequence<PartialMediaItem>
 
