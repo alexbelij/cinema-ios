@@ -9,7 +9,7 @@ protocol LibraryContentCoordinatorDelegate: class {
 class LibraryContentCoordinator: AutoPresentableCoordinator {
   enum ContentSpecification {
     case all
-    case allWithGenreId(Int)
+    case allWith(GenreIdentifier)
   }
 
   typealias Dependencies = LibraryDependency & MovieDbDependency
@@ -43,7 +43,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     switch content {
       case .all:
         movieListController.title = NSLocalizedString("library", comment: "")
-      case let .allWithGenreId(genreId):
+      case let .allWith(genreId):
         movieListController.title = L10n.genreName(for: genreId)!
     }
     DispatchQueue.global(qos: .default).async {
@@ -60,8 +60,8 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     switch content {
       case .all:
         items = dependencies.library.fetchAllMediaItems()
-      case let .allWithGenreId(genreId):
-        items = dependencies.library.fetchMediaItems(withGenreId: genreId)
+      case let .allWith(genreId):
+        items = dependencies.library.fetchMediaItems(for: genreId)
     }
     DispatchQueue.main.async {
       self.movieListController.listData = .available(items)
@@ -161,12 +161,12 @@ extension LibraryContentCoordinator: MediaLibraryDelegate {
     // updated movies
     if !contentUpdate.updatedItems.isEmpty {
       for (id, item) in contentUpdate.updatedItems {
-        guard let index = movieListItems.index(where: { $0.id == id }) else { continue }
+        guard let index = movieListItems.index(where: { $0.tmdbID == id }) else { continue }
         movieListItems.remove(at: index)
         movieListItems.insert(item, at: index)
       }
       if let itemDetailsCoordinator = self.itemDetailsCoordinator,
-         let updatedDetailItem = contentUpdate.updatedItems[itemDetailsCoordinator.detailItem.id] {
+         let updatedDetailItem = contentUpdate.updatedItems[itemDetailsCoordinator.detailItem.tmdbID] {
         DispatchQueue.main.async {
           itemDetailsCoordinator.updateNonRemoteProperties(with: updatedDetailItem)
         }
@@ -178,7 +178,7 @@ extension LibraryContentCoordinator: MediaLibraryDelegate {
     switch content {
       case .all:
         newMovies = contentUpdate.addedItems
-      case let .allWithGenreId(genreId):
+      case let .allWith(genreId):
         newMovies = contentUpdate.addedItems.filter { $0.genreIds.contains(genreId) }
     }
     movieListItems.append(contentsOf: newMovies)

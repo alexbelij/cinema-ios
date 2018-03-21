@@ -190,7 +190,7 @@ class PosterCell: UICollectionViewCell {
     posterImageView.image = .genericPosterImage(minWidth: posterImageView.frame.size.width)
     var workItem: DispatchWorkItem?
     workItem = DispatchWorkItem {
-      if let poster = posterProvider.poster(for: item.id, size: PosterSize(minWidth: 130)) {
+      if let poster = posterProvider.poster(for: item.tmdbID, size: PosterSize(minWidth: 130)) {
         DispatchQueue.main.async {
           guard !workItem!.isCancelled else { return }
           self.posterImageView.image = poster

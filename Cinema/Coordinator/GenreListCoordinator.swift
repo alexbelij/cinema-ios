@@ -54,9 +54,9 @@ class GenreListCoordinator: CustomPresentableCoordinator {
 
 extension GenreListCoordinator: GenreListControllerDelegate {
   func genreListController(_ controller: GenreListController,
-                           didSelectGenre genreId: Int) {
+                           didSelectGenre genreId: GenreIdentifier) {
     self.libraryContentCoordinator = LibraryContentCoordinator(navigationController: navigationController,
-                                                               content: .allWithGenreId(genreId),
+                                                               content: .allWith(genreId),
                                                                dependencies: dependencies)
     self.libraryContentCoordinator!.dismissWhenEmpty = true
     self.libraryContentCoordinator!.presentRootViewController()
@@ -67,7 +67,7 @@ extension GenreListCoordinator: GenreListControllerDelegate {
 
 extension GenreListCoordinator: MediaLibraryDelegate {
   func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
-    let updatedGenreIds: [Int]
+    let updatedGenreIds: [GenreIdentifier]
     var updatedGenreImageProvider: GenreImageProvider? = nil
 
     // When a movie has been removed from the library, we have to check,
@@ -105,7 +105,7 @@ extension GenreListCoordinator: MediaLibraryDelegate {
 
 private class RandomMovieGenreImageProvider: GenreImageProvider {
   private let movieDb: MovieDbClient
-  private var genreGroups = [Int: [MediaItem]]()
+  private var genreGroups = [GenreIdentifier: [MediaItem]]()
   private let maxRetries = 2
   var backdropSize: BackdropSize
 
@@ -127,11 +127,11 @@ private class RandomMovieGenreImageProvider: GenreImageProvider {
     }
   }
 
-  func genreImage(for genreId: Int) -> UIImage? {
+  func genreImage(for genreId: GenreIdentifier) -> UIImage? {
     guard let mediaItems = genreGroups[genreId] else { return nil }
     for _ in 0..<maxRetries {
       let randomIndex = Int(arc4random_uniform(UInt32(mediaItems.count)))
-      if let backdrop = movieDb.backdrop(for: mediaItems[randomIndex].id, size: backdropSize) {
+      if let backdrop = movieDb.backdrop(for: mediaItems[randomIndex].tmdbID, size: backdropSize) {
         return backdrop
       }
     }

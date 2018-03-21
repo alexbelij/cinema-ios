@@ -24,7 +24,7 @@ class ImportAction: MaintenanceAction {
       let existingItems = self.library.fetchAllMediaItems()
       let newItems = itemsToImport.filter { itemToImport in
         !existingItems.contains { existingItem in
-          itemToImport.id == existingItem.id
+          itemToImport.tmdbID == existingItem.tmdbID
         }
       }
       progress.completedUnitCount += 2

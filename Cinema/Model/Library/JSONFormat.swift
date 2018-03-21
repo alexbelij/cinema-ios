@@ -41,10 +41,10 @@ extension JSONFormat {
     dateFormatter.dateFormat = "yyyy-MM-dd"
     let payload: [JSON] = elements.map { item in
       var dictionary: [String: Any] = [
-        "id": item.id,
+        "id": item.tmdbID.rawValue,
         "title": item.title,
         "diskType": item.diskType.rawValue,
-        "genreIds": item.genreIds
+        "genreIds": item.genreIds.map { $0.rawValue }
       ]
       if let subtitle = item.subtitle {
         dictionary["subtitle"] = subtitle
@@ -69,20 +69,20 @@ extension JSONFormat {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy-MM-dd"
     for jsonItem in json[String.payloadKey].arrayValue {
-      let id = jsonItem["id"].int
+      let id = jsonItem["id"].int.map(TmdbIdentifier.init)
       let title = jsonItem["title"].string
       let subtitle = jsonItem["subtitle"].string
       let runtime = jsonItem["runtime"].int
       let releaseDate = jsonItem["releaseDate"].string.flatMap { dateFormatter.date(from: $0) }
       let diskType = DiskType(rawValue: jsonItem["diskType"].string ?? "")
-      let genreIds: [Int]
+      let genreIds: [GenreIdentifier]
       if let ids = jsonItem["genreIds"].array {
-        genreIds = ids.map { $0.int! }
+        genreIds = ids.map { GenreIdentifier(rawValue: $0.int!) }
       } else {
         genreIds = []
       }
       if let id = id, let title = title, let diskType = diskType {
-        let mediaItem = MediaItem(id: id,
+        let mediaItem = MediaItem(tmdbID: id,
                                   title: title,
                                   subtitle: subtitle,
                                   runtime: runtime,
@@ -106,7 +106,7 @@ extension JSONFormat {
     dateFormatter.dateFormat = "yyyy"
     let jsonArray: [JSON] = elements.map { item in
       var dictionary: [String: Any] = [
-        "id": item.id,
+        "id": item.tmdbID.rawValue,
         "title": item.title,
         "runtime": item.runtime ?? -1,
         "year": item.releaseDate.map { Int(dateFormatter.string(from: $0))! } ?? -1,
@@ -125,7 +125,7 @@ extension JSONFormat {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy"
     for jsonItem in json.arrayValue {
-      let id = jsonItem["id"].int
+      let id = jsonItem["id"].int.map(TmdbIdentifier.init)
       let title = jsonItem["title"].string
       let subtitle = jsonItem["subtitle"].string
       let runtime = jsonItem["runtime"].int
@@ -138,7 +138,7 @@ extension JSONFormat {
         } else {
           releaseDate = nil
         }
-        let mediaItem = MediaItem(id: id,
+        let mediaItem = MediaItem(tmdbID: id,
                                   title: title,
                                   subtitle: subtitle,
                                   runtime: runtime,

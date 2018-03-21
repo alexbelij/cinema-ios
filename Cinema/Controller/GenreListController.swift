@@ -3,15 +3,15 @@ import Foundation
 import UIKit
 
 protocol GenreListControllerDelegate: class {
-  func genreListController(_ controller: GenreListController, didSelectGenre genreId: Int)
+  func genreListController(_ controller: GenreListController, didSelectGenre genreId: GenreIdentifier)
 }
 
 protocol GenreImageProvider {
-  func genreImage(for genreId: Int) -> UIImage?
+  func genreImage(for genreId: GenreIdentifier) -> UIImage?
 }
 
 class EmptyGenreImageProvider: GenreImageProvider {
-  func genreImage(for genreId: Int) -> UIImage? {
+  func genreImage(for genreId: GenreIdentifier) -> UIImage? {
     return nil
   }
 }
@@ -19,7 +19,7 @@ class EmptyGenreImageProvider: GenreImageProvider {
 class GenreListController: UITableViewController {
   enum ListData {
     case loading
-    case available([Int])
+    case available([GenreIdentifier])
   }
 
   weak var delegate: GenreListControllerDelegate?
@@ -39,11 +39,11 @@ class GenreListController: UITableViewController {
   }
 
   fileprivate class Genre {
-    let id: Int
+    let id: GenreIdentifier
     let name: String
     var image: Image
 
-    init(id: Int, name: String) {
+    init(id: GenreIdentifier, name: String) {
       self.id = id
       self.name = name
       self.image = .unknown

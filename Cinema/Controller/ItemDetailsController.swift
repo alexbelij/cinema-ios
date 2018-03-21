@@ -47,7 +47,7 @@ class ItemDetailsController: UIViewController {
   }
   @IBOutlet private weak var posterView: UIImageView!
 
-  var genreIds = [Int]() {
+  var genreIds = [GenreIdentifier]() {
     didSet {
       self.loadViewIfNeeded()
       let names = self.genreIds.compactMap(L10n.genreName)

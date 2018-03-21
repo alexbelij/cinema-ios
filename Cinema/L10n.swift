@@ -2,9 +2,9 @@ import Foundation
 
 final class L10n {
   // swiftlint:disable:next cyclomatic_complexity
-  static func genreName(for genreId: Int) -> String? {
+  static func genreName(for genreId: GenreIdentifier) -> String? {
     let key: String?
-    switch genreId {
+    switch genreId.rawValue {
       case 12: key = "genre.adventure"
       case 14: key = "genre.fantasy"
       case 16: key = "genre.animation"

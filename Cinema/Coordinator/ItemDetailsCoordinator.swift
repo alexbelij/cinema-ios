@@ -32,14 +32,14 @@ class ItemDetailsCoordinator: CustomPresentableCoordinator {
     itemDetailsController = UIStoryboard.movieList.instantiate(ItemDetailsController.self)
     itemDetailsController.delegate = self
     configure(for: self.detailItem, resetRemoteProperties: true)
-    fetchRemoteData(for: self.detailItem.id)
+    fetchRemoteData(for: self.detailItem.tmdbID)
   }
 }
 
 // MARK: - Remote Data Fetching
 
 extension ItemDetailsCoordinator {
-  private func fetchRemoteData(for id: Int) {
+  private func fetchRemoteData(for id: TmdbIdentifier) {
     DispatchQueue.main.async {
       UIApplication.shared.isNetworkActivityIndicatorVisible = true
     }

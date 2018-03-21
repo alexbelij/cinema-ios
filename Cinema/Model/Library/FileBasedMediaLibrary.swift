@@ -46,34 +46,34 @@ class FileBasedMediaLibrary: MediaLibrary {
     return mediaItems
   }
 
-  func fetchMediaItems(withGenreId id: Int) -> [MediaItem] {
+  func fetchMediaItems(for id: GenreIdentifier) -> [MediaItem] {
     return mediaItems.filter { $0.genreIds.contains(id) }
   }
 
-  func containsMediaItem(withId id: Int) -> Bool {
-    return mediaItems.contains { item in item.id == id }
+  func containsMediaItem(with id: TmdbIdentifier) -> Bool {
+    return mediaItems.contains { item in item.tmdbID == id }
   }
 
   func add(_ mediaItem: MediaItem) throws {
-    guard !mediaItems.contains(where: { $0.id == mediaItem.id }) else { return }
+    guard !mediaItems.contains(where: { $0.tmdbID == mediaItem.tmdbID }) else { return }
     mediaItems.append(mediaItem)
     pendingContentUpdate.addedItems.append(mediaItem)
     try saveData()
   }
 
   func update(_ mediaItem: MediaItem) throws {
-    guard let index = mediaItems.index(where: { $0.id == mediaItem.id }) else {
-      throw MediaLibraryError.itemDoesNotExist(id: mediaItem.id)
+    guard let index = mediaItems.index(where: { $0.tmdbID == mediaItem.tmdbID }) else {
+      throw MediaLibraryError.itemDoesNotExist(id: mediaItem.tmdbID)
     }
     mediaItems.remove(at: index)
     mediaItems.insert(mediaItem, at: index)
-    pendingContentUpdate.updatedItems[mediaItem.id] = mediaItem
+    pendingContentUpdate.updatedItems[mediaItem.tmdbID] = mediaItem
     try saveData()
   }
 
   func remove(_ mediaItem: MediaItem) throws {
-    guard let index = mediaItems.index(where: { $0.id == mediaItem.id }) else {
-      throw MediaLibraryError.itemDoesNotExist(id: mediaItem.id)
+    guard let index = mediaItems.index(where: { $0.tmdbID == mediaItem.tmdbID }) else {
+      throw MediaLibraryError.itemDoesNotExist(id: mediaItem.tmdbID)
     }
     mediaItems.remove(at: index)
     pendingContentUpdate.removedItems.append(mediaItem)

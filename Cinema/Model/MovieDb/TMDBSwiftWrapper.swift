@@ -22,7 +22,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     TMDBConfig.apikey = TMDBSwiftWrapper.apiKey
   }
 
-  func poster(for id: Int, size: PosterSize) -> UIImage? {
+  func poster(for id: TmdbIdentifier, size: PosterSize) -> UIImage? {
     return cache.poster(for: "\(id)-\(language)-\(size)") {
       if let posterPath = movie(for: id)?.poster_path {
         let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
@@ -34,7 +34,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     }
   }
 
-  func backdrop(for id: Int, size: BackdropSize) -> UIImage? {
+  func backdrop(for id: TmdbIdentifier, size: BackdropSize) -> UIImage? {
     return cache.backdrop(for: "\(id)-\(language)-\(size)") {
       if let backdropPath = movie(for: id)?.backdrop_path {
         let path = TMDBSwiftWrapper.baseUrl + size.rawValue + backdropPath
@@ -46,16 +46,16 @@ class TMDBSwiftWrapper: MovieDbClient {
     }
   }
 
-  func overview(for id: Int) -> String? {
+  func overview(for id: TmdbIdentifier) -> String? {
     return movie(for: id)?.overview
   }
 
-  func certification(for id: Int) -> String? {
+  func certification(for id: TmdbIdentifier) -> String? {
     var releaseDates: [MovieReleaseDatesMDB]? = nil
     let certificationJson = cache.string(for: "certification-\(id)") {
       var jsonString: String?
       waitUntil { done in
-        MovieMDB.release_dates(movieID: id) { apiReturn, releaseDates1 in
+        MovieMDB.release_dates(movieID: id.rawValue) { apiReturn, releaseDates1 in
           if let json = apiReturn.json, apiReturn.json!["results"].exists(),
              let releaseDates1 = releaseDates1 {
             jsonString = json["results"].rawString()
@@ -76,19 +76,19 @@ class TMDBSwiftWrapper: MovieDbClient {
     return releaseDates?.first { $0.iso_3166_1 == self.country.rawValue }?.release_dates[0].certification
   }
 
-  func genreIds(for id: Int) -> [Int] {
-    if let genres = movie(for: id)?.genres.map({ $0.id! }) {
+  func genreIds(for id: TmdbIdentifier) -> [GenreIdentifier] {
+    if let genres = movie(for: id)?.genres.map({ GenreIdentifier(rawValue: $0.id!) }) {
       return genres
     }
     return []
   }
 
-  private func movie(for id: Int) -> MovieDetailedMDB? {
+  private func movie(for id: TmdbIdentifier) -> MovieDetailedMDB? {
     var createdMovie: MovieDetailedMDB? = nil
     let movieJson = cache.string(for: "movie-\(id)-\(language.rawValue)") {
       var jsonString: String?
       waitUntil { done in
-        MovieMDB.movie(movieID: id, language: language.rawValue) { apiReturn, movie in
+        MovieMDB.movie(movieID: id.rawValue, language: language.rawValue) { apiReturn, movie in
           if let json = apiReturn.json, apiReturn.json!["id"].exists() {
             jsonString = json.rawString()
             createdMovie = movie
@@ -117,7 +117,7 @@ class TMDBSwiftWrapper: MovieDbClient {
           let dateFormatter = DateFormatter()
           dateFormatter.dateFormat = "yyyy-MM-dd"
           value = results.map {
-            PartialMediaItem(id: $0.id!,
+            PartialMediaItem(tmdbID: TmdbIdentifier(rawValue: $0.id!),
                              title: $0.title!,
                              releaseDate: dateFormatter.date(from: $0.release_date!))
           }
@@ -128,7 +128,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     return value
   }
 
-  func runtime(for id: Int) -> Int? {
+  func runtime(for id: TmdbIdentifier) -> Int? {
     return movie(for: id)?.runtime
   }
 
@@ -141,7 +141,7 @@ class TMDBSwiftWrapper: MovieDbClient {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd"
             movies = result.map {
-              PartialMediaItem(id: $0.id!,
+              PartialMediaItem(tmdbID: TmdbIdentifier(rawValue: $0.id!),
                                title: $0.title!,
                                releaseDate: dateFormatter.date(from: $0.release_date!))
             }
@@ -153,7 +153,7 @@ class TMDBSwiftWrapper: MovieDbClient {
     }
   }
 
-  func releaseDate(for id: Int) -> Date? {
+  func releaseDate(for id: TmdbIdentifier) -> Date? {
     guard let movie = movie(for: id),
           let releaseDate = movie.release_date else { return nil }
     let dateFormatter = DateFormatter()
@@ -170,5 +170,4 @@ class TMDBSwiftWrapper: MovieDbClient {
     asyncProcess(done)
     semaphore.wait()
   }
-
 }

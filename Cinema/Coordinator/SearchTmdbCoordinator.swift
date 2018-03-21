@@ -30,7 +30,7 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
 
     popularMoviesController = UIStoryboard.popularMovies.instantiate(PopularMoviesController.self)
     popularMoviesController.delegate = self
-    let movies = movieDb.popularMovies().lazy.filter { !self.library.containsMediaItem(withId: $0.id) }
+    let movies = movieDb.popularMovies().lazy.filter { !self.library.containsMediaItem(with: $0.tmdbID) }
     popularMoviesController.movieIterator = AnyIterator(movies.makeIterator())
     popularMoviesController.posterProvider = MovieDbPosterProvider(movieDb)
 
@@ -46,7 +46,7 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
                             searchResultsFor searchText: String) -> [SearchTmdbController.SearchResult] {
     return self.movieDb.searchMovies(searchText: searchText).map { movie in
       SearchTmdbController.SearchResult(item: movie,
-                                        hasBeenAddedToLibrary: self.library.containsMediaItem(withId: movie.id))
+                                        hasBeenAddedToLibrary: self.library.containsMediaItem(with: movie.tmdbID))
     }
   }
 
@@ -81,7 +81,7 @@ extension SearchTmdbCoordinator {
                                            over controller: UIViewController) {
     let libraryUpdateController = UIStoryboard.searchTmdb.instantiate(LibraryUpdateController.self)
     DispatchQueue.global(qos: .userInitiated).async {
-      if let poster = self.movieDb.poster(for: item.id, size: PosterSize(minWidth: 185)) {
+      if let poster = self.movieDb.poster(for: item.tmdbID, size: PosterSize(minWidth: 185)) {
         DispatchQueue.main.async {
           libraryUpdateController.poster = poster
         }
@@ -89,12 +89,12 @@ extension SearchTmdbCoordinator {
     }
     controller.present(libraryUpdateController, animated: true)
     DispatchQueue.global(qos: .userInitiated).async {
-      let fullItem = MediaItem(id: item.id,
+      let fullItem = MediaItem(tmdbID: item.tmdbID,
                                title: item.title,
-                               runtime: self.movieDb.runtime(for: item.id),
+                               runtime: self.movieDb.runtime(for: item.tmdbID),
                                releaseDate: item.releaseDate,
                                diskType: diskType,
-                               genreIds: self.movieDb.genreIds(for: item.id))
+                               genreIds: self.movieDb.genreIds(for: item.tmdbID))
       do {
         try self.library.add(fullItem)
         DispatchQueue.main.async {

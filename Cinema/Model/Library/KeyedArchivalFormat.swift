@@ -40,10 +40,10 @@ extension KeyedArchivalFormat {
     dateFormatter.dateFormat = "yyyy-MM-dd"
     let payload: [[String: Any]] = elements.map { item in
       var dictionary: [String: Any] = [
-        "id": item.id,
+        "id": item.tmdbID.rawValue,
         "title": item.title,
         "diskType": item.diskType.rawValue,
-        "genreIds": item.genreIds
+        "genreIds": item.genreIds.map { $0.rawValue }
       ]
       if let subtitle = item.subtitle {
         dictionary["subtitle"] = subtitle
@@ -74,7 +74,7 @@ extension KeyedArchivalFormat {
     dateFormatter.dateFormat = "yyyy-MM-dd"
     var items = [MediaItem]()
     for dict in array {
-      let id = dict["id"] as? Int
+      let id = (dict["id"] as? Int).map(TmdbIdentifier.init)
       let title = dict["title"] as? String
       let subtitle = dict["subtitle"] as? String
       let runtime = dict["runtime"] as? Int
@@ -82,13 +82,13 @@ extension KeyedArchivalFormat {
       let diskType = DiskType(rawValue: dict["diskType"] as? String ?? "")
       let genreIds = dict["genreIds"] as? [Int] ?? []
       if let id = id, let title = title, let diskType = diskType {
-        let mediaItem = MediaItem(id: id,
+        let mediaItem = MediaItem(tmdbID: id,
                                   title: title,
                                   subtitle: subtitle,
                                   runtime: runtime,
                                   releaseDate: releaseDate,
                                   diskType: diskType,
-                                  genreIds: genreIds)
+                                  genreIds: genreIds.map(GenreIdentifier.init))
         items.append(mediaItem)
       } else {
         throw DataFormatError.invalidDataFormat
@@ -106,7 +106,7 @@ extension KeyedArchivalFormat {
     dateFormatter.dateFormat = "yyyy"
     let rootObject: [[String: Any]] = elements.map { item in
       var dictionary: [String: Any] = [
-        "id": item.id,
+        "id": item.tmdbID.rawValue,
         "title": item.title,
         "runtime": item.runtime ?? -1,
         "year": item.releaseDate.map { Int(dateFormatter.string(from: $0))! } ?? -1,
@@ -128,7 +128,7 @@ extension KeyedArchivalFormat {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy"
     for dict in array {
-      let id = dict["id"] as? Int
+      let id = (dict["id"] as? Int).map(TmdbIdentifier.init)
       let title = dict["title"] as? String
       let subtitle = dict["subtitle"] as? String
       let runtime = dict["runtime"] as? Int
@@ -141,7 +141,7 @@ extension KeyedArchivalFormat {
         } else {
           releaseDate = nil
         }
-        let mediaItem = MediaItem(id: id,
+        let mediaItem = MediaItem(tmdbID: id,
                                   title: title,
                                   subtitle: subtitle,
                                   runtime: runtime,

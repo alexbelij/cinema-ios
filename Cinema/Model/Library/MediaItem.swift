@@ -1,22 +1,46 @@
 import Foundation
 
+struct TmdbIdentifier: RawRepresentable, CustomStringConvertible, Hashable {
+  let rawValue: Int
+
+  init(rawValue: Int) {
+    self.rawValue = rawValue
+  }
+
+  var description: String {
+    return String(rawValue)
+  }
+}
+
+struct GenreIdentifier: RawRepresentable, CustomStringConvertible, Hashable {
+  let rawValue: Int
+
+  init(rawValue: Int) {
+    self.rawValue = rawValue
+  }
+
+  var description: String {
+    return String(rawValue)
+  }
+}
+
 struct MediaItem: Equatable, Hashable {
-  let id: Int
+  let tmdbID: TmdbIdentifier
   var title: String
   var subtitle: String?
   let runtime: Int?
   var releaseDate: Date?
   let diskType: DiskType
-  var genreIds: [Int]
+  var genreIds: [GenreIdentifier]
 
-  init(id: Int,
+  init(tmdbID: TmdbIdentifier,
        title: String,
        subtitle: String? = nil,
        runtime: Int? = nil,
        releaseDate: Date? = nil,
        diskType: DiskType = .bluRay,
-       genreIds: [Int] = []) {
-    self.id = id
+       genreIds: [GenreIdentifier] = []) {
+    self.tmdbID = tmdbID
     self.title = title
     self.subtitle = subtitle
     if let runtime = runtime, runtime > 0 {
@@ -38,7 +62,7 @@ struct MediaItem: Equatable, Hashable {
   }
 
   static func == (lhs: MediaItem, rhs: MediaItem) -> Bool {
-    guard lhs.id == rhs.id else { return false }
+    guard lhs.tmdbID == rhs.tmdbID else { return false }
     guard lhs.title == rhs.title else { return false }
     guard lhs.subtitle == rhs.subtitle else { return false }
     guard lhs.runtime == rhs.runtime else { return false }
@@ -49,7 +73,7 @@ struct MediaItem: Equatable, Hashable {
   }
 
   var hashValue: Int {
-    return id
+    return tmdbID.rawValue
   }
 
 }
@@ -59,18 +83,18 @@ enum DiskType: String {
 }
 
 struct PartialMediaItem: Equatable, Hashable {
-  let id: Int
+  let tmdbID: TmdbIdentifier
   let title: String
   let releaseDate: Date?
 
   static func == (lhs: PartialMediaItem, rhs: PartialMediaItem) -> Bool {
-    guard lhs.id == rhs.id else { return false }
+    guard lhs.tmdbID == rhs.tmdbID else { return false }
     guard lhs.title == rhs.title else { return false }
     guard lhs.releaseDate == rhs.releaseDate else { return false }
     return true
   }
 
   var hashValue: Int {
-    return id
+    return tmdbID.rawValue
   }
 }

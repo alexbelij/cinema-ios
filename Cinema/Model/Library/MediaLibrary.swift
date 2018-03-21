@@ -8,9 +8,9 @@ protocol MediaLibrary {
 
   func fetchAllMediaItems() -> [MediaItem]
 
-  func fetchMediaItems(withGenreId id: Int) -> [MediaItem]
+  func fetchMediaItems(for id: GenreIdentifier) -> [MediaItem]
 
-  func containsMediaItem(withId id: Int) -> Bool
+  func containsMediaItem(with id: TmdbIdentifier) -> Bool
 
   func add(_ mediaItem: MediaItem) throws
 
@@ -24,7 +24,7 @@ protocol MediaLibrary {
 
 enum MediaLibraryError: Error {
   case storageError
-  case itemDoesNotExist(id: Int)
+  case itemDoesNotExist(id: TmdbIdentifier)
 }
 
 protocol MediaLibraryDelegate: class {
@@ -34,9 +34,9 @@ protocol MediaLibraryDelegate: class {
 struct MediaLibraryContentUpdate {
   var addedItems: [MediaItem]
   var removedItems: [MediaItem]
-  var updatedItems: [Int: MediaItem]
+  var updatedItems: [TmdbIdentifier: MediaItem]
 
-  init(addedItems: [MediaItem] = [], removedItems: [MediaItem] = [], updatedItems: [Int: MediaItem] = [:]) {
+  init(addedItems: [MediaItem] = [], removedItems: [MediaItem] = [], updatedItems: [TmdbIdentifier: MediaItem] = [:]) {
     self.addedItems = addedItems
     self.removedItems = removedItems
     self.updatedItems = updatedItems

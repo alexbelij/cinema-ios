@@ -1,11 +1,11 @@
 import UIKit
 
 protocol PosterProvider {
-  func poster(for id: Int, size: PosterSize) -> UIImage?
+  func poster(for id: TmdbIdentifier, size: PosterSize) -> UIImage?
 }
 
 class EmptyPosterProvider: PosterProvider {
-  func poster(for id: Int, size: PosterSize) -> UIImage? {
+  func poster(for id: TmdbIdentifier, size: PosterSize) -> UIImage? {
     return nil
   }
 }
@@ -17,7 +17,7 @@ class MovieDbPosterProvider: PosterProvider {
     self.movieDb = movieDb
   }
 
-  func poster(for id: Int, size: PosterSize) -> UIImage? {
+  func poster(for id: TmdbIdentifier, size: PosterSize) -> UIImage? {
     return movieDb.poster(for: id, size: size)
   }
 }

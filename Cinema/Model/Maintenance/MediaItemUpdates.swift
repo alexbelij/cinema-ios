@@ -7,7 +7,7 @@ class GenreIdsUpdate: PropertyUpdate {
   }
 
   func apply(on item: inout MediaItem) {
-    item.genreIds = movieDb.genreIds(for: item.id)
+    item.genreIds = movieDb.genreIds(for: item.tmdbID)
   }
 
 }
@@ -21,7 +21,7 @@ class ReleaseDateUpdate: PropertyUpdate {
   }
 
   func apply(on item: inout MediaItem) {
-    item.releaseDate = movieDb.releaseDate(for: item.id)
+    item.releaseDate = movieDb.releaseDate(for: item.tmdbID)
   }
 
 }

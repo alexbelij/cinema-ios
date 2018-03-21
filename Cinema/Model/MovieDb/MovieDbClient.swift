@@ -9,23 +9,23 @@ protocol MovieDbClient {
 
   var cache: TMDBSwiftCache { get set }
 
-  func poster(for id: Int, size: PosterSize) -> UIImage?
+  func poster(for id: TmdbIdentifier, size: PosterSize) -> UIImage?
 
-  func backdrop(for id: Int, size: BackdropSize) -> UIImage?
+  func backdrop(for id: TmdbIdentifier, size: BackdropSize) -> UIImage?
 
-  func overview(for id: Int) -> String?
+  func overview(for id: TmdbIdentifier) -> String?
 
-  func certification(for id: Int) -> String?
+  func certification(for id: TmdbIdentifier) -> String?
 
-  func genreIds(for id: Int) -> [Int]
+  func genreIds(for id: TmdbIdentifier) -> [GenreIdentifier]
 
   func searchMovies(searchText: String) -> [PartialMediaItem]
 
-  func runtime(for id: Int) -> Int?
+  func runtime(for id: TmdbIdentifier) -> Int?
 
   func popularMovies() -> PagingSequence<PartialMediaItem>
 
-  func releaseDate(for id: Int) -> Date?
+  func releaseDate(for id: TmdbIdentifier) -> Date?
 
 }
 
