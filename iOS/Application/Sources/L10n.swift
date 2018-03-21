@@ -40,7 +40,7 @@ enum L10n {
         return NSLocalizedString("error.unsupportedSchemaVersion", comment: "")
       case DataFormatError.invalidDataFormat:
         return NSLocalizedString("error.invalidDataFormat", comment: "")
-      case MediaLibraryError.storageError:
+      case MovieLibraryError.storageError:
         return NSLocalizedString("error.storageError", comment: "")
       default:
         return NSLocalizedString("error.genericError", comment: "")
@@ -51,8 +51,8 @@ enum L10n {
 extension DiskType {
   var localizedName: String {
     switch self {
-      case .dvd: return NSLocalizedString("mediaItem.disk.dvd", comment: "")
-      case .bluRay: return NSLocalizedString("mediaItem.disk.bluRay", comment: "")
+      case .dvd: return NSLocalizedString("diskType.dvd", comment: "")
+      case .bluRay: return NSLocalizedString("diskType.bluRay", comment: "")
     }
   }
 }

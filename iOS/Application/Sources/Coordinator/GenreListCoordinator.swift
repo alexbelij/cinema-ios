@@ -36,11 +36,11 @@ class GenreListCoordinator: CustomPresentableCoordinator {
   }
 
   private func fetchListData() {
-    let items = dependencies.library.fetchAllMediaItems()
-    let imageProvider = RandomMovieGenreImageProvider(for: items,
+    let movies = dependencies.library.fetchAllMovies()
+    let imageProvider = RandomMovieGenreImageProvider(for: movies,
                                                       movieDb: dependencies.movieDb,
                                                       backdropSize: self.backdropSize)
-    let ids = Array(Set(items.flatMap { $0.genreIds }))
+    let ids = Array(Set(movies.flatMap { $0.genreIds }))
     DispatchQueue.main.async {
       self.genreListController.genreImageProvider = imageProvider
       self.genreListController.listData = .available(ids)
@@ -63,8 +63,8 @@ extension GenreListCoordinator: GenreListControllerDelegate {
 
 // MARK: - Library Events
 
-extension GenreListCoordinator: MediaLibraryDelegate {
-  func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
+extension GenreListCoordinator: MovieLibraryDelegate {
+  func library(_ library: MovieLibrary, didUpdateContent contentUpdate: MovieLibraryContentUpdate) {
     DispatchQueue.global().async {
       self.update(with: contentUpdate)
     }
@@ -75,16 +75,16 @@ extension GenreListCoordinator: MediaLibraryDelegate {
   // The easiest way is to query the entire library again.
   // But if no movies have been deleted (the most common use case) we can simplify
   // the process by adding only the new genre ids to the already computed ones.
-  private func update(with contentUpdate: MediaLibraryContentUpdate) {
-    if contentUpdate.removedItems.isEmpty {
+  private func update(with contentUpdate: MovieLibraryContentUpdate) {
+    if contentUpdate.removedMovies.isEmpty {
       DispatchQueue.main.sync {
         if case let .available(genreListItems) = genreListController.listData {
           var existingGenreIds = Set(genreListItems)
-          contentUpdate.addedItems.flatMap { $0.genreIds }.forEach { existingGenreIds.insert($0) }
+          contentUpdate.addedMovies.flatMap { $0.genreIds }.forEach { existingGenreIds.insert($0) }
           let updatedGenreIds = Array(existingGenreIds)
           // swiftlint:disable:next force_cast
           (self.genreListController.genreImageProvider as! RandomMovieGenreImageProvider)
-              .updateWithNewItems(contentUpdate.addedItems)
+              .updateWithNewMovies(contentUpdate.addedMovies)
           self.genreListController.listData = .available(updatedGenreIds)
         }
       }
@@ -98,33 +98,33 @@ extension GenreListCoordinator: MediaLibraryDelegate {
 
 private class RandomMovieGenreImageProvider: GenreImageProvider {
   private let movieDb: MovieDbClient
-  private var genreGroups = [GenreIdentifier: [MediaItem]]()
+  private var genreGroups = [GenreIdentifier: [Movie]]()
   private let maxRetries = 2
   var backdropSize: BackdropSize
 
-  init(for items: [MediaItem], movieDb: MovieDbClient, backdropSize: BackdropSize) {
+  init(for movies: [Movie], movieDb: MovieDbClient, backdropSize: BackdropSize) {
     self.movieDb = movieDb
     self.backdropSize = backdropSize
-    updateWithNewItems(items)
+    updateWithNewMovies(movies)
   }
 
-  func updateWithNewItems(_ items: [MediaItem]) {
-    for item in items {
-      for genreId in item.genreIds {
+  func updateWithNewMovies(_ movies: [Movie]) {
+    for movies in movies {
+      for genreId in movies.genreIds {
         if genreGroups[genreId] == nil {
-          genreGroups[genreId] = [item]
+          genreGroups[genreId] = [movies]
         } else {
-          genreGroups[genreId]!.append(item)
+          genreGroups[genreId]!.append(movies)
         }
       }
     }
   }
 
   func genreImage(for genreId: GenreIdentifier) -> UIImage? {
-    guard let mediaItems = genreGroups[genreId] else { return nil }
+    guard let movies = genreGroups[genreId] else { return nil }
     for _ in 0..<maxRetries {
-      let randomIndex = Int(arc4random_uniform(UInt32(mediaItems.count)))
-      if let backdrop = movieDb.backdrop(for: mediaItems[randomIndex].tmdbID, size: backdropSize) {
+      let randomIndex = Int(arc4random_uniform(UInt32(movies.count)))
+      if let backdrop = movieDb.backdrop(for: movies[randomIndex].tmdbID, size: backdropSize) {
         return backdrop
       }
     }

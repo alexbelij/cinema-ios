@@ -1,13 +1,13 @@
 import CinemaKit
 protocol SectionSortingStrategy {
 
-  func sectionIndexTitle(for item: MediaItem) -> String
+  func sectionIndexTitle(for movie: Movie) -> String
   func refineSectionIndexTitles(_: [String]) -> [String]
 
   func sectionTitle(for sectionIndexTitle: String) -> String
 
   func sectionIndexTitleSorting(left: String, right: String) -> Bool
-  func itemSorting(left: MediaItem, right: MediaItem) -> Bool
+  func movieSorting(left: Movie, right: Movie) -> Bool
 
 }
 

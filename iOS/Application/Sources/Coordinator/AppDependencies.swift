@@ -1,12 +1,12 @@
 import CinemaKit
 
 struct AppDependencies: LibraryDependency, MovieDbDependency {
-  let library: MediaLibrary
+  let library: MovieLibrary
   let movieDb: MovieDbClient
 }
 
 protocol LibraryDependency {
-  var library: MediaLibrary { get }
+  var library: MovieLibrary { get }
 }
 
 protocol MovieDbDependency {

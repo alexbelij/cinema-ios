@@ -17,11 +17,11 @@ public protocol MovieDbClient {
 
   func genreIds(for id: TmdbIdentifier) -> [GenreIdentifier]
 
-  func searchMovies(searchText: String) -> [PartialMediaItem]
+  func searchMovies(searchText: String) -> [PartialMovie]
 
   func runtime(for id: TmdbIdentifier) -> Measurement<UnitDuration>?
 
-  func popularMovies() -> PagingSequence<PartialMediaItem>
+  func popularMovies() -> PagingSequence<PartialMovie>
 
   func releaseDate(for id: TmdbIdentifier) -> Date?
 
@@ -105,5 +105,15 @@ public struct PagingSequence<PageElement>: Sequence, IteratorProtocol {
       return next()
     }
     return element
+  }
+}
+
+public struct PartialMovie: Equatable, Hashable {
+  public let tmdbID: TmdbIdentifier
+  public let title: String
+  public let releaseYear: Int?
+
+  public var hashValue: Int {
+    return tmdbID.rawValue
   }
 }

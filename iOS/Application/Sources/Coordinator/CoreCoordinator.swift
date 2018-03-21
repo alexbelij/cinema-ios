@@ -38,9 +38,9 @@ class CoreCoordinator: CustomPresentableCoordinator {
 
     searchTmdbCoordinator = SearchTmdbCoordinator(dependencies: dependencies)
     searchTmdbCoordinator.rootViewController.tabBarItem = UITabBarItem(
-        title: NSLocalizedString("addItem.title", comment: ""),
-        image: #imageLiteral(resourceName: "Tab-AddItem-normal"),
-        selectedImage: #imageLiteral(resourceName: "Tab-AddItem-selected")
+        title: NSLocalizedString("addMovie.title", comment: ""),
+        image: #imageLiteral(resourceName: "Tab-AddMovie-normal"),
+        selectedImage: #imageLiteral(resourceName: "Tab-AddMovie-selected")
     )
 
     tabBarController.viewControllers = [libraryContentNav,

@@ -37,8 +37,8 @@ private struct TitleSortingStrategy: SectionSortingStrategy {
     self.ignoredPrefixes = ignoredPrefixes
   }
 
-  func sectionIndexTitle(for item: MediaItem) -> String {
-    let title = removeArticlesAtBeginning(from: item.title)
+  func sectionIndexTitle(for movie: Movie) -> String {
+    let title = removeArticlesAtBeginning(from: movie.title)
     let firstCharacter = String(title[title.startIndex])
     let folded = firstCharacter.folding(options: .diacriticInsensitive, locale: Locale.current)
     if folded.rangeOfCharacter(from: .letters) != nil {
@@ -59,7 +59,7 @@ private struct TitleSortingStrategy: SectionSortingStrategy {
     }
   }
 
-  func itemSorting(left: MediaItem, right: MediaItem) -> Bool {
+  func movieSorting(left: Movie, right: Movie) -> Bool {
     let title1 = removeArticlesAtBeginning(from: left.title)
     let title2 = removeArticlesAtBeginning(from: right.title)
     switch title1.compare(title2, options: [.diacriticInsensitive, .caseInsensitive]) {
@@ -96,8 +96,8 @@ private struct RuntimeSortingStrategy: SectionSortingStrategy {
 
   private let unknownSymbol = "?"
 
-  func sectionIndexTitle(for item: MediaItem) -> String {
-    guard let runtime = item.runtime else { return unknownSymbol }
+  func sectionIndexTitle(for movie: Movie) -> String {
+    guard let runtime = movie.runtime else { return unknownSymbol }
     let minutes = Int(runtime.converted(to: UnitDuration.minutes).value)
     return String(minutes / 10 * 10)
   }
@@ -131,7 +131,7 @@ private struct RuntimeSortingStrategy: SectionSortingStrategy {
     return Int(left)! <= Int(right)!
   }
 
-  func itemSorting(left: MediaItem, right: MediaItem) -> Bool {
+  func movieSorting(left: Movie, right: Movie) -> Bool {
     guard let leftRuntime = left.runtime else { return false }
     guard let rightRuntime = right.runtime else { return true }
     return leftRuntime <= rightRuntime
@@ -142,8 +142,8 @@ private struct YearSortingStrategy: SectionSortingStrategy {
 
   private let unknownSymbol = "?"
 
-  func sectionIndexTitle(for item: MediaItem) -> String {
-    guard let releaseDate = item.releaseDate else { return unknownSymbol }
+  func sectionIndexTitle(for movie: Movie) -> String {
+    guard let releaseDate = movie.releaseDate else { return unknownSymbol }
     let year = Calendar.current.component(.year, from: releaseDate)
     if year < 2010 {
       return String(year / 10 * 10)
@@ -176,7 +176,7 @@ private struct YearSortingStrategy: SectionSortingStrategy {
     return Int(left)! >= Int(right)!
   }
 
-  func itemSorting(left: MediaItem, right: MediaItem) -> Bool {
+  func movieSorting(left: Movie, right: Movie) -> Bool {
     switch left.title.compare(right.title, options: [.diacriticInsensitive, .caseInsensitive]) {
       case .orderedSame, .orderedAscending: return true
       case .orderedDescending: return false

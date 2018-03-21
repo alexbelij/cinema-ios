@@ -129,8 +129,8 @@ public class TMDBSwiftWrapper: MovieDbClient {
     return createdMovie
   }
 
-  public func searchMovies(searchText: String) -> [PartialMediaItem] {
-    var movies = [PartialMediaItem]()
+  public func searchMovies(searchText: String) -> [PartialMovie] {
+    var movies = [PartialMovie]()
     waitUntil { done in
       SearchMDB.movie(query: searchText,
                       language: language.rawValue,
@@ -139,7 +139,7 @@ public class TMDBSwiftWrapper: MovieDbClient {
                       year: nil,
                       primaryReleaseYear: nil) { _, result in
         if let result = result {
-          movies = result.map(self.toPartialMediaItem)
+          movies = result.map(self.toPartialMovie)
         }
         done()
       }
@@ -152,13 +152,13 @@ public class TMDBSwiftWrapper: MovieDbClient {
     return Measurement(value: Double(runtime), unit: UnitDuration.minutes)
   }
 
-  public func popularMovies() -> PagingSequence<PartialMediaItem> {
-    return PagingSequence<PartialMediaItem> { page -> [PartialMediaItem]? in
-      var movies = [PartialMediaItem]()
+  public func popularMovies() -> PagingSequence<PartialMovie> {
+    return PagingSequence<PartialMovie> { page -> [PartialMovie]? in
+      var movies = [PartialMovie]()
       self.waitUntil { done in
         MovieMDB.popular(language: self.language.rawValue, page: page) { _, result in
           if let result = result {
-            movies = result.map(self.toPartialMediaItem)
+            movies = result.map(self.toPartialMovie)
           }
           done()
         }
@@ -167,12 +167,12 @@ public class TMDBSwiftWrapper: MovieDbClient {
     }
   }
 
-  private func toPartialMediaItem(_ movieMDB: MovieMDB) -> PartialMediaItem {
+  private func toPartialMovie(_ movieMDB: MovieMDB) -> PartialMovie {
     let identifier = TmdbIdentifier(rawValue: movieMDB.id!)
     let year = TMDBSwiftWrapper.releaseDateFormatter.date(from: movieMDB.release_date!)
                                                     .map { Calendar.current.component(.year, from: $0) }
     self.cachedPosterPaths[identifier] = movieMDB.poster_path
-    return PartialMediaItem(tmdbID: identifier, title: movieMDB.title!, releaseYear: year)
+    return PartialMovie(tmdbID: identifier, title: movieMDB.title!, releaseYear: year)
   }
 
   public func releaseDate(for id: TmdbIdentifier) -> Date? {

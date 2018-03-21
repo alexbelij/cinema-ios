@@ -9,10 +9,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Edit Item Controller-->
+        <!--Edit Movie Controller-->
         <scene sceneID="IEv-md-RNt">
             <objects>
-                <tableViewController storyboardIdentifier="EditItemController" id="dNn-o6-z2I" customClass="EditItemController" customModule="iOS_Application" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="EditMovieController" id="dNn-o6-z2I" customClass="EditMovieController" customModule="iOS_Application" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" allowsSelection="NO" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="tCM-ap-dJj">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

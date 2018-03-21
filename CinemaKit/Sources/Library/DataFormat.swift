@@ -4,18 +4,18 @@ public protocol DataFormat {
 
   var defaultSchemaVersion: SchemaVersion? { get set }
 
-  func serialize(_ elements: [MediaItem]) throws -> Data
+  func serialize(_ elements: [Movie]) throws -> Data
 
-  func serialize(_ elements: [MediaItem], schemaVersion: SchemaVersion) throws -> Data
+  func serialize(_ elements: [Movie], schemaVersion: SchemaVersion) throws -> Data
 
-  func deserialize(from data: Data) throws -> [MediaItem]
+  func deserialize(from data: Data) throws -> [Movie]
 
   func schemaVersion(of data: Data) throws -> SchemaVersion
 
 }
 
 public extension DataFormat {
-  func serialize(_ elements: [MediaItem]) throws -> Data {
+  func serialize(_ elements: [Movie]) throws -> Data {
     guard let version = defaultSchemaVersion else {
       fatalError("no default schema version has been set")
     }
@@ -45,11 +45,11 @@ public enum DataFormatError: Error {
 public enum SchemaVersion: Equatable, Comparable, CustomStringConvertible {
 
   // swiftlint:disable identifier_name
-  // array of MediaItems
+  // array of Movies
   case v1_0_0
   /*
    * schemaVersion -> <version>
-   * payload -> array of MediaItems
+   * payload -> array of Movies
    */
   case v2_0_0
   // swiftlint:enable identifier_name

@@ -1,21 +1,21 @@
 import Foundation
 import UIKit
 
-protocol EditItemControllerDelegate: class {
-  func editItemController(_ controller: EditItemController,
-                          shouldAcceptEdits edits: Set<EditItemController.Edit>) -> EditItemController.EditApproval
-  func editItemControllerDidCancelEditing(_ controller: EditItemController)
-  func editItemController(_ controller: EditItemController,
-                          didFinishEditingWithResult editResult: EditItemController.EditResult)
+protocol EditMovieControllerDelegate: class {
+  func editMovieController(_ controller: EditMovieController,
+                           shouldAcceptEdits edits: Set<EditMovieController.Edit>) -> EditMovieController.EditApproval
+  func editMovieControllerDidCancelEditing(_ controller: EditMovieController)
+  func editMovieController(_ controller: EditMovieController,
+                           didFinishEditingWithResult editResult: EditMovieController.EditResult)
 }
 
-class EditItemController: UITableViewController {
-  weak var delegate: EditItemControllerDelegate?
+class EditMovieController: UITableViewController {
+  weak var delegate: EditMovieControllerDelegate?
 
-  var itemTitle: String = "" {
+  var movieTitle: String = "" {
     didSet {
       self.loadViewIfNeeded()
-      self.titleTextField.text = itemTitle
+      self.titleTextField.text = movieTitle
     }
   }
   @IBOutlet private weak var titleTextField: UITextField!
@@ -55,18 +55,18 @@ class EditItemController: UITableViewController {
 
 // MARK: - View Controller Lifecycle
 
-extension EditItemController {
+extension EditMovieController {
   override func viewDidLoad() {
     super.viewDidLoad()
     titleTextField.delegate = self
     subtitleTextField.delegate = self
     deleteMovieButton.setTitle(NSLocalizedString("edit.deleteMovie", comment: ""), for: .normal)
 
-    reassign(property: \EditItemController.itemTitle)
-    reassign(property: \EditItemController.subtitle)
+    reassign(property: \EditMovieController.movieTitle)
+    reassign(property: \EditMovieController.subtitle)
   }
 
-  private func reassign<Type>(property: ReferenceWritableKeyPath<EditItemController, Type>) {
+  private func reassign<Type>(property: ReferenceWritableKeyPath<EditMovieController, Type>) {
     let value = self[keyPath: property]
     self[keyPath: property] = value
   }
@@ -74,7 +74,7 @@ extension EditItemController {
 
 // MARK: - Table View
 
-extension EditItemController {
+extension EditMovieController {
   override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
     switch section {
       case 0: return NSLocalizedString("edit.sectionHeader.title", comment: "")
@@ -86,11 +86,11 @@ extension EditItemController {
 
 // MARK: - Edit Management
 
-extension EditItemController {
+extension EditMovieController {
   private var allEdits: Set<Edit> {
     var edits = [Edit]()
     let newTitle = self.titleTextField.text ?? ""
-    if newTitle != itemTitle {
+    if newTitle != movieTitle {
       edits.append(.titleChange(newTitle))
     }
     let newSubtitle = self.subtitleTextField.text?.nilIfEmptyString
@@ -103,7 +103,7 @@ extension EditItemController {
 
 // MARK: - UITextFieldDelegate
 
-extension EditItemController: UITextFieldDelegate {
+extension EditMovieController: UITextFieldDelegate {
   func textFieldShouldReturn(_ textField: UITextField) -> Bool {
     if let nextField = self.view.viewWithTag(textField.tag + 1) as? UITextField {
       nextField.becomeFirstResponder()
@@ -116,20 +116,20 @@ extension EditItemController: UITextFieldDelegate {
 
 // MARK: - User Actions
 
-extension EditItemController {
+extension EditMovieController {
   @IBAction private func cancelButtonClicked() {
-    delegate?.editItemControllerDidCancelEditing(self)
+    delegate?.editMovieControllerDidCancelEditing(self)
   }
 
   @IBAction private func doneButtonClicked() {
     guard let delegate = self.delegate else { return }
     let edits = self.allEdits
     if edits.isEmpty {
-      delegate.editItemControllerDidCancelEditing(self)
+      delegate.editMovieControllerDidCancelEditing(self)
     } else {
-      switch delegate.editItemController(self, shouldAcceptEdits: edits) {
+      switch delegate.editMovieController(self, shouldAcceptEdits: edits) {
         case .accepted:
-          delegate.editItemController(self, didFinishEditingWithResult: .edited(edits))
+          delegate.editMovieController(self, didFinishEditingWithResult: .edited(edits))
         case let .rejected(reason):
           let alert = UIAlertController(title: NSLocalizedString("error.genericTitle", comment: ""),
                                         message: reason,
@@ -144,7 +144,7 @@ extension EditItemController {
     let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
     alert.addAction(UIAlertAction(title: NSLocalizedString("edit.deleteMovie", comment: ""),
                                   style: .destructive) { _ in
-      self.delegate?.editItemController(self, didFinishEditingWithResult: .deleted)
+      self.delegate?.editMovieController(self, didFinishEditingWithResult: .deleted)
     })
     alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     self.present(alert, animated: true)

@@ -7,11 +7,11 @@ final class ExternalMovieViewModel: PosterHaving {
     case addedToLibrary
   }
 
-  let movie: PartialMediaItem
+  let movie: PartialMovie
   var poster: ImageState
   var state: LibraryState
 
-  init(_ movie: PartialMediaItem, state: LibraryState) {
+  init(_ movie: PartialMovie, state: LibraryState) {
     self.movie = movie
     self.state = state
     self.poster = .unknown

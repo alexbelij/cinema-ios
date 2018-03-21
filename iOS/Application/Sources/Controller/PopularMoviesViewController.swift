@@ -8,12 +8,12 @@ protocol PopularMoviesControllerDelegate: class {
 
 class PopularMoviesController: UICollectionViewController {
   weak var delegate: PopularMoviesControllerDelegate?
-  var movieIterator: AnyIterator<PartialMediaItem> = AnyIterator(EmptyIterator())
+  var movieIterator: AnyIterator<PartialMovie> = AnyIterator(EmptyIterator())
   var maxMovieCount: Int = 10
   var posterProvider: PosterProvider = EmptyPosterProvider()
-  private var items = [ExternalMovieViewModel]()
+  private var movies = [ExternalMovieViewModel]()
   private let cellPosterSize = PosterSize(minWidth: 130)
-  private var isFetchingItems = false
+  private var isFetchingMovies = false
   private let emptyView = GenericEmptyView(accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
                                            description: .basic(NSLocalizedString("popularMovies.empty", comment: "")))
 }
@@ -37,8 +37,8 @@ extension PopularMoviesController {
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
-    if items.count < maxMovieCount {
-      fetchItems(count: maxMovieCount - items.count)
+    if movies.count < maxMovieCount {
+      fetchMovies(count: maxMovieCount - movies.count)
     }
   }
 }
@@ -47,16 +47,16 @@ extension PopularMoviesController {
 
 extension PopularMoviesController: UICollectionViewDataSourcePrefetching {
   override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-    return items.count
+    return movies.count
   }
 
   override func collectionView(_ collectionView: UICollectionView,
                                cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
     let cell: PosterCell = collectionView.dequeueReusableCell(for: indexPath)
-    let model = items[indexPath.row]
+    let model = movies[indexPath.row]
     cell.configure(for: model, posterProvider: posterProvider) { [weak self] in
       guard let `self` = self else { return }
-      guard let rowIndex = self.items.index(where: { $0.movie.tmdbID == model.movie.tmdbID }) else { return }
+      guard let rowIndex = self.movies.index(where: { $0.movie.tmdbID == model.movie.tmdbID }) else { return }
       collectionView.reloadItems(at: [IndexPath(row: rowIndex, section: 0)])
     }
     return cell
@@ -64,7 +64,7 @@ extension PopularMoviesController: UICollectionViewDataSourcePrefetching {
 
   public func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
     for indexPath in indexPaths {
-      let item = items[indexPath.row]
+      let item = movies[indexPath.row]
       if case .unknown = item.poster {
         item.poster = .loading
         DispatchQueue.global(qos: .background).async {
@@ -74,7 +74,7 @@ extension PopularMoviesController: UICollectionViewDataSourcePrefetching {
                       size: PosterCell.posterSize,
                       purpose: .popularMovies) { [weak self] in
             guard let `self` = self else { return }
-            guard let rowIndex = self.items.index(where: { $0.movie.tmdbID == item.movie.tmdbID }) else { return }
+            guard let rowIndex = self.movies.index(where: { $0.movie.tmdbID == item.movie.tmdbID }) else { return }
             collectionView.reloadItems(at: [IndexPath(row: rowIndex, section: 0)])
           }
         }
@@ -109,7 +109,7 @@ extension PopularMoviesController {
                                at indexPath: IndexPath) {
     guard elementKind == UICollectionElementKindSectionFooter,
           let footerView = view as? TmdbFooterView else { return }
-    if isFetchingItems {
+    if isFetchingMovies {
       footerView.activityIndicator.startAnimating()
     }
   }
@@ -124,11 +124,11 @@ extension PopularMoviesController {
   }
 
   override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    self.delegate?.popularMoviesController(self, didSelect: items[indexPath.row])
+    self.delegate?.popularMoviesController(self, didSelect: movies[indexPath.row])
   }
 
   func reloadRow(forMovieWithId id: TmdbIdentifier) {
-    if let index = items.index(where: { $0.movie.tmdbID == id }) {
+    if let index = movies.index(where: { $0.movie.tmdbID == id }) {
       super.collectionView!.reloadItems(at: [IndexPath(row: index, section: 0)])
     }
   }
@@ -137,9 +137,9 @@ extension PopularMoviesController {
 // MARK: - Data Management
 
 extension PopularMoviesController {
-  private func fetchItems(count: Int) {
-    guard !isFetchingItems else { return }
-    isFetchingItems = true
+  private func fetchMovies(count: Int) {
+    guard !isFetchingMovies else { return }
+    isFetchingMovies = true
     self.collectionView!.backgroundView = nil
     if let footerView = self.collectionView!.supplementaryView(forElementKind: UICollectionElementKindSectionFooter,
                                                                at: IndexPath(row: 0, section: 0)) as? TmdbFooterView {
@@ -147,20 +147,20 @@ extension PopularMoviesController {
     }
     DispatchQueue.global(qos: .userInitiated).async {
       for _ in 0..<count {
-        guard let item = self.movieIterator.next() else { break }
+        guard let movie = self.movieIterator.next() else { break }
         DispatchQueue.main.sync {
-          self.items.append(ExternalMovieViewModel(item, state: .new))
-          self.collectionView?.insertItems(at: [IndexPath(row: self.items.count - 1, section: 0)])
+          self.movies.append(ExternalMovieViewModel(movie, state: .new))
+          self.collectionView?.insertItems(at: [IndexPath(row: self.movies.count - 1, section: 0)])
         }
       }
       DispatchQueue.main.sync {
-        self.isFetchingItems = false
+        self.isFetchingMovies = false
         if let footerView = self.collectionView!.supplementaryView(forElementKind: UICollectionElementKindSectionFooter,
                                                                    at: IndexPath(row: 0,
                                                                                  section: 0)) as? TmdbFooterView {
           footerView.activityIndicator.stopAnimating()
           DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
-            if self.items.isEmpty {
+            if self.movies.isEmpty {
               self.collectionView!.backgroundView = self.emptyView
               footerView.imageView.isHidden = true
             } else {
@@ -177,10 +177,10 @@ extension PopularMoviesController {
 
 extension PopularMoviesController {
   func removeMovie(withId id: TmdbIdentifier) {
-    guard let index = items.index(where: { $0.movie.tmdbID == id }) else { return }
-    self.items.remove(at: index)
+    guard let index = movies.index(where: { $0.movie.tmdbID == id }) else { return }
+    self.movies.remove(at: index)
     collectionView!.deleteItems(at: [IndexPath(row: index, section: 0)])
-    fetchItems(count: 1)
+    fetchMovies(count: 1)
   }
 }
 

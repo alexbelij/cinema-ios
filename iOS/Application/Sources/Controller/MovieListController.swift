@@ -3,21 +3,21 @@ import Dispatch
 import UIKit
 
 protocol MovieListControllerDelegate: class {
-  func movieListController(_ controller: MovieListController, didSelect item: MediaItem)
+  func movieListController(_ controller: MovieListController, didSelect movie: Movie)
   func movieListControllerDidDismiss(_ controller: MovieListController)
 }
 
 class MovieListController: UITableViewController {
   enum ListData {
     case loading
-    case available([MediaItem])
+    case available([Movie])
   }
 
   final class ListItem: PosterHaving {
-    let movie: MediaItem
+    let movie: Movie
     var poster: ImageState
 
-    init(_ movie: MediaItem) {
+    init(_ movie: Movie) {
       self.movie = movie
       self.poster = .unknown
     }
@@ -146,8 +146,8 @@ extension MovieListController {
     switch listData {
       case .loading:
         viewModel = nil
-      case let .available(items):
-        viewModel = ViewModel(items, sortingStrategy: sortDescriptor.makeTableViewStrategy())
+      case let .available(movies):
+        viewModel = ViewModel(movies, sortingStrategy: sortDescriptor.makeTableViewStrategy())
     }
   }
 
@@ -161,8 +161,8 @@ extension MovieListController {
             description: .basic(NSLocalizedString("loading", comment: ""))
         )
         separatorStyle = .none
-      case let .available(items):
-        if items.isEmpty {
+      case let .available(movies):
+        if movies.isEmpty {
           backgroundView = GenericEmptyView(
               accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
               description: .basic(NSLocalizedString("library.empty", comment: ""))
@@ -178,9 +178,9 @@ extension MovieListController {
   }
 
   private func configureFooterView() {
-    if case let .available(items) = listData, !items.isEmpty {
+    if case let .available(movies) = listData, !movies.isEmpty {
       let format = NSLocalizedString("movieList.summary.movieCount", comment: "")
-      movieCountLabel.text = .localizedStringWithFormat(format, items.count)
+      movieCountLabel.text = .localizedStringWithFormat(format, movies.count)
       tableView.tableFooterView = summaryView
     } else {
       tableView.tableFooterView = nil
@@ -264,7 +264,7 @@ extension MovieListController: UISearchResultsUpdating {
     let searchText = searchController.searchBar.text ?? ""
     let lowercasedSearchText = searchText.lowercased()
     let searchResults = self.viewModel.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
-                                      .sorted { titleSortingStrategy.itemSorting(left: $0.movie, right: $1.movie) }
+                                      .sorted { titleSortingStrategy.movieSorting(left: $0.movie, right: $1.movie) }
     resultsController.reload(searchText: searchText, searchResults: searchResults)
   }
 }
@@ -322,16 +322,16 @@ private class ViewModel {
   private let indexPaths: [TmdbIdentifier: IndexPath]
   let isEmpty: Bool
 
-  init(_ items: [MediaItem], sortingStrategy: SectionSortingStrategy) {
+  init(_ movies: [Movie], sortingStrategy: SectionSortingStrategy) {
     var indexPaths = [TmdbIdentifier: IndexPath]()
     var sections = [Section]()
-    let sectionData: [String: [MediaItem]] = Dictionary(grouping: items) { sortingStrategy.sectionIndexTitle(for: $0) }
+    let sectionData: [String: [Movie]] = Dictionary(grouping: movies) { sortingStrategy.sectionIndexTitle(for: $0) }
     let existingSectionIndexTitles = Array(sectionData.keys).sorted(by: sortingStrategy.sectionIndexTitleSorting)
     let refinedSectionIndexTitles = sortingStrategy.refineSectionIndexTitles(existingSectionIndexTitles)
     for sectionIndex in refinedSectionIndexTitles.startIndex..<refinedSectionIndexTitles.endIndex {
       let indexTitle = refinedSectionIndexTitles[sectionIndex]
       if existingSectionIndexTitles.contains(indexTitle) {
-        let rows: [MovieListController.ListItem] = sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
+        let rows: [MovieListController.ListItem] = sectionData[indexTitle]!.sorted(by: sortingStrategy.movieSorting)
                                                                            .map(MovieListController.ListItem.init)
         for rowIndex in rows.startIndex..<rows.endIndex {
           indexPaths[rows[rowIndex].movie.tmdbID] = IndexPath(row: rowIndex, section: sectionIndex)
@@ -345,7 +345,7 @@ private class ViewModel {
     }
     let additionalIndexTitles = Set(existingSectionIndexTitles).subtracting(Set(refinedSectionIndexTitles))
     for indexTitle in additionalIndexTitles {
-      let rows = sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
+      let rows = sectionData[indexTitle]!.sorted(by: sortingStrategy.movieSorting)
                                          .map(MovieListController.ListItem.init)
       let sectionIndex = sections.count
       for rowIndex in rows.startIndex..<rows.endIndex {
@@ -355,7 +355,7 @@ private class ViewModel {
     }
     self.sections = sections
     self.indexPaths = indexPaths
-    isEmpty = items.isEmpty
+    isEmpty = movies.isEmpty
   }
 
   func item(at indexPath: IndexPath) -> MovieListController.ListItem {
@@ -392,7 +392,7 @@ private class ViewModel {
     return sections[index].rows == nil ? -1 : index
   }
 
-  func filtered(by filter: (MediaItem) -> Bool) -> [MovieListController.ListItem] {
+  func filtered(by filter: (Movie) -> Bool) -> [MovieListController.ListItem] {
     let allItems: [MovieListController.ListItem] = sections.flatMap { $0.rows ?? [] }
     return allItems.filter { filter($0.movie) }
   }

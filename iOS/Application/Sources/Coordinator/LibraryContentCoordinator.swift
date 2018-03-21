@@ -28,8 +28,8 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
   private let movieListController = UIStoryboard.movieList.instantiate(MovieListController.self)
 
   // child coordinators
-  private var itemDetailsCoordinator: ItemDetailsCoordinator?
-  private var editItemCoordinator: EditItemCoordinator?
+  private var movieDetailsCoordinator: MovieDetailsCoordinator?
+  private var editMovieCoordinator: EditMovieCoordinator?
 
   init(navigationController: UINavigationController,
        content: ContentSpecification,
@@ -56,15 +56,15 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
   }
 
   private func fetchListData() {
-    let items: [MediaItem]
+    let movies: [Movie]
     switch content {
       case .all:
-        items = dependencies.library.fetchAllMediaItems()
+        movies = dependencies.library.fetchAllMovies()
       case let .allWith(genreId):
-        items = dependencies.library.fetchMediaItems(for: genreId)
+        movies = dependencies.library.fetchMovies(for: genreId)
     }
     DispatchQueue.main.async {
-      self.movieListController.listData = .available(items)
+      self.movieListController.listData = .available(movies)
     }
   }
 }
@@ -72,24 +72,24 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 // MARK: - MovieListControllerDelegate
 
 extension LibraryContentCoordinator: MovieListControllerDelegate {
-  func movieListController(_ controller: MovieListController, didSelect item: MediaItem) {
-    itemDetailsCoordinator = ItemDetailsCoordinator(detailItem: item, dependencies: dependencies)
-    itemDetailsCoordinator!.delegate = self
+  func movieListController(_ controller: MovieListController, didSelect movie: Movie) {
+    movieDetailsCoordinator = MovieDetailsCoordinator(for: movie, dependencies: dependencies)
+    movieDetailsCoordinator!.delegate = self
     let editButton = UIBarButtonItem(barButtonSystemItem: .edit,
                                      target: self,
                                      action: #selector(editButtonTapped))
-    itemDetailsCoordinator!.rootViewController.navigationItem.rightBarButtonItem = editButton
-    self.navigationController.pushViewController(itemDetailsCoordinator!.rootViewController, animated: true)
+    movieDetailsCoordinator!.rootViewController.navigationItem.rightBarButtonItem = editButton
+    self.navigationController.pushViewController(movieDetailsCoordinator!.rootViewController, animated: true)
   }
 
   @objc
   private func editButtonTapped() {
-    guard let detailItem = self.itemDetailsCoordinator?.detailItem else {
-      preconditionFailure("ItemDetailsCoordinator should present detail item")
+    guard let movie = self.movieDetailsCoordinator?.movie else {
+      preconditionFailure("MovieDetailsCoordinator should present movie details")
     }
-    editItemCoordinator = EditItemCoordinator(item: detailItem, dependencies: dependencies)
-    editItemCoordinator!.delegate = self
-    self.navigationController.present(editItemCoordinator!.rootViewController, animated: true)
+    editMovieCoordinator = EditMovieCoordinator(for: movie, dependencies: dependencies)
+    editMovieCoordinator!.delegate = self
+    self.navigationController.present(editMovieCoordinator!.rootViewController, animated: true)
   }
 
   func movieListControllerDidDismiss(_ controller: MovieListController) {
@@ -97,44 +97,44 @@ extension LibraryContentCoordinator: MovieListControllerDelegate {
   }
 }
 
-// MARK: - ItemDetailsCoordinatorDelegate
+// MARK: - MovieDetailsCoordinatorDelegate
 
-extension LibraryContentCoordinator: ItemDetailsCoordinatorDelegate {
-  func itemDetailsCoordinatorDidDismiss(_ coordinator: ItemDetailsCoordinator) {
-    self.itemDetailsCoordinator = nil
+extension LibraryContentCoordinator: MovieDetailsCoordinatorDelegate {
+  func movieDetailsCoordinatorDidDismiss(_ coordinator: MovieDetailsCoordinator) {
+    self.movieDetailsCoordinator = nil
   }
 }
 
-// MARK: - EditItemCoordinatorDelegate
+// MARK: - EditMovieCoordinatorDelegate
 
-extension LibraryContentCoordinator: EditItemCoordinatorDelegate {
-  func editItemCoordinator(_ coordinator: EditItemCoordinator,
-                           didFinishEditingWithResult editResult: EditItemCoordinator.EditResult) {
+extension LibraryContentCoordinator: EditMovieCoordinatorDelegate {
+  func editMovieCoordinator(_ coordinator: EditMovieCoordinator,
+                            didFinishEditingWithResult editResult: EditMovieCoordinator.EditResult) {
     switch editResult {
-      case let .edited(editedItem):
-        guard let itemDetailsCoordinator = self.itemDetailsCoordinator else {
-          preconditionFailure("ItemDetailsCoordinator should present detail item")
+      case let .edited(editedMovie):
+        guard let movieDetailsCoordinator = self.movieDetailsCoordinator else {
+          preconditionFailure("MovieDetailsCoordinator should present movie details")
         }
-        itemDetailsCoordinator.updateNonRemoteProperties(with: editedItem)
+        movieDetailsCoordinator.updateNonRemoteProperties(with: editedMovie)
         coordinator.rootViewController.dismiss(animated: true)
       case .deleted:
         coordinator.rootViewController.dismiss(animated: true) {
           self.navigationController.popViewController(animated: true)
-          self.itemDetailsCoordinator = nil
+          self.movieDetailsCoordinator = nil
         }
       case .canceled:
         coordinator.rootViewController.dismiss(animated: true)
     }
-    self.editItemCoordinator = nil
+    self.editMovieCoordinator = nil
   }
 
-  func editItemCoordinator(_ coordinator: EditItemCoordinator, didFailWithError error: Error) {
+  func editMovieCoordinator(_ coordinator: EditMovieCoordinator, didFailWithError error: Error) {
     switch error {
-      case MediaLibraryError.itemDoesNotExist:
-        guard let detailItem = self.itemDetailsCoordinator?.detailItem else {
-          preconditionFailure("ItemDetailsCoordinator should present detail item")
+      case MovieLibraryError.movieDoesNotExist:
+        guard let movie = self.movieDetailsCoordinator?.movie else {
+          preconditionFailure("MovieDetailsCoordinator should present movie details")
         }
-        fatalError("tried to edit item which is not in library: \(detailItem)")
+        fatalError("tried to edit movie which is not in library: \(movie)")
       default:
         DispatchQueue.main.async {
           let alert = UIAlertController(title: NSLocalizedString("edit.failed", comment: ""),
@@ -144,7 +144,7 @@ extension LibraryContentCoordinator: EditItemCoordinatorDelegate {
           alert.addAction(UIAlertAction(title: NSLocalizedString("discard", comment: ""),
                                         style: .destructive) { _ in
             coordinator.rootViewController.dismiss(animated: true)
-            self.editItemCoordinator = nil
+            self.editMovieCoordinator = nil
           })
           coordinator.rootViewController.present(alert, animated: true)
         }
@@ -154,52 +154,52 @@ extension LibraryContentCoordinator: EditItemCoordinatorDelegate {
 
 // MARK: - Library Events
 
-extension LibraryContentCoordinator: MediaLibraryDelegate {
-  func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
-    guard case var .available(movieListItems) = movieListController.listData else { return }
+extension LibraryContentCoordinator: MovieLibraryDelegate {
+  func library(_ library: MovieLibrary, didUpdateContent contentUpdate: MovieLibraryContentUpdate) {
+    guard case var .available(listItems) = movieListController.listData else { return }
 
     // updated movies
-    if !contentUpdate.updatedItems.isEmpty {
-      for (id, item) in contentUpdate.updatedItems {
-        guard let index = movieListItems.index(where: { $0.tmdbID == id }) else { continue }
-        movieListItems.remove(at: index)
-        movieListItems.insert(item, at: index)
+    if !contentUpdate.updatedMovies.isEmpty {
+      for (id, movie) in contentUpdate.updatedMovies {
+        guard let index = listItems.index(where: { $0.tmdbID == id }) else { continue }
+        listItems.remove(at: index)
+        listItems.insert(movie, at: index)
       }
-      if let itemDetailsCoordinator = self.itemDetailsCoordinator,
-         let updatedDetailItem = contentUpdate.updatedItems[itemDetailsCoordinator.detailItem.tmdbID] {
+      if let movieDetailsCoordinator = self.movieDetailsCoordinator,
+         let updatedMovie = contentUpdate.updatedMovies[movieDetailsCoordinator.movie.tmdbID] {
         DispatchQueue.main.async {
-          itemDetailsCoordinator.updateNonRemoteProperties(with: updatedDetailItem)
+          movieDetailsCoordinator.updateNonRemoteProperties(with: updatedMovie)
         }
       }
     }
 
     // new movies
-    let newMovies: [MediaItem]
+    let newMovies: [Movie]
     switch content {
       case .all:
-        newMovies = contentUpdate.addedItems
+        newMovies = contentUpdate.addedMovies
       case let .allWith(genreId):
-        newMovies = contentUpdate.addedItems.filter { $0.genreIds.contains(genreId) }
+        newMovies = contentUpdate.addedMovies.filter { $0.genreIds.contains(genreId) }
     }
-    movieListItems.append(contentsOf: newMovies)
+    listItems.append(contentsOf: newMovies)
 
     // removed movies
-    if !contentUpdate.removedItems.isEmpty {
-      for item in contentUpdate.removedItems {
-        guard let index = movieListItems.index(of: item) else { continue }
-        movieListItems.remove(at: index)
+    if !contentUpdate.removedMovies.isEmpty {
+      for movie in contentUpdate.removedMovies {
+        guard let index = listItems.index(of: movie) else { continue }
+        listItems.remove(at: index)
       }
     }
 
     DispatchQueue.main.async {
       // commit changes only when controller is not being dismissed anyway
-      if movieListItems.isEmpty && self.dismissWhenEmpty {
+      if listItems.isEmpty && self.dismissWhenEmpty {
         self.movieListController.onViewDidAppear = { [weak self] in
           guard let `self` = self else { return }
           self.navigationController.popViewController(animated: true)
         }
       } else {
-        self.movieListController.listData = .available(movieListItems)
+        self.movieListController.listData = .available(listItems)
       }
     }
   }

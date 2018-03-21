@@ -56,12 +56,12 @@ class AppCoordinator: AutoPresentableCoordinator {
 extension AppCoordinator {
   private func makeDependencies() -> AppDependencies {
     os_log("gathering dependencies", log: AppCoordinator.logger, type: .default)
-    // Media Library
+    // Movie Library
     let url = Utils.directoryUrl(for: .documentDirectory).appendingPathComponent("cinema.data")
     moveLegacyLibraryFile(to: url)
     let dataFormat = KeyedArchivalFormat()
     dataFormat.defaultSchemaVersion = .v2_0_0
-    let library = FileBasedMediaLibrary(url: url, dataFormat: dataFormat)!
+    let library = FileBasedMovieLibrary(url: url, dataFormat: dataFormat)!
 
     // MovieDb Client
     let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en

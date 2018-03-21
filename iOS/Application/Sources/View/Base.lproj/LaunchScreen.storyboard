@@ -83,7 +83,7 @@
         <scene sceneID="7wz-lW-Cpx">
             <objects>
                 <navigationController id="aot-1T-i3b" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="" image="Tab-AddItem-normal" id="hnt-fn-5fk"/>
+                    <tabBarItem key="tabBarItem" title="" image="Tab-AddMovie-normal" id="hnt-fn-5fk"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="eMB-VF-r0t">
                         <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -97,7 +97,7 @@
     </scenes>
     <resources>
         <image name="Sort" width="25" height="25"/>
-        <image name="Tab-AddItem-normal" width="25" height="25"/>
+        <image name="Tab-AddMovie-normal" width="25" height="25"/>
         <image name="Tab-Genre-normal" width="25" height="25"/>
         <image name="Tab-Library-normal" width="25" height="25"/>
     </resources>

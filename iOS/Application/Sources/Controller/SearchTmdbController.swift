@@ -16,7 +16,7 @@ class SearchTmdbController: UIViewController {
   private lazy var searchController: UISearchController = {
     let searchController = UISearchController(searchResultsController: resultsController)
     searchController.searchResultsUpdater = self
-    searchController.searchBar.placeholder = NSLocalizedString("addItem.search.placeholder", comment: "")
+    searchController.searchBar.placeholder = NSLocalizedString("addMovie.search.placeholder", comment: "")
     return searchController
   }()
   private lazy var resultsController: GenericSearchResultsController<ExternalMovieViewModel> = {
@@ -92,7 +92,7 @@ class SearchTmdbController: UIViewController {
     definesPresentationContext = true
     navigationItem.searchController = searchController
     navigationItem.hidesSearchBarWhenScrolling = false
-    title = NSLocalizedString("addItem.title", comment: "")
+    title = NSLocalizedString("addMovie.title", comment: "")
   }
 }
 

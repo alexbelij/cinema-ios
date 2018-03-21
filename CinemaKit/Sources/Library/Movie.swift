@@ -24,7 +24,7 @@ public struct GenreIdentifier: RawRepresentable, CustomStringConvertible, Hashab
   }
 }
 
-public struct MediaItem: Hashable {
+public struct Movie: Hashable {
   public let tmdbID: TmdbIdentifier
   public var title: String
   public var subtitle: String?
@@ -64,14 +64,4 @@ public struct MediaItem: Hashable {
 
 public enum DiskType: String {
   case dvd, bluRay
-}
-
-public struct PartialMediaItem: Equatable, Hashable {
-  public let tmdbID: TmdbIdentifier
-  public let title: String
-  public let releaseYear: Int?
-
-  public var hashValue: Int {
-    return tmdbID.rawValue
-  }
 }

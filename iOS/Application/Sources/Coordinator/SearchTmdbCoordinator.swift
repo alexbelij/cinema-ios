@@ -12,7 +12,7 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
 
   // other properties
   private let dependencies: Dependencies
-  private var library: MediaLibrary {
+  private var library: MovieLibrary {
     return dependencies.library
   }
   private var movieDb: MovieDbClient {
@@ -32,7 +32,7 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
 
     popularMoviesController.delegate = self
     let movies = self.movieDb.popularMovies().lazy.filter { [library = self.library] in
-      !library.containsMediaItem(with: $0.tmdbID)
+      !library.containsMovie(with: $0.tmdbID)
     }
     popularMoviesController.movieIterator = AnyIterator(movies.makeIterator())
     popularMoviesController.posterProvider = MovieDbPosterProvider(movieDb)
@@ -52,7 +52,7 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
       } else {
         return ExternalMovieViewModel(
             movie,
-            state: self.library.containsMediaItem(with: movie.tmdbID) ? .addedToLibrary : .new)
+            state: self.library.containsMovie(with: movie.tmdbID) ? .addedToLibrary : .new)
       }
     }
     return cachedSearchResults
@@ -118,7 +118,7 @@ extension SearchTmdbCoordinator: PopularMoviesControllerDelegate {
 extension SearchTmdbCoordinator {
   private func showAddAlert(over controller: UIViewController,
                             then completion: @escaping (DiskType) -> Void) {
-    let alert = UIAlertController(title: NSLocalizedString("addItem.alert.howToAdd.title", comment: ""),
+    let alert = UIAlertController(title: NSLocalizedString("addMovie.alert.howToAdd.title", comment: ""),
                                   message: nil,
                                   preferredStyle: .alert)
     for diskType in [DiskType.dvd, .bluRay] {
@@ -130,15 +130,15 @@ extension SearchTmdbCoordinator {
     controller.present(alert, animated: true)
   }
 
-  private func add(_ item: PartialMediaItem,
+  private func add(_ item: PartialMovie,
                    withDiskType diskType: DiskType,
                    then completion: @escaping (Error?) -> Void) {
-    let fullItem = MediaItem(tmdbID: item.tmdbID,
-                             title: item.title,
-                             runtime: self.movieDb.runtime(for: item.tmdbID),
-                             releaseDate: self.movieDb.releaseDate(for: item.tmdbID),
-                             diskType: diskType,
-                             genreIds: self.movieDb.genreIds(for: item.tmdbID))
+    let fullItem = Movie(tmdbID: item.tmdbID,
+                         title: item.title,
+                         runtime: self.movieDb.runtime(for: item.tmdbID),
+                         releaseDate: self.movieDb.releaseDate(for: item.tmdbID),
+                         diskType: diskType,
+                         genreIds: self.movieDb.genreIds(for: item.tmdbID))
     do {
       try self.library.add(fullItem)
       completion(nil)
@@ -147,8 +147,8 @@ extension SearchTmdbCoordinator {
     }
   }
 
-  private func showAddingFailedAlert(for movie: PartialMediaItem) {
-    let format = NSLocalizedString("addItem.failed", comment: "")
+  private func showAddingFailedAlert(for movie: PartialMovie) {
+    let format = NSLocalizedString("addMovie.failed", comment: "")
     let alert = UIAlertController(title: .localizedStringWithFormat(format, movie.title),
                                   message: NSLocalizedString("error.tryAgain", comment: ""),
                                   preferredStyle: .alert)

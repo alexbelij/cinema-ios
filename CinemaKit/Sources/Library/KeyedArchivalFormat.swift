@@ -7,14 +7,14 @@ public class KeyedArchivalFormat: DataFormat {
   public init() {
   }
 
-  public func serialize(_ elements: [MediaItem], schemaVersion: SchemaVersion) throws -> Data {
+  public func serialize(_ elements: [Movie], schemaVersion: SchemaVersion) throws -> Data {
     switch schemaVersion {
       case .v1_0_0: return try serializeVersion1_0_0(elements)
       case .v2_0_0: return try serializeVersion2_0_0(elements)
     }
   }
 
-  public func deserialize(from data: Data) throws -> [MediaItem] {
+  public func deserialize(from data: Data) throws -> [Movie] {
     let version = try schemaVersion(of: data)
     switch version {
       case .v1_0_0: return try deserializeVersion1_0_0(from: data)
@@ -38,21 +38,21 @@ public class KeyedArchivalFormat: DataFormat {
 // MARK: - Version 2-0-0
 
 extension KeyedArchivalFormat {
-  private func serializeVersion2_0_0(_ elements: [MediaItem]) throws -> Data {
-    let payload: [[String: Any]] = elements.map { item in
+  private func serializeVersion2_0_0(_ elements: [Movie]) throws -> Data {
+    let payload: [[String: Any]] = elements.map { movie in
       var dictionary: [String: Any] = [
-        "id": item.tmdbID.rawValue,
-        "title": item.title,
-        "diskType": item.diskType.rawValue,
-        "genreIds": item.genreIds.map { $0.rawValue }
+        "id": movie.tmdbID.rawValue,
+        "title": movie.title,
+        "diskType": movie.diskType.rawValue,
+        "genreIds": movie.genreIds.map { $0.rawValue }
       ]
-      if let subtitle = item.subtitle {
+      if let subtitle = movie.subtitle {
         dictionary["subtitle"] = subtitle
       }
-      if let runtime = item.runtime {
+      if let runtime = movie.runtime {
         dictionary["runtime"] = Int(runtime.converted(to: UnitDuration.minutes).value)
       }
-      if let releaseDate = item.releaseDate {
+      if let releaseDate = movie.releaseDate {
         dictionary["releaseDate"] = DataFormatFormatters.v2DateFormatter.string(from: releaseDate)
       }
       return dictionary
@@ -65,13 +65,13 @@ extension KeyedArchivalFormat {
     return data as Data
   }
 
-  private func deserializeVersion2_0_0(from data: Data) throws -> [MediaItem] {
+  private func deserializeVersion2_0_0(from data: Data) throws -> [Movie] {
     let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
     guard let array = unarchiver.decodeObject(forKey: .payloadKey) as? [[String: Any]] else {
       throw DataFormatError.invalidDataFormat
     }
     unarchiver.finishDecoding()
-    var items = [MediaItem]()
+    var movies = [Movie]()
     for dict in array {
       let id = (dict["id"] as? Int).map(TmdbIdentifier.init)
       let title = dict["title"] as? String
@@ -81,35 +81,35 @@ extension KeyedArchivalFormat {
       let diskType = DiskType(rawValue: dict["diskType"] as? String ?? "")
       let genreIds = dict["genreIds"] as? [Int] ?? []
       if let id = id, let title = title, let diskType = diskType {
-        let mediaItem = MediaItem(tmdbID: id,
-                                  title: title,
-                                  subtitle: subtitle,
-                                  runtime: runtime,
-                                  releaseDate: releaseDate,
-                                  diskType: diskType,
-                                  genreIds: genreIds.map(GenreIdentifier.init))
-        items.append(mediaItem)
+        let movie = Movie(tmdbID: id,
+                          title: title,
+                          subtitle: subtitle,
+                          runtime: runtime,
+                          releaseDate: releaseDate,
+                          diskType: diskType,
+                          genreIds: genreIds.map(GenreIdentifier.init))
+        movies.append(movie)
       } else {
         throw DataFormatError.invalidDataFormat
       }
     }
-    return items
+    return movies
   }
 }
 
 // MARK: - Version 1-0-0
 
 extension KeyedArchivalFormat {
-  private func serializeVersion1_0_0(_ elements: [MediaItem]) throws -> Data {
-    let rootObject: [[String: Any]] = elements.map { item in
+  private func serializeVersion1_0_0(_ elements: [Movie]) throws -> Data {
+    let rootObject: [[String: Any]] = elements.map { movie in
       var dictionary: [String: Any] = [
-        "id": item.tmdbID.rawValue,
-        "title": item.title,
-        "runtime": item.runtime.map { Int($0.converted(to: UnitDuration.minutes).value) } ?? -1,
-        "year": item.releaseDate.map { Int(DataFormatFormatters.v1DateFormatter.string(from: $0))! } ?? -1,
-        "diskType": item.diskType.rawValue
+        "id": movie.tmdbID.rawValue,
+        "title": movie.title,
+        "runtime": movie.runtime.map { Int($0.converted(to: UnitDuration.minutes).value) } ?? -1,
+        "year": movie.releaseDate.map { Int(DataFormatFormatters.v1DateFormatter.string(from: $0))! } ?? -1,
+        "diskType": movie.diskType.rawValue
       ]
-      if let subtitle = item.subtitle {
+      if let subtitle = movie.subtitle {
         dictionary["subtitle"] = subtitle
       }
       return dictionary
@@ -117,11 +117,11 @@ extension KeyedArchivalFormat {
     return NSKeyedArchiver.archivedData(withRootObject: rootObject)
   }
 
-  private func deserializeVersion1_0_0(from data: Data) throws -> [MediaItem] {
+  private func deserializeVersion1_0_0(from data: Data) throws -> [Movie] {
     guard let array = NSKeyedUnarchiver.unarchiveObject(with: data) as? [[String: Any]] else {
       throw DataFormatError.invalidDataFormat
     }
-    var items = [MediaItem]()
+    var movies = [Movie]()
     for dict in array {
       let id = (dict["id"] as? Int).map(TmdbIdentifier.init)
       let title = dict["title"] as? String
@@ -141,18 +141,18 @@ extension KeyedArchivalFormat {
         } else {
           releaseDate = nil
         }
-        let mediaItem = MediaItem(tmdbID: id,
-                                  title: title,
-                                  subtitle: subtitle,
-                                  runtime: runtime,
-                                  releaseDate: releaseDate,
-                                  diskType: diskType,
-                                  genreIds: [])
-        items.append(mediaItem)
+        let movie = Movie(tmdbID: id,
+                          title: title,
+                          subtitle: subtitle,
+                          runtime: runtime,
+                          releaseDate: releaseDate,
+                          diskType: diskType,
+                          genreIds: [])
+        movies.append(movie)
       } else {
         throw DataFormatError.invalidDataFormat
       }
     }
-    return items
+    return movies
   }
 }

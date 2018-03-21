@@ -1,23 +1,23 @@
 import CinemaKit
 import UIKit
 
-protocol ItemDetailsControllerDelegate: class {
-  func itemDetailsControllerDidDismiss(_ controller: ItemDetailsController)
+protocol MovieDetailsControllerDelegate: class {
+  func movieDetailsControllerDidDismiss(_ controller: MovieDetailsController)
 }
 
-class ItemDetailsController: UIViewController {
+class MovieDetailsController: UIViewController {
   enum RemoteProperty<Type> {
     case loading
     case available(Type)
     case unavailable
   }
 
-  weak var delegate: ItemDetailsControllerDelegate?
+  weak var delegate: MovieDetailsControllerDelegate?
 
-  var itemTitle: String = "" {
+  var movieTitle: String = "" {
     didSet {
       self.loadViewIfNeeded()
-      self.titleLabel.text = itemTitle
+      self.titleLabel.text = movieTitle
     }
   }
   @IBOutlet private weak var titleLabel: UILabel!
@@ -62,7 +62,7 @@ class ItemDetailsController: UIViewController {
     didSet {
       self.loadViewIfNeeded()
       if let seconds = self.runtime?.converted(to: UnitDuration.seconds).value {
-        runtimeLabel.text = ItemDetailsController.runtimeFormatter.string(from: seconds)!
+        runtimeLabel.text = MovieDetailsController.runtimeFormatter.string(from: seconds)!
         runtimeStackView.isHidden = false
       } else {
         runtimeStackView.isHidden = true
@@ -83,7 +83,7 @@ class ItemDetailsController: UIViewController {
     didSet {
       self.loadViewIfNeeded()
       if let releaseDate = self.releaseDate {
-        releaseDateLabel.text = ItemDetailsController.releaseDateFormatter.string(from: releaseDate)
+        releaseDateLabel.text = MovieDetailsController.releaseDateFormatter.string(from: releaseDate)
         releaseDateStackView.isHidden = false
       } else {
         releaseDateStackView.isHidden = true
@@ -137,24 +137,24 @@ class ItemDetailsController: UIViewController {
 
 // MARK: - View Controller Lifecycle
 
-extension ItemDetailsController {
+extension MovieDetailsController {
   override func viewDidLoad() {
     super.viewDidLoad()
     posterView.layer.borderColor = UIColor.posterBorder.cgColor
     posterView.layer.borderWidth = 0.5
     storyLineLabel.text = NSLocalizedString("details.storyline", comment: "")
 
-    reassign(property: \ItemDetailsController.itemTitle)
-    reassign(property: \ItemDetailsController.poster)
-    reassign(property: \ItemDetailsController.genreIds)
-    reassign(property: \ItemDetailsController.runtime)
-    reassign(property: \ItemDetailsController.releaseDate)
-    reassign(property: \ItemDetailsController.certification)
-    reassign(property: \ItemDetailsController.diskType)
-    reassign(property: \ItemDetailsController.overview)
+    reassign(property: \MovieDetailsController.movieTitle)
+    reassign(property: \MovieDetailsController.poster)
+    reassign(property: \MovieDetailsController.genreIds)
+    reassign(property: \MovieDetailsController.runtime)
+    reassign(property: \MovieDetailsController.releaseDate)
+    reassign(property: \MovieDetailsController.certification)
+    reassign(property: \MovieDetailsController.diskType)
+    reassign(property: \MovieDetailsController.overview)
   }
 
-  private func reassign<Type>(property: ReferenceWritableKeyPath<ItemDetailsController, Type>) {
+  private func reassign<Type>(property: ReferenceWritableKeyPath<MovieDetailsController, Type>) {
     let value = self[keyPath: property]
     self[keyPath: property] = value
   }
@@ -162,7 +162,7 @@ extension ItemDetailsController {
   override func viewDidDisappear(_ animated: Bool) {
     super.viewDidDisappear(animated)
     if isMovingFromParentViewController {
-      self.delegate?.itemDetailsControllerDidDismiss(self)
+      self.delegate?.movieDetailsControllerDidDismiss(self)
     }
   }
 }

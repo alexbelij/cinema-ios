@@ -26,7 +26,7 @@ extension UIStoryboard {
   static var movieList = UIStoryboard(name: "MovieList", bundle: nil)
   static var searchTmdb = UIStoryboard(name: "SearchTmdb", bundle: nil)
   static var popularMovies = UIStoryboard(name: "PopularMovies", bundle: nil)
-  static var editItem = UIStoryboard(name: "EditItem", bundle: nil)
+  static var editMovie = UIStoryboard(name: "EditMovie", bundle: nil)
   static var genreList = UIStoryboard(name: "GenreList", bundle: nil)
   static var maintenance = UIStoryboard(name: "Maintenance", bundle: nil)
 
