@@ -1,3 +1,4 @@
+import Dispatch
 import Foundation
 import os.log
 
@@ -7,92 +8,120 @@ public class FileBasedMovieLibrary: MovieLibrary {
 
   public let delegates: MulticastDelegate<MovieLibraryDelegate> = MulticastDelegate()
 
+  private let queue = DispatchQueue(label: "de.martinbauer.cinema.library")
+
   private let url: URL
 
   private let dataFormat: DataFormat
 
-  private var movies: [TmdbIdentifier: Movie]
+  private var movies: [TmdbIdentifier: Movie]?
 
   private var pendingContentUpdate = MovieLibraryContentUpdate()
 
-  public init?(url: URL, dataFormat: DataFormat) {
+  public init(url: URL, dataFormat: DataFormat) {
     self.url = url
     self.dataFormat = dataFormat
-    if FileManager.default.fileExists(atPath: url.path) {
-      os_log("library data file exists", log: FileBasedMovieLibrary.logger, type: .default)
-      do {
-        let data = try Data(contentsOf: URL(fileURLWithPath: url.path))
-        movies = Dictionary(uniqueKeysWithValues: try dataFormat.deserialize(from: data).map { ($0.tmdbID, $0) })
-      } catch {
-        os_log("failed to load library data: %{public}@",
-               log: FileBasedMovieLibrary.logger,
-               type: .error,
-               String(describing: error))
-        return nil
+  }
+
+  private func whenMoviesAreLoaded<R>(else failureHandler: @escaping (AsyncResult<R, MovieLibraryError>) -> Void,
+                                      then successHandler: @escaping () -> Void) {
+    queue.async {
+      guard self.movies == nil else {
+        successHandler()
+        return
       }
-    } else {
-      os_log("no data file for library", log: FileBasedMovieLibrary.logger, type: .default)
-      movies = [:]
+      if FileManager.default.fileExists(atPath: self.url.path) {
+        os_log("library data file exists", log: FileBasedMovieLibrary.logger, type: .default)
+        do {
+          let data = try Data(contentsOf: URL(fileURLWithPath: self.url.path))
+          let deserializedMovies = try self.dataFormat.deserialize(from: data)
+          self.movies = Dictionary(uniqueKeysWithValues: deserializedMovies.map { ($0.tmdbID, $0) })
+          successHandler()
+        } catch {
+          os_log("failed to load library data: %{public}@",
+                 log: FileBasedMovieLibrary.logger,
+                 type: .error,
+                 String(describing: error))
+          failureHandler(.failure(.dataAccessError))
+        }
+      } else {
+        os_log("no data file for library", log: FileBasedMovieLibrary.logger, type: .default)
+        self.movies = [:]
+        successHandler()
+      }
     }
   }
 
   public func fetchMovies(then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void) {
-    completion(.success(Array(movies.values)))
+    whenMoviesAreLoaded(else: completion) {
+      completion(.success(Array(self.movies!.values)))
+    }
   }
 
   public func fetchMovies(for id: GenreIdentifier,
                           then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void) {
-    completion(.success(Array(movies.values.filter { $0.genreIds.contains(id) })))
+    whenMoviesAreLoaded(else: completion) {
+      completion(.success(Array(self.movies!.values.filter { $0.genreIds.contains(id) })))
+    }
   }
 
   public func containsMovie(with id: TmdbIdentifier) -> Bool {
-    return movies.keys.contains(id)
+    return queue.sync {
+      if movies == nil { fatalError("calling containsMovie(with:) is only allowed once movies were loaded") }
+      return self.movies!.keys.contains(id)
+    }
   }
 
   public func add(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
-    if movies.keys.contains(movie.tmdbID) { return }
-    movies[movie.tmdbID] = movie
-    pendingContentUpdate.addedMovies.append(movie)
-    do {
-      try saveData()
-      completion(.success(()))
-    } catch {
-      completion(.failure(.storageError))
+    whenMoviesAreLoaded(else: completion) {
+      if self.movies!.keys.contains(movie.tmdbID) { return }
+      self.movies![movie.tmdbID] = movie
+      self.pendingContentUpdate.addedMovies.append(movie)
+      do {
+        try self.saveData()
+        completion(.success(()))
+      } catch {
+        completion(.failure(.storageError))
+      }
     }
   }
 
   public func update(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
-    if movies[movie.tmdbID] == nil {
-      completion(.failure(.movieDoesNotExist(id: movie.tmdbID)))
-      return
-    }
-    movies[movie.tmdbID] = movie
-    pendingContentUpdate.updatedMovies[movie.tmdbID] = movie
-    do {
-      try saveData()
-      completion(.success(()))
-    } catch {
-      completion(.failure(.storageError))
+    whenMoviesAreLoaded(else: completion) {
+      if self.movies![movie.tmdbID] == nil {
+        completion(.failure(.movieDoesNotExist(id: movie.tmdbID)))
+        return
+      }
+      self.movies![movie.tmdbID] = movie
+      self.pendingContentUpdate.updatedMovies[movie.tmdbID] = movie
+      do {
+        try self.saveData()
+        completion(.success(()))
+      } catch {
+        completion(.failure(.storageError))
+      }
     }
   }
 
   public func remove(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
-    if movies[movie.tmdbID] == nil {
-      completion(.failure(.movieDoesNotExist(id: movie.tmdbID)))
-      return
-    }
-    movies.removeValue(forKey: movie.tmdbID)
-    pendingContentUpdate.removedMovies.append(movie)
-    do {
-      try saveData()
-      completion(.success(()))
-    } catch {
-      completion(.failure(.storageError))
+    whenMoviesAreLoaded(else: completion) {
+      if self.movies![movie.tmdbID] == nil {
+        completion(.failure(.movieDoesNotExist(id: movie.tmdbID)))
+        return
+      }
+      self.movies!.removeValue(forKey: movie.tmdbID)
+      self.pendingContentUpdate.removedMovies.append(movie)
+      do {
+        try self.saveData()
+        completion(.success(()))
+      } catch {
+        completion(.failure(.storageError))
+      }
     }
   }
 
   private func saveData() throws {
-    guard let data = try? dataFormat.serialize(Array(movies.values)) else {
+    guard let data = try? dataFormat.serialize(Array(movies!.values)) else {
       throw MovieLibraryError.storageError
     }
     guard FileManager.default.createFile(atPath: url.path, contents: data) else {

@@ -22,7 +22,7 @@ public class CinemaKitStartupManager: StartupManager {
     moveLegacyLibraryFile(to: url)
     let dataFormat = KeyedArchivalFormat()
     dataFormat.defaultSchemaVersion = .v2_0_0
-    let library = FileBasedMovieLibrary(url: url, dataFormat: dataFormat)!
+    let library = FileBasedMovieLibrary(url: url, dataFormat: dataFormat)
 
     // MovieDb Client
     let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en

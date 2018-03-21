@@ -9,7 +9,7 @@ public protocol MovieLibrary {
                    then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void)
 
   // getting information about the library
-  func containsMovie(with id: TmdbIdentifier) -> Bool
+  func containsMovie(with id: TmdbIdentifier) -> Bool // call only when movies have already been fetched
 
   // managing library content
   func add(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
@@ -18,6 +18,7 @@ public protocol MovieLibrary {
 }
 
 public enum MovieLibraryError: Error {
+  case dataAccessError
   case storageError
   case movieDoesNotExist(id: TmdbIdentifier)
 }
