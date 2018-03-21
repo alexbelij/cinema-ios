@@ -30,17 +30,9 @@ class EditItemController: UITableViewController {
 
   @IBOutlet private weak var deleteMovieButton: UIButton!
 
-  enum Edit: Equatable, Hashable {
+  enum Edit: Hashable {
     case titleChange(String)
     case subtitleChange(String?)
-
-    static func == (lhs: Edit, rhs: Edit) -> Bool {
-      switch (lhs, rhs) {
-        case let (.titleChange(title1), .titleChange(title2)): return title1 == title2
-        case let (.subtitleChange(subtitle1), .subtitleChange(subtitle2)): return subtitle1 == subtitle2
-        default: return false
-      }
-    }
 
     var hashValue: Int {
       switch self {

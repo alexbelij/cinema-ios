@@ -73,10 +73,6 @@ enum SchemaVersion: Equatable, Comparable, CustomStringConvertible {
     return versionString
   }
 
-  static func == (lhs: SchemaVersion, rhs: SchemaVersion) -> Bool {
-    return lhs.model == rhs.model && lhs.revision == rhs.revision && lhs.addition == rhs.addition
-  }
-
   static func < (lhs: SchemaVersion, rhs: SchemaVersion) -> Bool {
     if lhs.model != rhs.model {
       return lhs.model < rhs.model

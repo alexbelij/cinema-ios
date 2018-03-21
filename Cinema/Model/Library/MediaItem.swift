@@ -24,7 +24,7 @@ struct GenreIdentifier: RawRepresentable, CustomStringConvertible, Hashable {
   }
 }
 
-struct MediaItem: Equatable, Hashable {
+struct MediaItem: Hashable {
   let tmdbID: TmdbIdentifier
   var title: String
   var subtitle: String?
@@ -57,38 +57,19 @@ struct MediaItem: Equatable, Hashable {
     }
   }
 
-  static func == (lhs: MediaItem, rhs: MediaItem) -> Bool {
-    guard lhs.tmdbID == rhs.tmdbID else { return false }
-    guard lhs.title == rhs.title else { return false }
-    guard lhs.subtitle == rhs.subtitle else { return false }
-    guard lhs.runtime == rhs.runtime else { return false }
-    guard lhs.releaseDate == rhs.releaseDate else { return false }
-    guard lhs.diskType == rhs.diskType else { return false }
-    guard lhs.genreIds == rhs.genreIds else { return false }
-    return true
-  }
-
   var hashValue: Int {
     return tmdbID.rawValue
   }
-
 }
 
 enum DiskType: String {
   case dvd, bluRay
 }
 
-struct PartialMediaItem: Equatable, Hashable {
+struct PartialMediaItem: Hashable {
   let tmdbID: TmdbIdentifier
   let title: String
   let releaseDate: Date?
-
-  static func == (lhs: PartialMediaItem, rhs: PartialMediaItem) -> Bool {
-    guard lhs.tmdbID == rhs.tmdbID else { return false }
-    guard lhs.title == rhs.title else { return false }
-    guard lhs.releaseDate == rhs.releaseDate else { return false }
-    return true
-  }
 
   var hashValue: Int {
     return tmdbID.rawValue
