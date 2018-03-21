@@ -46,9 +46,9 @@ class GenericEmptyView: UIView {
     addSubview(stackView)
     NSLayoutConstraint.activate(
         [
-          stackView.leftAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leftAnchor, constant: 15),
-          stackView.rightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.rightAnchor, constant: -15),
-          stackView.centerYAnchor.constraint(equalTo: self.centerYAnchor)
+          stackView.centerXAnchor.constraint(equalTo: safeAreaLayoutGuide.centerXAnchor),
+          stackView.centerYAnchor.constraint(equalTo: safeAreaLayoutGuide.centerYAnchor),
+          stackView.widthAnchor.constraint(equalTo: safeAreaLayoutGuide.widthAnchor, multiplier: 0.66)
         ]
     )
     return stackView
