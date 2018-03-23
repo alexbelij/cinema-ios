@@ -37,8 +37,6 @@ class JSONFormat: DataFormat {
 
 extension JSONFormat {
   private func serializeVersion2_0_0(_ elements: [MediaItem]) throws -> Data {
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyy-MM-dd"
     let payload: [JSON] = elements.map { item in
       var dictionary: [String: Any] = [
         "id": item.tmdbID.rawValue,
@@ -53,7 +51,7 @@ extension JSONFormat {
         dictionary["runtime"] = Int(runtime.converted(to: UnitDuration.minutes).value)
       }
       if let releaseDate = item.releaseDate {
-        dictionary["releaseDate"] = dateFormatter.string(from: releaseDate)
+        dictionary["releaseDate"] = DataFormatFormatters.v2DateFormatter.string(from: releaseDate)
       }
       return JSON(dictionary)
     }
@@ -66,14 +64,12 @@ extension JSONFormat {
 
   private func deserializeVersion2_0_0(from json: JSON) throws -> [MediaItem] {
     var items = [MediaItem]()
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyy-MM-dd"
     for jsonItem in json[String.payloadKey].arrayValue {
       let id = jsonItem["id"].int.map(TmdbIdentifier.init)
       let title = jsonItem["title"].string
       let subtitle = jsonItem["subtitle"].string
       let runtime = jsonItem["runtime"].int.map { Measurement(value: Double($0), unit: UnitDuration.minutes) }
-      let releaseDate = jsonItem["releaseDate"].string.flatMap { dateFormatter.date(from: $0) }
+      let releaseDate = jsonItem["releaseDate"].string.flatMap { DataFormatFormatters.v2DateFormatter.date(from: $0) }
       let diskType = DiskType(rawValue: jsonItem["diskType"].string ?? "")
       let genreIds: [GenreIdentifier]
       if let ids = jsonItem["genreIds"].array {
@@ -102,14 +98,12 @@ extension JSONFormat {
 
 extension JSONFormat {
   private func serializeVersion1_0_0(_ elements: [MediaItem]) throws -> Data {
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyy"
     let jsonArray: [JSON] = elements.map { item in
       var dictionary: [String: Any] = [
         "id": item.tmdbID.rawValue,
         "title": item.title,
         "runtime": item.runtime.map { Int($0.converted(to: UnitDuration.minutes).value) } ?? -1,
-        "year": item.releaseDate.map { Int(dateFormatter.string(from: $0))! } ?? -1,
+        "year": item.releaseDate.map { Int(DataFormatFormatters.v1DateFormatter.string(from: $0))! } ?? -1,
         "diskType": item.diskType.rawValue
       ]
       if let subtitle = item.subtitle {
@@ -122,8 +116,6 @@ extension JSONFormat {
 
   private func deserializeVersion1_0_0(from json: JSON) throws -> [MediaItem] {
     var items = [MediaItem]()
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyy"
     for jsonItem in json.arrayValue {
       let id = jsonItem["id"].int.map(TmdbIdentifier.init)
       let title = jsonItem["title"].string
@@ -139,7 +131,7 @@ extension JSONFormat {
       if let id = id, let title = title, let runtime = runtime, let year = year, let diskType = diskType {
         let releaseDate: Date?
         if year > 0 {
-          releaseDate = dateFormatter.date(from: String(year))!
+          releaseDate = DataFormatFormatters.v1DateFormatter.date(from: String(year))!
         } else {
           releaseDate = nil
         }

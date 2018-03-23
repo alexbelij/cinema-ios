@@ -23,6 +23,20 @@ extension DataFormat {
   }
 }
 
+enum DataFormatFormatters {
+  static let v1DateFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy"
+    return formatter
+  }()
+
+  static let v2DateFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd"
+    return formatter
+  }()
+}
+
 enum DataFormatError: Error {
   case invalidDataFormat
   case unsupportedSchemaVersion(versionString: String)

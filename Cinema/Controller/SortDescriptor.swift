@@ -87,6 +87,13 @@ private struct TitleSortingStrategy: SectionSortingStrategy {
 
 private struct RuntimeSortingStrategy: SectionSortingStrategy {
 
+  private static let minutesFormatter: DateComponentsFormatter = {
+    let formatter = DateComponentsFormatter()
+    formatter.unitsStyle = .full
+    formatter.allowedUnits = [.minute]
+    return formatter
+  }()
+
   private let unknownSymbol = "?"
 
   func sectionIndexTitle(for item: MediaItem) -> String {
@@ -114,10 +121,7 @@ private struct RuntimeSortingStrategy: SectionSortingStrategy {
       case "0": return NSLocalizedString("sort.by.runtime.lessThanTenMinutes", comment: "")
       default:
         let runtime = DateComponents(minute: Int(sectionIndexTitle)!)
-        let formatter = DateComponentsFormatter()
-        formatter.unitsStyle = .full
-        formatter.allowedUnits = [.minute]
-        return formatter.string(from: runtime)!
+        return RuntimeSortingStrategy.minutesFormatter.string(from: runtime)!
     }
   }
 

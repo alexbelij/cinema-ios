@@ -9,6 +9,12 @@ class TMDBSwiftWrapper: MovieDbClient {
 
   private static let baseUrl = "https://image.tmdb.org/t/p/"
 
+  private static let releaseDateFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd"
+    return formatter
+  }()
+
   var language: MovieDbLanguage
 
   var country: MovieDbCountry
@@ -114,12 +120,10 @@ class TMDBSwiftWrapper: MovieDbClient {
                       year: nil,
                       primaryReleaseYear: nil) { _, results in
         if let results = results {
-          let dateFormatter = DateFormatter()
-          dateFormatter.dateFormat = "yyyy-MM-dd"
           value = results.map {
             PartialMediaItem(tmdbID: TmdbIdentifier(rawValue: $0.id!),
                              title: $0.title!,
-                             releaseDate: dateFormatter.date(from: $0.release_date!))
+                             releaseDate: TMDBSwiftWrapper.releaseDateFormatter.date(from: $0.release_date!))
           }
         }
         done()
@@ -139,12 +143,10 @@ class TMDBSwiftWrapper: MovieDbClient {
       self.waitUntil { done in
         MovieMDB.popular(language: self.language.rawValue, page: page) { _, result in
           if let result = result {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd"
             movies = result.map {
               PartialMediaItem(tmdbID: TmdbIdentifier(rawValue: $0.id!),
                                title: $0.title!,
-                               releaseDate: dateFormatter.date(from: $0.release_date!))
+                               releaseDate: TMDBSwiftWrapper.releaseDateFormatter.date(from: $0.release_date!))
             }
           }
           done()
@@ -157,9 +159,7 @@ class TMDBSwiftWrapper: MovieDbClient {
   func releaseDate(for id: TmdbIdentifier) -> Date? {
     guard let movie = movie(for: id),
           let releaseDate = movie.release_date else { return nil }
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyy-MM-dd"
-    return dateFormatter.date(from: releaseDate)
+    return TMDBSwiftWrapper.releaseDateFormatter.date(from: releaseDate)
   }
 
   private func waitUntil(_ asyncProcess: (_ done: @escaping () -> Void) -> Void) {

@@ -72,14 +72,18 @@ class ItemDetailsController: UIViewController {
   }
   @IBOutlet private weak var runtimeLabel: UILabel!
 
+  private static let releaseDateFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateStyle = .long
+    formatter.timeStyle = .none
+    return formatter
+  }()
+
   var releaseDate: Date? {
     didSet {
       self.loadViewIfNeeded()
       if let releaseDate = self.releaseDate {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .long
-        dateFormatter.timeStyle = .none
-        releaseDateLabel.text = dateFormatter.string(from: releaseDate)
+        releaseDateLabel.text = ItemDetailsController.releaseDateFormatter.string(from: releaseDate)
       } else {
         releaseDateLabel.text = NSLocalizedString("details.missing.releaseDate", comment: "")
       }

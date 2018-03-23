@@ -2,12 +2,16 @@ import Foundation
 import UIKit
 
 class Utils {
-  static func formatDuration(_ duration: Measurement<UnitDuration>) -> String {
+  private static let durationFormatter: DateComponentsFormatter = {
     let formatter = DateComponentsFormatter()
     formatter.unitsStyle = .full
     formatter.allowedUnits = [.hour, .minute]
     formatter.zeroFormattingBehavior = [.dropAll]
-    return formatter.string(from: duration.converted(to: UnitDuration.seconds).value)!
+    return formatter
+  }()
+
+  static func formatDuration(_ duration: Measurement<UnitDuration>) -> String {
+    return durationFormatter.string(from: duration.converted(to: UnitDuration.seconds).value)!
   }
 
   static func directoryUrl(for directory: FileManager.SearchPathDirectory,
