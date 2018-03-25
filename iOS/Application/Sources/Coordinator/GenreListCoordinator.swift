@@ -65,36 +65,31 @@ extension GenreListCoordinator: GenreListControllerDelegate {
 
 extension GenreListCoordinator: MediaLibraryDelegate {
   func library(_ library: MediaLibrary, didUpdateContent contentUpdate: MediaLibraryContentUpdate) {
-    let updatedGenreIds: [GenreIdentifier]
-    var updatedGenreImageProvider: GenreImageProvider? = nil
-
-    // When a movie has been removed from the library, we have to check,
-    // if there are still other movies with the same genre id, otherwise we can remove it.
-    // The easiest way is to query the entire library again.
-    // But if no movies have been deleted (the most common use case) we can simplify
-    // the process by adding only the new genre ids to the already computed ones.
-    if contentUpdate.removedItems.isEmpty,
-       case let .available(genreListItems) = genreListController.listData {
-      var existingGenreIds = Set(genreListItems)
-      contentUpdate.addedItems.flatMap { $0.genreIds }.forEach { existingGenreIds.insert($0) }
-      updatedGenreIds = Array(existingGenreIds)
-      // swiftlint:disable:next force_cast
-      (self.genreListController.genreImageProvider as! RandomMovieGenreImageProvider)
-          .updateWithNewItems(contentUpdate.addedItems)
-    } else {
-      let items = dependencies.library.fetchAllMediaItems()
-      updatedGenreIds = Array(Set(items.flatMap { $0.genreIds }))
-      updatedGenreImageProvider = RandomMovieGenreImageProvider(for: items,
-                                                                movieDb: self.dependencies.movieDb,
-                                                                backdropSize: self.backdropSize)
+    DispatchQueue.global().async {
+      self.update(with: contentUpdate)
     }
+  }
 
-    // commit changes
-    DispatchQueue.main.async {
-      self.genreListController.listData = .available(updatedGenreIds)
-      if let provider = updatedGenreImageProvider {
-        self.genreListController.genreImageProvider = provider
+  // When a movie has been removed from the library, we have to check,
+  // if there are still other movies with the same genre id, otherwise we can remove it.
+  // The easiest way is to query the entire library again.
+  // But if no movies have been deleted (the most common use case) we can simplify
+  // the process by adding only the new genre ids to the already computed ones.
+  private func update(with contentUpdate: MediaLibraryContentUpdate) {
+    if contentUpdate.removedItems.isEmpty {
+      DispatchQueue.main.sync {
+        if case let .available(genreListItems) = genreListController.listData {
+          var existingGenreIds = Set(genreListItems)
+          contentUpdate.addedItems.flatMap { $0.genreIds }.forEach { existingGenreIds.insert($0) }
+          let updatedGenreIds = Array(existingGenreIds)
+          // swiftlint:disable:next force_cast
+          (self.genreListController.genreImageProvider as! RandomMovieGenreImageProvider)
+              .updateWithNewItems(contentUpdate.addedItems)
+          self.genreListController.listData = .available(updatedGenreIds)
+        }
       }
+    } else {
+      self.fetchListData()
     }
   }
 }
