@@ -37,7 +37,8 @@ opt_in_rules:
   - untyped_error_in_catch
   - vertical_parameter_alignment_on_call
 included: # paths to include during linting. `--path` is ignored if present.
-  - Cinema
+  - CinemaKit
+  - iOS
 
 force_cast: warning
 type_name:
