@@ -10,7 +10,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     return true
   }
 
-  public func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
+  func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
     return appCoordinator.handleImport(from: url)
   }
 }

@@ -105,7 +105,7 @@ extension SearchTmdbCoordinator {
             }
           }
         }
-      } catch let error {
+      } catch {
         DispatchQueue.main.async {
           libraryUpdateController.endUpdate(result: .failure(error))
           DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {

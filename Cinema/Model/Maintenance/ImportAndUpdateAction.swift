@@ -43,7 +43,7 @@ class ImportAndUpdateAction: MaintenanceAction {
             }
         }
       }
-    } catch let error {
+    } catch {
       completion(.error(error))
     }
   }

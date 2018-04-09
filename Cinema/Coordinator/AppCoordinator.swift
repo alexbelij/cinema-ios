@@ -79,7 +79,7 @@ extension AppCoordinator {
     if FileManager.default.fileExists(atPath: legacyUrl.path) {
       do {
         try FileManager.default.moveItem(at: legacyUrl, to: url)
-      } catch let error {
+      } catch {
         fatalError("could not move library file: \(error)")
       }
     }

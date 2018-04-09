@@ -75,7 +75,7 @@ extension EditItemController {
 // MARK: - Table View
 
 extension EditItemController {
-  public override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+  override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
     switch section {
       case 0: return NSLocalizedString("edit.sectionHeader.title", comment: "")
       case 1: return NSLocalizedString("edit.sectionHeader.subtitle", comment: "")

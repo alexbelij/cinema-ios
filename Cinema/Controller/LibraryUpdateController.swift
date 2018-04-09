@@ -25,7 +25,7 @@ class LibraryUpdateController: UIViewController {
     label.text = NSLocalizedString("addItem.progress", comment: "")
   }
 
-  open override func viewWillAppear(_ animated: Bool) {
+  override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     self.activityIndicator.startAnimating()
   }

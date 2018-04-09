@@ -34,7 +34,7 @@ class PropertyUpdateAction: MaintenanceAction {
         }
       }
       completion(.result(()))
-    } catch let error {
+    } catch {
       completion(.error(error))
     }
   }

@@ -78,7 +78,7 @@ extension EditItemCoordinator: EditItemControllerDelegate {
           try self.library.remove(self.itemToEdit)
           self.delegate?.editItemCoordinator(self, didFinishEditingWithResult: .deleted)
       }
-    } catch let error {
+    } catch {
       self.delegate?.editItemCoordinator(self, didFailWithError: error)
     }
   }

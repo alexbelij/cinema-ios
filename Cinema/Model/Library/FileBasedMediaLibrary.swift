@@ -37,7 +37,7 @@ class FileBasedMediaLibrary: MediaLibrary {
     }
     do {
       return try dataFormat.schemaVersion(of: try Data(contentsOf: url))
-    } catch let error {
+    } catch {
       fatalError("Could not detect version of data at \(url): \(error)")
     }
   }

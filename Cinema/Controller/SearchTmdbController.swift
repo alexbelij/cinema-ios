@@ -71,7 +71,7 @@ class SearchTmdbController: UIViewController {
 }
 
 extension SearchTmdbController: UISearchResultsUpdating, UISearchControllerDelegate {
-  public func updateSearchResults(for searchController: UISearchController) {
+  func updateSearchResults(for searchController: UISearchController) {
     guard searchController.isActive else { return }
     guard let resultsController = searchController.searchResultsController as? SearchTmdbSearchResultsController else {
       preconditionFailure("unexpected SearchResultsController class")

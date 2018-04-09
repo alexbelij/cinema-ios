@@ -37,7 +37,7 @@ class ImportAction: MaintenanceAction {
       progress.completedUnitCount += 2
 
       completion(.result(Array(newItems)))
-    } catch let error {
+    } catch {
       completion(.error(error))
     }
   }
