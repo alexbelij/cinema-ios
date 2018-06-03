@@ -8,6 +8,12 @@ DEPENDENCIES:
   - SwiftyJSON (= 3.1.4)
   - TMDBSwift (= 0.4.2.1)
 
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Cache
+    - SwiftyJSON
+    - TMDBSwift
+
 SPEC CHECKSUMS:
   Cache: bd0233fc688b5e83a27bcd87807db7e6f23adcc5
   SwiftyJSON: c2842d878f95482ffceec5709abc3d05680c0220
@@ -15,4 +21,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: aefe396c5b1c86f19a81050c7e19ee9b41a18801
 
-COCOAPODS: 1.4.0
+COCOAPODS: 1.5.3

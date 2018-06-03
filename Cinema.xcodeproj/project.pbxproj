@@ -348,7 +348,6 @@
 				CBB569601EA4D6A2005F7BA7 /* Frameworks */,
 				CBB569611EA4D6A2005F7BA7 /* Resources */,
 				E09430FDF23DCE2C491ABA2F /* [CP] Embed Pods Frameworks */,
-				49EBD506F3024D94E638A4C7 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -420,21 +419,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		49EBD506F3024D94E638A4C7 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Cinema/Pods-Cinema-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		E09430FDF23DCE2C491ABA2F /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
