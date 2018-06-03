@@ -15,10 +15,6 @@ class MovieListSearchResultsController: UITableViewController {
   var posterProvider: PosterProvider = EmptyPosterProvider()
   private lazy var emptyView = GenericEmptyView()
 
-  convenience init() {
-    self.init(nibName: nil, bundle: nil)
-  }
-
   private func reload() {
     tableView.reloadData()
     if items.isEmpty {
@@ -35,7 +31,6 @@ class MovieListSearchResultsController: UITableViewController {
 extension MovieListSearchResultsController {
   override func viewDidLoad() {
     super.viewDidLoad()
-    tableView.register(UINib(nibName: "MovieListTableCell", bundle: nil), forCellReuseIdentifier: "MovieListTableCell")
   }
 }
 
@@ -71,10 +66,6 @@ extension MovieListSearchResultsController {
     let cell = tableView.dequeueReusableCell(MovieListTableCell.self)
     cell.configure(for: items[indexPath.row], posterProvider: posterProvider)
     return cell
-  }
-
-  public override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-    return 75
   }
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

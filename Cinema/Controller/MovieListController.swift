@@ -41,7 +41,7 @@ class MovieListController: UITableViewController {
 
   private let titleSortingStrategy = SortDescriptor.title.makeTableViewStrategy()
   private lazy var searchController: UISearchController = {
-    let resultsController = MovieListSearchResultsController()
+    let resultsController = storyboard!.instantiate(MovieListSearchResultsController.self)
     resultsController.onSelection = { [weak self] selectedItem in
       guard let `self` = self else { return }
       self.delegate?.movieListController(self, didSelect: selectedItem)
@@ -68,7 +68,6 @@ class MovieListController: UITableViewController {
 extension MovieListController {
   override func viewDidLoad() {
     super.viewDidLoad()
-    tableView.register(UINib(nibName: "MovieListTableCell", bundle: nil), forCellReuseIdentifier: "MovieListTableCell")
     tableView.prefetchDataSource = self
     tableView.sectionIndexBackgroundColor = UIColor.clear
     definesPresentationContext = true
@@ -192,10 +191,6 @@ extension MovieListController: UITableViewDataSourcePrefetching {
                           sectionForSectionIndexTitle title: String,
                           at index: Int) -> Int {
     return viewModel.sectionForSectionIndexTitle(title, at: index)
-  }
-
-  public override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-    return 75
   }
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -358,7 +353,8 @@ private class ViewModel {
 class MovieListTableCell: UITableViewCell {
   @IBOutlet private weak var posterView: UIImageView!
   @IBOutlet private weak var titleLabel: UILabel!
-  @IBOutlet private weak var runtimeLabel: UILabel!
+  @IBOutlet private weak var secondaryLabel: UILabel!
+  @IBOutlet private weak var tertiaryLabel: UILabel!
   private var workItem: DispatchWorkItem?
 
   override func awakeFromNib() {
@@ -368,10 +364,11 @@ class MovieListTableCell: UITableViewCell {
   }
 
   func configure(for item: MovieListItem, posterProvider: PosterProvider) {
-    titleLabel!.text = item.movie.fullTitle
-    runtimeLabel!.text = item.movie.runtime == nil
+    titleLabel.text = item.movie.fullTitle
+    secondaryLabel.text = item.movie.runtime == nil
         ? NSLocalizedString("details.missing.runtime", comment: "")
         : Utils.formatDuration(item.movie.runtime!)
+    tertiaryLabel.text = item.movie.diskType.localizedName
     configurePoster(for: item, posterProvider: posterProvider)
   }
 
@@ -380,9 +377,10 @@ class MovieListTableCell: UITableViewCell {
       case .unknown:
         configurePosterForUnknownOrLoadingImageState()
         item.image = .loading
+        let size = PosterSize(minWidth: Int(posterView.frame.size.width))
         var workItem: DispatchWorkItem?
         workItem = DispatchWorkItem {
-          let poster = posterProvider.poster(for: item.movie.tmdbID, size: PosterSize(minWidth: 46))
+          let poster = posterProvider.poster(for: item.movie.tmdbID, size: size)
           DispatchQueue.main.async {
             if let posterImage = poster {
               item.image = .available(posterImage)
