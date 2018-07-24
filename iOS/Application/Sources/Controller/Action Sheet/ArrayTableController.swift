@@ -26,9 +26,9 @@ class ArrayTableController<SheetItem: SheetItemProtocol>: NSObject, UITableViewD
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     switch sheetItemType {
       case let .array(array):
-        return self.cellConfig.cell(for: array[indexPath.item], cellDequeuing: tableView)
+        return self.cellConfig.cell(for: array[indexPath.item], at: indexPath, cellDequeuing: tableView)
       case .cancel:
-        return self.cellConfig.cancelCell(cellDequeuing: tableView)
+        return self.cellConfig.cancelCell(for: indexPath, cellDequeuing: tableView)
     }
   }
 

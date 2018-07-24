@@ -174,7 +174,7 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(MovieListTableCell.self)
+    let cell = tableView.dequeueReusableCell(MovieListTableCell.self, for: indexPath)
     cell.configure(for: viewModel.item(at: indexPath), posterProvider: posterProvider)
     return cell
   }

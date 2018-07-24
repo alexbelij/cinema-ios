@@ -156,13 +156,13 @@ public protocol TabularSheetCellConfiguration: class {
 
   var cellHeight: CGFloat { get }
 
-  func cell(for sheetItem: SheetItem, cellDequeuing: CellDequeuing) -> UITableViewCell
+  func cell(for sheetItem: SheetItem, at indexPath: IndexPath, cellDequeuing: CellDequeuing) -> UITableViewCell
 
   var showsCancelAction: Bool { get }
 
   var localizedCancelString: String { get }
 
-  func cancelCell(cellDequeuing: CellDequeuing) -> UITableViewCell
+  func cancelCell(for indexPath: IndexPath, cellDequeuing: CellDequeuing) -> UITableViewCell
 }
 
 public extension TabularSheetCellConfiguration {
@@ -178,8 +178,8 @@ public extension TabularSheetCellConfiguration {
     return true
   }
 
-  public func cancelCell(cellDequeuing: CellDequeuing) -> UITableViewCell {
-    let cell = cellDequeuing.dequeueReusableCell(CancelCell.self)
+  public func cancelCell(for indexPath: IndexPath, cellDequeuing: CellDequeuing) -> UITableViewCell {
+    let cell = cellDequeuing.dequeueReusableCell(CancelCell.self, for: indexPath)
     cell.label.textColor = cell.tintColor
     cell.label.text = localizedCancelString
     return cell
@@ -230,7 +230,7 @@ private class _AnyTabularSheetCellConfigurationBoxBase<SheetItem>: TabularSheetC
     _abstract()
   }
 
-  func cell(for sheetItem: SheetItem, cellDequeuing: CellDequeuing) -> UITableViewCell {
+  func cell(for sheetItem: SheetItem, at indexPath: IndexPath, cellDequeuing: CellDequeuing) -> UITableViewCell {
     _abstract()
   }
 
@@ -242,7 +242,7 @@ private class _AnyTabularSheetCellConfigurationBoxBase<SheetItem>: TabularSheetC
     _abstract()
   }
 
-  func cancelCell(cellDequeuing: CellDequeuing) -> UITableViewCell {
+  func cancelCell(for indexPath: IndexPath, cellDequeuing: CellDequeuing) -> UITableViewCell {
     _abstract()
   }
 }
@@ -266,8 +266,10 @@ private class _TabularSheetCellConfigurationBox<Base: TabularSheetCellConfigurat
     return base.cellHeight
   }
 
-  override func cell(for sheetItem: Base.SheetItem, cellDequeuing: CellDequeuing) -> UITableViewCell {
-    return base.cell(for: sheetItem, cellDequeuing: cellDequeuing)
+  override func cell(for sheetItem: Base.SheetItem,
+                     at indexPath: IndexPath,
+                     cellDequeuing: CellDequeuing) -> UITableViewCell {
+    return base.cell(for: sheetItem, at: indexPath, cellDequeuing: cellDequeuing)
   }
 
   override var showsCancelAction: Bool {
@@ -278,8 +280,8 @@ private class _TabularSheetCellConfigurationBox<Base: TabularSheetCellConfigurat
     return base.localizedCancelString
   }
 
-  override func cancelCell(cellDequeuing: CellDequeuing) -> UITableViewCell {
-    return base.cancelCell(cellDequeuing: cellDequeuing)
+  override func cancelCell(for indexPath: IndexPath, cellDequeuing: CellDequeuing) -> UITableViewCell {
+    return base.cancelCell(for: indexPath, cellDequeuing: cellDequeuing)
   }
 }
 
@@ -302,8 +304,8 @@ public class AnyTabularSheetCellConfiguration<SheetItem>: TabularSheetCellConfig
     return box.cellHeight
   }
 
-  public func cell(for sheetItem: SheetItem, cellDequeuing: CellDequeuing) -> UITableViewCell {
-    return box.cell(for: sheetItem, cellDequeuing: cellDequeuing)
+  public func cell(for sheetItem: SheetItem, at indexPath: IndexPath, cellDequeuing: CellDequeuing) -> UITableViewCell {
+    return box.cell(for: sheetItem, at: indexPath, cellDequeuing: cellDequeuing)
   }
 
   public var showsCancelAction: Bool {
@@ -314,7 +316,7 @@ public class AnyTabularSheetCellConfiguration<SheetItem>: TabularSheetCellConfig
     return box.localizedCancelString
   }
 
-  public func cancelCell(cellDequeuing: CellDequeuing) -> UITableViewCell {
-    return box.cancelCell(cellDequeuing: cellDequeuing)
+  public func cancelCell(for indexPath: IndexPath, cellDequeuing: CellDequeuing) -> UITableViewCell {
+    return box.cancelCell(for: indexPath, cellDequeuing: cellDequeuing)
   }
 }

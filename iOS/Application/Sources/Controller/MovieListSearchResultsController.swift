@@ -64,7 +64,7 @@ extension MovieListSearchResultsController {
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(MovieListTableCell.self)
+    let cell = tableView.dequeueReusableCell(MovieListTableCell.self, for: indexPath)
     cell.configure(for: items[indexPath.row], posterProvider: posterProvider)
     return cell
   }
