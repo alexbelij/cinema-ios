@@ -38,7 +38,7 @@ class SelectableLabelCellConfig: TabularSheetCellConfiguration {
 
   func cell(for sheetItem: SelectableLabelSheetItem,
             at indexPath: IndexPath,
-            cellDequeuing: TableViewCellDequeuing) -> UITableViewCell {
+            cellDequeuing: TableViewDequeuing) -> UITableViewCell {
     let cell: SelectableLabelCell = cellDequeuing.dequeueReusableCell(for: indexPath)
     cell.configure(labelText: sheetItem.title, accessoryType: sheetItem.accessoryType)
     return cell
