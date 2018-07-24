@@ -179,7 +179,7 @@ public extension TabularSheetCellConfiguration {
   }
 
   public func cancelCell(for indexPath: IndexPath, cellDequeuing: CellDequeuing) -> UITableViewCell {
-    let cell = cellDequeuing.dequeueReusableCell(CancelCell.self, for: indexPath)
+    let cell: CancelCell = cellDequeuing.dequeueReusableCell(for: indexPath)
     cell.label.textColor = cell.tintColor
     cell.label.text = localizedCancelString
     return cell
