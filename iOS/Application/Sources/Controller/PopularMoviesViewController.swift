@@ -51,8 +51,7 @@ extension PopularMoviesController {
 
   override func collectionView(_ collectionView: UICollectionView,
                                cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-    // swiftlint:disable:next force_cast
-    let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PosterCell", for: indexPath) as! PosterCell
+    let cell: PosterCell = collectionView.dequeueReusableCell(for: indexPath)
     cell.configure(for: items[indexPath.row], posterProvider: posterProvider)
     return cell
   }
