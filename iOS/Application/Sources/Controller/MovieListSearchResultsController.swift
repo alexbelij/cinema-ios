@@ -22,7 +22,6 @@ class MovieListSearchResultsController: UITableViewController {
       showEmptyView()
     } else {
       hideEmptyView()
-      tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
     }
   }
 }
