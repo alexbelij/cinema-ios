@@ -54,8 +54,7 @@ private struct TitleSortingStrategy: SectionSortingStrategy {
 
   func sectionIndexTitleSorting(left: String, right: String) -> Bool {
     switch left.compare(right) {
-      case .orderedSame: fallthrough
-      case .orderedAscending: return true
+      case .orderedSame, .orderedAscending: return true
       case .orderedDescending: return false
     }
   }
@@ -179,8 +178,7 @@ private struct YearSortingStrategy: SectionSortingStrategy {
 
   func itemSorting(left: MediaItem, right: MediaItem) -> Bool {
     switch left.title.compare(right.title, options: [.diacriticInsensitive, .caseInsensitive]) {
-      case .orderedSame: fallthrough
-      case .orderedAscending: return true
+      case .orderedSame, .orderedAscending: return true
       case .orderedDescending: return false
     }
   }

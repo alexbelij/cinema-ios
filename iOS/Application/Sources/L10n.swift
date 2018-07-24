@@ -1,7 +1,7 @@
 import CinemaKit
 import Foundation
 
-final class L10n {
+enum L10n {
   // swiftlint:disable:next cyclomatic_complexity
   static func genreName(for genreId: GenreIdentifier) -> String? {
     let key: String?

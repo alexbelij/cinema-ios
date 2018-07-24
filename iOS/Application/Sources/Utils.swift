@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-class Utils {
+enum Utils {
   private static let durationFormatter: DateComponentsFormatter = {
     let formatter = DateComponentsFormatter()
     formatter.unitsStyle = .full

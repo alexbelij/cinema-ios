@@ -66,18 +66,18 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
 
   // MARK: - Table View Setup
 
-  public override func viewWillAppear(_ animated: Bool) {
+  override public func viewWillAppear(_ animated: Bool) {
     guard !hasViewBeenShown else { preconditionFailure("TabularSheetController can only be shown once") }
     super.viewWillAppear(animated)
     setUpContentView()
   }
 
-  public override func viewDidAppear(_ animated: Bool) {
+  override public func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     self.hasViewBeenShown = true
   }
 
-  public override func viewWillLayoutSubviews() {
+  override public func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
     let bounds = presentingViewController!.view.bounds
     view.frame = CGRect(x: (bounds.width - self.contentWidth) / 2,
