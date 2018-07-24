@@ -54,7 +54,7 @@
 "import.progress" = "Importing into your Library";
 "library" = "Library";
 "library.empty" = "Your library is empty.";
-"library.search.placeholder" = "Search titles";
+"library.search.placeholder" = "Search movies";
 "loading" = "Loading…";
 "mediaItem.disk.bluRay" = "Blu-ray";
 "mediaItem.disk.dvd" = "DVD";
