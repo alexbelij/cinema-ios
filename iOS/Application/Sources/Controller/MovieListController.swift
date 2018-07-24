@@ -184,13 +184,15 @@ extension MovieListController: UITableViewDataSourcePrefetching {
 
   override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
     guard let viewModel = self.viewModel, !viewModel.isEmpty else { return nil }
-    return viewModel.sectionIndexTitles
+    guard let titles = viewModel.sectionIndexTitles else { return nil }
+    return [UITableViewIndexSearch] + titles
   }
 
   override func tableView(_ tableView: UITableView,
                           sectionForSectionIndexTitle title: String,
                           at index: Int) -> Int {
-    return viewModel.sectionForSectionIndexTitle(title, at: index)
+    guard title != UITableViewIndexSearch else { return -1 }
+    return viewModel.sectionForSectionIndexTitle(title, at: index - 1)
   }
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
