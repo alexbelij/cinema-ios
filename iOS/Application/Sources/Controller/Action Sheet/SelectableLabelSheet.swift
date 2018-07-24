@@ -36,8 +36,10 @@ class SelectableLabelCellConfig: TabularSheetCellConfiguration {
 
   let nibCellTypes: [UITableViewCell.Type] = [SelectableLabelCell.self]
 
-  func cell(for sheetItem: SelectableLabelSheetItem, cellDequeuing: CellDequeuing) -> UITableViewCell {
-    let cell = cellDequeuing.dequeueReusableCell(SelectableLabelCell.self)
+  func cell(for sheetItem: SelectableLabelSheetItem,
+            at indexPath: IndexPath,
+            cellDequeuing: TableViewDequeuing) -> UITableViewCell {
+    let cell: SelectableLabelCell = cellDequeuing.dequeueReusableCell(for: indexPath)
     cell.configure(labelText: sheetItem.title, accessoryType: sheetItem.accessoryType)
     return cell
   }

@@ -37,14 +37,11 @@ extension SearchTmdbSearchResultsController {
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let searchResult = searchResults[indexPath.row]
     if searchResult.hasBeenAddedToLibrary {
-      let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemAddedCell",
-                                               // swiftlint:disable:next force_cast
-                                               for: indexPath) as! SearchItemAddedCell
+      let cell: SearchItemAddedCell = tableView.dequeueReusableCell(for: indexPath)
       cell.configure(for: searchResult.item)
       return cell
     } else {
-      // swiftlint:disable:next force_cast
-      let cell = tableView.dequeueReusableCell(withIdentifier: "SearchItemCell", for: indexPath) as! SearchItemCell
+      let cell: SearchItemCell = tableView.dequeueReusableCell(for: indexPath)
       cell.configure(for: searchResult.item)
       return cell
     }

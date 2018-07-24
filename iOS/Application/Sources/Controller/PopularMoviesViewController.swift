@@ -51,8 +51,7 @@ extension PopularMoviesController {
 
   override func collectionView(_ collectionView: UICollectionView,
                                cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-    // swiftlint:disable:next force_cast
-    let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PosterCell", for: indexPath) as! PosterCell
+    let cell: PosterCell = collectionView.dequeueReusableCell(for: indexPath)
     cell.configure(for: items[indexPath.row], posterProvider: posterProvider)
     return cell
   }
@@ -66,16 +65,13 @@ extension PopularMoviesController {
                                at indexPath: IndexPath) -> UICollectionReusableView {
     switch kind {
       case UICollectionElementKindSectionHeader:
-        let reusableView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
-                                                                           withReuseIdentifier: "TitleHeaderView",
-                                                                           // swiftlint:disable:next force_cast
-                                                                           for: indexPath) as! TitleHeaderView
+        let reusableView: TitleHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+                                                                                            for: indexPath)
         reusableView.configure(title: NSLocalizedString("popularMovies", comment: ""))
         return reusableView
       case UICollectionElementKindSectionFooter:
         return collectionView.dequeueReusableSupplementaryView(ofKind: kind,
-                                                               withReuseIdentifier: "TmdbFooterView",
-                                                               for: indexPath)
+                                                               for: indexPath) as TmdbFooterView
       default:
         fatalError("Unexpected kind \(kind)")
     }

@@ -145,7 +145,7 @@ extension GenreListController: UITableViewDataSourcePrefetching {
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(GenreCell.self)
+    let cell: GenreCell = tableView.dequeueReusableCell(for: indexPath)
     cell.configure(for: viewModel[indexPath.row], genreImageProvider: genreImageProvider)
     return cell
   }
