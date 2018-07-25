@@ -22,19 +22,6 @@ class ItemDetailsController: UIViewController {
   }
   @IBOutlet private weak var titleLabel: UILabel!
 
-  var subtitle: String? {
-    didSet {
-      self.loadViewIfNeeded()
-      if let subtitle = self.subtitle {
-        self.subtitleLabel.isHidden = false
-        self.subtitleLabel.text = subtitle
-      } else {
-        self.subtitleLabel.isHidden = true
-      }
-    }
-  }
-  @IBOutlet private weak var subtitleLabel: UILabel!
-
   var poster: RemoteProperty<UIImage> = .loading {
     didSet {
       self.loadViewIfNeeded()
@@ -144,7 +131,6 @@ extension ItemDetailsController {
     posterView.layer.borderWidth = 0.5
 
     reassign(property: \ItemDetailsController.itemTitle)
-    reassign(property: \ItemDetailsController.subtitle)
     reassign(property: \ItemDetailsController.poster)
     reassign(property: \ItemDetailsController.genreIds)
     reassign(property: \ItemDetailsController.runtime)

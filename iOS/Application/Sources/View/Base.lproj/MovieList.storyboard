@@ -23,10 +23,10 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eWR-Wq-QmO">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="275"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="248.5"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="Mpb-Ni-OAS">
-                                                <rect key="frame" x="12" y="8" width="351" height="60"/>
+                                                <rect key="frame" x="12" y="8" width="351" height="33.5"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gZA-AT-KDO">
                                                         <rect key="frame" x="0.0" y="0.0" width="351" height="33.5"/>
@@ -34,16 +34,10 @@
                                                         <nil key="textColor"/>
                                                         <nil key="highlightedColor"/>
                                                     </label>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Subtitle" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RdX-7n-C4l">
-                                                        <rect key="frame" x="0.0" y="33.5" width="351" height="26.5"/>
-                                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="22"/>
-                                                        <nil key="textColor"/>
-                                                        <nil key="highlightedColor"/>
-                                                    </label>
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="Feu-bs-ssQ">
-                                                <rect key="frame" x="12" y="76" width="351" height="138"/>
+                                                <rect key="frame" x="12" y="49.5" width="351" height="138"/>
                                                 <subviews>
                                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="GenericPoster-w92" translatesAutoresizingMaskIntoConstraints="NO" id="G5A-3g-BU1">
                                                         <rect key="frame" x="0.0" y="0.0" width="92" height="138"/>
@@ -145,7 +139,7 @@
                                                 </subviews>
                                             </stackView>
                                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" editable="NO" text="Overview" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="juI-mP-94u">
-                                                <rect key="frame" x="12" y="222" width="351" height="33"/>
+                                                <rect key="frame" x="12" y="195.5" width="351" height="33"/>
                                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
@@ -193,7 +187,6 @@
                         <outlet property="posterView" destination="G5A-3g-BU1" id="VUl-lS-EQT"/>
                         <outlet property="releaseDateLabel" destination="swd-vr-IQS" id="hiG-oH-rYP"/>
                         <outlet property="runtimeLabel" destination="5gG-ms-RwD" id="SMu-2V-5k6"/>
-                        <outlet property="subtitleLabel" destination="RdX-7n-C4l" id="cwJ-o7-Tt4"/>
                         <outlet property="titleLabel" destination="gZA-AT-KDO" id="Roc-CX-GKg"/>
                     </connections>
                 </viewController>

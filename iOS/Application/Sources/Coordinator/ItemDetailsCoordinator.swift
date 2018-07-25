@@ -91,8 +91,7 @@ extension ItemDetailsCoordinator {
   }
 
   private func configure(for item: MediaItem, resetRemoteProperties: Bool) {
-    itemDetailsController.itemTitle = item.title
-    itemDetailsController.subtitle = item.subtitle
+    itemDetailsController.itemTitle = item.fullTitle
     itemDetailsController.genreIds = item.genreIds
     itemDetailsController.runtime = item.runtime
     itemDetailsController.releaseDate = item.releaseDate
