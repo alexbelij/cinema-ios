@@ -72,7 +72,6 @@ extension MovieListController {
     tableView.prefetchDataSource = self
     tableView.sectionIndexBackgroundColor = UIColor.clear
     definesPresentationContext = true
-    navigationItem.hidesSearchBarWhenScrolling = false
     setup()
   }
 
@@ -185,13 +184,15 @@ extension MovieListController: UITableViewDataSourcePrefetching {
 
   override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
     guard let viewModel = self.viewModel, !viewModel.isEmpty else { return nil }
-    return viewModel.sectionIndexTitles
+    guard let titles = viewModel.sectionIndexTitles else { return nil }
+    return [UITableViewIndexSearch] + titles
   }
 
   override func tableView(_ tableView: UITableView,
                           sectionForSectionIndexTitle title: String,
                           at index: Int) -> Int {
-    return viewModel.sectionForSectionIndexTitle(title, at: index)
+    guard title != UITableViewIndexSearch else { return -1 }
+    return viewModel.sectionForSectionIndexTitle(title, at: index - 1)
   }
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -204,7 +205,7 @@ extension MovieListController: UITableViewDataSourcePrefetching {
       if case MovieListItem.Image.unknown = movieListItem.image {
         movieListItem.image = .loading
         DispatchQueue.global(qos: .background).async {
-          let poster = self.posterProvider.poster(for: movieListItem.movie.tmdbID, size: PosterSize(minWidth: 46))
+          let poster = self.posterProvider.poster(for: movieListItem.movie.tmdbID, size: PosterSize(minWidth: 60))
           DispatchQueue.main.async {
             if let posterImage = poster {
               movieListItem.image = .available(posterImage)
