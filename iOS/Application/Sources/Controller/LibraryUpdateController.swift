@@ -4,7 +4,7 @@ class LibraryUpdateController: UIViewController {
   var poster: UIImage? {
     didSet {
       loadViewIfNeeded()
-      posterView.image = poster ?? .genericPosterImage(minWidth: posterView.frame.size.width)
+      posterView.image = poster ?? #imageLiteral(resourceName: "GenericPoster")
     }
   }
   @IBOutlet private weak var posterView: UIImageView!
@@ -19,7 +19,7 @@ class LibraryUpdateController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
+    posterView.image = #imageLiteral(resourceName: "GenericPoster")
     posterView.layer.borderColor = UIColor.posterBorder.cgColor
     posterView.layer.borderWidth = 0.5
     label.text = NSLocalizedString("addItem.progress", comment: "")

@@ -22,25 +22,12 @@ class ItemDetailsController: UIViewController {
   }
   @IBOutlet private weak var titleLabel: UILabel!
 
-  var subtitle: String? {
-    didSet {
-      self.loadViewIfNeeded()
-      if let subtitle = self.subtitle {
-        self.subtitleLabel.isHidden = false
-        self.subtitleLabel.text = subtitle
-      } else {
-        self.subtitleLabel.isHidden = true
-      }
-    }
-  }
-  @IBOutlet private weak var subtitleLabel: UILabel!
-
   var poster: RemoteProperty<UIImage> = .loading {
     didSet {
       self.loadViewIfNeeded()
       switch poster {
         case .loading, .unavailable:
-          self.posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
+          self.posterView.image = #imageLiteral(resourceName: "GenericPoster")
         case let .available(image):
           self.posterView.image = image
       }
@@ -51,7 +38,7 @@ class ItemDetailsController: UIViewController {
   var genreIds = [GenreIdentifier]() {
     didSet {
       self.loadViewIfNeeded()
-      let names = self.genreIds.compactMap(L10n.genreName)
+      let names = self.genreIds.compactMap(L10n.genreName).prefix(4)
       if names.isEmpty {
         self.genreLabel.text = NSLocalizedString("details.missing.genre", comment: "")
       } else {
@@ -61,11 +48,19 @@ class ItemDetailsController: UIViewController {
   }
   @IBOutlet private weak var genreLabel: UILabel!
 
+  private static let runtimeFormatter: DateComponentsFormatter = {
+    let formatter = DateComponentsFormatter()
+    formatter.unitsStyle = .abbreviated
+    formatter.allowedUnits = [.hour, .minute]
+    formatter.zeroFormattingBehavior = [.dropAll]
+    return formatter
+  }()
+
   var runtime: Measurement<UnitDuration>? {
     didSet {
       self.loadViewIfNeeded()
-      if let runtime = self.runtime {
-        runtimeLabel.text = Utils.formatDuration(runtime)
+      if let seconds = self.runtime?.converted(to: UnitDuration.seconds).value {
+        runtimeLabel.text = ItemDetailsController.runtimeFormatter.string(from: seconds)!
       } else {
         runtimeLabel.text = NSLocalizedString("details.missing.runtime", comment: "")
       }
@@ -119,20 +114,22 @@ class ItemDetailsController: UIViewController {
   }
   @IBOutlet private weak var diskLabel: UILabel!
 
+  @IBOutlet private weak var storyLineLabel: UILabel!
+
   var overview: RemoteProperty<String> = .loading {
     didSet {
       self.loadViewIfNeeded()
       switch overview {
         case .loading:
-          self.overviewTextView.text = NSLocalizedString("loading", comment: "")
+          self.overviewLabel.text = NSLocalizedString("loading", comment: "")
         case .unavailable:
-          self.overviewTextView.text = NSLocalizedString("details.missing.overview", comment: "")
+          self.overviewLabel.text = NSLocalizedString("details.missing.overview", comment: "")
         case let .available(overview):
-          self.overviewTextView.text = overview
+          self.overviewLabel.text = overview
       }
     }
   }
-  @IBOutlet private weak var overviewTextView: UITextView!
+  @IBOutlet private weak var overviewLabel: UILabel!
 }
 
 // MARK: - View Controller Lifecycle
@@ -142,9 +139,9 @@ extension ItemDetailsController {
     super.viewDidLoad()
     posterView.layer.borderColor = UIColor.posterBorder.cgColor
     posterView.layer.borderWidth = 0.5
+    storyLineLabel.text = NSLocalizedString("details.storyline", comment: "")
 
     reassign(property: \ItemDetailsController.itemTitle)
-    reassign(property: \ItemDetailsController.subtitle)
     reassign(property: \ItemDetailsController.poster)
     reassign(property: \ItemDetailsController.genreIds)
     reassign(property: \ItemDetailsController.runtime)

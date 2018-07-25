@@ -47,7 +47,7 @@ extension ItemDetailsCoordinator {
     let queue = DispatchQueue.global(qos: .userInitiated)
     let group = DispatchGroup()
     self.fetchRemoteValue(for: \ItemDetailsController.poster, on: queue, in: group) {
-      self.movieDb.poster(for: id, size: PosterSize(minWidth: 92))
+      self.movieDb.poster(for: id, size: PosterSize(minWidth: Int(0.345 * UIScreen.main.bounds.size.width)))
     }
     self.fetchRemoteValue(for: \ItemDetailsController.certification, on: queue, in: group) {
       self.movieDb.certification(for: id)?.nilIfEmptyString
@@ -91,8 +91,7 @@ extension ItemDetailsCoordinator {
   }
 
   private func configure(for item: MediaItem, resetRemoteProperties: Bool) {
-    itemDetailsController.itemTitle = item.title
-    itemDetailsController.subtitle = item.subtitle
+    itemDetailsController.itemTitle = item.fullTitle
     itemDetailsController.genreIds = item.genreIds
     itemDetailsController.runtime = item.runtime
     itemDetailsController.releaseDate = item.releaseDate

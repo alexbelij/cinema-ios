@@ -182,7 +182,7 @@ class PosterCell: UICollectionViewCell {
 
   func configure(for item: PartialMediaItem, posterProvider: PosterProvider) {
     titleLabel.text = item.title
-    posterImageView.image = .genericPosterImage(minWidth: posterImageView.frame.size.width)
+    posterImageView.image = #imageLiteral(resourceName: "GenericPoster")
     var workItem: DispatchWorkItem?
     workItem = DispatchWorkItem {
       if let poster = posterProvider.poster(for: item.tmdbID, size: PosterSize(minWidth: 130)) {

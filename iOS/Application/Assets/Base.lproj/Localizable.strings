@@ -19,6 +19,7 @@
 "details.missing.overview" = "No overview available.";
 "details.missing.releaseDate" = "No release date available.";
 "details.missing.runtime" = "No runtime available.";
+"details.storyline" = "Story Line";
 "discard" = "Discard";
 "edit.deleteMovie" = "Delete Movie";
 "edit.noTitleAlert" = "A movie must have a title.";

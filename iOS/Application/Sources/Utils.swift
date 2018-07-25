@@ -2,18 +2,6 @@ import Foundation
 import UIKit
 
 enum Utils {
-  private static let durationFormatter: DateComponentsFormatter = {
-    let formatter = DateComponentsFormatter()
-    formatter.unitsStyle = .full
-    formatter.allowedUnits = [.hour, .minute]
-    formatter.zeroFormattingBehavior = [.dropAll]
-    return formatter
-  }()
-
-  static func formatDuration(_ duration: Measurement<UnitDuration>) -> String {
-    return durationFormatter.string(from: duration.converted(to: UnitDuration.seconds).value)!
-  }
-
   static func directoryUrl(for directory: FileManager.SearchPathDirectory,
                            createIfNecessary: Bool = true) -> URL {
     let fileManager = FileManager.default
@@ -48,19 +36,6 @@ extension UIStoryboard {
       fatalError("could not instantiate view controller with identifier \(identifier) ")
     }
     return controller
-  }
-}
-
-extension UIImage {
-  static func genericPosterImage(minWidth: CGFloat) -> UIImage {
-    let width: CGFloat
-    switch minWidth {
-      case 0...92: width = 92
-      case 93...154: width = 154
-      case 155...185: width = 185
-      default: fatalError("poster for min width \(minWidth) not yet added to project")
-    }
-    return UIImage(named: "GenericPoster-w\(width)")!
   }
 }
 
