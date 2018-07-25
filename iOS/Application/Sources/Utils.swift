@@ -2,18 +2,6 @@ import Foundation
 import UIKit
 
 enum Utils {
-  private static let durationFormatter: DateComponentsFormatter = {
-    let formatter = DateComponentsFormatter()
-    formatter.unitsStyle = .full
-    formatter.allowedUnits = [.hour, .minute]
-    formatter.zeroFormattingBehavior = [.dropAll]
-    return formatter
-  }()
-
-  static func formatDuration(_ duration: Measurement<UnitDuration>) -> String {
-    return durationFormatter.string(from: duration.converted(to: UnitDuration.seconds).value)!
-  }
-
   static func directoryUrl(for directory: FileManager.SearchPathDirectory,
                            createIfNecessary: Bool = true) -> URL {
     let fileManager = FileManager.default

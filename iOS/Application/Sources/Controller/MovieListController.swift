@@ -353,6 +353,14 @@ private class ViewModel {
 }
 
 class MovieListTableCell: UITableViewCell {
+  private static let runtimeFormatter: DateComponentsFormatter = {
+    let formatter = DateComponentsFormatter()
+    formatter.unitsStyle = .full
+    formatter.allowedUnits = [.hour, .minute]
+    formatter.zeroFormattingBehavior = [.dropAll]
+    return formatter
+  }()
+
   @IBOutlet private weak var posterView: UIImageView!
   @IBOutlet private weak var titleLabel: UILabel!
   @IBOutlet private weak var secondaryLabel: UILabel!
@@ -367,9 +375,11 @@ class MovieListTableCell: UITableViewCell {
 
   func configure(for item: MovieListItem, posterProvider: PosterProvider) {
     titleLabel.text = item.movie.fullTitle
-    secondaryLabel.text = item.movie.runtime == nil
-        ? NSLocalizedString("details.missing.runtime", comment: "")
-        : Utils.formatDuration(item.movie.runtime!)
+    if let seconds = item.movie.runtime?.converted(to: UnitDuration.seconds).value {
+      secondaryLabel.text = MovieListTableCell.runtimeFormatter.string(from: seconds)!
+    } else {
+      secondaryLabel.text = NSLocalizedString("details.missing.runtime", comment: "")
+    }
     tertiaryLabel.text = item.movie.diskType.localizedName
     configurePoster(for: item, posterProvider: posterProvider)
   }

@@ -48,11 +48,19 @@ class ItemDetailsController: UIViewController {
   }
   @IBOutlet private weak var genreLabel: UILabel!
 
+  private static let runtimeFormatter: DateComponentsFormatter = {
+    let formatter = DateComponentsFormatter()
+    formatter.unitsStyle = .abbreviated
+    formatter.allowedUnits = [.hour, .minute]
+    formatter.zeroFormattingBehavior = [.dropAll]
+    return formatter
+  }()
+
   var runtime: Measurement<UnitDuration>? {
     didSet {
       self.loadViewIfNeeded()
-      if let runtime = self.runtime {
-        runtimeLabel.text = Utils.formatDuration(runtime)
+      if let seconds = self.runtime?.converted(to: UnitDuration.seconds).value {
+        runtimeLabel.text = ItemDetailsController.runtimeFormatter.string(from: seconds)!
       } else {
         runtimeLabel.text = NSLocalizedString("details.missing.runtime", comment: "")
       }
