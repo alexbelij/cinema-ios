@@ -38,7 +38,7 @@ class ItemDetailsController: UIViewController {
   var genreIds = [GenreIdentifier]() {
     didSet {
       self.loadViewIfNeeded()
-      let names = self.genreIds.compactMap(L10n.genreName)
+      let names = self.genreIds.compactMap(L10n.genreName).prefix(4)
       if names.isEmpty {
         self.genreLabel.text = NSLocalizedString("details.missing.genre", comment: "")
       } else {
