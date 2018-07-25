@@ -106,20 +106,22 @@ class ItemDetailsController: UIViewController {
   }
   @IBOutlet private weak var diskLabel: UILabel!
 
+  @IBOutlet private weak var storyLineLabel: UILabel!
+
   var overview: RemoteProperty<String> = .loading {
     didSet {
       self.loadViewIfNeeded()
       switch overview {
         case .loading:
-          self.overviewTextView.text = NSLocalizedString("loading", comment: "")
+          self.overviewLabel.text = NSLocalizedString("loading", comment: "")
         case .unavailable:
-          self.overviewTextView.text = NSLocalizedString("details.missing.overview", comment: "")
+          self.overviewLabel.text = NSLocalizedString("details.missing.overview", comment: "")
         case let .available(overview):
-          self.overviewTextView.text = overview
+          self.overviewLabel.text = overview
       }
     }
   }
-  @IBOutlet private weak var overviewTextView: UITextView!
+  @IBOutlet private weak var overviewLabel: UILabel!
 }
 
 // MARK: - View Controller Lifecycle
@@ -129,6 +131,7 @@ extension ItemDetailsController {
     super.viewDidLoad()
     posterView.layer.borderColor = UIColor.posterBorder.cgColor
     posterView.layer.borderWidth = 0.5
+    storyLineLabel.text = NSLocalizedString("details.storyline", comment: "")
 
     reassign(property: \ItemDetailsController.itemTitle)
     reassign(property: \ItemDetailsController.poster)
