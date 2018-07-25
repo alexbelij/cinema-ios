@@ -411,12 +411,12 @@ class MovieListTableCell: UITableViewCell {
       case let .available(posterImage):
         posterView.image = posterImage
       case .unavailable:
-        posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
+        posterView.image = #imageLiteral(resourceName: "GenericPoster")
     }
   }
 
   private func configurePosterForUnknownOrLoadingImageState() {
-    posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
+    posterView.image = #imageLiteral(resourceName: "GenericPoster")
   }
 
   override func prepareForReuse() {

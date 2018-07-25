@@ -39,19 +39,6 @@ extension UIStoryboard {
   }
 }
 
-extension UIImage {
-  static func genericPosterImage(minWidth: CGFloat) -> UIImage {
-    let width: CGFloat
-    switch minWidth {
-      case 0...92: width = 92
-      case 93...154: width = 154
-      case 155...185: width = 185
-      default: fatalError("poster for min width \(minWidth) not yet added to project")
-    }
-    return UIImage(named: "GenericPoster-w\(width)")!
-  }
-}
-
 extension UIColor {
   // swiftlint:disable object_literal
   static let disabledControlText = UIColor(white: 0.58, alpha: 1.0)

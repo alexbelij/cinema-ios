@@ -29,7 +29,7 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="Feu-bs-ssQ">
                                                 <rect key="frame" x="16" y="36" width="343" height="204.5"/>
                                                 <subviews>
-                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="GenericPoster-w92" translatesAutoresizingMaskIntoConstraints="NO" id="G5A-3g-BU1">
+                                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="GenericPoster" translatesAutoresizingMaskIntoConstraints="NO" id="G5A-3g-BU1">
                                                         <rect key="frame" x="0.0" y="5.5" width="129.5" height="194"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" secondItem="G5A-3g-BU1" secondAttribute="height" multiplier="2:3" id="LSL-Ef-SSA"/>
@@ -223,7 +223,7 @@
                                         <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="14" translatesAutoresizingMaskIntoConstraints="NO" id="2Km-GV-Wuk">
                                             <rect key="frame" x="16" y="0.0" width="325" height="99.5"/>
                                             <subviews>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" verticalHuggingPriority="252" image="GenericPoster-w92" translatesAutoresizingMaskIntoConstraints="NO" id="aMW-mt-aKk">
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" verticalHuggingPriority="252" image="GenericPoster" translatesAutoresizingMaskIntoConstraints="NO" id="aMW-mt-aKk">
                                                     <rect key="frame" x="0.0" y="5" width="60" height="90"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="90" id="O1H-YI-rTx"/>
@@ -344,7 +344,7 @@
                                         <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="14" translatesAutoresizingMaskIntoConstraints="NO" id="QJl-Yp-3UJ">
                                             <rect key="frame" x="16" y="0.0" width="325" height="99.5"/>
                                             <subviews>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" verticalHuggingPriority="252" image="GenericPoster-w92" translatesAutoresizingMaskIntoConstraints="NO" id="cSr-et-OvE">
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" verticalHuggingPriority="252" image="GenericPoster" translatesAutoresizingMaskIntoConstraints="NO" id="cSr-et-OvE">
                                                     <rect key="frame" x="0.0" y="5" width="60" height="90"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="90" id="FeM-aZ-KxZ"/>
@@ -414,7 +414,7 @@
         <image name="Certification" width="16" height="16"/>
         <image name="Clock" width="16" height="16"/>
         <image name="Disk" width="16" height="16"/>
-        <image name="GenericPoster-w92" width="92" height="138"/>
+        <image name="GenericPoster" width="92" height="138"/>
         <image name="Masks" width="16" height="16"/>
         <image name="Sort" width="25" height="25"/>
     </resources>

@@ -27,7 +27,7 @@ class ItemDetailsController: UIViewController {
       self.loadViewIfNeeded()
       switch poster {
         case .loading, .unavailable:
-          self.posterView.image = .genericPosterImage(minWidth: posterView.frame.size.width)
+          self.posterView.image = #imageLiteral(resourceName: "GenericPoster")
         case let .available(image):
           self.posterView.image = image
       }
