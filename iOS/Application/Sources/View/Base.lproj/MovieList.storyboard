@@ -23,10 +23,10 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eWR-Wq-QmO">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="248.5"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="261"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="Mpb-Ni-OAS">
-                                                <rect key="frame" x="12" y="8" width="351" height="33.5"/>
+                                                <rect key="frame" x="12" y="28" width="351" height="33.5"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gZA-AT-KDO">
                                                         <rect key="frame" x="0.0" y="0.0" width="351" height="33.5"/>
@@ -37,7 +37,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="Feu-bs-ssQ">
-                                                <rect key="frame" x="12" y="49.5" width="351" height="138"/>
+                                                <rect key="frame" x="12" y="69.5" width="351" height="138"/>
                                                 <subviews>
                                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="GenericPoster-w92" translatesAutoresizingMaskIntoConstraints="NO" id="G5A-3g-BU1">
                                                         <rect key="frame" x="0.0" y="0.0" width="92" height="138"/>
@@ -139,7 +139,7 @@
                                                 </subviews>
                                             </stackView>
                                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" editable="NO" text="Overview" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="juI-mP-94u">
-                                                <rect key="frame" x="12" y="195.5" width="351" height="33"/>
+                                                <rect key="frame" x="12" y="216" width="351" height="33"/>
                                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
@@ -147,16 +147,16 @@
                                         </subviews>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <constraints>
-                                            <constraint firstAttribute="leadingMargin" secondItem="Feu-bs-ssQ" secondAttribute="leading" constant="-4" id="864-pE-DZS"/>
-                                            <constraint firstAttribute="leadingMargin" secondItem="juI-mP-94u" secondAttribute="leading" constant="-4" id="9wg-Iu-JG7"/>
-                                            <constraint firstAttribute="trailingMargin" secondItem="Mpb-Ni-OAS" secondAttribute="trailing" constant="4" id="9xt-Fo-H63"/>
-                                            <constraint firstItem="Feu-bs-ssQ" firstAttribute="top" secondItem="Mpb-Ni-OAS" secondAttribute="bottom" constant="8" symbolic="YES" id="Azs-Y6-b78"/>
-                                            <constraint firstAttribute="trailingMargin" secondItem="Feu-bs-ssQ" secondAttribute="trailing" constant="4" id="DiM-Lk-fqC"/>
-                                            <constraint firstAttribute="trailingMargin" secondItem="juI-mP-94u" secondAttribute="trailing" constant="4" id="Gyv-e5-5MU"/>
-                                            <constraint firstAttribute="bottom" secondItem="juI-mP-94u" secondAttribute="bottom" constant="20" symbolic="YES" id="ZBI-Oo-zi9"/>
-                                            <constraint firstAttribute="leadingMargin" secondItem="Mpb-Ni-OAS" secondAttribute="leading" constant="-4" id="p5j-Rh-CT7"/>
-                                            <constraint firstItem="Mpb-Ni-OAS" firstAttribute="top" secondItem="eWR-Wq-QmO" secondAttribute="top" constant="8" id="pku-V1-Fey"/>
-                                            <constraint firstItem="juI-mP-94u" firstAttribute="top" secondItem="Feu-bs-ssQ" secondAttribute="bottom" constant="8" symbolic="YES" id="r4r-X9-3Lx"/>
+                                            <constraint firstAttribute="trailingMargin" secondItem="juI-mP-94u" secondAttribute="trailing" constant="4" id="1hq-ZQ-sVI"/>
+                                            <constraint firstAttribute="trailingMargin" secondItem="Mpb-Ni-OAS" secondAttribute="trailing" constant="4" id="4mx-Sd-f2S"/>
+                                            <constraint firstItem="juI-mP-94u" firstAttribute="top" secondItem="Feu-bs-ssQ" secondAttribute="bottom" constant="8" symbolic="YES" id="Bsz-qc-FEM"/>
+                                            <constraint firstItem="juI-mP-94u" firstAttribute="leading" secondItem="eWR-Wq-QmO" secondAttribute="leadingMargin" constant="4" id="PyP-en-etB"/>
+                                            <constraint firstItem="Feu-bs-ssQ" firstAttribute="top" secondItem="Mpb-Ni-OAS" secondAttribute="bottom" constant="8" symbolic="YES" id="QCN-Cx-2nL"/>
+                                            <constraint firstItem="Mpb-Ni-OAS" firstAttribute="top" secondItem="eWR-Wq-QmO" secondAttribute="topMargin" id="RLf-M5-QV5"/>
+                                            <constraint firstItem="Mpb-Ni-OAS" firstAttribute="leading" secondItem="eWR-Wq-QmO" secondAttribute="leadingMargin" constant="4" id="Y3y-GV-KI1"/>
+                                            <constraint firstItem="Feu-bs-ssQ" firstAttribute="leading" secondItem="eWR-Wq-QmO" secondAttribute="leadingMargin" constant="4" id="kEJ-r9-WPX"/>
+                                            <constraint firstAttribute="bottomMargin" secondItem="juI-mP-94u" secondAttribute="bottom" constant="4" id="s6E-J1-YGx"/>
+                                            <constraint firstAttribute="trailingMargin" secondItem="Feu-bs-ssQ" secondAttribute="trailing" constant="4" id="xK4-u3-F2A"/>
                                         </constraints>
                                     </view>
                                 </subviews>
