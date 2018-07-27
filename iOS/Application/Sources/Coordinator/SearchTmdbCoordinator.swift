@@ -18,6 +18,7 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
   private var movieDb: MovieDbClient {
     return dependencies.movieDb
   }
+  private var cachedSearchResults = [SearchTmdbController.SearchResult]()
 
   // managed controllers
   private let navigationController: UINavigationController
@@ -43,10 +44,16 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
 extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
   func searchTmdbController(_ controller: SearchTmdbController,
                             searchResultsFor searchText: String) -> [SearchTmdbController.SearchResult] {
-    return self.movieDb.searchMovies(searchText: searchText).map { movie in
-      SearchTmdbController.SearchResult(movie,
-                                        hasBeenAddedToLibrary: self.library.containsMediaItem(with: movie.tmdbID))
+    cachedSearchResults = self.movieDb.searchMovies(searchText: searchText).map { movie in
+      if let existing = cachedSearchResults.first(where: { $0.movie.tmdbID == movie.tmdbID }) {
+        return existing
+      } else {
+        return SearchTmdbController.SearchResult(
+            movie,
+            hasBeenAddedToLibrary: self.library.containsMediaItem(with: movie.tmdbID))
+      }
     }
+    return cachedSearchResults
   }
 
   func searchTmdbController(_ controller: SearchTmdbController,
