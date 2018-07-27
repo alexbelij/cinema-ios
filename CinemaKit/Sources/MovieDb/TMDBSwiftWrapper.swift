@@ -30,8 +30,10 @@ public class TMDBSwiftWrapper: MovieDbClient {
 
   public func poster(for id: TmdbIdentifier, size: PosterSize, purpose: PosterPurpose) -> UIImage? {
     switch purpose {
-      case .list, .details, .popularMovies, .libraryUpdate:
+      case .list, .details, .popularMovies:
         return cache.poster(for: "\(id)-\(language)-\(size)") { fetchPoster(for: id, size: size) }
+      case .libraryUpdate:
+        return fetchPoster(for: id, size: size)
     }
   }
 
