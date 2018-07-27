@@ -97,7 +97,13 @@ extension SearchTmdbController: UISearchResultsUpdating {
     }
     currentSearch?.cancel()
     let searchText = searchController.searchBar.text!
-    if !searchText.isEmpty {
+    if searchText.isEmpty {
+      searchQueue.async {
+        DispatchQueue.main.sync {
+          resultsController.reload(searchText: nil, searchResults: [])
+        }
+      }
+    } else {
       currentSearch = DispatchWorkItem {
         let searchResults = self.delegate?.searchTmdbController(self, searchResultsFor: searchText) ?? []
         DispatchQueue.main.sync {

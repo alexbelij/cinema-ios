@@ -19,21 +19,27 @@ class GenericSearchResultsController<Item>: UITableViewController {
     fatalError("use GenericSearchResultsController.init() instead")
   }
 
-  func reload(searchText: String, searchResults: [Item]) {
+  func reload(searchText: String?, searchResults: [Item]) {
     self.searchText = searchText
     self.items = searchResults
     super.tableView.reloadData()
-    if self.items.isEmpty {
-      emptyView.configure(
-          accessory: .image(#imageLiteral(resourceName: "EmptySearchResults")),
-          description: .basic(.localizedStringWithFormat(NSLocalizedString("search.results.empty", comment: ""),
-                                                         searchText))
-      )
-      super.tableView.backgroundView = emptyView
-      super.tableView.separatorStyle = .none
+    if let searchText = searchText {
+      if self.items.isEmpty {
+        emptyView.configure(
+            accessory: .image(#imageLiteral(resourceName: "EmptySearchResults")),
+            description: .basic(.localizedStringWithFormat(NSLocalizedString("search.results.empty", comment: ""),
+                                                           searchText))
+        )
+        super.tableView.backgroundView = emptyView
+        super.tableView.separatorStyle = .none
+      } else {
+        super.tableView.backgroundView = nil
+        super.tableView.separatorStyle = .singleLine
+      }
     } else {
-      super.tableView.backgroundView = nil
-      super.tableView.separatorStyle = .singleLine
+      super.tableView.backgroundView = GenericEmptyView(accessory: .activityIndicator,
+                                                        description: .basic(NSLocalizedString("loading", comment: "")))
+      super.tableView.separatorStyle = .none
     }
   }
 
