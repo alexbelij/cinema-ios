@@ -9,7 +9,7 @@ public protocol MovieDbClient {
 
   var cache: TMDBSwiftCache { get set }
 
-  func poster(for id: TmdbIdentifier, size: PosterSize) -> UIImage?
+  func poster(for id: TmdbIdentifier, size: PosterSize, purpose: PosterPurpose) -> UIImage?
 
   func backdrop(for id: TmdbIdentifier, size: BackdropSize) -> UIImage?
 
@@ -27,6 +27,13 @@ public protocol MovieDbClient {
 
   func releaseDate(for id: TmdbIdentifier) -> Date?
 
+}
+
+public enum PosterPurpose {
+  case list
+  case details
+  case popularMovies
+  case libraryUpdate
 }
 
 public enum MovieDbCountry: String {

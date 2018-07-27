@@ -79,7 +79,7 @@ extension SearchTmdbCoordinator {
                                            over controller: UIViewController) {
     let libraryUpdateController = UIStoryboard.searchTmdb.instantiate(LibraryUpdateController.self)
     DispatchQueue.global(qos: .userInitiated).async {
-      if let poster = self.movieDb.poster(for: item.tmdbID, size: PosterSize(minWidth: 185)) {
+      if let poster = self.movieDb.poster(for: item.tmdbID, size: PosterSize(minWidth: 185), purpose: .libraryUpdate) {
         DispatchQueue.main.async {
           libraryUpdateController.poster = poster
         }

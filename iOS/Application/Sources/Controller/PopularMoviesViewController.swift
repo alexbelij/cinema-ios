@@ -185,7 +185,9 @@ class PosterCell: UICollectionViewCell {
     posterImageView.image = #imageLiteral(resourceName: "GenericPoster")
     var workItem: DispatchWorkItem?
     workItem = DispatchWorkItem {
-      if let poster = posterProvider.poster(for: item.tmdbID, size: PosterSize(minWidth: 130)) {
+      if let poster = posterProvider.poster(for: item.tmdbID,
+                                            size: PosterSize(minWidth: 130),
+                                            purpose: .popularMovies) {
         DispatchQueue.main.async {
           guard !workItem!.isCancelled else { return }
           self.posterImageView.image = poster

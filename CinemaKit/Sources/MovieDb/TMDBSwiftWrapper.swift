@@ -28,16 +28,18 @@ public class TMDBSwiftWrapper: MovieDbClient {
     TMDBConfig.apikey = TMDBSwiftWrapper.apiKey
   }
 
-  public func poster(for id: TmdbIdentifier, size: PosterSize) -> UIImage? {
-    return cache.poster(for: "\(id)-\(language)-\(size)") {
-      if let posterPath = movie(for: id)?.poster_path {
-        let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
-        if let data = try? Data(contentsOf: URL(string: path)!) {
-          return UIImage(data: data)
-        }
-      }
-      return nil
+  public func poster(for id: TmdbIdentifier, size: PosterSize, purpose: PosterPurpose) -> UIImage? {
+    switch purpose {
+      case .list, .details, .popularMovies, .libraryUpdate:
+        return cache.poster(for: "\(id)-\(language)-\(size)") { fetchPoster(for: id, size: size) }
     }
+  }
+
+  private func fetchPoster(for id: TmdbIdentifier, size: PosterSize) -> UIImage? {
+    guard let posterPath = movie(for: id)?.poster_path else { return nil }
+    let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
+    guard let data = try? Data(contentsOf: URL(string: path)!) else { return nil }
+    return UIImage(data: data)
   }
 
   public func backdrop(for id: TmdbIdentifier, size: BackdropSize) -> UIImage? {

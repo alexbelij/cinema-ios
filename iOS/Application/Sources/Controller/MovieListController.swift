@@ -205,7 +205,9 @@ extension MovieListController: UITableViewDataSourcePrefetching {
       if case .unknown = movieListItem.image {
         movieListItem.image = .loading
         DispatchQueue.global(qos: .background).async {
-          let poster = self.posterProvider.poster(for: movieListItem.movie.tmdbID, size: PosterSize(minWidth: 60))
+          let poster = self.posterProvider.poster(for: movieListItem.movie.tmdbID,
+                                                  size: PosterSize(minWidth: 60),
+                                                  purpose: .list)
           DispatchQueue.main.async {
             if let posterImage = poster {
               movieListItem.image = .available(posterImage)
@@ -392,7 +394,7 @@ class MovieListTableCell: UITableViewCell {
         let size = PosterSize(minWidth: Int(posterView.frame.size.width))
         var workItem: DispatchWorkItem?
         workItem = DispatchWorkItem {
-          let poster = posterProvider.poster(for: item.movie.tmdbID, size: size)
+          let poster = posterProvider.poster(for: item.movie.tmdbID, size: size, purpose: .list)
           DispatchQueue.main.async {
             if let posterImage = poster {
               item.image = .available(posterImage)

@@ -45,7 +45,9 @@ extension ItemDetailsCoordinator {
     let queue = DispatchQueue.global(qos: .userInitiated)
     let group = DispatchGroup()
     self.fetchRemoteValue(for: \ItemDetailsController.poster, on: queue, in: group) {
-      self.movieDb.poster(for: id, size: PosterSize(minWidth: Int(0.345 * UIScreen.main.bounds.size.width)))
+      self.movieDb.poster(for: id,
+                          size: PosterSize(minWidth: Int(0.345 * UIScreen.main.bounds.size.width)),
+                          purpose: .details)
     }
     self.fetchRemoteValue(for: \ItemDetailsController.certification, on: queue, in: group) {
       self.movieDb.certification(for: id)?.nilIfEmptyString
