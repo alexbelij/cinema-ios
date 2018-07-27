@@ -7,8 +7,6 @@ public protocol MovieDbClient {
 
   var country: MovieDbCountry { get set }
 
-  var cache: TMDBSwiftCache { get set }
-
   func poster(for id: TmdbIdentifier, size: PosterSize, purpose: PosterPurpose) -> UIImage?
 
   func backdrop(for id: TmdbIdentifier, size: BackdropSize) -> UIImage?
