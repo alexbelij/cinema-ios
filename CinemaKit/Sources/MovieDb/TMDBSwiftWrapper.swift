@@ -36,7 +36,7 @@ public class TMDBSwiftWrapper: MovieDbClient {
         return cache.poster(for: "\(id)-\(language)-\(size)") { fetchPoster(for: id, size: size) }
       case .popularMovies:
         return cache.largePoster(for: "\(id)-\(language)-\(size)") { fetchPoster(for: id, size: size) }
-      case .libraryUpdate:
+      case .libraryUpdate, .searchResult:
         return fetchPoster(for: id, size: size)
     }
   }

@@ -30,6 +30,7 @@ public protocol MovieDbClient {
 public enum PosterPurpose {
   case list
   case details
+  case searchResult
   case popularMovies
   case libraryUpdate
 }

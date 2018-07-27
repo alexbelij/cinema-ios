@@ -11,13 +11,22 @@ protocol SearchTmdbControllerDelegate: class {
 }
 
 class SearchTmdbController: UIViewController {
-  struct SearchResult {
+  class SearchResult {
     let movie: PartialMediaItem
+    var poster: Image
     let hasBeenAddedToLibrary: Bool
 
     init(_ movie: PartialMediaItem, hasBeenAddedToLibrary: Bool) {
       self.movie = movie
       self.hasBeenAddedToLibrary = hasBeenAddedToLibrary
+      self.poster = .unknown
+    }
+
+    enum Image {
+      case unknown
+      case loading
+      case available(UIImage)
+      case unavailable
     }
   }
 
@@ -25,30 +34,20 @@ class SearchTmdbController: UIViewController {
   private var currentSearch: DispatchWorkItem?
   private lazy var searchController: UISearchController = {
     let resultsController = GenericSearchResultsController<SearchTmdbController.SearchResult>()
-    resultsController.cellRegistration = {
-      $0.register(SearchTmdbSearchResultTableCell.self)
-      $0.register(SearchTmdbSearchResultAddedTableCell.self)
-    }
+    resultsController.cellRegistration = { $0.register(SearchTmdbSearchResultTableCell.self) }
     resultsController.canSelect = { !$0.hasBeenAddedToLibrary }
     resultsController.onSelection = { [weak self] selectedItem in
       guard let `self` = self else { return }
       self.delegate?.searchTmdbController(self, didSelectSearchResult: selectedItem)
     }
     resultsController.deselectImmediately = true
-    resultsController.cellConfiguration = { tableView, indexPath, searchResult in
-      if searchResult.hasBeenAddedToLibrary {
-        let cell: SearchTmdbSearchResultAddedTableCell = tableView.dequeueReusableCell(for: indexPath)
-        cell.configure(for: searchResult)
-        return cell
-      } else {
-        let cell: SearchTmdbSearchResultTableCell = tableView.dequeueReusableCell(for: indexPath)
-        cell.configure(for: searchResult)
-        return cell
-      }
+    resultsController.cellConfiguration = { [posterProvider] tableView, indexPath, listItem in
+      let cell: SearchTmdbSearchResultTableCell = tableView.dequeueReusableCell(for: indexPath)
+      cell.configure(for: listItem, posterProvider: posterProvider)
+      return cell
     }
     let searchController = UISearchController(searchResultsController: resultsController)
     searchController.searchResultsUpdater = self
-    searchController.hidesNavigationBarDuringPresentation = false
     searchController.searchBar.placeholder = NSLocalizedString("addItem.search.placeholder", comment: "")
     return searchController
   }()
@@ -72,6 +71,7 @@ class SearchTmdbController: UIViewController {
     }
   }
   @IBOutlet private weak var containerView: UIView!
+  var posterProvider: PosterProvider = EmptyPosterProvider()
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -110,27 +110,59 @@ extension SearchTmdbController: UISearchResultsUpdating {
 }
 
 class SearchTmdbSearchResultTableCell: UITableViewCell {
+  @IBOutlet private weak var posterView: UIImageView!
   @IBOutlet private weak var titleLabel: UILabel!
   @IBOutlet private weak var yearLabel: UILabel!
-
-  func configure(for searchResult: SearchTmdbController.SearchResult) {
-    titleLabel.text = searchResult.movie.title
-    if let releaseYear = searchResult.movie.releaseYear {
-      yearLabel.text = String(releaseYear)
-    }
-  }
-}
-
-class SearchTmdbSearchResultAddedTableCell: UITableViewCell {
-  @IBOutlet private weak var titleLabel: UILabel!
-  @IBOutlet private weak var yearLabel: UILabel!
+  private var workItem: DispatchWorkItem?
 
   override func awakeFromNib() {
     super.awakeFromNib()
-    self.tintColor = .disabledControlText
+    posterView.layer.borderColor = UIColor.posterBorder.cgColor
+    posterView.layer.borderWidth = 0.5
   }
 
-  func configure(for searchResult: SearchTmdbController.SearchResult) {
+  func configure(for searchResult: SearchTmdbController.SearchResult, posterProvider: PosterProvider) {
     titleLabel.text = searchResult.movie.title
+    if let year = searchResult.movie.releaseYear {
+      yearLabel.text = String(year)
+    }
+    accessoryType = searchResult.hasBeenAddedToLibrary ? .checkmark : .none
+    selectionStyle = searchResult.hasBeenAddedToLibrary ? .none : .default
+    configurePoster(for: searchResult, posterProvider: posterProvider)
+  }
+
+  private func configurePoster(for searchResult: SearchTmdbController.SearchResult, posterProvider: PosterProvider) {
+    switch searchResult.poster {
+      case .unknown:
+        posterView.image = #imageLiteral(resourceName: "GenericPoster")
+        searchResult.poster = .loading
+        let size = PosterSize(minWidth: Int(posterView.frame.size.width))
+        var workItem: DispatchWorkItem?
+        workItem = DispatchWorkItem {
+          let poster = posterProvider.poster(for: searchResult.movie.tmdbID, size: size, purpose: .searchResult)
+          DispatchQueue.main.async {
+            if let posterImage = poster {
+              searchResult.poster = .available(posterImage)
+            } else {
+              searchResult.poster = .unavailable
+            }
+            if !workItem!.isCancelled {
+              self.configurePoster(for: searchResult, posterProvider: posterProvider)
+            }
+          }
+        }
+        self.workItem = workItem
+        DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
+      case let .available(posterImage):
+        posterView.image = posterImage
+      case .loading, .unavailable:
+        posterView.image = #imageLiteral(resourceName: "GenericPoster")
+    }
+  }
+
+  override func prepareForReuse() {
+    super.prepareForReuse()
+    self.workItem?.cancel()
+    self.workItem = nil
   }
 }

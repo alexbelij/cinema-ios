@@ -35,6 +35,7 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
     popularMoviesController.posterProvider = MovieDbPosterProvider(movieDb)
 
     searchTmdbController.delegate = self
+    searchTmdbController.posterProvider = MovieDbPosterProvider(dependencies.movieDb)
     searchTmdbController.additionalViewController = popularMoviesController
   }
 }

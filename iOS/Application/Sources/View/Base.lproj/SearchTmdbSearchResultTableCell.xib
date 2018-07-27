@@ -5,44 +5,68 @@
     </device>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="SearchTmdbSearchResultTableCell" id="c9A-0S-8v7" customClass="SearchTmdbSearchResultTableCell" customModule="iOS_Application" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="SearchTmdbSearchResultTableCell" rowHeight="100" id="106-Pd-RkR" customClass="SearchTmdbSearchResultTableCell" customModule="iOS_Application" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="100"/>
             <autoresizingMask key="autoresizingMask"/>
-            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="c9A-0S-8v7" id="gF2-AW-k5o">
-                <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="106-Pd-RkR" id="hQy-AB-Blx">
+                <rect key="frame" x="0.0" y="0.0" width="375" height="99.5"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="2017" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NM2-le-fqa">
-                        <rect key="frame" x="321.5" y="11" width="37.5" height="21"/>
-                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                        <nil key="textColor"/>
-                        <nil key="highlightedColor"/>
-                    </label>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="A8T-uo-PyI">
-                        <rect key="frame" x="16" y="11" width="297.5" height="21"/>
-                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                        <nil key="textColor"/>
-                        <nil key="highlightedColor"/>
-                    </label>
+                    <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="14" translatesAutoresizingMaskIntoConstraints="NO" id="jRP-4J-IlI">
+                        <rect key="frame" x="16" y="0.0" width="343" height="99.5"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" verticalHuggingPriority="252" image="GenericPoster" translatesAutoresizingMaskIntoConstraints="NO" id="Tyk-DA-haW">
+                                <rect key="frame" x="0.0" y="5" width="60" height="90"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="Tyk-DA-haW" secondAttribute="height" multiplier="2:3" id="3wO-zG-lPu"/>
+                                    <constraint firstAttribute="height" constant="90" id="7ty-Mf-e1u"/>
+                                </constraints>
+                            </imageView>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="XcZ-xw-Djn">
+                                <rect key="frame" x="74" y="18.5" width="269" height="62.5"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A long title reaching into the second line" textAlignment="natural" lineBreakMode="middleTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="evR-Lm-hhz">
+                                        <rect key="frame" x="0.0" y="0.0" width="269" height="42.5"/>
+                                        <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="2018" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ccF-mc-Mne">
+                                        <rect key="frame" x="0.0" y="46.5" width="269" height="16"/>
+                                        <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
+                                        <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="height" priority="750" constant="99.5" id="gwq-Qq-gJr"/>
+                        </constraints>
+                    </stackView>
                 </subviews>
                 <constraints>
-                    <constraint firstItem="NM2-le-fqa" firstAttribute="centerY" secondItem="gF2-AW-k5o" secondAttribute="centerY" id="BoX-ji-bTt"/>
-                    <constraint firstItem="NM2-le-fqa" firstAttribute="leading" secondItem="A8T-uo-PyI" secondAttribute="trailing" constant="8" symbolic="YES" id="FYO-es-IgS"/>
-                    <constraint firstItem="A8T-uo-PyI" firstAttribute="centerY" secondItem="gF2-AW-k5o" secondAttribute="centerY" id="INn-4V-k71"/>
-                    <constraint firstAttribute="trailingMargin" secondItem="NM2-le-fqa" secondAttribute="trailing" id="aTc-TU-xTZ"/>
-                    <constraint firstItem="A8T-uo-PyI" firstAttribute="leading" secondItem="gF2-AW-k5o" secondAttribute="leadingMargin" id="v5c-T6-QT3"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="jRP-4J-IlI" secondAttribute="trailing" id="30u-7o-cdw"/>
+                    <constraint firstAttribute="bottom" secondItem="jRP-4J-IlI" secondAttribute="bottom" id="7ht-aR-qQF"/>
+                    <constraint firstItem="jRP-4J-IlI" firstAttribute="leading" secondItem="hQy-AB-Blx" secondAttribute="leadingMargin" id="8l9-AG-s75"/>
+                    <constraint firstItem="jRP-4J-IlI" firstAttribute="top" secondItem="hQy-AB-Blx" secondAttribute="top" id="TMZ-4d-rbH"/>
                 </constraints>
             </tableViewCellContentView>
             <connections>
-                <outlet property="titleLabel" destination="A8T-uo-PyI" id="pe1-hE-gEx"/>
-                <outlet property="yearLabel" destination="NM2-le-fqa" id="9w0-Jr-1pJ"/>
+                <outlet property="posterView" destination="Tyk-DA-haW" id="x86-dY-2gR"/>
+                <outlet property="titleLabel" destination="evR-Lm-hhz" id="1BP-zE-Zp8"/>
+                <outlet property="yearLabel" destination="ccF-mc-Mne" id="qpq-Cb-UUU"/>
             </connections>
         </tableViewCell>
     </objects>
+    <resources>
+        <image name="GenericPoster" width="92" height="138"/>
+    </resources>
 </document>
