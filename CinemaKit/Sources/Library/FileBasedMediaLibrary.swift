@@ -8,7 +8,7 @@ public class FileBasedMediaLibrary: MediaLibrary {
 
   private let dataFormat: DataFormat
 
-  private var mediaItems: [MediaItem]
+  private var mediaItems: [TmdbIdentifier: MediaItem]
 
   private var isPerformingBatchUpdates = false
 
@@ -22,12 +22,12 @@ public class FileBasedMediaLibrary: MediaLibrary {
         throw MediaLibraryError.storageError
       }
       do {
-        mediaItems = try dataFormat.deserialize(from: data)
+        mediaItems = Dictionary(uniqueKeysWithValues: try dataFormat.deserialize(from: data).map { ($0.tmdbID, $0) })
       } catch {
         throw MediaLibraryError.storageError
       }
     } else {
-      mediaItems = []
+      mediaItems = [:]
     }
   }
 
@@ -43,39 +43,38 @@ public class FileBasedMediaLibrary: MediaLibrary {
   }
 
   public func fetchAllMediaItems() -> [MediaItem] {
-    return mediaItems
+    return Array(mediaItems.values)
   }
 
   public func fetchMediaItems(for id: GenreIdentifier) -> [MediaItem] {
-    return mediaItems.filter { $0.genreIds.contains(id) }
+    return fetchAllMediaItems().filter { $0.genreIds.contains(id) }
   }
 
   public func containsMediaItem(with id: TmdbIdentifier) -> Bool {
-    return mediaItems.contains { item in item.tmdbID == id }
+    return mediaItems.keys.contains(id)
   }
 
   public func add(_ mediaItem: MediaItem) throws {
-    guard !mediaItems.contains(where: { $0.tmdbID == mediaItem.tmdbID }) else { return }
-    mediaItems.append(mediaItem)
+    guard !mediaItems.keys.contains(mediaItem.tmdbID) else { return }
+    mediaItems[mediaItem.tmdbID] = mediaItem
     pendingContentUpdate.addedItems.append(mediaItem)
     try saveData()
   }
 
   public func update(_ mediaItem: MediaItem) throws {
-    guard let index = mediaItems.index(where: { $0.tmdbID == mediaItem.tmdbID }) else {
+    guard mediaItems[mediaItem.tmdbID] != nil else {
       throw MediaLibraryError.itemDoesNotExist(id: mediaItem.tmdbID)
     }
-    mediaItems.remove(at: index)
-    mediaItems.insert(mediaItem, at: index)
+    mediaItems[mediaItem.tmdbID] = mediaItem
     pendingContentUpdate.updatedItems[mediaItem.tmdbID] = mediaItem
     try saveData()
   }
 
   public func remove(_ mediaItem: MediaItem) throws {
-    guard let index = mediaItems.index(where: { $0.tmdbID == mediaItem.tmdbID }) else {
+    guard mediaItems[mediaItem.tmdbID] != nil else {
       throw MediaLibraryError.itemDoesNotExist(id: mediaItem.tmdbID)
     }
-    mediaItems.remove(at: index)
+    mediaItems.removeValue(forKey: mediaItem.tmdbID)
     pendingContentUpdate.removedItems.append(mediaItem)
     try saveData()
   }
@@ -89,7 +88,7 @@ public class FileBasedMediaLibrary: MediaLibrary {
 
   private func saveData() throws {
     guard !isPerformingBatchUpdates else { return }
-    guard let data = try? dataFormat.serialize(mediaItems) else {
+    guard let data = try? dataFormat.serialize(Array(mediaItems.values)) else {
       throw MediaLibraryError.storageError
     }
     guard FileManager.default.createFile(atPath: url.path, contents: data) else {
