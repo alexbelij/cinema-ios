@@ -31,6 +31,7 @@ class SearchTmdbController: UIViewController {
   }
 
   private let searchQueue = DispatchQueue(label: "de.martinbauer.cinema.tmdb-search", qos: .userInitiated)
+  private let throttlingTime: DispatchTimeInterval = .milliseconds(250)
   private var currentSearch: DispatchWorkItem?
   private lazy var searchController: UISearchController = {
     let resultsController = GenericSearchResultsController<SearchTmdbController.SearchResult>()
@@ -104,7 +105,7 @@ extension SearchTmdbController: UISearchResultsUpdating {
           self.currentSearch = nil
         }
       }
-      searchQueue.async(execute: currentSearch!)
+      searchQueue.asyncAfter(deadline: .now() + throttlingTime, execute: currentSearch!)
     }
   }
 }
