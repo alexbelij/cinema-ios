@@ -7,27 +7,27 @@ protocol MovieListControllerDelegate: class {
   func movieListControllerDidDismiss(_ controller: MovieListController)
 }
 
-class MovieListItem {
-  let movie: MediaItem
-  var image: Image
-
-  init(movie: MediaItem) {
-    self.movie = movie
-    self.image = .unknown
-  }
-
-  enum Image {
-    case unknown
-    case loading
-    case available(UIImage)
-    case unavailable
-  }
-}
-
 class MovieListController: UITableViewController {
   enum ListData {
     case loading
     case available([MediaItem])
+  }
+
+  class ListItem {
+    let movie: MediaItem
+    var image: Image
+
+    init(movie: MediaItem) {
+      self.movie = movie
+      self.image = .unknown
+    }
+
+    enum Image {
+      case unknown
+      case loading
+      case available(UIImage)
+      case unavailable
+    }
   }
 
   weak var delegate: MovieListControllerDelegate?
@@ -202,7 +202,7 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
     for indexPath in indexPaths {
       let movieListItem = viewModel.item(at: indexPath)
-      if case MovieListItem.Image.unknown = movieListItem.image {
+      if case .unknown = movieListItem.image {
         movieListItem.image = .loading
         DispatchQueue.global(qos: .background).async {
           let poster = self.posterProvider.poster(for: movieListItem.movie.tmdbID, size: PosterSize(minWidth: 60))
@@ -263,10 +263,10 @@ private class ViewModel {
   private struct Section {
     let indexTitle: String?
     let title: String?
-    let rows: [MovieListItem]?
+    let rows: [MovieListController.ListItem]?
 
     // standard section
-    init(indexTitle: String, title: String, rows: [MovieListItem]) {
+    init(indexTitle: String, title: String, rows: [MovieListController.ListItem]) {
       self.indexTitle = indexTitle
       self.title = title
       self.rows = rows
@@ -280,7 +280,7 @@ private class ViewModel {
     }
 
     // appended at the end
-    init(title: String, rows: [MovieListItem]) {
+    init(title: String, rows: [MovieListController.ListItem]) {
       self.indexTitle = nil
       self.title = title
       self.rows = rows
@@ -301,7 +301,7 @@ private class ViewModel {
         sections.append(Section(indexTitle: indexTitle,
                                 title: sortingStrategy.sectionTitle(for: indexTitle),
                                 rows: sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
-                                                              .map { MovieListItem(movie: $0) }))
+                                                              .map { MovieListController.ListItem(movie: $0) }))
       } else {
         sections.append(Section(indexTitle: indexTitle))
       }
@@ -310,13 +310,13 @@ private class ViewModel {
     for indexTitle in additionalIndexTitles {
       sections.append(Section(title: sortingStrategy.sectionTitle(for: indexTitle),
                               rows: sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
-                                                            .map { MovieListItem(movie: $0) }))
+                                                            .map { MovieListController.ListItem(movie: $0) }))
     }
     self.sections = sections
     isEmpty = items.isEmpty
   }
 
-  func item(at indexPath: IndexPath) -> MovieListItem {
+  func item(at indexPath: IndexPath) -> MovieListController.ListItem {
     guard let item = sections[indexPath.section].rows?[indexPath.row] else {
       fatalError("accessing invalid row \(indexPath.row) in section \(indexPath)")
     }
@@ -346,8 +346,8 @@ private class ViewModel {
     return sections[index].rows == nil ? -1 : index
   }
 
-  func filtered(by filter: (MediaItem) -> Bool) -> [MovieListItem] {
-    let allItems: [MovieListItem] = sections.flatMap { $0.rows ?? [] }
+  func filtered(by filter: (MediaItem) -> Bool) -> [MovieListController.ListItem] {
+    let allItems: [MovieListController.ListItem] = sections.flatMap { $0.rows ?? [] }
     return allItems.filter { filter($0.movie) }
   }
 }
@@ -373,7 +373,7 @@ class MovieListTableCell: UITableViewCell {
     posterView.layer.borderWidth = 0.5
   }
 
-  func configure(for item: MovieListItem, posterProvider: PosterProvider) {
+  func configure(for item: MovieListController.ListItem, posterProvider: PosterProvider) {
     titleLabel.text = item.movie.fullTitle
     if let seconds = item.movie.runtime?.converted(to: UnitDuration.seconds).value {
       secondaryLabel.text = MovieListTableCell.runtimeFormatter.string(from: seconds)!
@@ -384,7 +384,7 @@ class MovieListTableCell: UITableViewCell {
     configurePoster(for: item, posterProvider: posterProvider)
   }
 
-  private func configurePoster(for item: MovieListItem, posterProvider: PosterProvider) {
+  private func configurePoster(for item: MovieListController.ListItem, posterProvider: PosterProvider) {
     switch item.image {
       case .unknown:
         configurePosterForUnknownOrLoadingImageState()

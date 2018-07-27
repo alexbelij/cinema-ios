@@ -7,7 +7,7 @@ class MovieListSearchResultsController: UITableViewController {
       reload()
     }
   }
-  var items = [MovieListItem]() {
+  var items = [MovieListController.ListItem]() {
     didSet {
       reload()
     }
