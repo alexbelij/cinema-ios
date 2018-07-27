@@ -115,27 +115,21 @@ public class TMDBSwiftWrapper: MovieDbClient {
   }
 
   public func searchMovies(searchText: String) -> [PartialMediaItem] {
-    var value = [PartialMediaItem]()
+    var movies = [PartialMediaItem]()
     waitUntil { done in
       SearchMDB.movie(query: searchText,
                       language: language.rawValue,
                       page: 1,
                       includeAdult: false,
                       year: nil,
-                      primaryReleaseYear: nil) { _, results in
-        if let results = results {
-          value = results.map {
-            let year = TMDBSwiftWrapper.releaseDateFormatter.date(from: $0.release_date!)
-                                                            .map { Calendar.current.component(.year, from: $0) }
-            return PartialMediaItem(tmdbID: TmdbIdentifier(rawValue: $0.id!),
-                                    title: $0.title!,
-                                    releaseYear: year)
-          }
+                      primaryReleaseYear: nil) { _, result in
+        if let result = result {
+          movies = result.map(self.toPartialMediaItem)
         }
         done()
       }
     }
-    return value
+    return movies
   }
 
   public func runtime(for id: TmdbIdentifier) -> Measurement<UnitDuration>? {
@@ -149,19 +143,19 @@ public class TMDBSwiftWrapper: MovieDbClient {
       self.waitUntil { done in
         MovieMDB.popular(language: self.language.rawValue, page: page) { _, result in
           if let result = result {
-            movies = result.map {
-              let year = TMDBSwiftWrapper.releaseDateFormatter.date(from: $0.release_date!)
-                                                              .map { Calendar.current.component(.year, from: $0) }
-              return PartialMediaItem(tmdbID: TmdbIdentifier(rawValue: $0.id!),
-                                      title: $0.title!,
-                                      releaseYear: year)
-            }
+            movies = result.map(self.toPartialMediaItem)
           }
           done()
         }
       }
       return movies.isEmpty ? nil : movies
     }
+  }
+
+  private func toPartialMediaItem(_ movieMDB: MovieMDB) -> PartialMediaItem {
+    let year = TMDBSwiftWrapper.releaseDateFormatter.date(from: movieMDB.release_date!)
+                                                    .map { Calendar.current.component(.year, from: $0) }
+    return PartialMediaItem(tmdbID: TmdbIdentifier(rawValue: movieMDB.id!), title: movieMDB.title!, releaseYear: year)
   }
 
   public func releaseDate(for id: TmdbIdentifier) -> Date? {
