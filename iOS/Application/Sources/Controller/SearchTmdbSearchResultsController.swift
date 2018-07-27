@@ -67,9 +67,8 @@ class SearchItemCell: UITableViewCell {
 
   func configure(for searchItem: PartialMediaItem) {
     titleLabel.text = searchItem.title
-    if let releaseDate = searchItem.releaseDate {
-      let calendar = Calendar.current
-      yearLabel.text = String(calendar.component(.year, from: releaseDate))
+    if let releaseYear = searchItem.releaseYear {
+      yearLabel.text = String(releaseYear)
     }
   }
 }

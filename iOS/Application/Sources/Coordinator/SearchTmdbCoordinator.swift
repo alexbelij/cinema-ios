@@ -90,7 +90,7 @@ extension SearchTmdbCoordinator {
       let fullItem = MediaItem(tmdbID: item.tmdbID,
                                title: item.title,
                                runtime: self.movieDb.runtime(for: item.tmdbID),
-                               releaseDate: item.releaseDate,
+                               releaseDate: self.movieDb.releaseDate(for: item.tmdbID),
                                diskType: diskType,
                                genreIds: self.movieDb.genreIds(for: item.tmdbID))
       do {

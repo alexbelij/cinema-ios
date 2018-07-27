@@ -69,7 +69,7 @@ public enum DiskType: String {
 public struct PartialMediaItem: Equatable, Hashable {
   public let tmdbID: TmdbIdentifier
   public let title: String
-  public let releaseDate: Date?
+  public let releaseYear: Int?
 
   public var hashValue: Int {
     return tmdbID.rawValue

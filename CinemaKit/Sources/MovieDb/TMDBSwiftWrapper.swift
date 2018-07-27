@@ -121,9 +121,11 @@ public class TMDBSwiftWrapper: MovieDbClient {
                       primaryReleaseYear: nil) { _, results in
         if let results = results {
           value = results.map {
-            PartialMediaItem(tmdbID: TmdbIdentifier(rawValue: $0.id!),
-                             title: $0.title!,
-                             releaseDate: TMDBSwiftWrapper.releaseDateFormatter.date(from: $0.release_date!))
+            let year = TMDBSwiftWrapper.releaseDateFormatter.date(from: $0.release_date!)
+                                                            .map { Calendar.current.component(.year, from: $0) }
+            return PartialMediaItem(tmdbID: TmdbIdentifier(rawValue: $0.id!),
+                                    title: $0.title!,
+                                    releaseYear: year)
           }
         }
         done()
@@ -144,9 +146,11 @@ public class TMDBSwiftWrapper: MovieDbClient {
         MovieMDB.popular(language: self.language.rawValue, page: page) { _, result in
           if let result = result {
             movies = result.map {
-              PartialMediaItem(tmdbID: TmdbIdentifier(rawValue: $0.id!),
-                               title: $0.title!,
-                               releaseDate: TMDBSwiftWrapper.releaseDateFormatter.date(from: $0.release_date!))
+              let year = TMDBSwiftWrapper.releaseDateFormatter.date(from: $0.release_date!)
+                                                              .map { Calendar.current.component(.year, from: $0) }
+              return PartialMediaItem(tmdbID: TmdbIdentifier(rawValue: $0.id!),
+                                      title: $0.title!,
+                                      releaseYear: year)
             }
           }
           done()
