@@ -12,11 +12,11 @@ protocol SearchTmdbControllerDelegate: class {
 
 class SearchTmdbController: UIViewController {
   struct SearchResult {
-    let item: PartialMediaItem
+    let movie: PartialMediaItem
     let hasBeenAddedToLibrary: Bool
 
-    init(item: PartialMediaItem, hasBeenAddedToLibrary: Bool) {
-      self.item = item
+    init(_ movie: PartialMediaItem, hasBeenAddedToLibrary: Bool) {
+      self.movie = movie
       self.hasBeenAddedToLibrary = hasBeenAddedToLibrary
     }
   }
@@ -24,13 +24,29 @@ class SearchTmdbController: UIViewController {
   private let searchQueue = DispatchQueue(label: "de.martinbauer.cinema.tmdb-search", qos: .userInitiated)
   private var currentSearch: DispatchWorkItem?
   private lazy var searchController: UISearchController = {
-    let resultsController = UIStoryboard.searchTmdb.instantiate(SearchTmdbSearchResultsController.self)
-    resultsController.selectionHandler = { [weak self] searchResult in
+    let resultsController = GenericSearchResultsController<SearchTmdbController.SearchResult>()
+    resultsController.cellRegistration = {
+      $0.register(SearchTmdbSearchResultTableCell.self)
+      $0.register(SearchTmdbSearchResultAddedTableCell.self)
+    }
+    resultsController.canSelect = { !$0.hasBeenAddedToLibrary }
+    resultsController.onSelection = { [weak self] selectedItem in
       guard let `self` = self else { return }
-      self.delegate?.searchTmdbController(self, didSelectSearchResult: searchResult)
+      self.delegate?.searchTmdbController(self, didSelectSearchResult: selectedItem)
+    }
+    resultsController.deselectImmediately = true
+    resultsController.cellConfiguration = { tableView, indexPath, searchResult in
+      if searchResult.hasBeenAddedToLibrary {
+        let cell: SearchTmdbSearchResultAddedTableCell = tableView.dequeueReusableCell(for: indexPath)
+        cell.configure(for: searchResult)
+        return cell
+      } else {
+        let cell: SearchTmdbSearchResultTableCell = tableView.dequeueReusableCell(for: indexPath)
+        cell.configure(for: searchResult)
+        return cell
+      }
     }
     let searchController = UISearchController(searchResultsController: resultsController)
-    searchController.delegate = self
     searchController.searchResultsUpdater = self
     searchController.hidesNavigationBarDuringPresentation = false
     searchController.searchBar.placeholder = NSLocalizedString("addItem.search.placeholder", comment: "")
@@ -71,26 +87,50 @@ class SearchTmdbController: UIViewController {
   }
 }
 
-extension SearchTmdbController: UISearchResultsUpdating, UISearchControllerDelegate {
+extension SearchTmdbController: UISearchResultsUpdating {
   func updateSearchResults(for searchController: UISearchController) {
     guard searchController.isActive else { return }
-    guard let resultsController = searchController.searchResultsController as? SearchTmdbSearchResultsController else {
+    guard let resultsController = searchController.searchResultsController
+        as? GenericSearchResultsController<SearchTmdbController.SearchResult> else {
       preconditionFailure("unexpected SearchResultsController class")
     }
+    currentSearch?.cancel()
     let searchText = searchController.searchBar.text!
     if !searchText.isEmpty {
-      if let previousSearch = self.currentSearch {
-        previousSearch.cancel()
-      }
-      self.currentSearch = DispatchWorkItem {
+      currentSearch = DispatchWorkItem {
         let searchResults = self.delegate?.searchTmdbController(self, searchResultsFor: searchText) ?? []
         DispatchQueue.main.sync {
-          resultsController.searchText = searchText
-          resultsController.searchResults = searchResults
+          resultsController.reload(searchText: searchText, searchResults: searchResults)
           self.currentSearch = nil
         }
       }
-      self.searchQueue.async(execute: self.currentSearch!)
+      searchQueue.async(execute: currentSearch!)
     }
+  }
+}
+
+class SearchTmdbSearchResultTableCell: UITableViewCell {
+  @IBOutlet private weak var titleLabel: UILabel!
+  @IBOutlet private weak var yearLabel: UILabel!
+
+  func configure(for searchResult: SearchTmdbController.SearchResult) {
+    titleLabel.text = searchResult.movie.title
+    if let releaseYear = searchResult.movie.releaseYear {
+      yearLabel.text = String(releaseYear)
+    }
+  }
+}
+
+class SearchTmdbSearchResultAddedTableCell: UITableViewCell {
+  @IBOutlet private weak var titleLabel: UILabel!
+  @IBOutlet private weak var yearLabel: UILabel!
+
+  override func awakeFromNib() {
+    super.awakeFromNib()
+    self.tintColor = .disabledControlText
+  }
+
+  func configure(for searchResult: SearchTmdbController.SearchResult) {
+    titleLabel.text = searchResult.movie.title
   }
 }

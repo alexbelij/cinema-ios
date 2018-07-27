@@ -17,7 +17,7 @@ class MovieListController: UITableViewController {
     let movie: MediaItem
     var image: Image
 
-    init(movie: MediaItem) {
+    init(_ movie: MediaItem) {
       self.movie = movie
       self.image = .unknown
     }
@@ -42,12 +42,16 @@ class MovieListController: UITableViewController {
 
   private let titleSortingStrategy = SortDescriptor.title.makeTableViewStrategy()
   private lazy var searchController: UISearchController = {
-    let resultsController = storyboard!.instantiate(MovieListSearchResultsController.self)
-    resultsController.onSelection = { [weak self] selectedItem in
-      guard let `self` = self else { return }
-      self.delegate?.movieListController(self, didSelect: selectedItem)
+    let resultsController = GenericSearchResultsController<MovieListController.ListItem>()
+    resultsController.cellRegistration = { $0.register(MovieListListItemTableCell.self) }
+    resultsController.onSelection = { [delegate] selectedItem in
+      delegate?.movieListController(self, didSelect: selectedItem.movie)
     }
-    resultsController.posterProvider = posterProvider
+    resultsController.cellConfiguration = { [posterProvider] tableView, indexPath, listItem in
+      let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
+      cell.configure(for: listItem, posterProvider: posterProvider)
+      return cell
+    }
     let searchController = UISearchController(searchResultsController: resultsController)
     searchController.searchResultsUpdater = self
     searchController.dimsBackgroundDuringPresentation = false
@@ -69,6 +73,7 @@ class MovieListController: UITableViewController {
 extension MovieListController {
   override func viewDidLoad() {
     super.viewDidLoad()
+    tableView.register(MovieListListItemTableCell.self)
     tableView.prefetchDataSource = self
     tableView.sectionIndexBackgroundColor = UIColor.clear
     definesPresentationContext = true
@@ -173,7 +178,7 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell: MovieListTableCell = tableView.dequeueReusableCell(for: indexPath)
+    let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
     cell.configure(for: viewModel.item(at: indexPath), posterProvider: posterProvider)
     return cell
   }
@@ -211,7 +216,7 @@ extension MovieListController: UITableViewDataSourcePrefetching {
           DispatchQueue.main.async {
             if let posterImage = poster {
               movieListItem.image = .available(posterImage)
-              if let cell = tableView.cellForRow(at: indexPath) as? MovieListTableCell {
+              if let cell = tableView.cellForRow(at: indexPath) as? MovieListListItemTableCell {
                 cell.configure(for: movieListItem, posterProvider: self.posterProvider)
               }
             } else {
@@ -229,14 +234,15 @@ extension MovieListController: UITableViewDataSourcePrefetching {
 extension MovieListController: UISearchResultsUpdating {
   func updateSearchResults(for searchController: UISearchController) {
     guard searchController.isActive else { return }
-    guard let resultsController = searchController.searchResultsController as? MovieListSearchResultsController else {
+    guard let resultsController = searchController.searchResultsController
+        as? GenericSearchResultsController<MovieListController.ListItem> else {
       preconditionFailure("unexpected SearchResultsController class")
     }
     let searchText = searchController.searchBar.text ?? ""
     let lowercasedSearchText = searchText.lowercased()
-    resultsController.searchText = searchText
-    resultsController.items = viewModel.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
-                                       .sorted { titleSortingStrategy.itemSorting(left: $0.movie, right: $1.movie) }
+    let searchResults = self.viewModel.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
+                                      .sorted { titleSortingStrategy.itemSorting(left: $0.movie, right: $1.movie) }
+    resultsController.reload(searchText: searchText, searchResults: searchResults)
   }
 }
 
@@ -303,7 +309,7 @@ private class ViewModel {
         sections.append(Section(indexTitle: indexTitle,
                                 title: sortingStrategy.sectionTitle(for: indexTitle),
                                 rows: sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
-                                                              .map { MovieListController.ListItem(movie: $0) }))
+                                                              .map(MovieListController.ListItem.init)))
       } else {
         sections.append(Section(indexTitle: indexTitle))
       }
@@ -312,7 +318,7 @@ private class ViewModel {
     for indexTitle in additionalIndexTitles {
       sections.append(Section(title: sortingStrategy.sectionTitle(for: indexTitle),
                               rows: sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
-                                                            .map { MovieListController.ListItem(movie: $0) }))
+                                                            .map(MovieListController.ListItem.init)))
     }
     self.sections = sections
     isEmpty = items.isEmpty
@@ -354,7 +360,7 @@ private class ViewModel {
   }
 }
 
-class MovieListTableCell: UITableViewCell {
+class MovieListListItemTableCell: UITableViewCell {
   private static let runtimeFormatter: DateComponentsFormatter = {
     let formatter = DateComponentsFormatter()
     formatter.unitsStyle = .full
@@ -378,7 +384,7 @@ class MovieListTableCell: UITableViewCell {
   func configure(for item: MovieListController.ListItem, posterProvider: PosterProvider) {
     titleLabel.text = item.movie.fullTitle
     if let seconds = item.movie.runtime?.converted(to: UnitDuration.seconds).value {
-      secondaryLabel.text = MovieListTableCell.runtimeFormatter.string(from: seconds)!
+      secondaryLabel.text = MovieListListItemTableCell.runtimeFormatter.string(from: seconds)!
     } else {
       secondaryLabel.text = NSLocalizedString("details.missing.runtime", comment: "")
     }
@@ -389,7 +395,7 @@ class MovieListTableCell: UITableViewCell {
   private func configurePoster(for item: MovieListController.ListItem, posterProvider: PosterProvider) {
     switch item.image {
       case .unknown:
-        configurePosterForUnknownOrLoadingImageState()
+        posterView.image = #imageLiteral(resourceName: "GenericPoster")
         item.image = .loading
         let size = PosterSize(minWidth: Int(posterView.frame.size.width))
         var workItem: DispatchWorkItem?
@@ -408,17 +414,11 @@ class MovieListTableCell: UITableViewCell {
         }
         self.workItem = workItem
         DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
-      case .loading:
-        configurePosterForUnknownOrLoadingImageState()
       case let .available(posterImage):
         posterView.image = posterImage
-      case .unavailable:
+      case .loading, .unavailable:
         posterView.image = #imageLiteral(resourceName: "GenericPoster")
     }
-  }
-
-  private func configurePosterForUnknownOrLoadingImageState() {
-    posterView.image = #imageLiteral(resourceName: "GenericPoster")
   }
 
   override func prepareForReuse() {

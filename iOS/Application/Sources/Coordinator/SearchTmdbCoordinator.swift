@@ -43,14 +43,14 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
   func searchTmdbController(_ controller: SearchTmdbController,
                             searchResultsFor searchText: String) -> [SearchTmdbController.SearchResult] {
     return self.movieDb.searchMovies(searchText: searchText).map { movie in
-      SearchTmdbController.SearchResult(item: movie,
+      SearchTmdbController.SearchResult(movie,
                                         hasBeenAddedToLibrary: self.library.containsMediaItem(with: movie.tmdbID))
     }
   }
 
   func searchTmdbController(_ controller: SearchTmdbController,
                             didSelectSearchResult searchResult: SearchTmdbController.SearchResult) {
-    self.showAddAlert(for: searchResult.item, over: controller)
+    self.showAddAlert(for: searchResult.movie, over: controller)
   }
 }
 

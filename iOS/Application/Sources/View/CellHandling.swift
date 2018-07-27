@@ -1,5 +1,12 @@
 import UIKit
 
+extension UITableView {
+  public func register<CellType: UITableViewCell>(_ cellType: CellType.Type, bundle: Bundle? = nil) {
+    let identifier = String(describing: CellType.self)
+    register(UINib(nibName: identifier, bundle: bundle), forCellReuseIdentifier: identifier)
+  }
+}
+
 public protocol TableViewDequeuing {
   func dequeueReusableCell<CellType: UITableViewCell>(for indexPath: IndexPath) -> CellType
   func dequeueReusableHeaderFooterView<ViewType: UITableViewHeaderFooterView>() -> ViewType
@@ -20,6 +27,13 @@ extension UITableView: TableViewDequeuing {
       preconditionFailure("view with identifier \(identifier) is not of type \(ViewType.self)")
     }
     return cell
+  }
+}
+
+extension UICollectionView {
+  public func register<CellType: UICollectionViewCell>(_ cellType: CellType.Type, bundle: Bundle? = nil) {
+    let identifier = String(describing: CellType.self)
+    register(UINib(nibName: identifier, bundle: bundle), forCellWithReuseIdentifier: identifier)
   }
 }
 
