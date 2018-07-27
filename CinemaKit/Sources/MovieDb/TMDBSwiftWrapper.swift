@@ -37,21 +37,19 @@ public class TMDBSwiftWrapper: MovieDbClient {
 
   private func fetchPoster(for id: TmdbIdentifier, size: PosterSize) -> UIImage? {
     guard let posterPath = movie(for: id)?.poster_path else { return nil }
-    let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
-    guard let data = try? Data(contentsOf: URL(string: path)!) else { return nil }
-    return UIImage(data: data)
+    return fetchImage(at: posterPath, size: size.rawValue)
   }
 
   public func backdrop(for id: TmdbIdentifier, size: BackdropSize) -> UIImage? {
     return cache.backdrop(for: "\(id)-\(language)-\(size)") {
-      if let backdropPath = movie(for: id)?.backdrop_path {
-        let path = TMDBSwiftWrapper.baseUrl + size.rawValue + backdropPath
-        if let data = try? Data(contentsOf: URL(string: path)!) {
-          return UIImage(data: data)
-        }
-      }
-      return nil
+      guard let backdropPath = movie(for: id)?.backdrop_path else { return nil }
+      return fetchImage(at: backdropPath, size: size.rawValue)
     }
+  }
+
+  private func fetchImage(at path: String, size: String) -> UIImage? {
+    guard let data = try? Data(contentsOf: URL(string: TMDBSwiftWrapper.baseUrl + size + path)!) else { return nil }
+    return UIImage(data: data)
   }
 
   public func overview(for id: TmdbIdentifier) -> String? {
