@@ -43,7 +43,8 @@ class MovieListController: UITableViewController {
   private let titleSortingStrategy = SortDescriptor.title.makeTableViewStrategy()
   private lazy var searchController: UISearchController = {
     let resultsController = GenericSearchResultsController<MovieListController.ListItem>(
-        cell: MovieListListItemTableCell.self)
+        cell: MovieListListItemTableCell.self,
+        estimatedRowHeight: MovieListListItemTableCell.rowHeight)
     resultsController.onSelection = { [delegate] selectedItem in
       delegate?.movieListController(self, didSelect: selectedItem.movie)
     }
@@ -74,6 +75,7 @@ extension MovieListController {
   override func viewDidLoad() {
     super.viewDidLoad()
     tableView.register(MovieListListItemTableCell.self)
+    tableView.estimatedRowHeight = MovieListListItemTableCell.rowHeight
     tableView.prefetchDataSource = self
     tableView.sectionIndexBackgroundColor = UIColor.clear
     definesPresentationContext = true
@@ -361,6 +363,7 @@ private class ViewModel {
 }
 
 class MovieListListItemTableCell: UITableViewCell {
+  static let rowHeight: CGFloat = 100
   private static let runtimeFormatter: DateComponentsFormatter = {
     let formatter = DateComponentsFormatter()
     formatter.unitsStyle = .full

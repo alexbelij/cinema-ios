@@ -35,7 +35,8 @@ class SearchTmdbController: UIViewController {
   private var currentSearch: DispatchWorkItem?
   private lazy var searchController: UISearchController = {
     let resultsController = GenericSearchResultsController<SearchTmdbController.SearchResult>(
-        cell: SearchTmdbSearchResultTableCell.self)
+        cell: SearchTmdbSearchResultTableCell.self,
+        estimatedRowHeight: SearchTmdbSearchResultTableCell.rowHeight)
     resultsController.canSelect = { !$0.hasBeenAddedToLibrary }
     resultsController.onSelection = { [weak self] selectedItem in
       guard let `self` = self else { return }
@@ -117,6 +118,7 @@ extension SearchTmdbController: UISearchResultsUpdating {
 }
 
 class SearchTmdbSearchResultTableCell: UITableViewCell {
+  static let rowHeight: CGFloat = 100
   @IBOutlet private weak var posterView: UIImageView!
   @IBOutlet private weak var titleLabel: UILabel!
   @IBOutlet private weak var yearLabel: UILabel!

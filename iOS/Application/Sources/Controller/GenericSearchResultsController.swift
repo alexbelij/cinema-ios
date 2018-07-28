@@ -11,9 +11,10 @@ class GenericSearchResultsController<Item>: UITableViewController {
   private(set) var items = [Item]()
   private lazy var emptyView = GenericEmptyView()
 
-  init<CellType: UITableViewCell>(cell cellType: CellType.Type, bundle: Bundle? = nil) {
+  init<CellType: UITableViewCell>(cell cellType: CellType.Type, bundle: Bundle? = nil, estimatedRowHeight: CGFloat) {
     self.tableViewInitialization = { tableView in
       tableView.register(cellType, bundle: bundle)
+      tableView.estimatedRowHeight = estimatedRowHeight
     }
     super.init(nibName: nil, bundle: nil)
   }
@@ -25,7 +26,6 @@ class GenericSearchResultsController<Item>: UITableViewController {
   func reload(searchText: String?, searchResults: [Item]) {
     self.searchText = searchText
     self.items = searchResults
-    super.tableView.reloadData()
     if let searchText = searchText {
       if self.items.isEmpty {
         emptyView.configure(
@@ -38,12 +38,15 @@ class GenericSearchResultsController<Item>: UITableViewController {
       } else {
         super.tableView.backgroundView = nil
         super.tableView.separatorStyle = .singleLine
+        let offset = -super.tableView.safeAreaInsets.top
+        super.tableView.contentOffset = CGPoint(x: 0, y: offset)
       }
     } else {
       super.tableView.backgroundView = GenericEmptyView(accessory: .activityIndicator,
                                                         description: .basic(NSLocalizedString("loading", comment: "")))
       super.tableView.separatorStyle = .none
     }
+    super.tableView.reloadData()
   }
 
 // MARK: - View Controller Lifecycle
