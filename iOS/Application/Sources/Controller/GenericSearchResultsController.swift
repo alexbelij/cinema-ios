@@ -2,7 +2,7 @@ import CinemaKit
 import UIKit
 
 class GenericSearchResultsController<Item>: UITableViewController {
-  var cellRegistration: ((UITableView) -> Void)?
+  private let tableViewInitialization: ((UITableView) -> Void)
   var cellConfiguration: ((UITableView, IndexPath, Item) -> UITableViewCell)?
   var canSelect: ((Item) -> Bool)?
   var onSelection: ((Item) -> Void)?
@@ -11,7 +11,8 @@ class GenericSearchResultsController<Item>: UITableViewController {
   private(set) var items = [Item]()
   private lazy var emptyView = GenericEmptyView()
 
-  init() {
+  init(tableViewInitialization: @escaping (UITableView) -> Void) {
+    self.tableViewInitialization = tableViewInitialization
     super.init(nibName: nil, bundle: nil)
   }
 
@@ -48,7 +49,7 @@ class GenericSearchResultsController<Item>: UITableViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     super.tableView.tableFooterView = UIView()
-    cellRegistration?(super.tableView)
+    tableViewInitialization(super.tableView)
   }
 
 // MARK: - Table View

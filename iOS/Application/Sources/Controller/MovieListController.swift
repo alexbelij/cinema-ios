@@ -42,8 +42,9 @@ class MovieListController: UITableViewController {
 
   private let titleSortingStrategy = SortDescriptor.title.makeTableViewStrategy()
   private lazy var searchController: UISearchController = {
-    let resultsController = GenericSearchResultsController<MovieListController.ListItem>()
-    resultsController.cellRegistration = { $0.register(MovieListListItemTableCell.self) }
+    let resultsController = GenericSearchResultsController<MovieListController.ListItem> { tableView in
+      tableView.register(MovieListListItemTableCell.self)
+    }
     resultsController.onSelection = { [delegate] selectedItem in
       delegate?.movieListController(self, didSelect: selectedItem.movie)
     }

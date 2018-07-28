@@ -34,8 +34,9 @@ class SearchTmdbController: UIViewController {
   private let throttlingTime: DispatchTimeInterval = .milliseconds(250)
   private var currentSearch: DispatchWorkItem?
   private lazy var searchController: UISearchController = {
-    let resultsController = GenericSearchResultsController<SearchTmdbController.SearchResult>()
-    resultsController.cellRegistration = { $0.register(SearchTmdbSearchResultTableCell.self) }
+    let resultsController = GenericSearchResultsController<SearchTmdbController.SearchResult> { tableView in
+      tableView.register(SearchTmdbSearchResultTableCell.self)
+    }
     resultsController.canSelect = { !$0.hasBeenAddedToLibrary }
     resultsController.onSelection = { [weak self] selectedItem in
       guard let `self` = self else { return }
