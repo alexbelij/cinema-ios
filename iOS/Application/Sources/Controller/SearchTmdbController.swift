@@ -34,17 +34,16 @@ class SearchTmdbController: UIViewController {
   private let throttlingTime: DispatchTimeInterval = .milliseconds(250)
   private var currentSearch: DispatchWorkItem?
   private lazy var searchController: UISearchController = {
-    let resultsController = GenericSearchResultsController<SearchTmdbController.SearchResult> { tableView in
-      tableView.register(SearchTmdbSearchResultTableCell.self)
-    }
+    let resultsController = GenericSearchResultsController<SearchTmdbController.SearchResult>(
+        cell: SearchTmdbSearchResultTableCell.self)
     resultsController.canSelect = { !$0.hasBeenAddedToLibrary }
     resultsController.onSelection = { [weak self] selectedItem in
       guard let `self` = self else { return }
       self.delegate?.searchTmdbController(self, didSelectSearchResult: selectedItem)
     }
     resultsController.deselectImmediately = true
-    resultsController.cellConfiguration = { [posterProvider] tableView, indexPath, listItem in
-      let cell: SearchTmdbSearchResultTableCell = tableView.dequeueReusableCell(for: indexPath)
+    resultsController.cellConfiguration = { [posterProvider] dequeuing, indexPath, listItem in
+      let cell: SearchTmdbSearchResultTableCell = dequeuing.dequeueReusableCell(for: indexPath)
       cell.configure(for: listItem, posterProvider: posterProvider)
       return cell
     }

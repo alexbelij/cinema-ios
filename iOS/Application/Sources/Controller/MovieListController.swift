@@ -42,14 +42,13 @@ class MovieListController: UITableViewController {
 
   private let titleSortingStrategy = SortDescriptor.title.makeTableViewStrategy()
   private lazy var searchController: UISearchController = {
-    let resultsController = GenericSearchResultsController<MovieListController.ListItem> { tableView in
-      tableView.register(MovieListListItemTableCell.self)
-    }
+    let resultsController = GenericSearchResultsController<MovieListController.ListItem>(
+        cell: MovieListListItemTableCell.self)
     resultsController.onSelection = { [delegate] selectedItem in
       delegate?.movieListController(self, didSelect: selectedItem.movie)
     }
-    resultsController.cellConfiguration = { [posterProvider] tableView, indexPath, listItem in
-      let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
+    resultsController.cellConfiguration = { [posterProvider] dequeuing, indexPath, listItem in
+      let cell: MovieListListItemTableCell = dequeuing.dequeueReusableCell(for: indexPath)
       cell.configure(for: listItem, posterProvider: posterProvider)
       return cell
     }

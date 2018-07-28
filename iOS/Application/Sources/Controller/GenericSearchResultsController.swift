@@ -2,17 +2,19 @@ import CinemaKit
 import UIKit
 
 class GenericSearchResultsController<Item>: UITableViewController {
-  private let tableViewInitialization: ((UITableView) -> Void)
-  var cellConfiguration: ((UITableView, IndexPath, Item) -> UITableViewCell)?
+  var cellConfiguration: ((TableViewDequeuing, IndexPath, Item) -> UITableViewCell)?
   var canSelect: ((Item) -> Bool)?
   var onSelection: ((Item) -> Void)?
   var deselectImmediately: Bool = false
+  private let tableViewInitialization: ((UITableView) -> Void)
   private(set) var searchText: String?
   private(set) var items = [Item]()
   private lazy var emptyView = GenericEmptyView()
 
-  init(tableViewInitialization: @escaping (UITableView) -> Void) {
-    self.tableViewInitialization = tableViewInitialization
+  init<CellType: UITableViewCell>(cell cellType: CellType.Type, bundle: Bundle? = nil) {
+    self.tableViewInitialization = { tableView in
+      tableView.register(cellType, bundle: bundle)
+    }
     super.init(nibName: nil, bundle: nil)
   }
 
