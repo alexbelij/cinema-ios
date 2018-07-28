@@ -14,10 +14,7 @@
 "dataUpdate.start" = "Start Update";
 "dataUpdate.succeeded" = "Update completed";
 "dataUpdate.succeeded.description" = "Your library has been updated successfully.";
-"details.missing.certification" = "No certification available.";
-"details.missing.genre" = "No genre available.";
 "details.missing.overview" = "No overview available.";
-"details.missing.releaseDate" = "No release date available.";
 "details.missing.runtime" = "No runtime available.";
 "details.storyline" = "Story Line";
 "discard" = "Discard";

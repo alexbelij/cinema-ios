@@ -14,10 +14,7 @@
 "dataUpdate.start" = "Aktualisierung starten";
 "dataUpdate.succeeded" = "Update abgeschlossen";
 "dataUpdate.succeeded.description" = "Deine Mediathek wurde erfolgreich aktualisiert.";
-"details.missing.certification" = "Keine Altersfreigabe verfügbar.";
-"details.missing.genre" = "Kein Genre verfügbar.";
 "details.missing.overview" = "Keine Beschreibung vorhanden.";
-"details.missing.releaseDate" = "Kein Erscheinungsdatum verfügbar.";
 "details.missing.runtime" = "Keine Laufzeit verfügbar.";
 "details.storyline" = "Inhalt";
 "discard" = "Verwerfen";

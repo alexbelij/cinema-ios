@@ -40,13 +40,15 @@ class ItemDetailsController: UIViewController {
       self.loadViewIfNeeded()
       let names = self.genreIds.compactMap(L10n.genreName).prefix(4)
       if names.isEmpty {
-        self.genreLabel.text = NSLocalizedString("details.missing.genre", comment: "")
+        self.genreStackView.isHidden = true
       } else {
         self.genreLabel.text = names.joined(separator: ", ")
+        self.genreStackView.isHidden = false
       }
     }
   }
   @IBOutlet private weak var genreLabel: UILabel!
+  @IBOutlet private weak var genreStackView: UIStackView!
 
   private static let runtimeFormatter: DateComponentsFormatter = {
     let formatter = DateComponentsFormatter()
@@ -61,12 +63,14 @@ class ItemDetailsController: UIViewController {
       self.loadViewIfNeeded()
       if let seconds = self.runtime?.converted(to: UnitDuration.seconds).value {
         runtimeLabel.text = ItemDetailsController.runtimeFormatter.string(from: seconds)!
+        runtimeStackView.isHidden = false
       } else {
-        runtimeLabel.text = NSLocalizedString("details.missing.runtime", comment: "")
+        runtimeStackView.isHidden = true
       }
     }
   }
   @IBOutlet private weak var runtimeLabel: UILabel!
+  @IBOutlet private weak var runtimeStackView: UIStackView!
 
   private static let releaseDateFormatter: DateFormatter = {
     let formatter = DateFormatter()
@@ -80,36 +84,35 @@ class ItemDetailsController: UIViewController {
       self.loadViewIfNeeded()
       if let releaseDate = self.releaseDate {
         releaseDateLabel.text = ItemDetailsController.releaseDateFormatter.string(from: releaseDate)
+        releaseDateStackView.isHidden = false
       } else {
-        releaseDateLabel.text = NSLocalizedString("details.missing.releaseDate", comment: "")
+        releaseDateStackView.isHidden = true
       }
     }
   }
   @IBOutlet private weak var releaseDateLabel: UILabel!
+  @IBOutlet private weak var releaseDateStackView: UIStackView!
 
   var certification: RemoteProperty<String> = .loading {
     didSet {
       self.loadViewIfNeeded()
+      self.certificationStackView.isHidden = true
       switch certification {
-        case .loading:
-          self.certificationLabel.text = NSLocalizedString("loading", comment: "")
-        case .unavailable:
-          self.certificationLabel.text = NSLocalizedString("details.missing.certification", comment: "")
+        case .loading, .unavailable: break
         case let .available(certification):
           self.certificationLabel.text = certification
+          self.certificationStackView.isHidden = false
       }
     }
   }
   @IBOutlet private weak var certificationLabel: UILabel!
+  @IBOutlet private weak var certificationStackView: UIStackView!
 
   var diskType: DiskType? {
     didSet {
       self.loadViewIfNeeded()
-      if let diskType = self.diskType {
-        diskLabel.text = diskType.localizedName
-      } else {
-        diskLabel.text = "[MISSING]"
-      }
+      guard let diskType = self.diskType else { return }
+      diskLabel.text = diskType.localizedName
     }
   }
   @IBOutlet private weak var diskLabel: UILabel!

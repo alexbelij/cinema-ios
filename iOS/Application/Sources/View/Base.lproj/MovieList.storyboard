@@ -189,12 +189,16 @@
                     <toolbarItems/>
                     <connections>
                         <outlet property="certificationLabel" destination="1oE-tC-Pti" id="5qY-AG-Xbf"/>
+                        <outlet property="certificationStackView" destination="sku-DX-ihc" id="r2O-tt-wtp"/>
                         <outlet property="diskLabel" destination="lu0-Yv-0Bi" id="3cW-0q-2wX"/>
                         <outlet property="genreLabel" destination="Di6-NW-eKI" id="a2U-Hw-jpV"/>
+                        <outlet property="genreStackView" destination="Re7-tf-LeB" id="b5S-pf-5Vy"/>
                         <outlet property="overviewLabel" destination="ziP-Fj-Hsh" id="doj-fD-0Yu"/>
                         <outlet property="posterView" destination="G5A-3g-BU1" id="VUl-lS-EQT"/>
                         <outlet property="releaseDateLabel" destination="swd-vr-IQS" id="hiG-oH-rYP"/>
+                        <outlet property="releaseDateStackView" destination="2tX-G0-NnM" id="5lY-to-2MI"/>
                         <outlet property="runtimeLabel" destination="5gG-ms-RwD" id="SMu-2V-5k6"/>
+                        <outlet property="runtimeStackView" destination="EF9-Rp-F0c" id="AiV-bG-zUA"/>
                         <outlet property="storyLineLabel" destination="ZzR-r9-l2a" id="6Kh-Gn-l36"/>
                         <outlet property="titleLabel" destination="gZA-AT-KDO" id="Roc-CX-GKg"/>
                     </connections>
