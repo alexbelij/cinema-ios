@@ -1,5 +1,5 @@
 "addItem.alert.howToAdd.title" = "How do you want to add the movie?";
-"addItem.failed" = "Oh, snap!";
+"addItem.failed" = "“%@” could not be added to your library!";
 "addItem.search.placeholder" = "Enter the movie title…";
 "addItem.title" = "Add Movie";
 "cancel" = "Cancel";
@@ -16,13 +16,15 @@
 "details.storyline" = "Story Line";
 "discard" = "Discard";
 "edit.deleteMovie" = "Delete Movie";
+"edit.failed" = "Your edits could not be saved!";
 "edit.noTitleAlert" = "A movie must have a title.";
-"edit.rejected.title" = "Oh, snap!";
 "edit.sectionHeader.subtitle" = "Subtitle (optional)";
 "edit.sectionHeader.title" = "Title";
 "error.genericError" = "An unknown error occurred.";
+"error.genericTitle" = "Oh, snap!";
 "error.invalidDataFormat" = "The file can't be opened. Home-Cinema couldn't read the file.";
 "error.storageError" = "The library could not be saved.";
+"error.tryAgain" = "Please try again.";
 "error.unsupportedSchemaVersion" = "To import this file, you'll need a newer version of Home-Cinema.";
 "genre.action" = "Action";
 "genre.adventure" = "Adventure";
@@ -44,7 +46,6 @@
 "genre.war" = "War";
 "genre.western" = "Western";
 "genres" = "Genres";
-"import.failed" = "Oh, snap!";
 "import.succeeded" = "Import Complete";
 "import.progress" = "Importing into your Library";
 "library" = "Library";

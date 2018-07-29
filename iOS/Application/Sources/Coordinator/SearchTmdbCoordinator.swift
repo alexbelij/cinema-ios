@@ -64,17 +64,17 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
       }
       DispatchQueue.global(qos: .userInitiated).async {
         self.add(model.movie, withDiskType: diskType) { error in
-          if let error = error {
-            DispatchQueue.main.async {
-              model.state = .new
-              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
-              self.showAddingFailedAlert(for: error)
-            }
-          } else {
+          if error == nil {
             DispatchQueue.main.async {
               model.state = .addedToLibrary
               controller.reloadRow(forMovieWithId: model.movie.tmdbID)
               self.popularMoviesController.removeMovie(withId: model.movie.tmdbID)
+            }
+          } else {
+            DispatchQueue.main.async {
+              model.state = .new
+              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+              self.showAddingFailedAlert(for: model.movie)
             }
           }
         }
@@ -92,19 +92,19 @@ extension SearchTmdbCoordinator: PopularMoviesControllerDelegate {
       }
       DispatchQueue.global(qos: .userInitiated).async {
         self.add(model.movie, withDiskType: diskType) { error in
-          if let error = error {
-            DispatchQueue.main.async {
-              model.state = .new
-              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
-              self.showAddingFailedAlert(for: error)
-            }
-          } else {
+          if error == nil {
             DispatchQueue.main.async {
               model.state = .addedToLibrary
               controller.reloadRow(forMovieWithId: model.movie.tmdbID)
               DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
                 controller.removeMovie(withId: model.movie.tmdbID)
               }
+            }
+          } else {
+            DispatchQueue.main.async {
+              model.state = .new
+              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+              self.showAddingFailedAlert(for: model.movie)
             }
           }
         }
@@ -145,9 +145,10 @@ extension SearchTmdbCoordinator {
     }
   }
 
-  private func showAddingFailedAlert(for error: Error) {
-    let alert = UIAlertController(title: NSLocalizedString("addItem.failed", comment: ""),
-                                  message: L10n.errorMessage(for: error),
+  private func showAddingFailedAlert(for movie: PartialMediaItem) {
+    let format = NSLocalizedString("addItem.failed", comment: "")
+    let alert = UIAlertController(title: .localizedStringWithFormat(format, movie.title),
+                                  message: NSLocalizedString("error.tryAgain", comment: ""),
                                   preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default))
     rootViewController.present(alert, animated: true)

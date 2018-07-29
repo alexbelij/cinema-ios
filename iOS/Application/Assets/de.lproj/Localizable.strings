@@ -1,5 +1,5 @@
 "addItem.alert.howToAdd.title" = "Wie willst du den Film hinzufügen?";
-"addItem.failed" = "Hoppla!";
+"addItem.failed" = "„%@“ konnte nicht zu deiner Mediathek hinzugefügt werden!";
 "addItem.search.placeholder" = "Gib den Filmtitel ein …";
 "addItem.title" = "Film hinzufügen";
 "cancel" = "Abbrechen";
@@ -16,13 +16,15 @@
 "details.storyline" = "Inhalt";
 "discard" = "Verwerfen";
 "edit.deleteMovie" = "Film löschen";
+"edit.failed" = "Deine Änderungen konnten nicht gespeichert werden!";
 "edit.noTitleAlert" = "Ein Film braucht einen Titel.";
-"edit.rejected.title" = "Hoppla!";
 "edit.sectionHeader.subtitle" = "Untertitel (optional)";
 "edit.sectionHeader.title" = "Titel";
 "error.genericError" = "Es ist ein unbekannter Fehler aufgetreten.";
+"error.genericTitle" = "Hoppla!";
 "error.invalidDataFormat" = "Die Datei kann nicht geöffnet werden. Home-Cinema konnte die Datei nicht lesen.";
 "error.storageError" = "Die Mediathek konnte nicht gespeichert werden.";
+"error.tryAgain" = "Bitte versuch es erneut.";
 "error.unsupportedSchemaVersion" = "Du benötigst eine neuere Version von Home-Cinema, um die Datei zu importieren.";
 "genre.action" = "Action";
 "genre.adventure" = "Abenteuer";
@@ -44,7 +46,6 @@
 "genre.war" = "Kriegsfilm";
 "genre.western" = "Western";
 "genres" = "Genres";
-"import.failed" = "Hoppla!";
 "import.succeeded" = "Aktualisierung abgeschlossen";
 "import.progress" = "Deine Mediathek wird aktualisiert";
 "library" = "Mediathek";

@@ -131,7 +131,7 @@ extension EditItemController {
         case .accepted:
           delegate.editItemController(self, didFinishEditingWithResult: .edited(edits))
         case let .rejected(reason):
-          let alert = UIAlertController(title: NSLocalizedString("edit.rejected.title", comment: ""),
+          let alert = UIAlertController(title: NSLocalizedString("error.genericTitle", comment: ""),
                                         message: reason,
                                         preferredStyle: .alert)
           alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default))

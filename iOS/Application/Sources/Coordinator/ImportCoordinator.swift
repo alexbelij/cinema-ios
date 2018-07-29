@@ -40,7 +40,7 @@ extension ImportCoordinator {
             }
           case let .error(error):
             DispatchQueue.main.async {
-              self.showContinuePage(primaryText: NSLocalizedString("import.failed", comment: ""),
+              self.showContinuePage(primaryText: NSLocalizedString("error.genericTitle", comment: ""),
                                     secondaryText: L10n.errorMessage(for: error))
             }
         }

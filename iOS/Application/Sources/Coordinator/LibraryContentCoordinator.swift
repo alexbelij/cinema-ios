@@ -137,8 +137,8 @@ extension LibraryContentCoordinator: EditItemCoordinatorDelegate {
         fatalError("tried to edit item which is not in library: \(detailItem)")
       default:
         DispatchQueue.main.async {
-          let alert = UIAlertController(title: L10n.errorMessage(for: error),
-                                        message: nil,
+          let alert = UIAlertController(title: NSLocalizedString("edit.failed", comment: ""),
+                                        message: NSLocalizedString("error.tryAgain", comment: ""),
                                         preferredStyle: .alert)
           alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
           alert.addAction(UIAlertAction(title: NSLocalizedString("discard", comment: ""),
