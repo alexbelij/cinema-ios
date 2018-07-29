@@ -59,6 +59,10 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
   func searchTmdbController(_ controller: SearchTmdbController,
                             didSelectSearchResult searchResult: SearchTmdbController.SearchResult) {
     self.showAddAlert(over: controller) { diskType in
+      DispatchQueue.main.async {
+        searchResult.state = .updateInProgress
+        controller.reloadRow(forMovieWithId: searchResult.movie.tmdbID)
+      }
       DispatchQueue.global(qos: .userInitiated).async {
         self.add(searchResult.movie, withDiskType: diskType) { error in
           if let error = error {

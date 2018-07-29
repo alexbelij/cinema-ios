@@ -31,6 +31,7 @@ class SearchTmdbController: UIViewController {
 
     enum LibraryState {
       case new
+      case updateInProgress
       case addedToLibrary
     }
   }
@@ -51,7 +52,7 @@ class SearchTmdbController: UIViewController {
     resultsController.canSelect = { item in
       switch item.state {
         case .new: return true
-        case .addedToLibrary: return false
+        case .updateInProgress, .addedToLibrary: return false
       }
     }
     resultsController.onSelection = { [weak self] selectedItem in
@@ -132,6 +133,7 @@ class SearchTmdbSearchResultTableCell: UITableViewCell {
   @IBOutlet private weak var posterView: UIImageView!
   @IBOutlet private weak var titleLabel: UILabel!
   @IBOutlet private weak var yearLabel: UILabel!
+  private lazy var activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
   private var workItem: DispatchWorkItem?
 
   override func awakeFromNib() {
@@ -149,6 +151,10 @@ class SearchTmdbSearchResultTableCell: UITableViewCell {
       case .new:
         accessoryType = .none
         selectionStyle = .default
+      case .updateInProgress:
+        accessoryView = activityIndicator
+        activityIndicator.startAnimating()
+        selectionStyle = .none
       case .addedToLibrary:
         accessoryType = .checkmark
         selectionStyle = .none
@@ -187,6 +193,7 @@ class SearchTmdbSearchResultTableCell: UITableViewCell {
 
   override func prepareForReuse() {
     super.prepareForReuse()
+    activityIndicator.stopAnimating()
     self.workItem?.cancel()
     self.workItem = nil
   }
