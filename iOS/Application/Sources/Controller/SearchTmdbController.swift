@@ -34,6 +34,12 @@ class SearchTmdbController: UIViewController {
   private let throttlingTime: DispatchTimeInterval = .milliseconds(250)
   private var currentSearch: DispatchWorkItem?
   private lazy var searchController: UISearchController = {
+    let searchController = UISearchController(searchResultsController: resultsController)
+    searchController.searchResultsUpdater = self
+    searchController.searchBar.placeholder = NSLocalizedString("addItem.search.placeholder", comment: "")
+    return searchController
+  }()
+  private lazy var resultsController: GenericSearchResultsController<SearchTmdbController.SearchResult> = {
     let resultsController = GenericSearchResultsController<SearchTmdbController.SearchResult>(
         cell: SearchTmdbSearchResultTableCell.self,
         estimatedRowHeight: SearchTmdbSearchResultTableCell.rowHeight)
@@ -48,10 +54,7 @@ class SearchTmdbController: UIViewController {
       cell.configure(for: listItem, posterProvider: posterProvider)
       return cell
     }
-    let searchController = UISearchController(searchResultsController: resultsController)
-    searchController.searchResultsUpdater = self
-    searchController.searchBar.placeholder = NSLocalizedString("addItem.search.placeholder", comment: "")
-    return searchController
+    return resultsController
   }()
   weak var delegate: SearchTmdbControllerDelegate?
   var additionalViewController: UIViewController? {
@@ -92,23 +95,19 @@ class SearchTmdbController: UIViewController {
 extension SearchTmdbController: UISearchResultsUpdating {
   func updateSearchResults(for searchController: UISearchController) {
     guard searchController.isActive else { return }
-    guard let resultsController = searchController.searchResultsController
-        as? GenericSearchResultsController<SearchTmdbController.SearchResult> else {
-      preconditionFailure("unexpected SearchResultsController class")
-    }
     currentSearch?.cancel()
     let searchText = searchController.searchBar.text!
     if searchText.isEmpty {
       searchQueue.async {
         DispatchQueue.main.sync {
-          resultsController.reload(searchText: nil, searchResults: [])
+          self.resultsController.reload(searchText: nil, searchResults: [])
         }
       }
     } else {
       currentSearch = DispatchWorkItem {
         let searchResults = self.delegate?.searchTmdbController(self, searchResultsFor: searchText) ?? []
         DispatchQueue.main.sync {
-          resultsController.reload(searchText: searchText, searchResults: searchResults)
+          self.resultsController.reload(searchText: searchText, searchResults: searchResults)
           self.currentSearch = nil
         }
       }

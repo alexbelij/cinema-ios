@@ -42,6 +42,13 @@ class MovieListController: UITableViewController {
 
   private let titleSortingStrategy = SortDescriptor.title.makeTableViewStrategy()
   private lazy var searchController: UISearchController = {
+    let searchController = UISearchController(searchResultsController: resultsController)
+    searchController.searchResultsUpdater = self
+    searchController.dimsBackgroundDuringPresentation = false
+    searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
+    return searchController
+  }()
+  private lazy var resultsController: GenericSearchResultsController<MovieListController.ListItem> = {
     let resultsController = GenericSearchResultsController<MovieListController.ListItem>(
         cell: MovieListListItemTableCell.self,
         estimatedRowHeight: MovieListListItemTableCell.rowHeight)
@@ -53,11 +60,7 @@ class MovieListController: UITableViewController {
       cell.configure(for: listItem, posterProvider: posterProvider)
       return cell
     }
-    let searchController = UISearchController(searchResultsController: resultsController)
-    searchController.searchResultsUpdater = self
-    searchController.dimsBackgroundDuringPresentation = false
-    searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
-    return searchController
+    return resultsController
   }()
 
   private var sortDescriptor = SortDescriptor.title
@@ -236,10 +239,6 @@ extension MovieListController: UITableViewDataSourcePrefetching {
 extension MovieListController: UISearchResultsUpdating {
   func updateSearchResults(for searchController: UISearchController) {
     guard searchController.isActive else { return }
-    guard let resultsController = searchController.searchResultsController
-        as? GenericSearchResultsController<MovieListController.ListItem> else {
-      preconditionFailure("unexpected SearchResultsController class")
-    }
     let searchText = searchController.searchBar.text ?? ""
     let lowercasedSearchText = searchText.lowercased()
     let searchResults = self.viewModel.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
