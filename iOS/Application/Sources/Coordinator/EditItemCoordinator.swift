@@ -68,19 +68,32 @@ extension EditItemCoordinator: EditItemControllerDelegate {
 
   func editItemController(_ controller: EditItemController,
                           didFinishEditingWithResult editResult: EditItemController.EditResult) {
-    do {
-      switch editResult {
-        case let .edited(edits):
-          var item = self.itemToEdit
-          self.applyEdits(edits, to: &item)
-          try self.library.update(item)
-          self.delegate?.editItemCoordinator(self, didFinishEditingWithResult: .edited(item))
-        case .deleted:
-          try self.library.remove(self.itemToEdit)
-          self.delegate?.editItemCoordinator(self, didFinishEditingWithResult: .deleted)
+    controller.navigationItem.leftBarButtonItem!.isEnabled = false
+    controller.view.isUserInteractionEnabled = false
+    let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+    activityIndicator.startAnimating()
+    controller.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: activityIndicator)
+    DispatchQueue.global(qos: .userInitiated).async {
+      do {
+        switch editResult {
+          case let .edited(edits):
+            var item = self.itemToEdit
+            self.applyEdits(edits, to: &item)
+            try self.library.update(item)
+            DispatchQueue.main.async {
+              self.delegate?.editItemCoordinator(self, didFinishEditingWithResult: .edited(item))
+            }
+          case .deleted:
+            try self.library.remove(self.itemToEdit)
+            DispatchQueue.main.async {
+              self.delegate?.editItemCoordinator(self, didFinishEditingWithResult: .deleted)
+            }
+        }
+      } catch {
+        DispatchQueue.main.async {
+          self.delegate?.editItemCoordinator(self, didFailWithError: error)
+        }
       }
-    } catch {
-      self.delegate?.editItemCoordinator(self, didFailWithError: error)
     }
   }
 
