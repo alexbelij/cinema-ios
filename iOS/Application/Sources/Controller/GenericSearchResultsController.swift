@@ -49,6 +49,12 @@ class GenericSearchResultsController<Item>: UITableViewController {
     super.tableView.reloadData()
   }
 
+  func reloadRow(where predicate: (Item) -> Bool) {
+    if let index = items.index(where: predicate) {
+      super.tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none)
+    }
+  }
+
 // MARK: - View Controller Lifecycle
 
   override func viewDidLoad() {

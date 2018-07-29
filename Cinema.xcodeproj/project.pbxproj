@@ -60,7 +60,6 @@
 		CBEA63481FF3958A00830377 /* ScrimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBEA63471FF3958A00830377 /* ScrimView.swift */; };
 		CBED94271F6BF80E00FA4045 /* PopularMoviesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED94201F6BF6C200FA4045 /* PopularMoviesViewController.swift */; };
 		CBED94291F6BF80E00FA4045 /* SearchTmdbController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED94221F6BF6C200FA4045 /* SearchTmdbController.swift */; };
-		CBED942A1F6BF80E00FA4045 /* LibraryUpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED941A1F6BF6C200FA4045 /* LibraryUpdateController.swift */; };
 		CBED942B1F6BFB0E00FA4045 /* MovieListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED941F1F6BF6C200FA4045 /* MovieListController.swift */; };
 		CBED942C1F6BFB0E00FA4045 /* SortDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED94231F6BF6C200FA4045 /* SortDescriptor.swift */; };
 		CBED942D1F6BFB0E00FA4045 /* EditItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED941C1F6BF6C200FA4045 /* EditItemController.swift */; };
@@ -163,7 +162,6 @@
 		CBEA63421FF3953600830377 /* GenreListCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenreListCoordinator.swift; sourceTree = "<group>"; };
 		CBEA63451FF3954700830377 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/GenreList.storyboard; sourceTree = "<group>"; };
 		CBEA63471FF3958A00830377 /* ScrimView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScrimView.swift; sourceTree = "<group>"; };
-		CBED941A1F6BF6C200FA4045 /* LibraryUpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryUpdateController.swift; sourceTree = "<group>"; };
 		CBED941B1F6BF6C200FA4045 /* ItemDetailsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailsController.swift; sourceTree = "<group>"; };
 		CBED941C1F6BF6C200FA4045 /* EditItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditItemController.swift; sourceTree = "<group>"; };
 		CBED941F1F6BF6C200FA4045 /* MovieListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieListController.swift; sourceTree = "<group>"; };
@@ -393,7 +391,6 @@
 				CBEA63401FF3952300830377 /* GenreListController.swift */,
 				CBED94221F6BF6C200FA4045 /* SearchTmdbController.swift */,
 				CBED94201F6BF6C200FA4045 /* PopularMoviesViewController.swift */,
-				CBED941A1F6BF6C200FA4045 /* LibraryUpdateController.swift */,
 				CBF3CE771FF25AA600F4B6C0 /* GenericSearchResultsController.swift */,
 			);
 			path = Controller;
@@ -663,7 +660,6 @@
 				CBED94271F6BF80E00FA4045 /* PopularMoviesViewController.swift in Sources */,
 				CBF3CE721FF256AC00F4B6C0 /* CellHandling.swift in Sources */,
 				CBF3CE781FF25AA600F4B6C0 /* GenericSearchResultsController.swift in Sources */,
-				CBED942A1F6BF80E00FA4045 /* LibraryUpdateController.swift in Sources */,
 				CBF3CE6E1FF250BD00F4B6C0 /* LibraryContentCoordinator.swift in Sources */,
 				CBED942C1F6BFB0E00FA4045 /* SortDescriptor.swift in Sources */,
 				CB370C1F1FFD08270034BB2F /* PageCoordinator.swift in Sources */,

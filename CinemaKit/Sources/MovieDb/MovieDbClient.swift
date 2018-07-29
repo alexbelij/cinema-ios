@@ -32,7 +32,6 @@ public enum PosterPurpose {
   case details
   case searchResult
   case popularMovies
-  case libraryUpdate
 }
 
 public enum MovieDbCountry: String {

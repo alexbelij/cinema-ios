@@ -14,11 +14,11 @@ class SearchTmdbController: UIViewController {
   class SearchResult {
     let movie: PartialMediaItem
     var poster: Image
-    let hasBeenAddedToLibrary: Bool
+    var state: LibraryState
 
-    init(_ movie: PartialMediaItem, hasBeenAddedToLibrary: Bool) {
+    init(_ movie: PartialMediaItem, state: LibraryState) {
       self.movie = movie
-      self.hasBeenAddedToLibrary = hasBeenAddedToLibrary
+      self.state = state
       self.poster = .unknown
     }
 
@@ -27,6 +27,11 @@ class SearchTmdbController: UIViewController {
       case loading
       case available(UIImage)
       case unavailable
+    }
+
+    enum LibraryState {
+      case new
+      case addedToLibrary
     }
   }
 
@@ -43,7 +48,12 @@ class SearchTmdbController: UIViewController {
     let resultsController = GenericSearchResultsController<SearchTmdbController.SearchResult>(
         cell: SearchTmdbSearchResultTableCell.self,
         estimatedRowHeight: SearchTmdbSearchResultTableCell.rowHeight)
-    resultsController.canSelect = { !$0.hasBeenAddedToLibrary }
+    resultsController.canSelect = { item in
+      switch item.state {
+        case .new: return true
+        case .addedToLibrary: return false
+      }
+    }
     resultsController.onSelection = { [weak self] selectedItem in
       guard let `self` = self else { return }
       self.delegate?.searchTmdbController(self, didSelectSearchResult: selectedItem)
@@ -85,11 +95,6 @@ class SearchTmdbController: UIViewController {
     navigationItem.hidesSearchBarWhenScrolling = false
     title = NSLocalizedString("addItem.title", comment: "")
   }
-
-  override func viewWillDisappear(_ animated: Bool) {
-    super.viewWillDisappear(animated)
-    searchController.isActive = false
-  }
 }
 
 extension SearchTmdbController: UISearchResultsUpdating {
@@ -116,6 +121,12 @@ extension SearchTmdbController: UISearchResultsUpdating {
   }
 }
 
+extension SearchTmdbController {
+  func reloadRow(forMovieWithId id: TmdbIdentifier) {
+    resultsController.reloadRow { $0.movie.tmdbID == id }
+  }
+}
+
 class SearchTmdbSearchResultTableCell: UITableViewCell {
   static let rowHeight: CGFloat = 100
   @IBOutlet private weak var posterView: UIImageView!
@@ -134,8 +145,14 @@ class SearchTmdbSearchResultTableCell: UITableViewCell {
     if let year = searchResult.movie.releaseYear {
       yearLabel.text = String(year)
     }
-    accessoryType = searchResult.hasBeenAddedToLibrary ? .checkmark : .none
-    selectionStyle = searchResult.hasBeenAddedToLibrary ? .none : .default
+    switch searchResult.state {
+      case .new:
+        accessoryType = .none
+        selectionStyle = .default
+      case .addedToLibrary:
+        accessoryType = .checkmark
+        selectionStyle = .none
+    }
     configurePoster(for: searchResult, posterProvider: posterProvider)
   }
 
