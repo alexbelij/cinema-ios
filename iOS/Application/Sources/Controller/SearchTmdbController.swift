@@ -43,6 +43,24 @@ class SearchTmdbController: UIViewController {
       }
       return cell
     }
+    resultsController.prefetchHandler = { [posterProvider] tableView, indexPaths in
+      for indexPath in indexPaths {
+        let model = resultsController.items[indexPath.row]
+        if case .unknown = model.poster {
+          model.poster = .loading
+          DispatchQueue.global(qos: .background).async {
+            fetchPoster(for: model,
+                        using: posterProvider,
+                        size: MovieListListItemTableCell.posterSize,
+                        purpose: .searchResult) {
+              guard let rowIndex = resultsController.items.index(where: { $0.movie.tmdbID == model.movie.tmdbID })
+                  else { return }
+              tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
+            }
+          }
+        }
+      }
+    }
     return resultsController
   }()
   weak var delegate: SearchTmdbControllerDelegate?

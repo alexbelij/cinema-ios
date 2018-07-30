@@ -1,8 +1,9 @@
 import CinemaKit
 import UIKit
 
-class GenericSearchResultsController<Item>: UITableViewController {
+class GenericSearchResultsController<Item>: UITableViewController, UITableViewDataSourcePrefetching {
   var cellConfiguration: ((UITableView, IndexPath, Item) -> UITableViewCell)?
+  var prefetchHandler: ((UITableView, [IndexPath]) -> Void)?
   var canSelect: ((Item) -> Bool)?
   var onSelection: ((Item) -> Void)?
   var deselectImmediately: Bool = false
@@ -60,6 +61,7 @@ class GenericSearchResultsController<Item>: UITableViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     super.tableView.tableFooterView = UIView()
+    super.tableView.prefetchDataSource = self
     tableViewInitialization(super.tableView)
   }
 
@@ -71,6 +73,10 @@ class GenericSearchResultsController<Item>: UITableViewController {
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     return cellConfiguration?(tableView, indexPath, items[indexPath.row]) ?? UITableViewCell()
+  }
+
+  func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+    prefetchHandler?(tableView, indexPaths)
   }
 
   override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {

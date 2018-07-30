@@ -61,6 +61,25 @@ class MovieListController: UITableViewController {
       }
       return cell
     }
+    resultsController.prefetchHandler = { [weak self] tableView, indexPaths in
+      guard let `self` = self else { return }
+      for indexPath in indexPaths {
+        let listItem = resultsController.items[indexPath.row]
+        if case .unknown = listItem.poster {
+          listItem.poster = .loading
+          DispatchQueue.global(qos: .background).async {
+            fetchPoster(for: listItem,
+                        using: self.posterProvider,
+                        size: MovieListListItemTableCell.posterSize,
+                        purpose: .list) {
+              guard let rowIndex = resultsController.items.index(where: { $0.movie.tmdbID == listItem.movie.tmdbID })
+                  else { return }
+              tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
+            }
+          }
+        }
+      }
+    }
     return resultsController
   }()
 
