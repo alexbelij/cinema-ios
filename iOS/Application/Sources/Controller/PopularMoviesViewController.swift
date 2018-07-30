@@ -101,6 +101,12 @@ extension PopularMoviesController {
   override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     self.delegate?.popularMoviesController(self, didSelect: items[indexPath.row])
   }
+
+  func reloadRow(forMovieWithId id: TmdbIdentifier) {
+    if let index = items.index(where: { $0.movie.tmdbID == id }) {
+      super.collectionView!.reloadItems(at: [IndexPath(row: index, section: 0)])
+    }
+  }
 }
 
 // MARK: - Data Management
@@ -166,6 +172,9 @@ class PosterCell: UICollectionViewCell {
 
   @IBOutlet private weak var posterView: UIImageView!
   @IBOutlet private weak var titleLabel: UILabel!
+  @IBOutlet private var blurView: UIVisualEffectView!
+  @IBOutlet private var activityIndicator: UIActivityIndicatorView!
+  @IBOutlet private weak var checkmarkView: UIVisualEffectView!
   private var highlightView: UIView!
   private var workItem: DispatchWorkItem?
 
@@ -184,6 +193,18 @@ class PosterCell: UICollectionViewCell {
   func configure(for model: ExternalMovieViewModel, posterProvider: PosterProvider) {
     titleLabel.text = model.movie.title
     configurePoster(for: model, posterProvider: posterProvider)
+    switch model.state {
+      case .new:
+        blurView.isHidden = true
+        checkmarkView.isHidden = true
+      case .updateInProgress:
+        blurView.isHidden = false
+        checkmarkView.isHidden = true
+        activityIndicator.startAnimating()
+      case .addedToLibrary:
+        blurView.isHidden = false
+        checkmarkView.isHidden = false
+    }
   }
 
   private func configurePoster(for model: ExternalMovieViewModel, posterProvider: PosterProvider) {
@@ -230,6 +251,7 @@ class PosterCell: UICollectionViewCell {
     super.prepareForReuse()
     self.workItem?.cancel()
     self.workItem = nil
+    activityIndicator.stopAnimating()
   }
 }
 

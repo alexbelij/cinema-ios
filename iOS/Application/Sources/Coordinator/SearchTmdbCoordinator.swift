@@ -88,15 +88,25 @@ extension SearchTmdbCoordinator: PopularMoviesControllerDelegate {
   func popularMoviesController(_ controller: PopularMoviesController,
                                didSelect model: ExternalMovieViewModel) {
     showAddAlert(over: controller) { diskType in
+      DispatchQueue.main.async {
+        model.state = .updateInProgress
+        controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+      }
       DispatchQueue.global(qos: .userInitiated).async {
         self.add(model.movie, withDiskType: diskType) { error in
           if let error = error {
             DispatchQueue.main.async {
+              model.state = .new
+              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
               self.showAddingFailedAlert(for: error)
             }
           } else {
             DispatchQueue.main.async {
-              controller.removeMovie(withId: model.movie.tmdbID)
+              model.state = .addedToLibrary
+              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+              DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+                controller.removeMovie(withId: model.movie.tmdbID)
+              }
             }
           }
         }
