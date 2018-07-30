@@ -33,6 +33,7 @@ extension PopularMoviesController {
     let spacing = (contentWidth - totalCellWidth) / 3.5
     flowLayout.minimumInteritemSpacing = spacing
     flowLayout.sectionInset = UIEdgeInsets(top: 10, left: spacing, bottom: 10, right: spacing)
+    collectionView!.prefetchDataSource = self
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -45,7 +46,7 @@ extension PopularMoviesController {
 
 // MARK: - UICollectionViewDataSource
 
-extension PopularMoviesController {
+extension PopularMoviesController: UICollectionViewDataSourcePrefetching {
   override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
     return items.count
   }
@@ -55,6 +56,30 @@ extension PopularMoviesController {
     let cell: PosterCell = collectionView.dequeueReusableCell(for: indexPath)
     cell.configure(for: items[indexPath.row], posterProvider: posterProvider)
     return cell
+  }
+
+  public func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+    for indexPath in indexPaths {
+      let item = items[indexPath.row]
+      if case .unknown = item.poster {
+        item.poster = .loading
+        DispatchQueue.global(qos: .background).async {
+          let poster = self.posterProvider.poster(for: item.movie.tmdbID,
+                                                  size: PosterSize(minWidth: 130),
+                                                  purpose: .popularMovies)
+          DispatchQueue.main.async {
+            if let posterImage = poster {
+              item.poster = .available(posterImage)
+              if let cell = collectionView.cellForItem(at: indexPath) as? PosterCell {
+                cell.configure(for: item, posterProvider: self.posterProvider)
+              }
+            } else {
+              item.poster = .unavailable
+            }
+          }
+        }
+      }
+    }
   }
 }
 
