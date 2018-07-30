@@ -34,8 +34,8 @@ class SearchTmdbController: UIViewController {
       self.delegate?.searchTmdbController(self, didSelect: selectedItem)
     }
     resultsController.deselectImmediately = true
-    resultsController.cellConfiguration = { [posterProvider] dequeuing, indexPath, listItem in
-      let cell: SearchTmdbSearchResultTableCell = dequeuing.dequeueReusableCell(for: indexPath)
+    resultsController.cellConfiguration = { [posterProvider] tableView, indexPath, listItem in
+      let cell: SearchTmdbSearchResultTableCell = tableView.dequeueReusableCell(for: indexPath)
       cell.configure(for: listItem, posterProvider: posterProvider)
       return cell
     }

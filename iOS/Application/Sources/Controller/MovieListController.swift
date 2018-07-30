@@ -55,8 +55,8 @@ class MovieListController: UITableViewController {
     resultsController.onSelection = { [delegate] selectedItem in
       delegate?.movieListController(self, didSelect: selectedItem.movie)
     }
-    resultsController.cellConfiguration = { [posterProvider] dequeuing, indexPath, listItem in
-      let cell: MovieListListItemTableCell = dequeuing.dequeueReusableCell(for: indexPath)
+    resultsController.cellConfiguration = { [posterProvider] tableView, indexPath, listItem in
+      let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
       cell.configure(for: listItem, posterProvider: posterProvider)
       return cell
     }

@@ -2,7 +2,7 @@ import CinemaKit
 import UIKit
 
 class GenericSearchResultsController<Item>: UITableViewController {
-  var cellConfiguration: ((TableViewDequeuing, IndexPath, Item) -> UITableViewCell)?
+  var cellConfiguration: ((UITableView, IndexPath, Item) -> UITableViewCell)?
   var canSelect: ((Item) -> Bool)?
   var onSelection: ((Item) -> Void)?
   var deselectImmediately: Bool = false
