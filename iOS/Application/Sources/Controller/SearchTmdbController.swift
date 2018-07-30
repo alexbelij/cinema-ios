@@ -5,37 +5,12 @@ import UIKit
 
 protocol SearchTmdbControllerDelegate: class {
   func searchTmdbController(_ controller: SearchTmdbController,
-                            searchResultsFor searchText: String) -> [SearchTmdbController.SearchResult]
+                            searchResultsFor searchText: String) -> [ExternalMovieViewModel]
   func searchTmdbController(_ controller: SearchTmdbController,
-                            didSelectSearchResult searchResult: SearchTmdbController.SearchResult)
+                            didSelectSearchResult model: ExternalMovieViewModel)
 }
 
 class SearchTmdbController: UIViewController {
-  class SearchResult {
-    let movie: PartialMediaItem
-    var poster: Image
-    var state: LibraryState
-
-    init(_ movie: PartialMediaItem, state: LibraryState) {
-      self.movie = movie
-      self.state = state
-      self.poster = .unknown
-    }
-
-    enum Image {
-      case unknown
-      case loading
-      case available(UIImage)
-      case unavailable
-    }
-
-    enum LibraryState {
-      case new
-      case updateInProgress
-      case addedToLibrary
-    }
-  }
-
   private let searchQueue = DispatchQueue(label: "de.martinbauer.cinema.tmdb-search", qos: .userInitiated)
   private let throttlingTime: DispatchTimeInterval = .milliseconds(250)
   private var currentSearch: DispatchWorkItem?
@@ -45,8 +20,8 @@ class SearchTmdbController: UIViewController {
     searchController.searchBar.placeholder = NSLocalizedString("addItem.search.placeholder", comment: "")
     return searchController
   }()
-  private lazy var resultsController: GenericSearchResultsController<SearchTmdbController.SearchResult> = {
-    let resultsController = GenericSearchResultsController<SearchTmdbController.SearchResult>(
+  private lazy var resultsController: GenericSearchResultsController<ExternalMovieViewModel> = {
+    let resultsController = GenericSearchResultsController<ExternalMovieViewModel>(
         cell: SearchTmdbSearchResultTableCell.self,
         estimatedRowHeight: SearchTmdbSearchResultTableCell.rowHeight)
     resultsController.canSelect = { item in
@@ -142,12 +117,12 @@ class SearchTmdbSearchResultTableCell: UITableViewCell {
     posterView.layer.borderWidth = 0.5
   }
 
-  func configure(for searchResult: SearchTmdbController.SearchResult, posterProvider: PosterProvider) {
-    titleLabel.text = searchResult.movie.title
-    if let year = searchResult.movie.releaseYear {
+  func configure(for model: ExternalMovieViewModel, posterProvider: PosterProvider) {
+    titleLabel.text = model.movie.title
+    if let year = model.movie.releaseYear {
       yearLabel.text = String(year)
     }
-    switch searchResult.state {
+    switch model.state {
       case .new:
         accessoryType = .none
         selectionStyle = .default
@@ -159,26 +134,26 @@ class SearchTmdbSearchResultTableCell: UITableViewCell {
         accessoryType = .checkmark
         selectionStyle = .none
     }
-    configurePoster(for: searchResult, posterProvider: posterProvider)
+    configurePoster(for: model, posterProvider: posterProvider)
   }
 
-  private func configurePoster(for searchResult: SearchTmdbController.SearchResult, posterProvider: PosterProvider) {
-    switch searchResult.poster {
+  private func configurePoster(for model: ExternalMovieViewModel, posterProvider: PosterProvider) {
+    switch model.poster {
       case .unknown:
         posterView.image = #imageLiteral(resourceName: "GenericPoster")
-        searchResult.poster = .loading
+        model.poster = .loading
         let size = PosterSize(minWidth: Int(posterView.frame.size.width))
         var workItem: DispatchWorkItem?
         workItem = DispatchWorkItem {
-          let poster = posterProvider.poster(for: searchResult.movie.tmdbID, size: size, purpose: .searchResult)
+          let poster = posterProvider.poster(for: model.movie.tmdbID, size: size, purpose: .searchResult)
           DispatchQueue.main.async {
             if let posterImage = poster {
-              searchResult.poster = .available(posterImage)
+              model.poster = .available(posterImage)
             } else {
-              searchResult.poster = .unavailable
+              model.poster = .unavailable
             }
             if !workItem!.isCancelled {
-              self.configurePoster(for: searchResult, posterProvider: posterProvider)
+              self.configurePoster(for: model, posterProvider: posterProvider)
             }
           }
         }

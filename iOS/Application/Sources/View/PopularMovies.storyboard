@@ -55,7 +55,7 @@
                                 </constraints>
                                 <size key="customSize" width="150" height="230"/>
                                 <connections>
-                                    <outlet property="posterImageView" destination="wd4-JF-0Co" id="wu8-Rk-OYc"/>
+                                    <outlet property="posterView" destination="wd4-JF-0Co" id="DXs-vh-YZE"/>
                                     <outlet property="titleLabel" destination="EMQ-UV-WWr" id="qry-t9-kfW"/>
                                 </connections>
                             </collectionViewCell>

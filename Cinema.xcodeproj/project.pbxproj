@@ -44,7 +44,7 @@
 		CB65D7AF1F8A131F00457386 /* SelectableLabelCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB65D7AE1F8A131F00457386 /* SelectableLabelCell.xib */; };
 		CB6F19F921106950009239BD /* MovieListListItemTableCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB6F19FB21106950009239BD /* MovieListListItemTableCell.xib */; };
 		CB6F19FC21106953009239BD /* SearchTmdbSearchResultTableCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB6F19FE21106953009239BD /* SearchTmdbSearchResultTableCell.xib */; };
-		CB6F19FF21106957009239BD /* SearchTmdbSearchResultAddedTableCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB6F1A0121106957009239BD /* SearchTmdbSearchResultAddedTableCell.xib */; };
+		CB6F1A0E211083AF009239BD /* ExternalMovieViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB6F1A0C2110836F009239BD /* ExternalMovieViewModel.swift */; };
 		CB84B1891FEAF5E500B455D4 /* SortPrefixes.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB84B18B1FEAF5E500B455D4 /* SortPrefixes.plist */; };
 		CB9484C11EFA643500D9651E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = CB9484C31EFA643500D9651E /* Localizable.strings */; };
 		CBAE5E861F3486EA0055366F /* EditItem.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBAE5E841F3486EA0055366F /* EditItem.storyboard */; };
@@ -143,7 +143,7 @@
 		CB65D7AE1F8A131F00457386 /* SelectableLabelCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SelectableLabelCell.xib; sourceTree = "<group>"; };
 		CB6F19FA21106950009239BD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MovieListListItemTableCell.xib; sourceTree = "<group>"; };
 		CB6F19FD21106953009239BD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/SearchTmdbSearchResultTableCell.xib; sourceTree = "<group>"; };
-		CB6F1A0021106957009239BD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/SearchTmdbSearchResultAddedTableCell.xib; sourceTree = "<group>"; };
+		CB6F1A0C2110836F009239BD /* ExternalMovieViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalMovieViewModel.swift; sourceTree = "<group>"; };
 		CB84B18A1FEAF5E500B455D4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Base; path = Base.lproj/SortPrefixes.plist; sourceTree = "<group>"; };
 		CB9484C21EFA643500D9651E /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CB9484C61EFA691100D9651E /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -391,6 +391,7 @@
 				CBEA63401FF3952300830377 /* GenreListController.swift */,
 				CBED94221F6BF6C200FA4045 /* SearchTmdbController.swift */,
 				CBED94201F6BF6C200FA4045 /* PopularMoviesViewController.swift */,
+				CB6F1A0C2110836F009239BD /* ExternalMovieViewModel.swift */,
 				CBF3CE771FF25AA600F4B6C0 /* GenericSearchResultsController.swift */,
 			);
 			path = Controller;
@@ -652,6 +653,7 @@
 				816BF40FCCC10885A4DACB13 /* Utils.swift in Sources */,
 				CBF3CE6A1FF245BB00F4B6C0 /* ItemDetailsCoordinator.swift in Sources */,
 				CBF3CE601FF2366700F4B6C0 /* Coordinator.swift in Sources */,
+				CB6F1A0E211083AF009239BD /* ExternalMovieViewModel.swift in Sources */,
 				CBED942D1F6BFB0E00FA4045 /* EditItemController.swift in Sources */,
 				CBED94301F6BFB0E00FA4045 /* ItemDetailsController.swift in Sources */,
 				CB65D7AB1F8A107F00457386 /* TabularSheetController.swift in Sources */,
@@ -714,14 +716,6 @@
 				CB6F19FD21106953009239BD /* Base */,
 			);
 			name = SearchTmdbSearchResultTableCell.xib;
-			sourceTree = "<group>";
-		};
-		CB6F1A0121106957009239BD /* SearchTmdbSearchResultAddedTableCell.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CB6F1A0021106957009239BD /* Base */,
-			);
-			name = SearchTmdbSearchResultAddedTableCell.xib;
 			sourceTree = "<group>";
 		};
 		CB84B18B1FEAF5E500B455D4 /* SortPrefixes.plist */ = {
