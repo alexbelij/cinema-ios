@@ -68,7 +68,7 @@ extension AppCoordinator {
     // MovieDb Client
     let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en
     let country = MovieDbCountry(rawValue: Locale.current.regionCode ?? "US") ?? .unitedStates
-    let movieDb = TMDBSwiftWrapper(language: language, country: country, cache: StandardTMDBSwiftCache())
+    let movieDb = TMDBSwiftWrapper(language: language, country: country)
 
     return AppDependencies(library: library, movieDb: movieDb)
   }

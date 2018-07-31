@@ -161,7 +161,7 @@ extension GenreListController: UITableViewDataSourcePrefetching {
   func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
     for indexPath in indexPaths {
       let genre = viewModel[indexPath.row]
-      if case Genre.Image.unknown = genre.image {
+      if case .unknown = genre.image {
         genre.image = .loading
         DispatchQueue.global(qos: .background).async {
           let backdrop = self.genreImageProvider.genreImage(for: genre.id)

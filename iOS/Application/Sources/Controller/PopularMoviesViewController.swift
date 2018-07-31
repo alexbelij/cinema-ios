@@ -3,7 +3,7 @@ import Dispatch
 import UIKit
 
 protocol PopularMoviesControllerDelegate: class {
-  func popularMoviesController(_ controller: PopularMoviesController, didSelect movie: PartialMediaItem)
+  func popularMoviesController(_ controller: PopularMoviesController, didSelect model: ExternalMovieViewModel)
 }
 
 class PopularMoviesController: UICollectionViewController {
@@ -11,7 +11,7 @@ class PopularMoviesController: UICollectionViewController {
   var movieIterator: AnyIterator<PartialMediaItem> = AnyIterator(EmptyIterator())
   var maxMovieCount: Int = 10
   var posterProvider: PosterProvider = EmptyPosterProvider()
-  private var items = [PartialMediaItem]()
+  private var items = [ExternalMovieViewModel]()
   private let cellPosterSize = PosterSize(minWidth: 130)
   private var isFetchingItems = false
   private let emptyView = GenericEmptyView(accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
@@ -32,6 +32,7 @@ extension PopularMoviesController {
     let spacing = (contentWidth - totalCellWidth) / 3.5
     flowLayout.minimumInteritemSpacing = spacing
     flowLayout.sectionInset = UIEdgeInsets(top: 10, left: spacing, bottom: 10, right: spacing)
+    collectionView!.prefetchDataSource = self
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -44,7 +45,7 @@ extension PopularMoviesController {
 
 // MARK: - UICollectionViewDataSource
 
-extension PopularMoviesController {
+extension PopularMoviesController: UICollectionViewDataSourcePrefetching {
   override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
     return items.count
   }
@@ -54,6 +55,30 @@ extension PopularMoviesController {
     let cell: PosterCell = collectionView.dequeueReusableCell(for: indexPath)
     cell.configure(for: items[indexPath.row], posterProvider: posterProvider)
     return cell
+  }
+
+  public func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+    for indexPath in indexPaths {
+      let item = items[indexPath.row]
+      if case .unknown = item.poster {
+        item.poster = .loading
+        DispatchQueue.global(qos: .background).async {
+          let poster = self.posterProvider.poster(for: item.movie.tmdbID,
+                                                  size: PosterSize(minWidth: 130),
+                                                  purpose: .popularMovies)
+          DispatchQueue.main.async {
+            if let posterImage = poster {
+              item.poster = .available(posterImage)
+              if let cell = collectionView.cellForItem(at: indexPath) as? PosterCell {
+                cell.configure(for: item, posterProvider: self.posterProvider)
+              }
+            } else {
+              item.poster = .unavailable
+            }
+          }
+        }
+      }
+    }
   }
 }
 
@@ -100,6 +125,12 @@ extension PopularMoviesController {
   override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     self.delegate?.popularMoviesController(self, didSelect: items[indexPath.row])
   }
+
+  func reloadRow(forMovieWithId id: TmdbIdentifier) {
+    if let index = items.index(where: { $0.movie.tmdbID == id }) {
+      super.collectionView!.reloadItems(at: [IndexPath(row: index, section: 0)])
+    }
+  }
 }
 
 // MARK: - Data Management
@@ -116,7 +147,7 @@ extension PopularMoviesController {
       for _ in 0..<count {
         guard let item = self.movieIterator.next() else { break }
         DispatchQueue.main.sync {
-          self.items.append(item)
+          self.items.append(ExternalMovieViewModel(item, state: .new))
           self.collectionView?.insertItems(at: [IndexPath(row: self.items.count - 1, section: 0)])
         }
       }
@@ -143,8 +174,8 @@ extension PopularMoviesController {
 // MARK: - Actions
 
 extension PopularMoviesController {
-  func removeItem(_ item: PartialMediaItem) {
-    guard let index = items.index(of: item) else { return }
+  func removeMovie(withId id: TmdbIdentifier) {
+    guard let index = items.index(where: { $0.movie.tmdbID == id }) else { return }
     self.items.remove(at: index)
     collectionView!.deleteItems(at: [IndexPath(row: index, section: 0)])
     fetchItems(count: 1)
@@ -163,37 +194,71 @@ class TitleHeaderView: UICollectionReusableView {
 
 class PosterCell: UICollectionViewCell {
 
-  @IBOutlet fileprivate weak var posterImageView: UIImageView!
+  @IBOutlet private weak var posterView: UIImageView!
   @IBOutlet private weak var titleLabel: UILabel!
+  @IBOutlet private var blurView: UIVisualEffectView!
+  @IBOutlet private var activityIndicator: UIActivityIndicatorView!
+  @IBOutlet private weak var checkmarkView: UIVisualEffectView!
   private var highlightView: UIView!
   private var workItem: DispatchWorkItem?
 
   override func awakeFromNib() {
     super.awakeFromNib()
-    posterImageView.layer.shadowColor = UIColor.black.cgColor
-    posterImageView.layer.shadowRadius = 2
-    posterImageView.layer.shadowOpacity = 0.5
-    posterImageView.layer.shadowOffset = CGSize(width: 0.0, height: 1.0)
-    self.highlightView = UIView(frame: posterImageView.frame)
+    posterView.layer.shadowColor = UIColor.black.cgColor
+    posterView.layer.shadowRadius = 2
+    posterView.layer.shadowOpacity = 0.5
+    posterView.layer.shadowOffset = CGSize(width: 0.0, height: 1.0)
+    self.highlightView = UIView(frame: posterView.frame)
     self.highlightView.backgroundColor = .black
     self.highlightView.alpha = 0
     self.contentView.addSubview(highlightView)
   }
 
-  func configure(for item: PartialMediaItem, posterProvider: PosterProvider) {
-    titleLabel.text = item.title
-    posterImageView.image = #imageLiteral(resourceName: "GenericPoster")
-    var workItem: DispatchWorkItem?
-    workItem = DispatchWorkItem {
-      if let poster = posterProvider.poster(for: item.tmdbID, size: PosterSize(minWidth: 130)) {
-        DispatchQueue.main.async {
-          guard !workItem!.isCancelled else { return }
-          self.posterImageView.image = poster
-        }
-      }
+  func configure(for model: ExternalMovieViewModel, posterProvider: PosterProvider) {
+    titleLabel.text = model.movie.title
+    configurePoster(for: model, posterProvider: posterProvider)
+    switch model.state {
+      case .new:
+        blurView.isHidden = true
+        checkmarkView.isHidden = true
+      case .updateInProgress:
+        blurView.isHidden = false
+        checkmarkView.isHidden = true
+        activityIndicator.startAnimating()
+      case .addedToLibrary:
+        blurView.isHidden = false
+        checkmarkView.isHidden = false
     }
-    self.workItem = workItem
-    DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
+  }
+
+  private func configurePoster(for model: ExternalMovieViewModel, posterProvider: PosterProvider) {
+    switch model.poster {
+      case .unknown:
+        posterView.image = #imageLiteral(resourceName: "GenericPoster")
+        model.poster = .loading
+        var workItem: DispatchWorkItem?
+        workItem = DispatchWorkItem {
+          let poster = posterProvider.poster(for: model.movie.tmdbID,
+                                             size: PosterSize(minWidth: 130),
+                                             purpose: .popularMovies)
+          DispatchQueue.main.async {
+            if let posterImage = poster {
+              model.poster = .available(posterImage)
+            } else {
+              model.poster = .unavailable
+            }
+            if !workItem!.isCancelled {
+              self.configurePoster(for: model, posterProvider: posterProvider)
+            }
+          }
+        }
+        self.workItem = workItem
+        DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
+      case let .available(posterImage):
+        posterView.image = posterImage
+      case .loading, .unavailable:
+        posterView.image = #imageLiteral(resourceName: "GenericPoster")
+    }
   }
 
   override var isHighlighted: Bool {
@@ -210,6 +275,7 @@ class PosterCell: UICollectionViewCell {
     super.prepareForReuse()
     self.workItem?.cancel()
     self.workItem = nil
+    activityIndicator.stopAnimating()
   }
 }
 

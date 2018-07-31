@@ -18,6 +18,7 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
   private var movieDb: MovieDbClient {
     return dependencies.movieDb
   }
+  private var cachedSearchResults = [ExternalMovieViewModel]()
 
   // managed controllers
   private let navigationController: UINavigationController
@@ -35,82 +36,120 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
     popularMoviesController.posterProvider = MovieDbPosterProvider(movieDb)
 
     searchTmdbController.delegate = self
+    searchTmdbController.posterProvider = MovieDbPosterProvider(dependencies.movieDb)
     searchTmdbController.additionalViewController = popularMoviesController
   }
 }
 
 extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
   func searchTmdbController(_ controller: SearchTmdbController,
-                            searchResultsFor searchText: String) -> [SearchTmdbController.SearchResult] {
-    return self.movieDb.searchMovies(searchText: searchText).map { movie in
-      SearchTmdbController.SearchResult(item: movie,
-                                        hasBeenAddedToLibrary: self.library.containsMediaItem(with: movie.tmdbID))
+                            searchResultsFor searchText: String) -> [ExternalMovieViewModel] {
+    cachedSearchResults = self.movieDb.searchMovies(searchText: searchText).map { movie in
+      if let existing = cachedSearchResults.first(where: { $0.movie.tmdbID == movie.tmdbID }) {
+        return existing
+      } else {
+        return ExternalMovieViewModel(
+            movie,
+            state: self.library.containsMediaItem(with: movie.tmdbID) ? .addedToLibrary : .new)
+      }
     }
+    return cachedSearchResults
   }
 
-  func searchTmdbController(_ controller: SearchTmdbController,
-                            didSelectSearchResult searchResult: SearchTmdbController.SearchResult) {
-    self.showAddAlert(for: searchResult.item, over: controller)
+  func searchTmdbController(_ controller: SearchTmdbController, didSelect model: ExternalMovieViewModel) {
+    self.showAddAlert(over: controller) { diskType in
+      DispatchQueue.main.async {
+        model.state = .updateInProgress
+        controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+      }
+      DispatchQueue.global(qos: .userInitiated).async {
+        self.add(model.movie, withDiskType: diskType) { error in
+          if let error = error {
+            DispatchQueue.main.async {
+              model.state = .new
+              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+              self.showAddingFailedAlert(for: error)
+            }
+          } else {
+            DispatchQueue.main.async {
+              model.state = .addedToLibrary
+              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+              self.popularMoviesController.removeMovie(withId: model.movie.tmdbID)
+            }
+          }
+        }
+      }
+    }
   }
 }
 
 extension SearchTmdbCoordinator: PopularMoviesControllerDelegate {
-  func popularMoviesController(_ controller: PopularMoviesController, didSelect movie: PartialMediaItem) {
-    showAddAlert(for: movie, over: controller)
+  func popularMoviesController(_ controller: PopularMoviesController, didSelect model: ExternalMovieViewModel) {
+    showAddAlert(over: controller) { diskType in
+      DispatchQueue.main.async {
+        model.state = .updateInProgress
+        controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+      }
+      DispatchQueue.global(qos: .userInitiated).async {
+        self.add(model.movie, withDiskType: diskType) { error in
+          if let error = error {
+            DispatchQueue.main.async {
+              model.state = .new
+              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+              self.showAddingFailedAlert(for: error)
+            }
+          } else {
+            DispatchQueue.main.async {
+              model.state = .addedToLibrary
+              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+              DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+                controller.removeMovie(withId: model.movie.tmdbID)
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
 
 extension SearchTmdbCoordinator {
-  private func showAddAlert(for item: PartialMediaItem, over controller: UIViewController) {
+  private func showAddAlert(over controller: UIViewController,
+                            then completion: @escaping (DiskType) -> Void) {
     let alert = UIAlertController(title: NSLocalizedString("addItem.alert.howToAdd.title", comment: ""),
                                   message: nil,
                                   preferredStyle: .alert)
     for diskType in [DiskType.dvd, .bluRay] {
       alert.addAction(UIAlertAction(title: diskType.localizedName, style: .default) { _ in
-        self.showLibraryUpdateController(for: item, diskType: diskType, over: controller)
+        completion(diskType)
       })
     }
     alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     controller.present(alert, animated: true)
   }
 
-  private func showLibraryUpdateController(for item: PartialMediaItem,
-                                           diskType: DiskType,
-                                           over controller: UIViewController) {
-    let libraryUpdateController = UIStoryboard.searchTmdb.instantiate(LibraryUpdateController.self)
-    DispatchQueue.global(qos: .userInitiated).async {
-      if let poster = self.movieDb.poster(for: item.tmdbID, size: PosterSize(minWidth: 185)) {
-        DispatchQueue.main.async {
-          libraryUpdateController.poster = poster
-        }
-      }
+  private func add(_ item: PartialMediaItem,
+                   withDiskType diskType: DiskType,
+                   then completion: @escaping (Error?) -> Void) {
+    let fullItem = MediaItem(tmdbID: item.tmdbID,
+                             title: item.title,
+                             runtime: self.movieDb.runtime(for: item.tmdbID),
+                             releaseDate: self.movieDb.releaseDate(for: item.tmdbID),
+                             diskType: diskType,
+                             genreIds: self.movieDb.genreIds(for: item.tmdbID))
+    do {
+      try self.library.add(fullItem)
+      completion(nil)
+    } catch {
+      completion(error)
     }
-    controller.present(libraryUpdateController, animated: true)
-    DispatchQueue.global(qos: .userInitiated).async {
-      let fullItem = MediaItem(tmdbID: item.tmdbID,
-                               title: item.title,
-                               runtime: self.movieDb.runtime(for: item.tmdbID),
-                               releaseDate: item.releaseDate,
-                               diskType: diskType,
-                               genreIds: self.movieDb.genreIds(for: item.tmdbID))
-      do {
-        try self.library.add(fullItem)
-        DispatchQueue.main.async {
-          libraryUpdateController.endUpdate(result: .success(addedItemTitle: item.title))
-          DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
-            libraryUpdateController.dismiss(animated: true) {
-              self.popularMoviesController.removeItem(item)
-            }
-          }
-        }
-      } catch {
-        DispatchQueue.main.async {
-          libraryUpdateController.endUpdate(result: .failure(error))
-          DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
-            libraryUpdateController.dismiss(animated: true)
-          }
-        }
-      }
-    }
+  }
+
+  private func showAddingFailedAlert(for error: Error) {
+    let alert = UIAlertController(title: NSLocalizedString("addItem.failed", comment: ""),
+                                  message: L10n.errorMessage(for: error),
+                                  preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default))
+    rootViewController.present(alert, animated: true)
   }
 }

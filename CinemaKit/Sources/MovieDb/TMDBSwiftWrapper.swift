@@ -19,37 +19,48 @@ public class TMDBSwiftWrapper: MovieDbClient {
 
   public var country: MovieDbCountry
 
-  public var cache: TMDBSwiftCache
+  private var cache: TMDBSwiftCache
 
-  public init(language: MovieDbLanguage, country: MovieDbCountry, cache: TMDBSwiftCache) {
+  private var cachedPosterPaths = [TmdbIdentifier: String]()
+
+  public init(language: MovieDbLanguage, country: MovieDbCountry) {
     self.language = language
     self.country = country
-    self.cache = cache
+    self.cache = StandardTMDBSwiftCache()
     TMDBConfig.apikey = TMDBSwiftWrapper.apiKey
   }
 
-  public func poster(for id: TmdbIdentifier, size: PosterSize) -> UIImage? {
-    return cache.poster(for: "\(id)-\(language)-\(size)") {
-      if let posterPath = movie(for: id)?.poster_path {
-        let path = TMDBSwiftWrapper.baseUrl + size.rawValue + posterPath
-        if let data = try? Data(contentsOf: URL(string: path)!) {
-          return UIImage(data: data)
-        }
-      }
-      return nil
+  public func poster(for id: TmdbIdentifier, size: PosterSize, purpose: PosterPurpose) -> UIImage? {
+    switch purpose {
+      case .list, .details:
+        return cache.poster(for: "\(id)-\(language)-\(size)") { fetchPoster(for: id, size: size) }
+      case .popularMovies:
+        return cache.largePoster(for: "\(id)-\(language)-\(size)") { fetchPoster(for: id, size: size) }
+      case .searchResult:
+        return fetchPoster(for: id, size: size)
     }
+  }
+
+  private func fetchPoster(for id: TmdbIdentifier, size: PosterSize) -> UIImage? {
+    if cachedPosterPaths.keys.contains(id) {
+      guard let posterPath = cachedPosterPaths[id] else { return nil }
+      return fetchImage(at: posterPath, size: size.rawValue)
+    } else if let posterPath = movie(for: id)?.poster_path {
+      return fetchImage(at: posterPath, size: size.rawValue)
+    }
+    return nil
   }
 
   public func backdrop(for id: TmdbIdentifier, size: BackdropSize) -> UIImage? {
     return cache.backdrop(for: "\(id)-\(language)-\(size)") {
-      if let backdropPath = movie(for: id)?.backdrop_path {
-        let path = TMDBSwiftWrapper.baseUrl + size.rawValue + backdropPath
-        if let data = try? Data(contentsOf: URL(string: path)!) {
-          return UIImage(data: data)
-        }
-      }
-      return nil
+      guard let backdropPath = movie(for: id)?.backdrop_path else { return nil }
+      return fetchImage(at: backdropPath, size: size.rawValue)
     }
+  }
+
+  private func fetchImage(at path: String, size: String) -> UIImage? {
+    guard let data = try? Data(contentsOf: URL(string: TMDBSwiftWrapper.baseUrl + size + path)!) else { return nil }
+    return UIImage(data: data)
   }
 
   public func overview(for id: TmdbIdentifier) -> String? {
@@ -111,25 +122,21 @@ public class TMDBSwiftWrapper: MovieDbClient {
   }
 
   public func searchMovies(searchText: String) -> [PartialMediaItem] {
-    var value = [PartialMediaItem]()
+    var movies = [PartialMediaItem]()
     waitUntil { done in
       SearchMDB.movie(query: searchText,
                       language: language.rawValue,
                       page: 1,
                       includeAdult: false,
                       year: nil,
-                      primaryReleaseYear: nil) { _, results in
-        if let results = results {
-          value = results.map {
-            PartialMediaItem(tmdbID: TmdbIdentifier(rawValue: $0.id!),
-                             title: $0.title!,
-                             releaseDate: TMDBSwiftWrapper.releaseDateFormatter.date(from: $0.release_date!))
-          }
+                      primaryReleaseYear: nil) { _, result in
+        if let result = result {
+          movies = result.map(self.toPartialMediaItem)
         }
         done()
       }
     }
-    return value
+    return movies
   }
 
   public func runtime(for id: TmdbIdentifier) -> Measurement<UnitDuration>? {
@@ -143,17 +150,21 @@ public class TMDBSwiftWrapper: MovieDbClient {
       self.waitUntil { done in
         MovieMDB.popular(language: self.language.rawValue, page: page) { _, result in
           if let result = result {
-            movies = result.map {
-              PartialMediaItem(tmdbID: TmdbIdentifier(rawValue: $0.id!),
-                               title: $0.title!,
-                               releaseDate: TMDBSwiftWrapper.releaseDateFormatter.date(from: $0.release_date!))
-            }
+            movies = result.map(self.toPartialMediaItem)
           }
           done()
         }
       }
       return movies.isEmpty ? nil : movies
     }
+  }
+
+  private func toPartialMediaItem(_ movieMDB: MovieMDB) -> PartialMediaItem {
+    let identifier = TmdbIdentifier(rawValue: movieMDB.id!)
+    let year = TMDBSwiftWrapper.releaseDateFormatter.date(from: movieMDB.release_date!)
+                                                    .map { Calendar.current.component(.year, from: $0) }
+    self.cachedPosterPaths[identifier] = movieMDB.poster_path
+    return PartialMediaItem(tmdbID: identifier, title: movieMDB.title!, releaseYear: year)
   }
 
   public func releaseDate(for id: TmdbIdentifier) -> Date? {

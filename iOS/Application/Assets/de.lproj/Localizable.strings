@@ -1,9 +1,6 @@
 "addItem.alert.howToAdd.title" = "Wie willst du den Film hinzufügen?";
 "addItem.failed" = "Hoppla!";
-"addItem.progress" = "Mediathek wird aktualisiert …";
 "addItem.search.placeholder" = "Gib den Filmtitel ein …";
-"addItem.succeeded" = "Aktualisierung abgeschlossen.";
-"addItem.succeeded.changes" = "%@ wurde hinzugefügt.";
 "addItem.title" = "Film hinzufügen";
 "cancel" = "Abbrechen";
 "continue" = "Fortfahren";

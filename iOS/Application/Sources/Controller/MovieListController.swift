@@ -7,27 +7,27 @@ protocol MovieListControllerDelegate: class {
   func movieListControllerDidDismiss(_ controller: MovieListController)
 }
 
-class MovieListItem {
-  let movie: MediaItem
-  var image: Image
-
-  init(movie: MediaItem) {
-    self.movie = movie
-    self.image = .unknown
-  }
-
-  enum Image {
-    case unknown
-    case loading
-    case available(UIImage)
-    case unavailable
-  }
-}
-
 class MovieListController: UITableViewController {
   enum ListData {
     case loading
     case available([MediaItem])
+  }
+
+  final class ListItem {
+    let movie: MediaItem
+    var poster: Image
+
+    init(_ movie: MediaItem) {
+      self.movie = movie
+      self.poster = .unknown
+    }
+
+    enum Image {
+      case unknown
+      case loading
+      case available(UIImage)
+      case unavailable
+    }
   }
 
   weak var delegate: MovieListControllerDelegate?
@@ -42,17 +42,25 @@ class MovieListController: UITableViewController {
 
   private let titleSortingStrategy = SortDescriptor.title.makeTableViewStrategy()
   private lazy var searchController: UISearchController = {
-    let resultsController = storyboard!.instantiate(MovieListSearchResultsController.self)
-    resultsController.onSelection = { [weak self] selectedItem in
-      guard let `self` = self else { return }
-      self.delegate?.movieListController(self, didSelect: selectedItem)
-    }
-    resultsController.posterProvider = posterProvider
     let searchController = UISearchController(searchResultsController: resultsController)
     searchController.searchResultsUpdater = self
     searchController.dimsBackgroundDuringPresentation = false
     searchController.searchBar.placeholder = NSLocalizedString("library.search.placeholder", comment: "")
     return searchController
+  }()
+  private lazy var resultsController: GenericSearchResultsController<MovieListController.ListItem> = {
+    let resultsController = GenericSearchResultsController<MovieListController.ListItem>(
+        cell: MovieListListItemTableCell.self,
+        estimatedRowHeight: MovieListListItemTableCell.rowHeight)
+    resultsController.onSelection = { [delegate] selectedItem in
+      delegate?.movieListController(self, didSelect: selectedItem.movie)
+    }
+    resultsController.cellConfiguration = { [posterProvider] dequeuing, indexPath, listItem in
+      let cell: MovieListListItemTableCell = dequeuing.dequeueReusableCell(for: indexPath)
+      cell.configure(for: listItem, posterProvider: posterProvider)
+      return cell
+    }
+    return resultsController
   }()
 
   private var sortDescriptor = SortDescriptor.title
@@ -69,6 +77,8 @@ class MovieListController: UITableViewController {
 extension MovieListController {
   override func viewDidLoad() {
     super.viewDidLoad()
+    tableView.register(MovieListListItemTableCell.self)
+    tableView.estimatedRowHeight = MovieListListItemTableCell.rowHeight
     tableView.prefetchDataSource = self
     tableView.sectionIndexBackgroundColor = UIColor.clear
     definesPresentationContext = true
@@ -173,7 +183,7 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell: MovieListTableCell = tableView.dequeueReusableCell(for: indexPath)
+    let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
     cell.configure(for: viewModel.item(at: indexPath), posterProvider: posterProvider)
     return cell
   }
@@ -202,18 +212,20 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
     for indexPath in indexPaths {
       let movieListItem = viewModel.item(at: indexPath)
-      if case MovieListItem.Image.unknown = movieListItem.image {
-        movieListItem.image = .loading
+      if case .unknown = movieListItem.poster {
+        movieListItem.poster = .loading
         DispatchQueue.global(qos: .background).async {
-          let poster = self.posterProvider.poster(for: movieListItem.movie.tmdbID, size: PosterSize(minWidth: 60))
+          let poster = self.posterProvider.poster(for: movieListItem.movie.tmdbID,
+                                                  size: PosterSize(minWidth: 60),
+                                                  purpose: .list)
           DispatchQueue.main.async {
             if let posterImage = poster {
-              movieListItem.image = .available(posterImage)
-              if let cell = tableView.cellForRow(at: indexPath) as? MovieListTableCell {
+              movieListItem.poster = .available(posterImage)
+              if let cell = tableView.cellForRow(at: indexPath) as? MovieListListItemTableCell {
                 cell.configure(for: movieListItem, posterProvider: self.posterProvider)
               }
             } else {
-              movieListItem.image = .unavailable
+              movieListItem.poster = .unavailable
             }
           }
         }
@@ -227,14 +239,11 @@ extension MovieListController: UITableViewDataSourcePrefetching {
 extension MovieListController: UISearchResultsUpdating {
   func updateSearchResults(for searchController: UISearchController) {
     guard searchController.isActive else { return }
-    guard let resultsController = searchController.searchResultsController as? MovieListSearchResultsController else {
-      preconditionFailure("unexpected SearchResultsController class")
-    }
     let searchText = searchController.searchBar.text ?? ""
     let lowercasedSearchText = searchText.lowercased()
-    resultsController.searchText = searchText
-    resultsController.items = viewModel.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
-                                       .sorted { titleSortingStrategy.itemSorting(left: $0.movie, right: $1.movie) }
+    let searchResults = self.viewModel.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
+                                      .sorted { titleSortingStrategy.itemSorting(left: $0.movie, right: $1.movie) }
+    resultsController.reload(searchText: searchText, searchResults: searchResults)
   }
 }
 
@@ -263,10 +272,10 @@ private class ViewModel {
   private struct Section {
     let indexTitle: String?
     let title: String?
-    let rows: [MovieListItem]?
+    let rows: [MovieListController.ListItem]?
 
     // standard section
-    init(indexTitle: String, title: String, rows: [MovieListItem]) {
+    init(indexTitle: String, title: String, rows: [MovieListController.ListItem]) {
       self.indexTitle = indexTitle
       self.title = title
       self.rows = rows
@@ -280,7 +289,7 @@ private class ViewModel {
     }
 
     // appended at the end
-    init(title: String, rows: [MovieListItem]) {
+    init(title: String, rows: [MovieListController.ListItem]) {
       self.indexTitle = nil
       self.title = title
       self.rows = rows
@@ -301,7 +310,7 @@ private class ViewModel {
         sections.append(Section(indexTitle: indexTitle,
                                 title: sortingStrategy.sectionTitle(for: indexTitle),
                                 rows: sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
-                                                              .map { MovieListItem(movie: $0) }))
+                                                              .map(MovieListController.ListItem.init)))
       } else {
         sections.append(Section(indexTitle: indexTitle))
       }
@@ -310,13 +319,13 @@ private class ViewModel {
     for indexTitle in additionalIndexTitles {
       sections.append(Section(title: sortingStrategy.sectionTitle(for: indexTitle),
                               rows: sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
-                                                            .map { MovieListItem(movie: $0) }))
+                                                            .map(MovieListController.ListItem.init)))
     }
     self.sections = sections
     isEmpty = items.isEmpty
   }
 
-  func item(at indexPath: IndexPath) -> MovieListItem {
+  func item(at indexPath: IndexPath) -> MovieListController.ListItem {
     guard let item = sections[indexPath.section].rows?[indexPath.row] else {
       fatalError("accessing invalid row \(indexPath.row) in section \(indexPath)")
     }
@@ -346,13 +355,14 @@ private class ViewModel {
     return sections[index].rows == nil ? -1 : index
   }
 
-  func filtered(by filter: (MediaItem) -> Bool) -> [MovieListItem] {
-    let allItems: [MovieListItem] = sections.flatMap { $0.rows ?? [] }
+  func filtered(by filter: (MediaItem) -> Bool) -> [MovieListController.ListItem] {
+    let allItems: [MovieListController.ListItem] = sections.flatMap { $0.rows ?? [] }
     return allItems.filter { filter($0.movie) }
   }
 }
 
-class MovieListTableCell: UITableViewCell {
+class MovieListListItemTableCell: UITableViewCell {
+  static let rowHeight: CGFloat = 100
   private static let runtimeFormatter: DateComponentsFormatter = {
     let formatter = DateComponentsFormatter()
     formatter.unitsStyle = .full
@@ -373,10 +383,10 @@ class MovieListTableCell: UITableViewCell {
     posterView.layer.borderWidth = 0.5
   }
 
-  func configure(for item: MovieListItem, posterProvider: PosterProvider) {
+  func configure(for item: MovieListController.ListItem, posterProvider: PosterProvider) {
     titleLabel.text = item.movie.fullTitle
     if let seconds = item.movie.runtime?.converted(to: UnitDuration.seconds).value {
-      secondaryLabel.text = MovieListTableCell.runtimeFormatter.string(from: seconds)!
+      secondaryLabel.text = MovieListListItemTableCell.runtimeFormatter.string(from: seconds)!
     } else {
       secondaryLabel.text = NSLocalizedString("details.missing.runtime", comment: "")
     }
@@ -384,20 +394,20 @@ class MovieListTableCell: UITableViewCell {
     configurePoster(for: item, posterProvider: posterProvider)
   }
 
-  private func configurePoster(for item: MovieListItem, posterProvider: PosterProvider) {
-    switch item.image {
+  private func configurePoster(for item: MovieListController.ListItem, posterProvider: PosterProvider) {
+    switch item.poster {
       case .unknown:
-        configurePosterForUnknownOrLoadingImageState()
-        item.image = .loading
+        posterView.image = #imageLiteral(resourceName: "GenericPoster")
+        item.poster = .loading
         let size = PosterSize(minWidth: Int(posterView.frame.size.width))
         var workItem: DispatchWorkItem?
         workItem = DispatchWorkItem {
-          let poster = posterProvider.poster(for: item.movie.tmdbID, size: size)
+          let poster = posterProvider.poster(for: item.movie.tmdbID, size: size, purpose: .list)
           DispatchQueue.main.async {
             if let posterImage = poster {
-              item.image = .available(posterImage)
+              item.poster = .available(posterImage)
             } else {
-              item.image = .unavailable
+              item.poster = .unavailable
             }
             if !workItem!.isCancelled {
               self.configurePoster(for: item, posterProvider: posterProvider)
@@ -406,17 +416,11 @@ class MovieListTableCell: UITableViewCell {
         }
         self.workItem = workItem
         DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
-      case .loading:
-        configurePosterForUnknownOrLoadingImageState()
       case let .available(posterImage):
         posterView.image = posterImage
-      case .unavailable:
+      case .loading, .unavailable:
         posterView.image = #imageLiteral(resourceName: "GenericPoster")
     }
-  }
-
-  private func configurePosterForUnknownOrLoadingImageState() {
-    posterView.image = #imageLiteral(resourceName: "GenericPoster")
   }
 
   override func prepareForReuse() {

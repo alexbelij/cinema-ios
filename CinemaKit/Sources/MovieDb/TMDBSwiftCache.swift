@@ -1,26 +1,30 @@
 import Cache
 import UIKit.UIImage
 
-public protocol TMDBSwiftCache {
+protocol TMDBSwiftCache {
 
   func string(for key: String, orSupply supplier: () -> String?) -> String?
   func poster(for key: String, orSupply supplier: () -> UIImage?) -> UIImage?
+  func largePoster(for key: String, orSupply supplier: () -> UIImage?) -> UIImage?
   func backdrop(for key: String, orSupply supplier: () -> UIImage?) -> UIImage?
 
 }
 
-public class StandardTMDBSwiftCache: TMDBSwiftCache {
+class StandardTMDBSwiftCache: TMDBSwiftCache {
 
   private let movieCache: Storage
   private let posterCache: Storage
+  private let largePosterCache: Storage
   private let backdropCache: Storage
 
-  public init() {
+  init() {
     do {
       movieCache = try Storage(diskConfig: DiskConfig(name: "MovieCache", maxSize: 10_000_000),
                                memoryConfig: MemoryConfig(expiry: .never))
       posterCache = try Storage(diskConfig: DiskConfig(name: "PosterCache", maxSize: 50_000_000),
                                 memoryConfig: MemoryConfig(expiry: .never))
+      largePosterCache = try Storage(diskConfig: DiskConfig(name: "LargePosterCache", maxSize: 10_000_000),
+                                     memoryConfig: MemoryConfig(expiry: .never))
       backdropCache = try Storage(diskConfig: DiskConfig(name: "BackdropCache", maxSize: 50_000_000),
                                   memoryConfig: MemoryConfig(expiry: .never))
     } catch {
@@ -28,11 +32,11 @@ public class StandardTMDBSwiftCache: TMDBSwiftCache {
     }
   }
 
-  public func string(for key: String, orSupply supplier: () -> String?) -> String? {
+  func string(for key: String, orSupply supplier: () -> String?) -> String? {
     return cachingImpl(key: key, cache: movieCache, supplier: supplier)
   }
 
-  public func poster(for key: String, orSupply supplier: () -> UIImage?) -> UIImage? {
+  func poster(for key: String, orSupply supplier: () -> UIImage?) -> UIImage? {
     let wrapper: ImageWrapper? = cachingImpl(key: key, cache: posterCache) {
       guard let image = supplier() else { return nil }
       return ImageWrapper(image: image)
@@ -40,7 +44,15 @@ public class StandardTMDBSwiftCache: TMDBSwiftCache {
     return wrapper?.image
   }
 
-  public func backdrop(for key: String, orSupply supplier: () -> UIImage?) -> UIImage? {
+  func largePoster(for key: String, orSupply supplier: () -> UIImage?) -> UIImage? {
+    let wrapper: ImageWrapper? = cachingImpl(key: key, cache: largePosterCache) {
+      guard let image = supplier() else { return nil }
+      return ImageWrapper(image: image)
+    }
+    return wrapper?.image
+  }
+
+  func backdrop(for key: String, orSupply supplier: () -> UIImage?) -> UIImage? {
     let wrapper: ImageWrapper? = cachingImpl(key: key, cache: backdropCache) {
       guard let image = supplier() else { return nil }
       return ImageWrapper(image: image)
@@ -57,22 +69,6 @@ public class StandardTMDBSwiftCache: TMDBSwiftCache {
       return createdElement
     }
     return nil
-  }
-
-}
-
-public class EmptyTMDBSwiftCache: TMDBSwiftCache {
-
-  public func string(for key: String, orSupply supplier: () -> String?) -> String? {
-    return supplier()
-  }
-
-  public func poster(for key: String, orSupply supplier: () -> UIImage?) -> UIImage? {
-    return supplier()
-  }
-
-  public func backdrop(for key: String, orSupply supplier: () -> UIImage?) -> UIImage? {
-    return supplier()
   }
 
 }

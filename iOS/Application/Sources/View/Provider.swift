@@ -2,11 +2,11 @@ import CinemaKit
 import UIKit
 
 protocol PosterProvider {
-  func poster(for id: TmdbIdentifier, size: PosterSize) -> UIImage?
+  func poster(for id: TmdbIdentifier, size: PosterSize, purpose: PosterPurpose) -> UIImage?
 }
 
 class EmptyPosterProvider: PosterProvider {
-  func poster(for id: TmdbIdentifier, size: PosterSize) -> UIImage? {
+  func poster(for id: TmdbIdentifier, size: PosterSize, purpose: PosterPurpose) -> UIImage? {
     return nil
   }
 }
@@ -18,7 +18,7 @@ class MovieDbPosterProvider: PosterProvider {
     self.movieDb = movieDb
   }
 
-  func poster(for id: TmdbIdentifier, size: PosterSize) -> UIImage? {
-    return movieDb.poster(for: id, size: size)
+  func poster(for id: TmdbIdentifier, size: PosterSize, purpose: PosterPurpose) -> UIImage? {
+    return movieDb.poster(for: id, size: size, purpose: purpose)
   }
 }
