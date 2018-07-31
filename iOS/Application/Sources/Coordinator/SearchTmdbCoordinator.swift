@@ -56,8 +56,7 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
     return cachedSearchResults
   }
 
-  func searchTmdbController(_ controller: SearchTmdbController,
-                            didSelectSearchResult model: ExternalMovieViewModel) {
+  func searchTmdbController(_ controller: SearchTmdbController, didSelect model: ExternalMovieViewModel) {
     self.showAddAlert(over: controller) { diskType in
       DispatchQueue.main.async {
         model.state = .updateInProgress
@@ -85,8 +84,7 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
 }
 
 extension SearchTmdbCoordinator: PopularMoviesControllerDelegate {
-  func popularMoviesController(_ controller: PopularMoviesController,
-                               didSelect model: ExternalMovieViewModel) {
+  func popularMoviesController(_ controller: PopularMoviesController, didSelect model: ExternalMovieViewModel) {
     showAddAlert(over: controller) { diskType in
       DispatchQueue.main.async {
         model.state = .updateInProgress

@@ -32,7 +32,7 @@ extension UIStoryboard {
   func instantiate<ViewController: UIViewController>(_ viewController: ViewController.Type) -> ViewController {
     let identifier = String(describing: viewController)
     guard let controller = instantiateViewController(withIdentifier: identifier)
-    as? ViewController else {
+        as? ViewController else {
       fatalError("could not instantiate view controller with identifier \(identifier) ")
     }
     return controller

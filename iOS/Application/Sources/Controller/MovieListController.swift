@@ -13,13 +13,13 @@ class MovieListController: UITableViewController {
     case available([MediaItem])
   }
 
-  class ListItem {
+  final class ListItem {
     let movie: MediaItem
-    var image: Image
+    var poster: Image
 
     init(_ movie: MediaItem) {
       self.movie = movie
-      self.image = .unknown
+      self.poster = .unknown
     }
 
     enum Image {
@@ -212,20 +212,20 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
     for indexPath in indexPaths {
       let movieListItem = viewModel.item(at: indexPath)
-      if case .unknown = movieListItem.image {
-        movieListItem.image = .loading
+      if case .unknown = movieListItem.poster {
+        movieListItem.poster = .loading
         DispatchQueue.global(qos: .background).async {
           let poster = self.posterProvider.poster(for: movieListItem.movie.tmdbID,
                                                   size: PosterSize(minWidth: 60),
                                                   purpose: .list)
           DispatchQueue.main.async {
             if let posterImage = poster {
-              movieListItem.image = .available(posterImage)
+              movieListItem.poster = .available(posterImage)
               if let cell = tableView.cellForRow(at: indexPath) as? MovieListListItemTableCell {
                 cell.configure(for: movieListItem, posterProvider: self.posterProvider)
               }
             } else {
-              movieListItem.image = .unavailable
+              movieListItem.poster = .unavailable
             }
           }
         }
@@ -395,19 +395,19 @@ class MovieListListItemTableCell: UITableViewCell {
   }
 
   private func configurePoster(for item: MovieListController.ListItem, posterProvider: PosterProvider) {
-    switch item.image {
+    switch item.poster {
       case .unknown:
         posterView.image = #imageLiteral(resourceName: "GenericPoster")
-        item.image = .loading
+        item.poster = .loading
         let size = PosterSize(minWidth: Int(posterView.frame.size.width))
         var workItem: DispatchWorkItem?
         workItem = DispatchWorkItem {
           let poster = posterProvider.poster(for: item.movie.tmdbID, size: size, purpose: .list)
           DispatchQueue.main.async {
             if let posterImage = poster {
-              item.image = .available(posterImage)
+              item.poster = .available(posterImage)
             } else {
-              item.image = .unavailable
+              item.poster = .unavailable
             }
             if !workItem!.isCancelled {
               self.configurePoster(for: item, posterProvider: posterProvider)

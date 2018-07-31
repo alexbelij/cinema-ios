@@ -3,8 +3,7 @@ import Dispatch
 import UIKit
 
 protocol PopularMoviesControllerDelegate: class {
-  func popularMoviesController(_ controller: PopularMoviesController,
-                               didSelect model: ExternalMovieViewModel)
+  func popularMoviesController(_ controller: PopularMoviesController, didSelect model: ExternalMovieViewModel)
 }
 
 class PopularMoviesController: UICollectionViewController {

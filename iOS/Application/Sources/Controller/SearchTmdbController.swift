@@ -6,8 +6,7 @@ import UIKit
 protocol SearchTmdbControllerDelegate: class {
   func searchTmdbController(_ controller: SearchTmdbController,
                             searchResultsFor searchText: String) -> [ExternalMovieViewModel]
-  func searchTmdbController(_ controller: SearchTmdbController,
-                            didSelectSearchResult model: ExternalMovieViewModel)
+  func searchTmdbController(_ controller: SearchTmdbController, didSelect model: ExternalMovieViewModel)
 }
 
 class SearchTmdbController: UIViewController {
@@ -32,7 +31,7 @@ class SearchTmdbController: UIViewController {
     }
     resultsController.onSelection = { [weak self] selectedItem in
       guard let `self` = self else { return }
-      self.delegate?.searchTmdbController(self, didSelectSearchResult: selectedItem)
+      self.delegate?.searchTmdbController(self, didSelect: selectedItem)
     }
     resultsController.deselectImmediately = true
     resultsController.cellConfiguration = { [posterProvider] dequeuing, indexPath, listItem in
