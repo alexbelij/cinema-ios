@@ -26,6 +26,7 @@ class EditItemCoordinator: CustomPresentableCoordinator {
 
   // managed controller
   private let navigationController: UINavigationController
+  private let editItemController = UIStoryboard.editItem.instantiate(EditItemController.self)
 
   enum EditResult {
     case canceled
@@ -36,10 +37,7 @@ class EditItemCoordinator: CustomPresentableCoordinator {
   init(item: MediaItem, dependencies: Dependencies) {
     self.dependencies = dependencies
     self.itemToEdit = item
-    // swiftlint:disable force_cast
-    navigationController = UIStoryboard.editItem.instantiateInitialViewController() as! UINavigationController
-    let editItemController = navigationController.topViewController as! EditItemController
-    // swiftlint:enable force_cast
+    navigationController = UINavigationController(rootViewController: editItemController)
     editItemController.delegate = self
     editItemController.itemTitle = itemToEdit.title
     editItemController.subtitle = itemToEdit.subtitle

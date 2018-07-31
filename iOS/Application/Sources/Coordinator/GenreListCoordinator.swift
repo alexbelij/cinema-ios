@@ -19,17 +19,14 @@ class GenreListCoordinator: CustomPresentableCoordinator {
 
   // managed controller
   private let navigationController: UINavigationController
-  private let genreListController: GenreListController
+  private let genreListController = UIStoryboard.genreList.instantiate(GenreListController.self)
 
   // child coordinator
   private var libraryContentCoordinator: LibraryContentCoordinator?
 
   init(dependencies: Dependencies) {
     self.dependencies = dependencies
-    // swiftlint:disable force_cast
-    navigationController = UIStoryboard.genreList.instantiateInitialViewController() as! UINavigationController
-    genreListController = navigationController.topViewController as! GenreListController
-    // swiftlint:enable force_cast
+    navigationController = UINavigationController(rootViewController: genreListController)
     self.backdropSize = BackdropSize(minWidth: Int(genreListController.view.bounds.width))
     self.genreListController.delegate = self
     self.dependencies.library.delegates.add(self)

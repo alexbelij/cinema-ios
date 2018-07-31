@@ -21,22 +21,19 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
 
   // managed controllers
   private let navigationController: UINavigationController
-  private let popularMoviesController: PopularMoviesController
+  private let searchTmdbController = UIStoryboard.searchTmdb.instantiate(SearchTmdbController.self)
+  private let popularMoviesController = UIStoryboard.popularMovies.instantiate(PopularMoviesController.self)
 
   init(dependencies: Dependencies) {
     self.dependencies = dependencies
 
-    // swiftlint:disable:next force_cast
-    self.navigationController = UIStoryboard.searchTmdb.instantiateInitialViewController() as! UINavigationController
+    self.navigationController = UINavigationController(rootViewController: searchTmdbController)
 
-    popularMoviesController = UIStoryboard.popularMovies.instantiate(PopularMoviesController.self)
     popularMoviesController.delegate = self
     let movies = movieDb.popularMovies().lazy.filter { !self.library.containsMediaItem(with: $0.tmdbID) }
     popularMoviesController.movieIterator = AnyIterator(movies.makeIterator())
     popularMoviesController.posterProvider = MovieDbPosterProvider(movieDb)
 
-    // swiftlint:disable:next force_cast
-    let searchTmdbController = navigationController.topViewController! as! SearchTmdbController
     searchTmdbController.delegate = self
     searchTmdbController.additionalViewController = popularMoviesController
   }

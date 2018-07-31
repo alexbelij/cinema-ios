@@ -24,13 +24,11 @@ class ItemDetailsCoordinator: CustomPresentableCoordinator {
   private(set) var detailItem: MediaItem
 
   // managed controller
-  private var itemDetailsController: ItemDetailsController
+  private var itemDetailsController = UIStoryboard.movieList.instantiate(ItemDetailsController.self)
 
   init(detailItem: MediaItem, dependencies: Dependencies) {
     self.dependencies = dependencies
     self.detailItem = detailItem
-
-    itemDetailsController = UIStoryboard.movieList.instantiate(ItemDetailsController.self)
     itemDetailsController.delegate = self
     configure(for: self.detailItem, resetRemoteProperties: true)
     fetchRemoteData(for: self.detailItem.tmdbID)

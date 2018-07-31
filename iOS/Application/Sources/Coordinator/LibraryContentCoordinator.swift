@@ -25,7 +25,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 
   // managed controllers
   private let navigationController: UINavigationController
-  private let movieListController: MovieListController
+  private let movieListController = UIStoryboard.movieList.instantiate(MovieListController.self)
 
   // child coordinators
   private var itemDetailsCoordinator: ItemDetailsCoordinator?
@@ -37,7 +37,6 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     self.dependencies = dependencies
     self.content = content
     self.navigationController = navigationController
-    self.movieListController = UIStoryboard.movieList.instantiate(MovieListController.self)
     movieListController.delegate = self
     movieListController.posterProvider = MovieDbPosterProvider(dependencies.movieDb)
     dependencies.library.delegates.add(self)
