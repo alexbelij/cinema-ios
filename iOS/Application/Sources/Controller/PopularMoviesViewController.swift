@@ -140,6 +140,7 @@ extension PopularMoviesController {
   private func fetchItems(count: Int) {
     guard !isFetchingItems else { return }
     isFetchingItems = true
+    self.collectionView!.backgroundView = nil
     if let footerView = self.collectionView!.supplementaryView(forElementKind: UICollectionElementKindSectionFooter,
                                                                at: IndexPath(row: 0, section: 0)) as? TmdbFooterView {
       footerView.activityIndicator.startAnimating()
