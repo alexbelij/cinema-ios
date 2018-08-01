@@ -17,7 +17,7 @@ class StandardTMDBSwiftCache: TMDBSwiftCache {
   private let largePosterCache: Storage
   private let backdropCache: Storage
 
-  init() {
+  init?() {
     do {
       movieCache = try Storage(diskConfig: DiskConfig(name: "MovieCache", maxSize: 10_000_000),
                                memoryConfig: MemoryConfig(expiry: .never))
@@ -28,7 +28,7 @@ class StandardTMDBSwiftCache: TMDBSwiftCache {
       backdropCache = try Storage(diskConfig: DiskConfig(name: "BackdropCache", maxSize: 50_000_000),
                                   memoryConfig: MemoryConfig(expiry: .never))
     } catch {
-      fatalError("could not create cache storage")
+      return nil
     }
   }
 
@@ -70,5 +70,22 @@ class StandardTMDBSwiftCache: TMDBSwiftCache {
     }
     return nil
   }
+}
 
+class DummyTMDBSwiftCache: TMDBSwiftCache {
+  func string(for key: String, orSupply supplier: () -> String?) -> String? {
+    return supplier()
+  }
+
+  func poster(for key: String, orSupply supplier: () -> UIImage?) -> UIImage? {
+    return supplier()
+  }
+
+  func largePoster(for key: String, orSupply supplier: () -> UIImage?) -> UIImage? {
+    return supplier()
+  }
+
+  func backdrop(for key: String, orSupply supplier: () -> UIImage?) -> UIImage? {
+    return supplier()
+  }
 }

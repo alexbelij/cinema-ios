@@ -26,7 +26,7 @@ public class TMDBSwiftWrapper: MovieDbClient {
   public init(language: MovieDbLanguage, country: MovieDbCountry) {
     self.language = language
     self.country = country
-    self.cache = StandardTMDBSwiftCache()
+    self.cache = StandardTMDBSwiftCache() ?? DummyTMDBSwiftCache()
     TMDBConfig.apikey = TMDBSwiftWrapper.apiKey
   }
 
