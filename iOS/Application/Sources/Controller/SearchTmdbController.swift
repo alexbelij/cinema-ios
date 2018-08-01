@@ -36,7 +36,11 @@ class SearchTmdbController: UIViewController {
     resultsController.deselectImmediately = true
     resultsController.cellConfiguration = { [posterProvider] tableView, indexPath, listItem in
       let cell: SearchTmdbSearchResultTableCell = tableView.dequeueReusableCell(for: indexPath)
-      cell.configure(for: listItem, posterProvider: posterProvider)
+      cell.configure(for: listItem, posterProvider: posterProvider) {
+        guard let rowIndex = resultsController.items.index(where: { $0.movie.tmdbID == listItem.movie.tmdbID })
+            else { return }
+        tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
+      }
       return cell
     }
     return resultsController
@@ -104,11 +108,11 @@ extension SearchTmdbController {
 
 class SearchTmdbSearchResultTableCell: UITableViewCell {
   static let rowHeight: CGFloat = 100
+  static let posterSize = PosterSize(minWidth: 60)
   @IBOutlet private weak var posterView: UIImageView!
   @IBOutlet private weak var titleLabel: UILabel!
   @IBOutlet private weak var yearLabel: UILabel!
   private lazy var activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
-  private var workItem: DispatchWorkItem?
 
   override func awakeFromNib() {
     super.awakeFromNib()
@@ -116,7 +120,9 @@ class SearchTmdbSearchResultTableCell: UITableViewCell {
     posterView.layer.borderWidth = 0.5
   }
 
-  func configure(for model: ExternalMovieViewModel, posterProvider: PosterProvider) {
+  func configure(for model: ExternalMovieViewModel,
+                 posterProvider: PosterProvider,
+                 onNeedsReload: @escaping () -> Void) {
     titleLabel.text = model.movie.title
     if let year = model.movie.releaseYear {
       yearLabel.text = String(year)
@@ -133,31 +139,17 @@ class SearchTmdbSearchResultTableCell: UITableViewCell {
         accessoryType = .checkmark
         selectionStyle = .none
     }
-    configurePoster(for: model, posterProvider: posterProvider)
-  }
-
-  private func configurePoster(for model: ExternalMovieViewModel, posterProvider: PosterProvider) {
     switch model.poster {
       case .unknown:
         posterView.image = #imageLiteral(resourceName: "GenericPoster")
         model.poster = .loading
-        let size = PosterSize(minWidth: Int(posterView.frame.size.width))
-        var workItem: DispatchWorkItem?
-        workItem = DispatchWorkItem {
-          let poster = posterProvider.poster(for: model.movie.tmdbID, size: size, purpose: .searchResult)
-          DispatchQueue.main.async {
-            if let posterImage = poster {
-              model.poster = .available(posterImage)
-            } else {
-              model.poster = .unavailable
-            }
-            if !workItem!.isCancelled {
-              self.configurePoster(for: model, posterProvider: posterProvider)
-            }
-          }
+        DispatchQueue.global(qos: .userInteractive).async {
+          fetchPoster(for: model,
+                      using: posterProvider,
+                      size: SearchTmdbSearchResultTableCell.posterSize,
+                      purpose: .searchResult,
+                      then: onNeedsReload)
         }
-        self.workItem = workItem
-        DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
       case let .available(posterImage):
         posterView.image = posterImage
       case .loading, .unavailable:
@@ -168,7 +160,5 @@ class SearchTmdbSearchResultTableCell: UITableViewCell {
   override func prepareForReuse() {
     super.prepareForReuse()
     activityIndicator.stopAnimating()
-    self.workItem?.cancel()
-    self.workItem = nil
   }
 }

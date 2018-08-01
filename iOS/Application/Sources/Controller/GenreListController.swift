@@ -42,19 +42,12 @@ class GenreListController: UITableViewController {
   fileprivate class Genre {
     let id: GenreIdentifier
     let name: String
-    var image: Image
+    var image: ImageState
 
     init(id: GenreIdentifier, name: String) {
       self.id = id
       self.name = name
       self.image = .unknown
-    }
-
-    enum Image {
-      case unknown
-      case loading
-      case available(UIImage)
-      case missing
     }
   }
 }
@@ -146,7 +139,12 @@ extension GenreListController: UITableViewDataSourcePrefetching {
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell: GenreCell = tableView.dequeueReusableCell(for: indexPath)
-    cell.configure(for: viewModel[indexPath.row], genreImageProvider: genreImageProvider)
+    let genre = viewModel[indexPath.row]
+    cell.configure(for: genre, genreImageProvider: genreImageProvider) { [weak self] in
+      guard let `self` = self else { return }
+      guard let rowIndex = self.viewModel.index(where: { $0.id == genre.id }) else { return }
+      tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
+    }
     return cell
   }
 
@@ -164,16 +162,10 @@ extension GenreListController: UITableViewDataSourcePrefetching {
       if case .unknown = genre.image {
         genre.image = .loading
         DispatchQueue.global(qos: .background).async {
-          let backdrop = self.genreImageProvider.genreImage(for: genre.id)
-          DispatchQueue.main.async {
-            if let backdropImage = backdrop {
-              genre.image = .available(backdropImage)
-              if let cell = tableView.cellForRow(at: indexPath) as? GenreCell {
-                cell.configure(for: genre, genreImageProvider: self.genreImageProvider)
-              }
-            } else {
-              genre.image = .missing
-            }
+          fetchBackdrop(for: genre, using: self.genreImageProvider) { [weak self] in
+            guard let `self` = self else { return }
+            guard let rowIndex = self.viewModel.index(where: { $0.id == genre.id }) else { return }
+            tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
           }
         }
       }
@@ -188,7 +180,6 @@ class GenreCell: UITableViewCell {
   @IBOutlet private weak var genreNameLabel: UILabel!
   @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
   private var scrim: ScrimView!
-  private var workItem: DispatchWorkItem?
 
   override func awakeFromNib() {
     super.awakeFromNib()
@@ -204,32 +195,17 @@ class GenreCell: UITableViewCell {
     scrim.frame = contentView.bounds
   }
 
-  fileprivate func configure(for genre: GenreListController.Genre, genreImageProvider: GenreImageProvider) {
+  fileprivate func configure(for genre: GenreListController.Genre,
+                             genreImageProvider: GenreImageProvider,
+                             onNeedsReload: @escaping () -> Void) {
     genreNameLabel.text = genre.name
-    configureBackdrop(genre: genre, genreImageProvider: genreImageProvider)
-  }
-
-  private func configureBackdrop(genre: GenreListController.Genre, genreImageProvider: GenreImageProvider) {
     switch genre.image {
       case .unknown:
         configureBackdropForUnknownOrLoadingImageState()
         genre.image = .loading
-        var workItem: DispatchWorkItem?
-        workItem = DispatchWorkItem {
-          let backdrop = genreImageProvider.genreImage(for: genre.id)
-          DispatchQueue.main.async {
-            if let backdropImage = backdrop {
-              genre.image = .available(backdropImage)
-            } else {
-              genre.image = .missing
-            }
-            if !(workItem?.isCancelled ?? true) {
-              self.configureBackdrop(genre: genre, genreImageProvider: genreImageProvider)
-            }
-          }
+        DispatchQueue.global(qos: .userInteractive).async {
+          fetchBackdrop(for: genre, using: genreImageProvider, then: onNeedsReload)
         }
-        self.workItem = workItem
-        DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
       case .loading:
         configureBackdropForUnknownOrLoadingImageState()
       case let .available(genreImage):
@@ -239,7 +215,7 @@ class GenreCell: UITableViewCell {
         backdropImageView.contentMode = .scaleAspectFill
         scrim.isHidden = false
         self.activityIndicator.stopAnimating()
-      case .missing:
+      case .unavailable:
         genreNameLabel.textColor = #colorLiteral(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
         genreNameLabel.layer.shadowOpacity = 0.0
         backdropImageView.image = #imageLiteral(resourceName: "MissingGenreImage")
@@ -261,8 +237,20 @@ class GenreCell: UITableViewCell {
 
   override func prepareForReuse() {
     super.prepareForReuse()
-    self.workItem?.cancel()
-    self.workItem = nil
     self.activityIndicator.stopAnimating()
+  }
+}
+
+private func fetchBackdrop(for genre: GenreListController.Genre,
+                           using genreImageProvider: GenreImageProvider,
+                           then completion: @escaping () -> Void) {
+  let backdrop = genreImageProvider.genreImage(for: genre.id)
+  DispatchQueue.main.async {
+    if let backdropImage = backdrop {
+      genre.image = .available(backdropImage)
+    } else {
+      genre.image = .unavailable
+    }
+    completion()
   }
 }

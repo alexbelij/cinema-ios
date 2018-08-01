@@ -53,7 +53,12 @@ extension PopularMoviesController: UICollectionViewDataSourcePrefetching {
   override func collectionView(_ collectionView: UICollectionView,
                                cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
     let cell: PosterCell = collectionView.dequeueReusableCell(for: indexPath)
-    cell.configure(for: items[indexPath.row], posterProvider: posterProvider)
+    let model = items[indexPath.row]
+    cell.configure(for: model, posterProvider: posterProvider) { [weak self] in
+      guard let `self` = self else { return }
+      guard let rowIndex = self.items.index(where: { $0.movie.tmdbID == model.movie.tmdbID }) else { return }
+      collectionView.reloadItems(at: [IndexPath(row: rowIndex, section: 0)])
+    }
     return cell
   }
 
@@ -63,18 +68,14 @@ extension PopularMoviesController: UICollectionViewDataSourcePrefetching {
       if case .unknown = item.poster {
         item.poster = .loading
         DispatchQueue.global(qos: .background).async {
-          let poster = self.posterProvider.poster(for: item.movie.tmdbID,
-                                                  size: PosterSize(minWidth: 130),
-                                                  purpose: .popularMovies)
-          DispatchQueue.main.async {
-            if let posterImage = poster {
-              item.poster = .available(posterImage)
-              if let cell = collectionView.cellForItem(at: indexPath) as? PosterCell {
-                cell.configure(for: item, posterProvider: self.posterProvider)
-              }
-            } else {
-              item.poster = .unavailable
-            }
+          sleep(2)
+          fetchPoster(for: item,
+                      using: self.posterProvider,
+                      size: PosterCell.posterSize,
+                      purpose: .popularMovies) { [weak self] in
+            guard let `self` = self else { return }
+            guard let rowIndex = self.items.index(where: { $0.movie.tmdbID == item.movie.tmdbID }) else { return }
+            collectionView.reloadItems(at: [IndexPath(row: rowIndex, section: 0)])
           }
         }
       }
@@ -193,14 +194,13 @@ class TitleHeaderView: UICollectionReusableView {
 }
 
 class PosterCell: UICollectionViewCell {
-
+  static let posterSize = PosterSize(minWidth: 130)
   @IBOutlet private weak var posterView: UIImageView!
   @IBOutlet private weak var titleLabel: UILabel!
   @IBOutlet private var blurView: UIVisualEffectView!
   @IBOutlet private var activityIndicator: UIActivityIndicatorView!
   @IBOutlet private weak var checkmarkView: UIVisualEffectView!
   private var highlightView: UIView!
-  private var workItem: DispatchWorkItem?
 
   override func awakeFromNib() {
     super.awakeFromNib()
@@ -214,9 +214,10 @@ class PosterCell: UICollectionViewCell {
     self.contentView.addSubview(highlightView)
   }
 
-  func configure(for model: ExternalMovieViewModel, posterProvider: PosterProvider) {
+  func configure(for model: ExternalMovieViewModel,
+                 posterProvider: PosterProvider,
+                 onNeedsReload: @escaping () -> Void) {
     titleLabel.text = model.movie.title
-    configurePoster(for: model, posterProvider: posterProvider)
     switch model.state {
       case .new:
         blurView.isHidden = true
@@ -229,31 +230,18 @@ class PosterCell: UICollectionViewCell {
         blurView.isHidden = false
         checkmarkView.isHidden = false
     }
-  }
-
-  private func configurePoster(for model: ExternalMovieViewModel, posterProvider: PosterProvider) {
     switch model.poster {
       case .unknown:
         posterView.image = #imageLiteral(resourceName: "GenericPoster")
         model.poster = .loading
-        var workItem: DispatchWorkItem?
-        workItem = DispatchWorkItem {
-          let poster = posterProvider.poster(for: model.movie.tmdbID,
-                                             size: PosterSize(minWidth: 130),
-                                             purpose: .popularMovies)
-          DispatchQueue.main.async {
-            if let posterImage = poster {
-              model.poster = .available(posterImage)
-            } else {
-              model.poster = .unavailable
-            }
-            if !workItem!.isCancelled {
-              self.configurePoster(for: model, posterProvider: posterProvider)
-            }
-          }
+        DispatchQueue.global(qos: .userInteractive).async {
+          sleep(2)
+          fetchPoster(for: model,
+                      using: posterProvider,
+                      size: PosterCell.posterSize,
+                      purpose: .popularMovies,
+                      then: onNeedsReload)
         }
-        self.workItem = workItem
-        DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
       case let .available(posterImage):
         posterView.image = posterImage
       case .loading, .unavailable:
@@ -273,8 +261,6 @@ class PosterCell: UICollectionViewCell {
 
   override func prepareForReuse() {
     super.prepareForReuse()
-    self.workItem?.cancel()
-    self.workItem = nil
     activityIndicator.stopAnimating()
   }
 }

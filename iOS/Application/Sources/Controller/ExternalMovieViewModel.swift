@@ -1,14 +1,6 @@
 import CinemaKit
-import UIKit
 
-final class ExternalMovieViewModel {
-  enum ImageState {
-    case unknown
-    case loading
-    case available(UIImage)
-    case unavailable
-  }
-
+final class ExternalMovieViewModel: PosterHaving {
   enum LibraryState {
     case new
     case updateInProgress
@@ -23,5 +15,9 @@ final class ExternalMovieViewModel {
     self.movie = movie
     self.state = state
     self.poster = .unknown
+  }
+
+  var tmdbID: TmdbIdentifier {
+    return movie.tmdbID
   }
 }

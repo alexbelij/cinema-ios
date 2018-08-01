@@ -1,3 +1,4 @@
+import CinemaKit
 import Foundation
 import UIKit
 
@@ -53,5 +54,41 @@ extension UIColor {
 extension String {
   var nilIfEmptyString: String? {
     return self.isEmpty ? nil : self
+  }
+}
+
+extension UITableView {
+  func reloadRowWithoutAnimation(at indexPath: IndexPath) {
+    UIView.performWithoutAnimation {
+      reloadRows(at: [indexPath], with: .none)
+    }
+  }
+}
+
+enum ImageState {
+  case unknown
+  case loading
+  case available(UIImage)
+  case unavailable
+}
+
+protocol PosterHaving: class {
+  var tmdbID: TmdbIdentifier { get }
+  var poster: ImageState { get set }
+}
+
+func fetchPoster(for model: PosterHaving,
+                 using posterProvider: PosterProvider,
+                 size: PosterSize,
+                 purpose: PosterPurpose,
+                 then completion: @escaping () -> Void) {
+  let poster = posterProvider.poster(for: model.tmdbID, size: size, purpose: purpose)
+  DispatchQueue.main.async {
+    if let posterImage = poster {
+      model.poster = .available(posterImage)
+    } else {
+      model.poster = .unavailable
+    }
+    completion()
   }
 }

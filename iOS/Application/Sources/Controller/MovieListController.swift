@@ -13,20 +13,17 @@ class MovieListController: UITableViewController {
     case available([MediaItem])
   }
 
-  final class ListItem {
+  final class ListItem: PosterHaving {
     let movie: MediaItem
-    var poster: Image
+    var poster: ImageState
 
     init(_ movie: MediaItem) {
       self.movie = movie
       self.poster = .unknown
     }
 
-    enum Image {
-      case unknown
-      case loading
-      case available(UIImage)
-      case unavailable
+    var tmdbID: TmdbIdentifier {
+      return movie.tmdbID
     }
   }
 
@@ -57,7 +54,11 @@ class MovieListController: UITableViewController {
     }
     resultsController.cellConfiguration = { [posterProvider] tableView, indexPath, listItem in
       let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
-      cell.configure(for: listItem, posterProvider: posterProvider)
+      cell.configure(for: listItem, posterProvider: posterProvider) {
+        guard let rowIndex = resultsController.items.index(where: { $0.movie.tmdbID == listItem.movie.tmdbID })
+            else { return }
+        tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
+      }
       return cell
     }
     return resultsController
@@ -184,7 +185,12 @@ extension MovieListController: UITableViewDataSourcePrefetching {
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
-    cell.configure(for: viewModel.item(at: indexPath), posterProvider: posterProvider)
+    let item = viewModel.item(at: indexPath)
+    cell.configure(for: item, posterProvider: posterProvider) { [weak self] in
+      guard let `self` = self else { return }
+      guard let newIndexPath = self.viewModel.indexPath(for: item) else { return }
+      tableView.reloadRowWithoutAnimation(at: newIndexPath)
+    }
     return cell
   }
 
@@ -211,22 +217,17 @@ extension MovieListController: UITableViewDataSourcePrefetching {
 
   func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
     for indexPath in indexPaths {
-      let movieListItem = viewModel.item(at: indexPath)
-      if case .unknown = movieListItem.poster {
-        movieListItem.poster = .loading
+      let listItem = viewModel.item(at: indexPath)
+      if case .unknown = listItem.poster {
+        listItem.poster = .loading
         DispatchQueue.global(qos: .background).async {
-          let poster = self.posterProvider.poster(for: movieListItem.movie.tmdbID,
-                                                  size: PosterSize(minWidth: 60),
-                                                  purpose: .list)
-          DispatchQueue.main.async {
-            if let posterImage = poster {
-              movieListItem.poster = .available(posterImage)
-              if let cell = tableView.cellForRow(at: indexPath) as? MovieListListItemTableCell {
-                cell.configure(for: movieListItem, posterProvider: self.posterProvider)
-              }
-            } else {
-              movieListItem.poster = .unavailable
-            }
+          fetchPoster(for: listItem,
+                      using: self.posterProvider,
+                      size: MovieListListItemTableCell.posterSize,
+                      purpose: .list) { [weak self] in
+            guard let `self` = self else { return }
+            guard let newIndexPath = self.viewModel.indexPath(for: listItem) else { return }
+            tableView.reloadRowWithoutAnimation(at: newIndexPath)
           }
         }
       }
@@ -297,31 +298,42 @@ private class ViewModel {
   }
 
   private let sections: [Section]
+  private let indexPaths: [TmdbIdentifier: IndexPath]
   let isEmpty: Bool
 
   init(_ items: [MediaItem], sortingStrategy: SectionSortingStrategy) {
+    var indexPaths = [TmdbIdentifier: IndexPath]()
     var sections = [Section]()
     let sectionData: [String: [MediaItem]] = Dictionary(grouping: items) { sortingStrategy.sectionIndexTitle(for: $0) }
     let existingSectionIndexTitles = Array(sectionData.keys).sorted(by: sortingStrategy.sectionIndexTitleSorting)
     let refinedSectionIndexTitles = sortingStrategy.refineSectionIndexTitles(existingSectionIndexTitles)
-    for index in refinedSectionIndexTitles.startIndex..<refinedSectionIndexTitles.endIndex {
-      let indexTitle = refinedSectionIndexTitles[index]
+    for sectionIndex in refinedSectionIndexTitles.startIndex..<refinedSectionIndexTitles.endIndex {
+      let indexTitle = refinedSectionIndexTitles[sectionIndex]
       if existingSectionIndexTitles.contains(indexTitle) {
+        let rows: [MovieListController.ListItem] = sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
+                                                                           .map(MovieListController.ListItem.init)
+        for rowIndex in rows.startIndex..<rows.endIndex {
+          indexPaths[rows[rowIndex].movie.tmdbID] = IndexPath(row: rowIndex, section: sectionIndex)
+        }
         sections.append(Section(indexTitle: indexTitle,
                                 title: sortingStrategy.sectionTitle(for: indexTitle),
-                                rows: sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
-                                                              .map(MovieListController.ListItem.init)))
+                                rows: rows))
       } else {
         sections.append(Section(indexTitle: indexTitle))
       }
     }
     let additionalIndexTitles = Set(existingSectionIndexTitles).subtracting(Set(refinedSectionIndexTitles))
     for indexTitle in additionalIndexTitles {
-      sections.append(Section(title: sortingStrategy.sectionTitle(for: indexTitle),
-                              rows: sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
-                                                            .map(MovieListController.ListItem.init)))
+      let rows = sectionData[indexTitle]!.sorted(by: sortingStrategy.itemSorting)
+                                         .map(MovieListController.ListItem.init)
+      let sectionIndex = sections.count
+      for rowIndex in rows.startIndex..<rows.endIndex {
+        indexPaths[rows[rowIndex].movie.tmdbID] = IndexPath(row: rowIndex, section: sectionIndex)
+      }
+      sections.append(Section(title: sortingStrategy.sectionTitle(for: indexTitle), rows: rows))
     }
     self.sections = sections
+    self.indexPaths = indexPaths
     isEmpty = items.isEmpty
   }
 
@@ -330,6 +342,10 @@ private class ViewModel {
       fatalError("accessing invalid row \(indexPath.row) in section \(indexPath)")
     }
     return item
+  }
+
+  func indexPath(for item: MovieListController.ListItem) -> IndexPath? {
+    return indexPaths[item.movie.tmdbID]
   }
 
   var numberOfSections: Int {
@@ -363,6 +379,7 @@ private class ViewModel {
 
 class MovieListListItemTableCell: UITableViewCell {
   static let rowHeight: CGFloat = 100
+  static let posterSize = PosterSize(minWidth: 60)
   private static let runtimeFormatter: DateComponentsFormatter = {
     let formatter = DateComponentsFormatter()
     formatter.unitsStyle = .full
@@ -375,7 +392,6 @@ class MovieListListItemTableCell: UITableViewCell {
   @IBOutlet private weak var titleLabel: UILabel!
   @IBOutlet private weak var secondaryLabel: UILabel!
   @IBOutlet private weak var tertiaryLabel: UILabel!
-  private var workItem: DispatchWorkItem?
 
   override func awakeFromNib() {
     super.awakeFromNib()
@@ -383,7 +399,9 @@ class MovieListListItemTableCell: UITableViewCell {
     posterView.layer.borderWidth = 0.5
   }
 
-  func configure(for item: MovieListController.ListItem, posterProvider: PosterProvider) {
+  func configure(for item: MovieListController.ListItem,
+                 posterProvider: PosterProvider,
+                 onNeedsReload: @escaping () -> Void) {
     titleLabel.text = item.movie.fullTitle
     if let seconds = item.movie.runtime?.converted(to: UnitDuration.seconds).value {
       secondaryLabel.text = MovieListListItemTableCell.runtimeFormatter.string(from: seconds)!
@@ -391,41 +409,21 @@ class MovieListListItemTableCell: UITableViewCell {
       secondaryLabel.text = NSLocalizedString("details.missing.runtime", comment: "")
     }
     tertiaryLabel.text = item.movie.diskType.localizedName
-    configurePoster(for: item, posterProvider: posterProvider)
-  }
-
-  private func configurePoster(for item: MovieListController.ListItem, posterProvider: PosterProvider) {
     switch item.poster {
       case .unknown:
         posterView.image = #imageLiteral(resourceName: "GenericPoster")
         item.poster = .loading
-        let size = PosterSize(minWidth: Int(posterView.frame.size.width))
-        var workItem: DispatchWorkItem?
-        workItem = DispatchWorkItem {
-          let poster = posterProvider.poster(for: item.movie.tmdbID, size: size, purpose: .list)
-          DispatchQueue.main.async {
-            if let posterImage = poster {
-              item.poster = .available(posterImage)
-            } else {
-              item.poster = .unavailable
-            }
-            if !workItem!.isCancelled {
-              self.configurePoster(for: item, posterProvider: posterProvider)
-            }
-          }
+        DispatchQueue.global(qos: .userInteractive).async {
+          fetchPoster(for: item,
+                      using: posterProvider,
+                      size: MovieListListItemTableCell.posterSize,
+                      purpose: .list,
+                      then: onNeedsReload)
         }
-        self.workItem = workItem
-        DispatchQueue.global(qos: .userInteractive).async(execute: workItem!)
       case let .available(posterImage):
         posterView.image = posterImage
       case .loading, .unavailable:
         posterView.image = #imageLiteral(resourceName: "GenericPoster")
     }
-  }
-
-  override func prepareForReuse() {
-    super.prepareForReuse()
-    self.workItem?.cancel()
-    self.workItem = nil
   }
 }
