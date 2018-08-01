@@ -36,6 +36,30 @@ class StandardTMDBSwiftCache: TMDBSwiftCache {
              String(describing: error))
       return nil
     }
+    NotificationCenter.default.addObserver(self,
+                                           selector: #selector(clearExpiredData),
+                                           name: .UIApplicationDidReceiveMemoryWarning,
+                                           object: nil)
+    NotificationCenter.default.addObserver(self,
+                                           selector: #selector(clearExpiredData),
+                                           name: .UIApplicationWillTerminate,
+                                           object: nil)
+  }
+
+  @objc
+  private func clearExpiredData() {
+    do {
+      os_log("clearing expired data", log: StandardTMDBSwiftCache.logger, type: .info)
+      try movieCache.removeExpiredObjects()
+      try posterCache.removeExpiredObjects()
+      try largePosterCache.removeExpiredObjects()
+      try backdropCache.removeExpiredObjects()
+    } catch {
+      os_log("unable to clear expired data: %{public}@",
+             log: StandardTMDBSwiftCache.logger,
+             type: .fault,
+             String(describing: error))
+    }
   }
 
   func string(for key: String, orSupply supplier: () -> String?) -> String? {
