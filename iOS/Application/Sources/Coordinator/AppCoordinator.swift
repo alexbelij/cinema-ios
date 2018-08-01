@@ -62,8 +62,7 @@ extension AppCoordinator {
     moveLegacyLibraryFile(to: url)
     let dataFormat = KeyedArchivalFormat()
     dataFormat.defaultSchemaVersion = .v2_0_0
-    // swiftlint:disable:next force_try
-    let library = try! FileBasedMediaLibrary(url: url, dataFormat: dataFormat)
+    let library = FileBasedMediaLibrary(url: url, dataFormat: dataFormat)!
 
     // MovieDb Client
     let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en

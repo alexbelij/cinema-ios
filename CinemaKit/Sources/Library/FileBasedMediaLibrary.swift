@@ -14,17 +14,15 @@ public class FileBasedMediaLibrary: MediaLibrary {
 
   private var pendingContentUpdate = MediaLibraryContentUpdate()
 
-  public init(url: URL, dataFormat: DataFormat) throws {
+  public init?(url: URL, dataFormat: DataFormat) {
     self.url = url
     self.dataFormat = dataFormat
     if FileManager.default.fileExists(atPath: url.path) {
-      guard let data = try? Data(contentsOf: URL(fileURLWithPath: url.path)) else {
-        throw MediaLibraryError.storageError
-      }
       do {
+        let data = try Data(contentsOf: URL(fileURLWithPath: url.path))
         mediaItems = Dictionary(uniqueKeysWithValues: try dataFormat.deserialize(from: data).map { ($0.tmdbID, $0) })
       } catch {
-        throw MediaLibraryError.storageError
+        return nil
       }
     } else {
       mediaItems = [:]
