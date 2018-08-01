@@ -1,5 +1,6 @@
 import CinemaKit
 import Foundation
+import os.log
 import UIKit
 
 class AppCoordinator: AutoPresentableCoordinator {
@@ -11,6 +12,7 @@ class AppCoordinator: AutoPresentableCoordinator {
     case upAndRunning(AppDependencies, CoreCoordinator)
   }
 
+  private static let logger = Logging.createLogger(category: "Main")
   private let window = UIWindow(frame: UIScreen.main.bounds)
   private var state: State = .launched {
     didSet {
@@ -23,6 +25,7 @@ class AppCoordinator: AutoPresentableCoordinator {
         case let .updatingData(_, dataUpdateCoordinator):
           window.rootViewController = dataUpdateCoordinator.rootViewController
         case let .upAndRunning(_, mainCoordinator):
+          os_log("up and running", log: AppCoordinator.logger, type: .default)
           replaceRootViewController(of: window, with: mainCoordinator.rootViewController)
       }
     }
@@ -57,6 +60,7 @@ class AppCoordinator: AutoPresentableCoordinator {
 
 extension AppCoordinator {
   private func makeDependencies() -> AppDependencies {
+    os_log("gathering dependencies", log: AppCoordinator.logger, type: .default)
     // Media Library
     let url = Utils.directoryUrl(for: .documentDirectory).appendingPathComponent("cinema.data")
     moveLegacyLibraryFile(to: url)
@@ -79,8 +83,15 @@ extension AppCoordinator {
     if FileManager.default.fileExists(atPath: legacyUrl.path) {
       do {
         try FileManager.default.moveItem(at: legacyUrl, to: url)
+        os_log("moved legacy library data file from 'Application Support' to 'Documents'",
+               log: AppCoordinator.logger,
+               type: .default)
       } catch {
-        fatalError("could not move library file: \(error)")
+        os_log("unable to move legacy library data file: %{public}@",
+               log: AppCoordinator.logger,
+               type: .fault,
+               String(describing: error))
+        fatalError("unable to move legacy library data file")
       }
     }
   }
@@ -90,10 +101,13 @@ extension AppCoordinator {
 
 extension AppCoordinator: DataUpdateCoordinatorDelegate {
   private func checkForDataUpdates(dependencies: AppDependencies) {
+    os_log("checking for library data updates", log: AppCoordinator.logger, type: .default)
     let updates = UpdateUtils.updates(from: dependencies.library.persistentSchemaVersion, using: dependencies.movieDb)
     if updates.isEmpty {
+      os_log("library data is up to date", log: AppCoordinator.logger, type: .default)
       transition(to: .upAndRunning(dependencies, CoreCoordinator(dependencies: dependencies)))
     } else {
+      os_log("library data update necessary", log: AppCoordinator.logger, type: .default)
       let dataUpdateCoordinator = DataUpdateCoordinator(library: dependencies.library, updates: updates)
       dataUpdateCoordinator.delegate = self
       transition(to: .updatingData(dependencies, dataUpdateCoordinator))
@@ -104,6 +118,7 @@ extension AppCoordinator: DataUpdateCoordinatorDelegate {
     guard case let State.updatingData(dependencies, _) = state else {
       preconditionFailure("delegate method called but not in appropriate state: \(state)")
     }
+    os_log("library data update complete", log: AppCoordinator.logger, type: .default)
     transition(to: .upAndRunning(dependencies, CoreCoordinator(dependencies: dependencies)))
   }
 }

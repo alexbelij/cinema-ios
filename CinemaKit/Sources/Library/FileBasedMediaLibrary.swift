@@ -1,6 +1,9 @@
 import Foundation
+import os.log
 
 public class FileBasedMediaLibrary: MediaLibrary {
+
+  private static let logger = Logging.createLogger(category: "Storage")
 
   public let delegates: MulticastDelegate<MediaLibraryDelegate> = MulticastDelegate()
 
@@ -18,13 +21,19 @@ public class FileBasedMediaLibrary: MediaLibrary {
     self.url = url
     self.dataFormat = dataFormat
     if FileManager.default.fileExists(atPath: url.path) {
+      os_log("library data file exists", log: FileBasedMediaLibrary.logger, type: .default)
       do {
         let data = try Data(contentsOf: URL(fileURLWithPath: url.path))
         mediaItems = Dictionary(uniqueKeysWithValues: try dataFormat.deserialize(from: data).map { ($0.tmdbID, $0) })
       } catch {
+        os_log("failed to load library data: %{public}@",
+               log: FileBasedMediaLibrary.logger,
+               type: .error,
+               String(describing: error))
         return nil
       }
     } else {
+      os_log("no data file for library", log: FileBasedMediaLibrary.logger, type: .default)
       mediaItems = [:]
     }
   }
