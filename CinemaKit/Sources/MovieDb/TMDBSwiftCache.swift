@@ -1,4 +1,5 @@
 import Cache
+import os.log
 import UIKit.UIImage
 
 protocol TMDBSwiftCache {
@@ -12,6 +13,7 @@ protocol TMDBSwiftCache {
 
 class StandardTMDBSwiftCache: TMDBSwiftCache {
 
+  private static let logger = Logging.createLogger(category: "TMDB-Cache")
   private let movieCache: Storage
   private let posterCache: Storage
   private let largePosterCache: Storage
@@ -28,6 +30,10 @@ class StandardTMDBSwiftCache: TMDBSwiftCache {
       backdropCache = try Storage(diskConfig: DiskConfig(name: "BackdropCache", maxSize: 50_000_000),
                                   memoryConfig: MemoryConfig(expiry: .never))
     } catch {
+      os_log("unable to create cache: %{public}@",
+             log: StandardTMDBSwiftCache.logger,
+             type: .fault,
+             String(describing: error))
       return nil
     }
   }
