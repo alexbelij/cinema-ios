@@ -1,9 +1,12 @@
 import Dispatch
 import Foundation
+import os.log
 import TMDBSwift
 import UIKit
 
 public class TMDBSwiftWrapper: MovieDbClient {
+
+  private static let logger = Logging.createLogger(category: "TMDB")
 
   private static let apiKey = "ace1ea1cb456b8d6fe092a0ec923e30c"
 
@@ -59,7 +62,12 @@ public class TMDBSwiftWrapper: MovieDbClient {
   }
 
   private func fetchImage(at path: String, size: String) -> UIImage? {
-    guard let data = try? Data(contentsOf: URL(string: TMDBSwiftWrapper.baseUrl + size + path)!) else { return nil }
+    let urlString: String = TMDBSwiftWrapper.baseUrl + size + path
+    guard let url = URL(string: urlString) else {
+      os_log("image path is no valid URL: %{public}@", log: TMDBSwiftWrapper.logger, type: .error, urlString)
+      return nil
+    }
+    guard let data = try? Data(contentsOf: url) else { return nil }
     return UIImage(data: data)
   }
 
