@@ -17,37 +17,12 @@ class ImportCoordinator: PageCoordinator {
     self.importUrl = importUrl
     self.dependencies = dependencies
     super.init()
-    showImportingPage()
+    showContinuePage(primaryText: "Imports are currently disabled.",
+                     secondaryText: "Please check back later.")
   }
 }
 
 extension ImportCoordinator {
-  private func showImportingPage() {
-    let importAndUpdateAction = ImportAndUpdateAction(library: dependencies.library,
-                                                      movieDb: dependencies.movieDb,
-                                                      from: importUrl)
-    showPage(ProgressPage.initWith(primaryText: NSLocalizedString("import.progress", comment: ""),
-                                   progress: importAndUpdateAction.progress))
-    DispatchQueue.global(qos: .userInitiated).async {
-      importAndUpdateAction.performAction { result in
-        switch result {
-          case let .result(addedItems):
-            let count = addedItems.count
-            DispatchQueue.main.async {
-              let format = NSLocalizedString("import.succeeded.changes", comment: "")
-              self.showContinuePage(primaryText: NSLocalizedString("import.succeeded", comment: ""),
-                                    secondaryText: .localizedStringWithFormat(format, count))
-            }
-          case let .error(error):
-            DispatchQueue.main.async {
-              self.showContinuePage(primaryText: NSLocalizedString("error.genericTitle", comment: ""),
-                                    secondaryText: L10n.errorMessage(for: error))
-            }
-        }
-      }
-    }
-  }
-
   private func showContinuePage(primaryText: String, secondaryText: String) {
     showPage(ActionPage.initWith(primaryText: primaryText,
                                  secondaryText: secondaryText,
