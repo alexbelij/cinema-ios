@@ -7,8 +7,6 @@ class AppCoordinator: AutoPresentableCoordinator {
   enum State {
     case launched
     case gatheringDependencies
-    case checkingForDataUpdates(AppDependencies)
-    case updatingData(AppDependencies, DataUpdateCoordinator)
     case upAndRunning(AppDependencies, CoreCoordinator)
   }
 
@@ -19,11 +17,8 @@ class AppCoordinator: AutoPresentableCoordinator {
       switch state {
         case .launched: fatalError("unreachable")
         case .gatheringDependencies:
-          transition(to: .checkingForDataUpdates(makeDependencies()))
-        case let .checkingForDataUpdates(dependencies):
-          checkForDataUpdates(dependencies: dependencies)
-        case let .updatingData(_, dataUpdateCoordinator):
-          window.rootViewController = dataUpdateCoordinator.rootViewController
+          let dependencies = makeDependencies()
+          transition(to: .upAndRunning(dependencies, CoreCoordinator(dependencies: dependencies)))
         case let .upAndRunning(_, mainCoordinator):
           os_log("up and running", log: AppCoordinator.logger, type: .default)
           replaceRootViewController(of: window, with: mainCoordinator.rootViewController)
@@ -97,32 +92,6 @@ extension AppCoordinator {
   }
 }
 
-// MARK: - Data Updates
-
-extension AppCoordinator: DataUpdateCoordinatorDelegate {
-  private func checkForDataUpdates(dependencies: AppDependencies) {
-    os_log("checking for library data updates", log: AppCoordinator.logger, type: .default)
-    let updates = UpdateUtils.updates(from: dependencies.library.persistentSchemaVersion, using: dependencies.movieDb)
-    if updates.isEmpty {
-      os_log("library data is up to date", log: AppCoordinator.logger, type: .default)
-      transition(to: .upAndRunning(dependencies, CoreCoordinator(dependencies: dependencies)))
-    } else {
-      os_log("library data update necessary", log: AppCoordinator.logger, type: .default)
-      let dataUpdateCoordinator = DataUpdateCoordinator(library: dependencies.library, updates: updates)
-      dataUpdateCoordinator.delegate = self
-      transition(to: .updatingData(dependencies, dataUpdateCoordinator))
-    }
-  }
-
-  func dataUpdateCoordinatorDidFinish(_ coordinator: DataUpdateCoordinator) {
-    guard case let State.updatingData(dependencies, _) = state else {
-      preconditionFailure("delegate method called but not in appropriate state: \(state)")
-    }
-    os_log("library data update complete", log: AppCoordinator.logger, type: .default)
-    transition(to: .upAndRunning(dependencies, CoreCoordinator(dependencies: dependencies)))
-  }
-}
-
 // MARK: - Importing from URL
 
 extension AppCoordinator: ImportCoordinatorDelegate {
@@ -143,7 +112,6 @@ extension AppCoordinator: ImportCoordinatorDelegate {
 // MARK: - Finite State Machine Validation
 
 extension AppCoordinator {
-  // swiftlint:disable:next cyclomatic_complexity
   func transition(to nextState: State) {
     let isValidNextState: Bool
     switch state {
@@ -153,16 +121,6 @@ extension AppCoordinator {
           default: isValidNextState = false
         }
       case .gatheringDependencies:
-        switch nextState {
-          case .checkingForDataUpdates: isValidNextState = true
-          default: isValidNextState = false
-        }
-      case .checkingForDataUpdates:
-        switch nextState {
-          case .updatingData, .upAndRunning: isValidNextState = true
-          default: isValidNextState = false
-        }
-      case .updatingData:
         switch nextState {
           case .upAndRunning: isValidNextState = true
           default: isValidNextState = false

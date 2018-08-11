@@ -4,13 +4,6 @@
 "addItem.title" = "Film hinzufügen";
 "cancel" = "Abbrechen";
 "continue" = "Fortfahren";
-"dataUpdate.failed" = "Deine Mediathek konnte nicht aktualisiert werden.";
-"dataUpdate.intention" = "Um die App für dich zu verbessern, müssen wir deine Mediathek aktualisieren.";
-"dataUpdate.progress" = "Mediathek wird aktualisiert";
-"dataUpdate.update" = "Aktualisierung";
-"dataUpdate.start" = "Aktualisierung starten";
-"dataUpdate.succeeded" = "Update abgeschlossen";
-"dataUpdate.succeeded.description" = "Deine Mediathek wurde erfolgreich aktualisiert.";
 "details.missing.overview" = "Keine Beschreibung vorhanden.";
 "details.missing.runtime" = "Keine Laufzeit verfügbar.";
 "details.storyline" = "Inhalt";
