@@ -236,7 +236,6 @@ class PosterCell: UICollectionViewCell {
         posterView.image = #imageLiteral(resourceName: "GenericPoster")
         model.poster = .loading
         DispatchQueue.global(qos: .userInteractive).async {
-          sleep(2)
           fetchPoster(for: model,
                       using: posterProvider,
                       size: PosterCell.posterSize,
