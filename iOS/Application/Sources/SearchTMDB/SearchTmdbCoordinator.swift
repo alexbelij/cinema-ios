@@ -9,7 +9,11 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
   }
 
   // other properties
-  private var library: MovieLibrary
+  var library: MovieLibrary {
+    didSet {
+      setup()
+    }
+  }
   private var movieDb: MovieDbClient
   private var cachedSearchResults = [ExternalMovieViewModel]()
 
@@ -18,22 +22,29 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
   private let searchTmdbController = UIStoryboard.searchTmdb.instantiate(SearchTmdbController.self)
   private let popularMoviesController = UIStoryboard.popularMovies.instantiate(PopularMoviesController.self)
 
-  init(dependencies: AppDependencies) {
-    self.library = dependencies.library
-    self.movieDb = dependencies.movieDb
+  init(for library: MovieLibrary, using movieDb: MovieDbClient) {
+    self.library = library
+    self.movieDb = movieDb
 
     self.navigationController = UINavigationController(rootViewController: searchTmdbController)
 
     popularMoviesController.delegate = self
-    let movies = self.movieDb.popularMovies().lazy.filter { [library = self.library] in
-      !library.containsMovie(with: $0.tmdbID)
-    }
-    popularMoviesController.movieIterator = AnyIterator(movies.makeIterator())
     popularMoviesController.posterProvider = MovieDbPosterProvider(movieDb)
 
     searchTmdbController.delegate = self
-    searchTmdbController.posterProvider = MovieDbPosterProvider(dependencies.movieDb)
+    searchTmdbController.posterProvider = MovieDbPosterProvider(movieDb)
     searchTmdbController.additionalViewController = popularMoviesController
+
+    setup()
+  }
+
+  private func setup() {
+    DispatchQueue.main.async {
+      let movies = self.movieDb.popularMovies().lazy.filter { [library = self.library] in
+        !library.containsMovie(with: $0.tmdbID)
+      }
+      self.popularMoviesController.movieIterator = AnyIterator(movies.makeIterator())
+    }
   }
 }
 

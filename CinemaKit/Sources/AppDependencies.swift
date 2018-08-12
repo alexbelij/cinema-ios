@@ -1,4 +1,4 @@
 public struct AppDependencies {
-  public let library: MovieLibrary
+  public let libraryManager: MovieLibraryManager
   public let movieDb: MovieDbClient
 }

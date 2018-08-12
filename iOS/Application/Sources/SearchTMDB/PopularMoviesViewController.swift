@@ -8,6 +8,7 @@ protocol PopularMoviesControllerDelegate: class {
 
 class PopularMoviesController: UICollectionViewController {
   weak var delegate: PopularMoviesControllerDelegate?
+  // FIXME should reload when didSet
   var movieIterator: AnyIterator<PartialMovie> = AnyIterator(EmptyIterator())
   var maxMovieCount: Int = 10
   var posterProvider: PosterProvider = EmptyPosterProvider()

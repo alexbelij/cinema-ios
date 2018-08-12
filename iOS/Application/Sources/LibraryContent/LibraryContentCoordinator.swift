@@ -19,7 +19,14 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 
   // other properties
   private let dependencies: AppDependencies
-  private let library: MovieLibrary
+  var library: MovieLibrary {
+    willSet {
+      library.delegates.remove(self)
+    }
+    didSet {
+      setup()
+    }
+  }
   private let content: ContentSpecification
   var dismissWhenEmpty = false
   var showsLibrarySwitch = false {
@@ -44,29 +51,39 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
   private var movieDetailsCoordinator: MovieDetailsCoordinator?
   private var editMovieCoordinator: EditMovieCoordinator?
 
-  init(navigationController: UINavigationController,
-       content: ContentSpecification,
+  init(for library: MovieLibrary,
+       displaying content: ContentSpecification,
+       navigationController: UINavigationController,
        dependencies: AppDependencies) {
     self.dependencies = dependencies
-    self.library = dependencies.library
+    self.library = library
     self.content = content
     self.navigationController = navigationController
     movieListController.delegate = self
     movieListController.posterProvider = MovieDbPosterProvider(dependencies.movieDb)
-    dependencies.library.delegates.add(self)
+    setup()
+  }
+
+  func presentRootViewController() {
+    self.navigationController.pushViewController(movieListController, animated: true)
+  }
+
+  private func setup() {
+    library.delegates.add(self)
+    updateTitle()
+    movieListController.listData = .loading
+    DispatchQueue.global(qos: .default).async {
+      self.fetchListData()
+    }
+  }
+
+  private func updateTitle() {
     switch content {
       case .all:
         movieListController.title = NSLocalizedString("library", comment: "")
       case let .allWith(genreId):
         movieListController.title = L10n.genreName(for: genreId)!
     }
-    DispatchQueue.global(qos: .default).async {
-      self.fetchListData()
-    }
-  }
-
-  func presentRootViewController() {
-    self.navigationController.pushViewController(movieListController, animated: true)
   }
 
   private func fetchListData() {
@@ -187,6 +204,10 @@ extension LibraryContentCoordinator {
 // MARK: - Library Events
 
 extension LibraryContentCoordinator: MovieLibraryDelegate {
+  func libraryDidUpdateMetadata(_ library: MovieLibrary) {
+    updateTitle()
+  }
+
   func library(_ library: MovieLibrary, didUpdateContent contentUpdate: MovieLibraryContentUpdate) {
     guard case var .available(listItems) = movieListController.listData else { return }
 

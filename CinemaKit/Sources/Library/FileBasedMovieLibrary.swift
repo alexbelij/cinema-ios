@@ -2,11 +2,15 @@ import Dispatch
 import Foundation
 import os.log
 
-public class FileBasedMovieLibrary: MovieLibrary {
-  private static let logger = Logging.createLogger(category: "Storage")
+class FileBasedMovieLibrary: InternalMovieLibrary {
+  private static let logger = Logging.createLogger(category: "Library")
 
-  public let metadata: MovieLibraryMetadata
-  public let delegates: MulticastDelegate<MovieLibraryDelegate> = MulticastDelegate()
+  var metadata: MovieLibraryMetadata {
+    didSet {
+      delegates.invoke { $0.libraryDidUpdateMetadata(self) }
+    }
+  }
+  let delegates: MulticastDelegate<MovieLibraryDelegate> = MulticastDelegate()
 
   private let queue = DispatchQueue(label: "de.martinbauer.cinema.library")
   private let url: URL
@@ -14,7 +18,7 @@ public class FileBasedMovieLibrary: MovieLibrary {
   private var movies: [TmdbIdentifier: Movie]?
   private var pendingContentUpdate = MovieLibraryContentUpdate()
 
-  public init(metadata: MovieLibraryMetadata, url: URL, dataFormat: DataFormat) {
+  init(metadata: MovieLibraryMetadata, url: URL, dataFormat: DataFormat) {
     self.metadata = metadata
     self.url = url
     self.dataFormat = dataFormat
@@ -49,27 +53,27 @@ public class FileBasedMovieLibrary: MovieLibrary {
     }
   }
 
-  public func fetchMovies(then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void) {
+  func fetchMovies(then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void) {
     whenMoviesAreLoaded(else: completion) {
       completion(.success(Array(self.movies!.values)))
     }
   }
 
-  public func fetchMovies(for id: GenreIdentifier,
-                          then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void) {
+  func fetchMovies(for id: GenreIdentifier,
+                   then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void) {
     whenMoviesAreLoaded(else: completion) {
       completion(.success(Array(self.movies!.values.filter { $0.genreIds.contains(id) })))
     }
   }
 
-  public func containsMovie(with id: TmdbIdentifier) -> Bool {
+  func containsMovie(with id: TmdbIdentifier) -> Bool {
     return queue.sync {
       if movies == nil { fatalError("calling containsMovie(with:) is only allowed once movies were loaded") }
       return self.movies!.keys.contains(id)
     }
   }
 
-  public func add(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
+  func add(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
     whenMoviesAreLoaded(else: completion) {
       if self.movies!.keys.contains(movie.tmdbID) { return }
       self.movies![movie.tmdbID] = movie
@@ -83,7 +87,7 @@ public class FileBasedMovieLibrary: MovieLibrary {
     }
   }
 
-  public func update(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
+  func update(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
     whenMoviesAreLoaded(else: completion) {
       if self.movies![movie.tmdbID] == nil {
         completion(.failure(.movieDoesNotExist(id: movie.tmdbID)))
@@ -100,7 +104,7 @@ public class FileBasedMovieLibrary: MovieLibrary {
     }
   }
 
-  public func remove(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
+  func remove(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
     whenMoviesAreLoaded(else: completion) {
       if self.movies![movie.tmdbID] == nil {
         completion(.failure(.movieDoesNotExist(id: movie.tmdbID)))

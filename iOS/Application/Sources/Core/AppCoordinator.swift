@@ -18,9 +18,7 @@ class AppCoordinator: AutoPresentableCoordinator {
         case .launched: fatalError("unreachable")
         case .startup:
           // TODO initialize on .userInitiated queue and display startup ui
-          CinemaKitStartupManager().initialize { dependencies in
-            self.transition(to: .upAndRunning(dependencies, CoreCoordinator(dependencies: dependencies)))
-          }
+          initializeCinemaKit()
         case let .upAndRunning(_, mainCoordinator):
           os_log("up and running", log: AppCoordinator.logger, type: .default)
           replaceRootViewController(of: window, with: mainCoordinator.rootViewController)
@@ -33,6 +31,21 @@ class AppCoordinator: AutoPresentableCoordinator {
   func presentRootViewController() {
     transition(to: .startup)
     window.makeKeyAndVisible()
+  }
+
+  private func initializeCinemaKit() {
+    CinemaKitStartupManager().initialize { dependencies in
+      dependencies.libraryManager.fetchLibraries { result in
+        switch result {
+          case let .failure(error):
+            fatalError("unable to fetch libraries: \(error)")
+          case let .success(libraries):
+            guard libraries.count == 1 else { fatalError("which one is the default one?") }
+            let coreCoordinator = CoreCoordinator(for: libraries.first!, dependencies: dependencies)
+            self.transition(to: .upAndRunning(dependencies, coreCoordinator))
+        }
+      }
+    }
   }
 
   private func replaceRootViewController(of window: UIWindow, with newController: UIViewController) {

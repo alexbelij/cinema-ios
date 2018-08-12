@@ -12,6 +12,7 @@ public struct MovieLibraryMetadata: Hashable, Equatable, Codable {
 
 public protocol MovieLibraryDelegate: class {
   func library(_ library: MovieLibrary, didUpdateContent contentUpdate: MovieLibraryContentUpdate)
+  func libraryDidUpdateMetadata(_ library: MovieLibrary)
 }
 
 public struct MovieLibraryContentUpdate {
@@ -32,7 +33,7 @@ public enum MovieLibraryError: Error {
   case movieDoesNotExist(id: TmdbIdentifier)
 }
 
-public protocol MovieLibrary {
+public protocol MovieLibrary: class {
   var metadata: MovieLibraryMetadata { get }
   var delegates: MulticastDelegate<MovieLibraryDelegate> { get }
 
@@ -48,4 +49,8 @@ public protocol MovieLibrary {
   func add(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
   func update(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
   func remove(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
+}
+
+protocol InternalMovieLibrary: MovieLibrary {
+  var metadata: MovieLibraryMetadata { get set }
 }

@@ -8,13 +8,11 @@ protocol ImportCoordinatorDelegate: class {
 
 class ImportCoordinator: PageCoordinator {
   weak var delegate: ImportCoordinatorDelegate?
-  private let library: MovieLibrary
   private let movieDb: MovieDbClient
   private let importUrl: URL
 
   init(importUrl: URL, dependencies: AppDependencies) {
     self.importUrl = importUrl
-    self.library = dependencies.library
     self.movieDb = dependencies.movieDb
     super.init()
     showContinuePage(primaryText: "Imports are currently disabled.",

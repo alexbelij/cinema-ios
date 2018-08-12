@@ -31,7 +31,7 @@ class MovieListController: UITableViewController {
   weak var delegate: MovieListControllerDelegate?
   var listData: ListData = .loading {
     didSet {
-      loadViewIfNeeded()
+      guard self.isViewLoaded else { return }
       setup()
     }
   }

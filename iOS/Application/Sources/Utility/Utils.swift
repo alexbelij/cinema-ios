@@ -10,6 +10,7 @@ extension UIStoryboard {
   static var editMovie = UIStoryboard(name: "EditMovie", bundle: nil)
   static var genreList = UIStoryboard(name: "GenreList", bundle: nil)
   static var maintenance = UIStoryboard(name: "Maintenance", bundle: nil)
+  static var libraryList = UIStoryboard(name: "LibraryList", bundle: nil)
 
   func instantiate<ViewController: UIViewController>(_ viewController: ViewController.Type) -> ViewController {
     let identifier = String(describing: viewController)

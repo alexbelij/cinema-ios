@@ -11,7 +11,14 @@ class GenreListCoordinator: CustomPresentableCoordinator {
 
   // other properties
   private let dependencies: AppDependencies
-  private let library: MovieLibrary
+  var library: MovieLibrary {
+    willSet {
+      library.delegates.remove(self)
+    }
+    didSet {
+      setup()
+    }
+  }
   private let movieDb: MovieDbClient
 
   // other properties
@@ -24,13 +31,17 @@ class GenreListCoordinator: CustomPresentableCoordinator {
   // child coordinator
   private var libraryContentCoordinator: LibraryContentCoordinator?
 
-  init(dependencies: AppDependencies) {
+  init(for library: MovieLibrary, dependencies: AppDependencies) {
     self.dependencies = dependencies
-    self.library = dependencies.library
+    self.library = library
     self.movieDb = dependencies.movieDb
     navigationController = UINavigationController(rootViewController: genreListController)
     self.backdropSize = BackdropSize(minWidth: Int(genreListController.view.bounds.width))
     self.genreListController.delegate = self
+    setup()
+  }
+
+  private func setup() {
     self.library.delegates.add(self)
     DispatchQueue.global(qos: .default).async {
       self.fetchListData()
@@ -65,8 +76,9 @@ class GenreListCoordinator: CustomPresentableCoordinator {
 extension GenreListCoordinator: GenreListControllerDelegate {
   func genreListController(_ controller: GenreListController,
                            didSelectGenre genreId: GenreIdentifier) {
-    self.libraryContentCoordinator = LibraryContentCoordinator(navigationController: navigationController,
-                                                               content: .allWith(genreId),
+    self.libraryContentCoordinator = LibraryContentCoordinator(for: library,
+                                                               displaying: .allWith(genreId),
+                                                               navigationController: navigationController,
                                                                dependencies: dependencies)
     self.libraryContentCoordinator!.dismissWhenEmpty = true
     self.libraryContentCoordinator!.presentRootViewController()
@@ -76,6 +88,9 @@ extension GenreListCoordinator: GenreListControllerDelegate {
 // MARK: - Library Events
 
 extension GenreListCoordinator: MovieLibraryDelegate {
+  func libraryDidUpdateMetadata(_ library: MovieLibrary) {
+  }
+
   func library(_ library: MovieLibrary, didUpdateContent contentUpdate: MovieLibraryContentUpdate) {
     DispatchQueue.global().async {
       self.update(with: contentUpdate)
