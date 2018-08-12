@@ -7,15 +7,15 @@ protocol ImportCoordinatorDelegate: class {
 }
 
 class ImportCoordinator: PageCoordinator {
-  typealias Dependencies = LibraryDependency & MovieDbDependency
-
   weak var delegate: ImportCoordinatorDelegate?
-  private let dependencies: Dependencies
+  private let library: MovieLibrary
+  private let movieDb: MovieDbClient
   private let importUrl: URL
 
-  init(importUrl: URL, dependencies: Dependencies) {
+  init(importUrl: URL, dependencies: AppDependencies) {
     self.importUrl = importUrl
-    self.dependencies = dependencies
+    self.library = dependencies.library
+    self.movieDb = dependencies.movieDb
     super.init()
     showContinuePage(primaryText: "Imports are currently disabled.",
                      secondaryText: "Please check back later.")

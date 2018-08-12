@@ -9,8 +9,6 @@ protocol EditMovieCoordinatorDelegate: class {
 }
 
 class EditMovieCoordinator: CustomPresentableCoordinator {
-  typealias Dependencies = LibraryDependency
-
   // coordinator stuff
   var rootViewController: UIViewController {
     return navigationController
@@ -18,10 +16,7 @@ class EditMovieCoordinator: CustomPresentableCoordinator {
   weak var delegate: EditMovieCoordinatorDelegate?
 
   // other properties
-  private let dependencies: Dependencies
-  private var library: MovieLibrary {
-    return dependencies.library
-  }
+  private let library: MovieLibrary
   private var movieToEdit: Movie
 
   // managed controller
@@ -34,8 +29,8 @@ class EditMovieCoordinator: CustomPresentableCoordinator {
     case deleted
   }
 
-  init(for movie: Movie, dependencies: Dependencies) {
-    self.dependencies = dependencies
+  init(for movie: Movie, in library: MovieLibrary) {
+    self.library = library
     self.movieToEdit = movie
     navigationController = UINavigationController(rootViewController: editMovieController)
     editMovieController.delegate = self

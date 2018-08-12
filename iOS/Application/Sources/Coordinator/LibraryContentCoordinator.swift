@@ -13,13 +13,12 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     case allWith(GenreIdentifier)
   }
 
-  typealias Dependencies = LibraryDependency & MovieDbDependency
-
   // coordinator stuff
   weak var delegate: LibraryContentCoordinatorDelegate?
 
   // other properties
-  private let dependencies: Dependencies
+  private let dependencies: AppDependencies
+  private let library: MovieLibrary
   private let content: ContentSpecification
   var dismissWhenEmpty = false
 
@@ -33,8 +32,9 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 
   init(navigationController: UINavigationController,
        content: ContentSpecification,
-       dependencies: Dependencies) {
+       dependencies: AppDependencies) {
     self.dependencies = dependencies
+    self.library = dependencies.library
     self.content = content
     self.navigationController = navigationController
     movieListController.delegate = self
@@ -59,9 +59,9 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     let movies: [Movie]
     switch content {
       case .all:
-        movies = dependencies.library.fetchAllMovies()
+        movies = library.fetchAllMovies()
       case let .allWith(genreId):
-        movies = dependencies.library.fetchMovies(for: genreId)
+        movies = library.fetchMovies(for: genreId)
     }
     DispatchQueue.main.async {
       self.movieListController.listData = .available(movies)
@@ -73,7 +73,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 
 extension LibraryContentCoordinator: MovieListControllerDelegate {
   func movieListController(_ controller: MovieListController, didSelect movie: Movie) {
-    movieDetailsCoordinator = MovieDetailsCoordinator(for: movie, dependencies: dependencies)
+    movieDetailsCoordinator = MovieDetailsCoordinator(for: movie, using: dependencies.movieDb)
     movieDetailsCoordinator!.delegate = self
     let editButton = UIBarButtonItem(barButtonSystemItem: .edit,
                                      target: self,
@@ -87,7 +87,7 @@ extension LibraryContentCoordinator: MovieListControllerDelegate {
     guard let movie = self.movieDetailsCoordinator?.movie else {
       preconditionFailure("MovieDetailsCoordinator should present movie details")
     }
-    editMovieCoordinator = EditMovieCoordinator(for: movie, dependencies: dependencies)
+    editMovieCoordinator = EditMovieCoordinator(for: movie, in: library)
     editMovieCoordinator!.delegate = self
     self.navigationController.present(editMovieCoordinator!.rootViewController, animated: true)
   }

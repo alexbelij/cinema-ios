@@ -3,8 +3,6 @@ import Foundation
 import UIKit
 
 class CoreCoordinator: CustomPresentableCoordinator {
-  typealias Dependencies = LibraryDependency & MovieDbDependency
-
   // coordinator stuff
   var rootViewController: UIViewController {
     return tabBarController
@@ -18,7 +16,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
   private let genreListCoordinator: GenreListCoordinator
   private let searchTmdbCoordinator: SearchTmdbCoordinator
 
-  init(dependencies: Dependencies) {
+  init(dependencies: AppDependencies) {
     let libraryContentNav = UINavigationController()
     libraryContentCoordinator = LibraryContentCoordinator(navigationController: libraryContentNav,
                                                           content: .all,

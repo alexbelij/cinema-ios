@@ -1,12 +1,4 @@
-public protocol LibraryDependency {
-  var library: MovieLibrary { get }
-}
-
-public protocol MovieDbDependency {
-  var movieDb: MovieDbClient { get }
-}
-
-public struct AppDependencies: LibraryDependency, MovieDbDependency {
+public struct AppDependencies {
   public let library: MovieLibrary
   public let movieDb: MovieDbClient
 }

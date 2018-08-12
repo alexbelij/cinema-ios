@@ -3,21 +3,14 @@ import Dispatch
 import UIKit
 
 class SearchTmdbCoordinator: CustomPresentableCoordinator {
-  typealias Dependencies = LibraryDependency & MovieDbDependency
-
   // coordinator stuff
   var rootViewController: UIViewController {
     return navigationController
   }
 
   // other properties
-  private let dependencies: Dependencies
-  private var library: MovieLibrary {
-    return dependencies.library
-  }
-  private var movieDb: MovieDbClient {
-    return dependencies.movieDb
-  }
+  private var library: MovieLibrary
+  private var movieDb: MovieDbClient
   private var cachedSearchResults = [ExternalMovieViewModel]()
 
   // managed controllers
@@ -25,8 +18,9 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
   private let searchTmdbController = UIStoryboard.searchTmdb.instantiate(SearchTmdbController.self)
   private let popularMoviesController = UIStoryboard.popularMovies.instantiate(PopularMoviesController.self)
 
-  init(dependencies: Dependencies) {
-    self.dependencies = dependencies
+  init(dependencies: AppDependencies) {
+    self.library = dependencies.library
+    self.movieDb = dependencies.movieDb
 
     self.navigationController = UINavigationController(rootViewController: searchTmdbController)
 

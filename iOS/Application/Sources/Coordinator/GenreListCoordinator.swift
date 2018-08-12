@@ -4,15 +4,15 @@ import Foundation
 import UIKit
 
 class GenreListCoordinator: CustomPresentableCoordinator {
-  typealias Dependencies = LibraryDependency & MovieDbDependency
-
   // coordinator stuff
   var rootViewController: UIViewController {
     return navigationController
   }
 
   // other properties
-  private let dependencies: Dependencies
+  private let dependencies: AppDependencies
+  private let library: MovieLibrary
+  private let movieDb: MovieDbClient
 
   // other properties
   private let backdropSize: BackdropSize
@@ -24,21 +24,23 @@ class GenreListCoordinator: CustomPresentableCoordinator {
   // child coordinator
   private var libraryContentCoordinator: LibraryContentCoordinator?
 
-  init(dependencies: Dependencies) {
+  init(dependencies: AppDependencies) {
     self.dependencies = dependencies
+    self.library = dependencies.library
+    self.movieDb = dependencies.movieDb
     navigationController = UINavigationController(rootViewController: genreListController)
     self.backdropSize = BackdropSize(minWidth: Int(genreListController.view.bounds.width))
     self.genreListController.delegate = self
-    self.dependencies.library.delegates.add(self)
+    self.library.delegates.add(self)
     DispatchQueue.global(qos: .default).async {
       self.fetchListData()
     }
   }
 
   private func fetchListData() {
-    let movies = dependencies.library.fetchAllMovies()
+    let movies = library.fetchAllMovies()
     let imageProvider = RandomMovieGenreImageProvider(for: movies,
-                                                      movieDb: dependencies.movieDb,
+                                                      movieDb: movieDb,
                                                       backdropSize: self.backdropSize)
     let ids = Array(Set(movies.flatMap { $0.genreIds }))
     DispatchQueue.main.async {
