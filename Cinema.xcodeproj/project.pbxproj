@@ -14,6 +14,7 @@
 		816BF68AD5183E9A65E57593 /* GenericEmptyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFD2D067C0F79106D9254 /* GenericEmptyView.swift */; };
 		816BFC18F7DB44F8FF6B6838 /* SelectableLabelSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFD50F2821EF263C13B48 /* SelectableLabelSheet.swift */; };
 		816BFCFFC63B3745C2399F75 /* ImportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFC5A4FCEC7B899C4E47E /* ImportCoordinator.swift */; };
+		816BFF4C29DB37ED03A26417 /* StartupManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF76FA3CA6466230D5381 /* StartupManager.swift */; };
 		A8B38F2F53B47077F6B743F1 /* Pods_CinemaKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5FCC01CFBB4BB1DDCACBD358 /* Pods_CinemaKit.framework */; };
 		CB0310C92111C8DE006D61B7 /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF23B3E183EE77E401FBC /* Logging.swift */; };
 		CB0F41301F5C526B00095350 /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = CB0F41321F5C526B00095350 /* Localizable.stringsdict */; };
@@ -32,7 +33,6 @@
 		CB1A15DF2061347E003BD8D0 /* TMDBSwiftWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFC9CFD7B36183A006B9A /* TMDBSwiftWrapper.swift */; };
 		CB370C1F1FFD08270034BB2F /* PageCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB370C1E1FFD08270034BB2F /* PageCoordinator.swift */; };
 		CB4C40631FF2A63F00A6C32B /* SearchTmdbCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4C40621FF2A63F00A6C32B /* SearchTmdbCoordinator.swift */; };
-		CB4C40651FF2C65A00A6C32B /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */; };
 		CB65D7AB1F8A107F00457386 /* TabularSheetController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB65D7A81F8A103000457386 /* TabularSheetController.swift */; };
 		CB65D7AC1F8A108200457386 /* DimmingPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB65D7AA1F8A103000457386 /* DimmingPresentationController.swift */; };
 		CB65D7AD1F8A108A00457386 /* ArrayTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB65D7A91F8A103000457386 /* ArrayTableController.swift */; };
@@ -42,6 +42,7 @@
 		CB6F1A0F21108705009239BD /* PopularMovies.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CB6F1A1121108705009239BD /* PopularMovies.storyboard */; };
 		CB6F1A122110870A009239BD /* GenericPages.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CB6F1A142110870A009239BD /* GenericPages.storyboard */; };
 		CB6F1A152110870E009239BD /* SelectableLabelCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB6F1A172110870E009239BD /* SelectableLabelCell.xib */; };
+		CB797D352120203200F59618 /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */; };
 		CB84B1891FEAF5E500B455D4 /* SortPrefixes.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB84B18B1FEAF5E500B455D4 /* SortPrefixes.plist */; };
 		CB9484C11EFA643500D9651E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = CB9484C31EFA643500D9651E /* Localizable.strings */; };
 		CBAE5E861F3486EA0055366F /* EditMovie.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBAE5E841F3486EA0055366F /* EditMovie.storyboard */; };
@@ -107,6 +108,7 @@
 		816BF1736861B92F3C805B3D /* MulticastDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MulticastDelegate.swift; sourceTree = "<group>"; };
 		816BF23B3E183EE77E401FBC /* Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		816BF2612290416EB1BFCA59 /* MovieDbClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieDbClient.swift; sourceTree = "<group>"; };
+		816BF76FA3CA6466230D5381 /* StartupManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartupManager.swift; sourceTree = "<group>"; };
 		816BFA309BDAC4DB9673DA9D /* FileBasedMovieLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileBasedMovieLibrary.swift; sourceTree = "<group>"; };
 		816BFB089CECEE7E6D463824 /* Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		816BFB35827AAE8FBEE17E66 /* JSONFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONFormat.swift; sourceTree = "<group>"; };
@@ -218,6 +220,8 @@
 				CBED94141F6BF63500FA4045 /* MovieDb */,
 				816BFB089CECEE7E6D463824 /* Logging.swift */,
 				816BF1736861B92F3C805B3D /* MulticastDelegate.swift */,
+				816BF76FA3CA6466230D5381 /* StartupManager.swift */,
+				CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -379,7 +383,6 @@
 			isa = PBXGroup;
 			children = (
 				CBF3CE5F1FF2366700F4B6C0 /* Coordinator.swift */,
-				CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */,
 				CBB569661EA4D6A2005F7BA7 /* AppDelegate.swift */,
 				CBF3CE611FF2369B00F4B6C0 /* AppCoordinator.swift */,
 				CBF3CE631FF2385C00F4B6C0 /* CoreCoordinator.swift */,
@@ -607,7 +610,9 @@
 				CB1A15D920613478003BD8D0 /* FileBasedMovieLibrary.swift in Sources */,
 				CB1A15DF2061347E003BD8D0 /* TMDBSwiftWrapper.swift in Sources */,
 				CB1A15D820613478003BD8D0 /* Movie.swift in Sources */,
+				CB797D352120203200F59618 /* AppDependencies.swift in Sources */,
 				816BF12226A30047F4E426A6 /* Logging.swift in Sources */,
+				816BFF4C29DB37ED03A26417 /* StartupManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -638,7 +643,6 @@
 				CBF3CE641FF2385C00F4B6C0 /* CoreCoordinator.swift in Sources */,
 				CBF3CE621FF2369B00F4B6C0 /* AppCoordinator.swift in Sources */,
 				CBEA63411FF3952300830377 /* GenreListController.swift in Sources */,
-				CB4C40651FF2C65A00A6C32B /* AppDependencies.swift in Sources */,
 				CBED94291F6BF80E00FA4045 /* SearchTmdbController.swift in Sources */,
 				CB4C40631FF2A63F00A6C32B /* SearchTmdbCoordinator.swift in Sources */,
 				CBF3CE681FF23E9700F4B6C0 /* EditMovieCoordinator.swift in Sources */,
