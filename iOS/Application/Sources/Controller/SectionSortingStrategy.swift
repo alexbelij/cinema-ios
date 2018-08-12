@@ -1,6 +1,5 @@
 import CinemaKit
 protocol SectionSortingStrategy {
-
   func sectionIndexTitle(for movie: Movie) -> String
   func refineSectionIndexTitles(_: [String]) -> [String]
 
@@ -8,7 +7,6 @@ protocol SectionSortingStrategy {
 
   func sectionIndexTitleSorting(left: String, right: String) -> Bool
   func movieSorting(left: Movie, right: Movie) -> Bool
-
 }
 
 extension SectionSortingStrategy {

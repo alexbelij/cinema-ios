@@ -28,7 +28,6 @@ enum SortDescriptor {
 }
 
 private struct TitleSortingStrategy: SectionSortingStrategy {
-
   private let allSectionIndexTitles = ["#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
                                        "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
   private let ignoredPrefixes: [String]
@@ -82,11 +81,9 @@ private struct TitleSortingStrategy: SectionSortingStrategy {
       return str
     }
   }
-
 }
 
 private struct RuntimeSortingStrategy: SectionSortingStrategy {
-
   private static let minutesFormatter: DateComponentsFormatter = {
     let formatter = DateComponentsFormatter()
     formatter.unitsStyle = .full
@@ -139,7 +136,6 @@ private struct RuntimeSortingStrategy: SectionSortingStrategy {
 }
 
 private struct YearSortingStrategy: SectionSortingStrategy {
-
   private let unknownSymbol = "?"
 
   func sectionIndexTitle(for movie: Movie) -> String {

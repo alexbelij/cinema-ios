@@ -332,8 +332,8 @@
 		CBED94151F6BF64800FA4045 /* Library */ = {
 			isa = PBXGroup;
 			children = (
-				CBB5697C1EA4D6C3005F7BA7 /* MovieLibrary.swift */,
 				CBB5697B1EA4D6C3005F7BA7 /* Movie.swift */,
+				CBB5697C1EA4D6C3005F7BA7 /* MovieLibrary.swift */,
 				816BFA309BDAC4DB9673DA9D /* FileBasedMovieLibrary.swift */,
 				816BFE92A74C1A209F3908F4 /* DataFormat.swift */,
 				816BFF4C36540A18EF3BBC17 /* KeyedArchivalFormat.swift */,

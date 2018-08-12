@@ -1,7 +1,6 @@
 import Foundation
 
 public class KeyedArchivalFormat: DataFormat {
-
   public var defaultSchemaVersion: SchemaVersion?
 
   public init() {

@@ -3,19 +3,14 @@ import Foundation
 import os.log
 
 public class FileBasedMovieLibrary: MovieLibrary {
-
   private static let logger = Logging.createLogger(category: "Storage")
 
   public let delegates: MulticastDelegate<MovieLibraryDelegate> = MulticastDelegate()
 
   private let queue = DispatchQueue(label: "de.martinbauer.cinema.library")
-
   private let url: URL
-
   private let dataFormat: DataFormat
-
   private var movies: [TmdbIdentifier: Movie]?
-
   private var pendingContentUpdate = MovieLibraryContentUpdate()
 
   public init(url: URL, dataFormat: DataFormat) {
@@ -130,5 +125,4 @@ public class FileBasedMovieLibrary: MovieLibrary {
     delegates.invoke { $0.library(self, didUpdateContent: self.pendingContentUpdate) }
     pendingContentUpdate = MovieLibraryContentUpdate()
   }
-
 }

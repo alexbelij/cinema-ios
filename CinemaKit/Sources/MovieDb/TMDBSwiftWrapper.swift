@@ -5,13 +5,9 @@ import TMDBSwift
 import UIKit
 
 public class TMDBSwiftWrapper: MovieDbClient {
-
   private static let logger = Logging.createLogger(category: "TMDB")
-
   private static let apiKey = "ace1ea1cb456b8d6fe092a0ec923e30c"
-
   private static let baseUrl = "https://image.tmdb.org/t/p/"
-
   private static let releaseDateFormatter: DateFormatter = {
     let formatter = DateFormatter()
     formatter.dateFormat = "yyyy-MM-dd"
@@ -19,11 +15,9 @@ public class TMDBSwiftWrapper: MovieDbClient {
   }()
 
   public var language: MovieDbLanguage
-
   public var country: MovieDbCountry
 
   private var cache: TMDBSwiftCache
-
   private var cachedPosterPaths = [TmdbIdentifier: String]()
 
   public init(language: MovieDbLanguage, country: MovieDbCountry) {

@@ -2,7 +2,6 @@ import Foundation
 import SwiftyJSON
 
 public class JSONFormat: DataFormat {
-
   public var defaultSchemaVersion: SchemaVersion?
 
   public init() {

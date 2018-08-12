@@ -17,7 +17,6 @@ public enum SheetItemGroupingStyle {
 
 public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewController,
     UIViewControllerTransitioningDelegate {
-
   private var sheetItems = [SheetItem]()
   private var sheetItemGroups: [[SheetItem]] {
     var groups = [[SheetItem]]()

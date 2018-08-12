@@ -1,17 +1,12 @@
 import Foundation
 
 public protocol DataFormat {
-
   var defaultSchemaVersion: SchemaVersion? { get set }
 
   func serialize(_ elements: [Movie]) throws -> Data
-
   func serialize(_ elements: [Movie], schemaVersion: SchemaVersion) throws -> Data
-
   func deserialize(from data: Data) throws -> [Movie]
-
   func schemaVersion(of data: Data) throws -> SchemaVersion
-
 }
 
 public extension DataFormat {
@@ -43,7 +38,6 @@ public enum DataFormatError: Error {
 }
 
 public enum SchemaVersion: Equatable, Comparable, CustomStringConvertible {
-
   // swiftlint:disable identifier_name
   // array of Movies
   case v1_0_0
@@ -87,7 +81,7 @@ public enum SchemaVersion: Equatable, Comparable, CustomStringConvertible {
     return versionString
   }
 
-  public static func < (lhs: SchemaVersion, rhs: SchemaVersion) -> Bool {
+  public static func <(lhs: SchemaVersion, rhs: SchemaVersion) -> Bool {
     if lhs.model != rhs.model {
       return lhs.model < rhs.model
     }

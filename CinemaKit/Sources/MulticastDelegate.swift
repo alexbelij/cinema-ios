@@ -1,7 +1,6 @@
 import Foundation
 
 public class MulticastDelegate<T> {
-
   private let delegates: NSHashTable<AnyObject> = NSHashTable<AnyObject>.weakObjects()
 
   public var count: Int {

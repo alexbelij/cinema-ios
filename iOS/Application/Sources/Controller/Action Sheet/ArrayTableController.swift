@@ -1,7 +1,6 @@
 import UIKit
 
 class ArrayTableController<SheetItem: SheetItemProtocol>: NSObject, UITableViewDataSource, UITableViewDelegate {
-
   private let sheetItemType: SheetItemType
   private let cellConfig: AnyTabularSheetCellConfiguration<SheetItem>
   private unowned let presentingViewController: UIViewController

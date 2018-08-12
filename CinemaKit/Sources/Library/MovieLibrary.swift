@@ -1,5 +1,27 @@
 import Foundation
 
+public protocol MovieLibraryDelegate: class {
+  func library(_ library: MovieLibrary, didUpdateContent contentUpdate: MovieLibraryContentUpdate)
+}
+
+public struct MovieLibraryContentUpdate {
+  public var addedMovies: [Movie]
+  public var removedMovies: [Movie]
+  public var updatedMovies: [TmdbIdentifier: Movie]
+
+  init(addedMovies: [Movie] = [], removedMovies: [Movie] = [], updatedMovies: [TmdbIdentifier: Movie] = [:]) {
+    self.addedMovies = addedMovies
+    self.removedMovies = removedMovies
+    self.updatedMovies = updatedMovies
+  }
+}
+
+public enum MovieLibraryError: Error {
+  case dataAccessError
+  case storageError
+  case movieDoesNotExist(id: TmdbIdentifier)
+}
+
 public protocol MovieLibrary {
   var delegates: MulticastDelegate<MovieLibraryDelegate> { get }
 
@@ -15,26 +37,4 @@ public protocol MovieLibrary {
   func add(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
   func update(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
   func remove(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
-}
-
-public enum MovieLibraryError: Error {
-  case dataAccessError
-  case storageError
-  case movieDoesNotExist(id: TmdbIdentifier)
-}
-
-public protocol MovieLibraryDelegate: class {
-  func library(_ library: MovieLibrary, didUpdateContent contentUpdate: MovieLibraryContentUpdate)
-}
-
-public struct MovieLibraryContentUpdate {
-  public var addedMovies: [Movie]
-  public var removedMovies: [Movie]
-  public var updatedMovies: [TmdbIdentifier: Movie]
-
-  init(addedMovies: [Movie] = [], removedMovies: [Movie] = [], updatedMovies: [TmdbIdentifier: Movie] = [:]) {
-    self.addedMovies = addedMovies
-    self.removedMovies = removedMovies
-    self.updatedMovies = updatedMovies
-  }
 }
