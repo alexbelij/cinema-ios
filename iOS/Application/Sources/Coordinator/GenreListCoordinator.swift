@@ -38,14 +38,22 @@ class GenreListCoordinator: CustomPresentableCoordinator {
   }
 
   private func fetchListData() {
-    let movies = library.fetchAllMovies()
-    let imageProvider = RandomMovieGenreImageProvider(for: movies,
-                                                      movieDb: movieDb,
-                                                      backdropSize: self.backdropSize)
-    let ids = Array(Set(movies.flatMap { $0.genreIds }))
-    DispatchQueue.main.async {
-      self.genreListController.genreImageProvider = imageProvider
-      self.genreListController.listData = .available(ids)
+    library.fetchMovies { result in
+      switch result {
+        case let .failure(error):
+          fatalError("unable to fetch movies: \(error)")
+        case let .success(movies):
+          DispatchQueue.main.async {
+            let imageProvider = RandomMovieGenreImageProvider(for: movies,
+                                                              movieDb: self.movieDb,
+                                                              backdropSize: self.backdropSize)
+            let ids = Array(Set(movies.flatMap { $0.genreIds }))
+            DispatchQueue.main.async {
+              self.genreListController.genreImageProvider = imageProvider
+              self.genreListController.listData = .available(ids)
+            }
+          }
+      }
     }
   }
 }

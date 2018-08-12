@@ -4,16 +4,17 @@ public protocol MovieLibrary {
   var delegates: MulticastDelegate<MovieLibraryDelegate> { get }
 
   // accessing library content
-  func fetchAllMovies() -> [Movie]
-  func fetchMovies(for id: GenreIdentifier) -> [Movie]
+  func fetchMovies(then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void)
+  func fetchMovies(for id: GenreIdentifier,
+                   then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void)
 
   // getting information about the library
   func containsMovie(with id: TmdbIdentifier) -> Bool
 
   // managing library content
-  func add(_ movie: Movie) throws
-  func update(_ movie: Movie) throws
-  func remove(_ movie: Movie) throws
+  func add(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
+  func update(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
+  func remove(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
 }
 
 public enum MovieLibraryError: Error {

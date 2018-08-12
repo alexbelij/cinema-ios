@@ -36,41 +36,59 @@ public class FileBasedMovieLibrary: MovieLibrary {
     }
   }
 
-  public func fetchAllMovies() -> [Movie] {
-    return Array(movies.values)
+  public func fetchMovies(then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void) {
+    completion(.success(Array(movies.values)))
   }
 
-  public func fetchMovies(for id: GenreIdentifier) -> [Movie] {
-    return fetchAllMovies().filter { $0.genreIds.contains(id) }
+  public func fetchMovies(for id: GenreIdentifier,
+                          then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void) {
+    completion(.success(Array(movies.values.filter { $0.genreIds.contains(id) })))
   }
 
   public func containsMovie(with id: TmdbIdentifier) -> Bool {
     return movies.keys.contains(id)
   }
 
-  public func add(_ movie: Movie) throws {
-    guard !movies.keys.contains(movie.tmdbID) else { return }
+  public func add(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
+    if movies.keys.contains(movie.tmdbID) { return }
     movies[movie.tmdbID] = movie
     pendingContentUpdate.addedMovies.append(movie)
-    try saveData()
+    do {
+      try saveData()
+      completion(.success(()))
+    } catch {
+      completion(.failure(.storageError))
+    }
   }
 
-  public func update(_ movie: Movie) throws {
-    guard movies[movie.tmdbID] != nil else {
-      throw MovieLibraryError.movieDoesNotExist(id: movie.tmdbID)
+  public func update(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
+    if movies[movie.tmdbID] == nil {
+      completion(.failure(.movieDoesNotExist(id: movie.tmdbID)))
+      return
     }
     movies[movie.tmdbID] = movie
     pendingContentUpdate.updatedMovies[movie.tmdbID] = movie
-    try saveData()
+    do {
+      try saveData()
+      completion(.success(()))
+    } catch {
+      completion(.failure(.storageError))
+    }
   }
 
-  public func remove(_ movie: Movie) throws {
-    guard movies[movie.tmdbID] != nil else {
-      throw MovieLibraryError.movieDoesNotExist(id: movie.tmdbID)
+  public func remove(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
+    if movies[movie.tmdbID] == nil {
+      completion(.failure(.movieDoesNotExist(id: movie.tmdbID)))
+      return
     }
     movies.removeValue(forKey: movie.tmdbID)
     pendingContentUpdate.removedMovies.append(movie)
-    try saveData()
+    do {
+      try saveData()
+      completion(.success(()))
+    } catch {
+      completion(.failure(.storageError))
+    }
   }
 
   private func saveData() throws {

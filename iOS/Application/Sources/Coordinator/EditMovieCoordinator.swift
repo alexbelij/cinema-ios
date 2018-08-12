@@ -67,26 +67,27 @@ extension EditMovieCoordinator: EditMovieControllerDelegate {
     activityIndicator.startAnimating()
     controller.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: activityIndicator)
     DispatchQueue.global(qos: .userInitiated).async {
-      do {
-        switch editResult {
-          case let .edited(edits):
-            var movie = self.movieToEdit
-            self.applyEdits(edits, to: &movie)
-            try self.library.update(movie)
-            DispatchQueue.main.async {
-              self.delegate?.editMovieCoordinator(self, didFinishEditingWithResult: .edited(movie))
-            }
-          case .deleted:
-            try self.library.remove(self.movieToEdit)
-            DispatchQueue.main.async {
-              self.delegate?.editMovieCoordinator(self, didFinishEditingWithResult: .deleted)
-            }
-        }
-      } catch {
+      switch editResult {
+        case let .edited(edits):
+          var movie = self.movieToEdit
+          self.applyEdits(edits, to: &movie)
+          self.library.update(movie) { result in self.handleResult(result, for: .edited(movie)) }
+        case .deleted:
+          self.library.remove(self.movieToEdit) { result in self.handleResult(result, for: .deleted) }
+      }
+    }
+  }
+
+  private func handleResult(_ result: AsyncResult<Void, MovieLibraryError>, for editResult: EditResult) {
+    switch result {
+      case let .failure(error):
         DispatchQueue.main.async {
           self.delegate?.editMovieCoordinator(self, didFailWithError: error)
         }
-      }
+      case .success:
+        DispatchQueue.main.async {
+          self.delegate?.editMovieCoordinator(self, didFinishEditingWithResult: editResult)
+        }
     }
   }
 

@@ -56,15 +56,22 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
   }
 
   private func fetchListData() {
-    let movies: [Movie]
     switch content {
       case .all:
-        movies = library.fetchAllMovies()
+        library.fetchMovies(then: self.handleFetchedMovies)
       case let .allWith(genreId):
-        movies = library.fetchMovies(for: genreId)
+        library.fetchMovies(for: genreId, then: self.handleFetchedMovies)
     }
-    DispatchQueue.main.async {
-      self.movieListController.listData = .available(movies)
+  }
+
+  private func handleFetchedMovies(result: AsyncResult<[Movie], MovieLibraryError>) {
+    switch result {
+      case let .failure(error):
+        fatalError("unable to fetch movies: \(error)")
+      case let .success(movies):
+        DispatchQueue.main.async {
+          self.movieListController.listData = .available(movies)
+        }
     }
   }
 }

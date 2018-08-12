@@ -133,11 +133,11 @@ extension SearchTmdbCoordinator {
                          releaseDate: self.movieDb.releaseDate(for: item.tmdbID),
                          diskType: diskType,
                          genreIds: self.movieDb.genreIds(for: item.tmdbID))
-    do {
-      try self.library.add(fullItem)
-      completion(nil)
-    } catch {
-      completion(error)
+    library.add(fullItem) { result in
+      switch result {
+        case let .failure(error): completion(error)
+        case .success: completion(nil)
+      }
     }
   }
 
