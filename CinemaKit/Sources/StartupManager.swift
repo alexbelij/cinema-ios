@@ -18,11 +18,12 @@ public class CinemaKitStartupManager: StartupManager {
   private func makeDependencies() -> AppDependencies {
     os_log("gathering dependencies", log: CinemaKitStartupManager.logger, type: .default)
     // Movie Library
+    let metadata = MovieLibraryMetadata(name: NSLocalizedString("library", comment: ""))
     let url = directoryUrl(for: .documentDirectory).appendingPathComponent("cinema.data")
     moveLegacyLibraryFile(to: url)
     let dataFormat = KeyedArchivalFormat()
     dataFormat.defaultSchemaVersion = .v2_0_0
-    let library = FileBasedMovieLibrary(url: url, dataFormat: dataFormat)
+    let library = FileBasedMovieLibrary(metadata: metadata, url: url, dataFormat: dataFormat)
 
     // MovieDb Client
     let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en

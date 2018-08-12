@@ -5,6 +5,7 @@ import os.log
 public class FileBasedMovieLibrary: MovieLibrary {
   private static let logger = Logging.createLogger(category: "Storage")
 
+  public let metadata: MovieLibraryMetadata
   public let delegates: MulticastDelegate<MovieLibraryDelegate> = MulticastDelegate()
 
   private let queue = DispatchQueue(label: "de.martinbauer.cinema.library")
@@ -13,7 +14,8 @@ public class FileBasedMovieLibrary: MovieLibrary {
   private var movies: [TmdbIdentifier: Movie]?
   private var pendingContentUpdate = MovieLibraryContentUpdate()
 
-  public init(url: URL, dataFormat: DataFormat) {
+  public init(metadata: MovieLibraryMetadata, url: URL, dataFormat: DataFormat) {
+    self.metadata = metadata
     self.url = url
     self.dataFormat = dataFormat
   }

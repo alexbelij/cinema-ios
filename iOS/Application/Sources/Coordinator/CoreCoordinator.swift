@@ -9,6 +9,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
   }
 
   // other properties
+  private let library: MovieLibrary
   private let tabBarController = UITabBarController()
 
   // child coordinators
@@ -17,6 +18,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
   private let searchTmdbCoordinator: SearchTmdbCoordinator
 
   init(dependencies: AppDependencies) {
+    self.library = dependencies.library
     let libraryContentNav = UINavigationController()
     libraryContentCoordinator = LibraryContentCoordinator(navigationController: libraryContentNav,
                                                           content: .all,
@@ -56,7 +58,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
 extension CoreCoordinator: LibraryContentCoordinatorDelegate {
   func libraryContentCoordinatorShowLibraryList(_ coordinator: LibraryContentCoordinator) {
     let controller = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
-    controller.addSheetItem(SelectableLabelSheetItem(title: NSLocalizedString("library", comment: ""),
+    controller.addSheetItem(SelectableLabelSheetItem(title: library.metadata.name,
                                                      showCheckmark: true))
     self.tabBarController.present(controller, animated: true)
   }

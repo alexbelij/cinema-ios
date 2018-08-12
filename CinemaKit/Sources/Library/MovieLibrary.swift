@@ -1,5 +1,15 @@
 import Foundation
 
+public struct MovieLibraryMetadata: Hashable, Equatable, Codable {
+  public let id: UUID
+  public var name: String
+
+  public init(name: String) {
+    self.id = UUID()
+    self.name = name
+  }
+}
+
 public protocol MovieLibraryDelegate: class {
   func library(_ library: MovieLibrary, didUpdateContent contentUpdate: MovieLibraryContentUpdate)
 }
@@ -23,6 +33,7 @@ public enum MovieLibraryError: Error {
 }
 
 public protocol MovieLibrary {
+  var metadata: MovieLibraryMetadata { get }
   var delegates: MulticastDelegate<MovieLibraryDelegate> { get }
 
   // accessing library content
