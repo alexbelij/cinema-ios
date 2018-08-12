@@ -1,25 +1,19 @@
 import Foundation
 
 public protocol MovieLibrary {
-
   var delegates: MulticastDelegate<MovieLibraryDelegate> { get }
 
-  var persistentSchemaVersion: SchemaVersion { get }
-
+  // accessing library content
   func fetchAllMovies() -> [Movie]
-
   func fetchMovies(for id: GenreIdentifier) -> [Movie]
 
+  // getting information about the library
   func containsMovie(with id: TmdbIdentifier) -> Bool
 
+  // managing library content
   func add(_ movie: Movie) throws
-
   func update(_ movie: Movie) throws
-
   func remove(_ movie: Movie) throws
-
-  func performBatchUpdates(_ updates: () throws -> Void) throws
-
 }
 
 public enum MovieLibraryError: Error {

@@ -13,8 +13,6 @@ public class FileBasedMovieLibrary: MovieLibrary {
 
   private var movies: [TmdbIdentifier: Movie]
 
-  private var isPerformingBatchUpdates = false
-
   private var pendingContentUpdate = MovieLibraryContentUpdate()
 
   public init?(url: URL, dataFormat: DataFormat) {
@@ -35,17 +33,6 @@ public class FileBasedMovieLibrary: MovieLibrary {
     } else {
       os_log("no data file for library", log: FileBasedMovieLibrary.logger, type: .default)
       movies = [:]
-    }
-  }
-
-  public var persistentSchemaVersion: SchemaVersion {
-    guard FileManager.default.fileExists(atPath: url.path) else {
-      return dataFormat.defaultSchemaVersion!
-    }
-    do {
-      return try dataFormat.schemaVersion(of: try Data(contentsOf: url))
-    } catch {
-      fatalError("Could not detect version of data at \(url): \(error)")
     }
   }
 
@@ -86,15 +73,7 @@ public class FileBasedMovieLibrary: MovieLibrary {
     try saveData()
   }
 
-  public func performBatchUpdates(_ updates: () throws -> Void) throws {
-    isPerformingBatchUpdates = true
-    try updates()
-    isPerformingBatchUpdates = false
-    try saveData()
-  }
-
   private func saveData() throws {
-    guard !isPerformingBatchUpdates else { return }
     guard let data = try? dataFormat.serialize(Array(movies.values)) else {
       throw MovieLibraryError.storageError
     }
