@@ -79,13 +79,14 @@ extension CoreCoordinator: LibraryContentCoordinatorDelegate {
 
   private func showLibrarySheet(for libraries: [MovieLibrary]) {
     let controller = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
-    for library in libraries {
-      let isCurrentLibrary = self.library.metadata.id == library.metadata.id
-      controller.addSheetItem(SelectableLabelSheetItem(title: library.metadata.name,
-                                                       showCheckmark: isCurrentLibrary) { _ in
-        self.switchLibrary(to: library)
-      })
-    }
+    libraries.sorted(by: StandardSortDescriptors.byLibraryName)
+             .forEach { library in
+               let isCurrentLibrary = self.library.metadata.id == library.metadata.id
+               controller.addSheetItem(SelectableLabelSheetItem(title: library.metadata.name,
+                                                                showCheckmark: isCurrentLibrary) { _ in
+                 self.switchLibrary(to: library)
+               })
+             }
     controller.addSheetItem(SelectableLabelSheetItem(title: NSLocalizedString("core.librarySettings", comment: ""),
                                                      showCheckmark: false) { _ in
       self.librarySettingsCoordinator = LibraryListCoordinator(dependencies: self.dependencies)

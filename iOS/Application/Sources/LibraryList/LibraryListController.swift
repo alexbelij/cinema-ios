@@ -9,6 +9,20 @@ class LibraryListController: UITableViewController {
     case addLibraryAction
   }
 
+  private static let sortDescriptor: (ListItem, ListItem) -> Bool = { item1, item2 in
+    switch (item1, item2) {
+      case let (.placeholder(metadata1), .placeholder(metadata2)):
+        return StandardSortDescriptors.byMetadataName(metadata1, metadata2)
+      case let (.selectLibrary(metadata1), .selectLibrary(metadata2)):
+        return StandardSortDescriptors.byMetadataName(metadata1, metadata2)
+      case let (.placeholder(metadata1), .selectLibrary(metadata2)):
+        return StandardSortDescriptors.byMetadataName(metadata1, metadata2)
+      case let (.selectLibrary(metadata1), .placeholder(metadata2)):
+        return StandardSortDescriptors.byMetadataName(metadata1, metadata2)
+      case (.addLibraryAction, _): return false
+      case (_, .addLibraryAction): return true
+    }
+  }
   var onDoneButtonTap: (() -> Void)?
   var onSelection: ((MovieLibraryMetadata) -> Void)?
   var onAddLibraryButtonTap: (() -> Void)?
@@ -21,12 +35,14 @@ class LibraryListController: UITableViewController {
 extension LibraryListController {
   func setLibraries(_ data: [MovieLibraryMetadata]) {
     viewModel = data.map { ListItem.selectLibrary($0) } + [.addLibraryAction]
+    viewModel.sort(by: LibraryListController.sortDescriptor)
     tableView?.reloadData()
   }
 
   func addPlaceholder(for metadata: MovieLibraryMetadata) {
-    let index = viewModel.count - 1
-    viewModel.insert(.placeholder(metadata), at: index)
+    viewModel.append(.placeholder(metadata))
+    viewModel.sort(by: LibraryListController.sortDescriptor)
+    let index = viewModelIndex(for: metadata)!
     tableView?.insertRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
   }
 
