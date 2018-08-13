@@ -31,6 +31,8 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
     return groups
   }
 
+  private let scrollView = UIScrollView()
+  private var cancelTableView: UITableView?
   private var tableControllers = [ArrayTableController<SheetItem>]()
   private var registeredCells = [String: UINib]()
   private let cellConfig: AnyTabularSheetCellConfiguration<SheetItem>
@@ -39,8 +41,18 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
   public var sheetCornerRadius: CGFloat = 14.0
 
   private var contentWidth: CGFloat = 0.0
-  private var contentHeight: CGFloat = 0.0
+  private var scrollableContentHeight: CGFloat = 0.0
   private var hasViewBeenShown = false
+
+  // all devices except iPhone X use sheetMargin as bottom margin
+  private var bottomMargin: CGFloat {
+    let bottomSafeAreaInset = presentingViewController!.view.safeAreaInsets.bottom
+    if bottomSafeAreaInset == 0 {
+      return sheetMargin
+    } else {
+      return bottomSafeAreaInset
+    }
+  }
 
   public init<C: TabularSheetCellConfiguration>(cellConfig: C) where C.SheetItem == SheetItem {
     self.cellConfig = AnyTabularSheetCellConfiguration(cellConfig)
@@ -51,6 +63,13 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
       let identifier = String(describing: cellType)
       registeredCells[identifier] = UINib(nibName: identifier, bundle: cellConfig.nibCellBundle)
     }
+    scrollView.bounces = false
+    scrollView.contentInsetAdjustmentBehavior = .never
+    scrollView.layer.cornerRadius = sheetCornerRadius
+    scrollView.scrollIndicatorInsets = UIEdgeInsets(top: sheetCornerRadius,
+                                                    left: 0,
+                                                    bottom: sheetCornerRadius,
+                                                    right: 0)
   }
 
   public required init?(coder aDecoder: NSCoder) {
@@ -79,9 +98,18 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
   override public func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
     let bounds = presentingViewController!.view.bounds
+    let maxHeight = 0.9 * bounds.height
+    let cancelGroupHeight = cancelTableView == nil ? 0 : cancelTableView!.contentSize.height + sheetMargin
+    let scrollViewHeight = scrollableContentHeight + cancelGroupHeight <= maxHeight
+        ? scrollableContentHeight
+        : maxHeight - sheetMargin - cancelGroupHeight
+    scrollView.frame = CGRect(x: 0, y: 0, width: contentWidth, height: scrollViewHeight)
+    if cancelTableView != nil {
+      cancelTableView!.frame.origin = CGPoint(x: 0, y: scrollViewHeight + sheetMargin)
+    }
+    let contentHeight = cancelGroupHeight + scrollViewHeight
     view.frame = CGRect(x: (bounds.width - self.contentWidth) / 2,
-                        y: bounds.origin.y + bounds.height - self.contentHeight
-                           - presentingViewController!.view.safeAreaInsets.bottom,
+                        y: bounds.origin.y + bounds.height - contentHeight - bottomMargin,
                         width: contentWidth,
                         height: contentHeight)
   }
@@ -89,30 +117,47 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
   private func setUpContentView() {
     guard !self.sheetItems.isEmpty else { preconditionFailure("there must be at least one sheet item") }
     contentWidth = min(self.view.bounds.width, self.view.bounds.height) - 2 * sheetMargin
-    contentHeight = 0.0
+    view.addSubview(scrollView)
+    scrollableContentHeight = 0.0
+
+    // all groups except last one (cancel)
     sheetItemGroups.forEach { group in
-      self.setUpTableView(tableController: ArrayTableController(sheetItemType: .array(group),
-                                                                cellConfig: self.cellConfig,
-                                                                presentingViewController: self)) { tableView in
+      let arrayTableController = ArrayTableController(sheetItemType: .array(group),
+                                                      cellConfig: cellConfig,
+                                                      presentingViewController: self)
+      let tableView = setUpTableView(tableController: arrayTableController) { tableView in
         registeredCells.forEach { identifier, nib in tableView.register(nib, forCellReuseIdentifier: identifier) }
       }
+      scrollView.addSubview(tableView)
+      tableView.layoutIfNeeded()
+      let tableViewHeight = tableView.contentSize.height
+      tableView.frame = CGRect(x: 0,
+                               y: scrollableContentHeight,
+                               width: contentWidth,
+                               height: tableViewHeight)
+      scrollableContentHeight += tableViewHeight + sheetMargin
     }
+    scrollableContentHeight -= sheetMargin
+    scrollView.contentSize = CGSize(width: contentWidth, height: scrollableContentHeight)
+
+    // last group (cancel)
     if cellConfig.showsCancelAction {
-      self.setUpTableView(tableController: ArrayTableController(sheetItemType: .cancel,
-                                                                cellConfig: self.cellConfig,
-                                                                presentingViewController: self)) { tableView in
+      let arrayTableController = ArrayTableController(sheetItemType: .cancel,
+                                                      cellConfig: cellConfig,
+                                                      presentingViewController: self)
+      cancelTableView = setUpTableView(tableController: arrayTableController) { tableView in
         tableView.register(CancelCell.self, forCellReuseIdentifier: "CancelCell")
       }
+      view.addSubview(cancelTableView!)
+      cancelTableView!.layoutIfNeeded()
+      let tableViewHeight = cancelTableView!.contentSize.height
+      // origin is set in viewWillLayoutSubviews
+      cancelTableView!.frame = CGRect(x: 0, y: 0, width: contentWidth, height: tableViewHeight)
     }
-    let bounds = presentingViewController!.view.bounds
-    view.frame = CGRect(x: (bounds.width - self.contentWidth) / 2,
-                        y: bounds.origin.y + bounds.height,
-                        width: contentWidth,
-                        height: contentHeight)
   }
 
   private func setUpTableView(tableController: ArrayTableController<SheetItem>,
-                              cellRegistering: (UITableView) -> Void) {
+                              cellRegistering: (UITableView) -> Void) -> UITableView {
     self.tableControllers.append(tableController)
     let tableView = UITableView(frame: .zero, style: .plain)
     tableView.backgroundColor = .clear
@@ -125,14 +170,7 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
     tableView.layer.cornerRadius = self.sheetCornerRadius
     tableView.layer.masksToBounds = true
     cellRegistering(tableView)
-    view.addSubview(tableView)
-
-    tableView.layoutIfNeeded()
-    tableView.frame = CGRect(x: 0,
-                             y: contentHeight,
-                             width: contentWidth,
-                             height: tableView.contentSize.height)
-    contentHeight += tableView.frame.height + sheetMargin
+    return tableView
   }
 
   // MARK: - UIViewControllerTransitioningDelegate
