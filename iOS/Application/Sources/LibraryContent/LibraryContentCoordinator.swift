@@ -80,9 +80,9 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
   private func updateTitle() {
     switch content {
       case .all:
-        movieListController.title = NSLocalizedString("library", comment: "")
+        movieListController.navigationItem.title = library.metadata.name
       case let .allWith(genreId):
-        movieListController.title = L10n.genreName(for: genreId)!
+        movieListController.navigationItem.title = L10n.genreName(for: genreId)!
     }
   }
 
