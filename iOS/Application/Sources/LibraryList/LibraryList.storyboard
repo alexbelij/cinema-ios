@@ -162,9 +162,8 @@
                                             <subviews>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GmZ-yI-Ium">
                                                     <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
-                                                    <state key="normal" title="Remove Library">
-                                                        <color key="titleColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
-                                                    </state>
+                                                    <color key="tintColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
+                                                    <state key="normal" title="Remove Library"/>
                                                     <connections>
                                                         <action selector="deleteLibraryButtonTapped" destination="zWh-vG-Wst" eventType="touchUpInside" id="Bos-DF-QLV"/>
                                                     </connections>

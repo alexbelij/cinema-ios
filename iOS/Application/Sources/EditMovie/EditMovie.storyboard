@@ -81,9 +81,8 @@
                                             <subviews>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uxz-nq-J40">
                                                     <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
-                                                    <state key="normal" title="Delete Movie">
-                                                        <color key="titleColor" red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="calibratedRGB"/>
-                                                    </state>
+                                                    <color key="tintColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
+                                                    <state key="normal" title="Delete Movie"/>
                                                     <connections>
                                                         <action selector="deleteButtonClicked" destination="dNn-o6-z2I" eventType="touchUpInside" id="yZT-hp-pkD"/>
                                                     </connections>
