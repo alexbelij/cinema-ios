@@ -20,14 +20,14 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rxh-GR-vWh">
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rxh-GR-vWh">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eWR-Wq-QmO">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="367.5"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="347.5"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="Feu-bs-ssQ">
-                                                <rect key="frame" x="16" y="36" width="343" height="204.5"/>
+                                                <rect key="frame" x="16" y="16" width="343" height="204.5"/>
                                                 <subviews>
                                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="GenericPoster" translatesAutoresizingMaskIntoConstraints="NO" id="G5A-3g-BU1">
                                                         <rect key="frame" x="0.0" y="5.5" width="129.5" height="194"/>
@@ -139,13 +139,13 @@
                                                 </subviews>
                                             </stackView>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Story Line" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZzR-r9-l2a">
-                                                <rect key="frame" x="16" y="260.5" width="81" height="20.5"/>
+                                                <rect key="frame" x="16" y="240.5" width="81" height="20.5"/>
                                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ziP-Fj-Hsh">
-                                                <rect key="frame" x="16" y="284.5" width="343" height="67"/>
+                                                <rect key="frame" x="16" y="264.5" width="343" height="67"/>
                                                 <string key="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vel nisi eget elit facilisis tempor laoreet ac est. Nunc diam turpis, iaculis vel sem ac, feugiat lacinia lacus.</string>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <nil key="textColor"/>
