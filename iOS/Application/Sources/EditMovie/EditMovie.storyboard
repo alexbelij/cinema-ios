@@ -5,7 +5,6 @@
     </device>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -80,12 +79,6 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="b30-k7-5Ve">
-                                                    <rect key="frame" x="16" y="11" width="343" height="22"/>
-                                                    <nil key="textColor"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                    <textInputTraits key="textInputTraits"/>
-                                                </textField>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uxz-nq-J40">
                                                     <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
                                                     <state key="normal" title="Delete Movie">
@@ -98,13 +91,9 @@
                                             </subviews>
                                             <constraints>
                                                 <constraint firstItem="uxz-nq-J40" firstAttribute="leading" secondItem="M43-MT-e44" secondAttribute="leading" id="Ai3-9Z-O0o"/>
-                                                <constraint firstAttribute="bottomMargin" secondItem="b30-k7-5Ve" secondAttribute="bottom" id="F6Z-PQ-4D1"/>
-                                                <constraint firstItem="b30-k7-5Ve" firstAttribute="top" secondItem="M43-MT-e44" secondAttribute="topMargin" id="U1j-Nk-NfL"/>
                                                 <constraint firstAttribute="trailing" secondItem="uxz-nq-J40" secondAttribute="trailing" id="Uox-Qy-BDh"/>
-                                                <constraint firstItem="b30-k7-5Ve" firstAttribute="leading" secondItem="M43-MT-e44" secondAttribute="leadingMargin" id="XPR-lB-LlE"/>
                                                 <constraint firstItem="uxz-nq-J40" firstAttribute="top" secondItem="M43-MT-e44" secondAttribute="top" id="lSM-Ug-E8O"/>
                                                 <constraint firstAttribute="bottom" secondItem="uxz-nq-J40" secondAttribute="bottom" id="rwq-TE-hfM"/>
-                                                <constraint firstAttribute="trailingMargin" secondItem="b30-k7-5Ve" secondAttribute="trailing" id="zxA-SX-bFn"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
