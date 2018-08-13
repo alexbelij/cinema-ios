@@ -61,11 +61,7 @@ extension EditMovieCoordinator: EditMovieControllerDelegate {
 
   func editMovieController(_ controller: EditMovieController,
                            didFinishEditingWithResult editResult: EditMovieController.EditResult) {
-    controller.navigationItem.leftBarButtonItem!.isEnabled = false
-    controller.view.isUserInteractionEnabled = false
-    let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
-    activityIndicator.startAnimating()
-    controller.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: activityIndicator)
+    controller.startWaitingAnimation()
     DispatchQueue.global(qos: .userInitiated).async {
       switch editResult {
         case let .edited(edits):
@@ -79,15 +75,14 @@ extension EditMovieCoordinator: EditMovieControllerDelegate {
   }
 
   private func handleResult(_ result: AsyncResult<Void, MovieLibraryError>, for editResult: EditResult) {
-    switch result {
-      case let .failure(error):
-        DispatchQueue.main.async {
+    DispatchQueue.main.async {
+      self.editMovieController.stopWaitingAnimation(restoreUI: result.isFailure)
+      switch result {
+        case let .failure(error):
           self.delegate?.editMovieCoordinator(self, didFailWithError: error)
-        }
-      case .success:
-        DispatchQueue.main.async {
+        case .success:
           self.delegate?.editMovieCoordinator(self, didFinishEditingWithResult: editResult)
-        }
+      }
     }
   }
 

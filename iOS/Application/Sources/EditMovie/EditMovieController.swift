@@ -157,3 +157,25 @@ extension EditMovieController {
     self.view?.endEditing(false)
   }
 }
+
+extension EditMovieController {
+  func startWaitingAnimation() {
+    navigationItem.leftBarButtonItem!.isEnabled = false
+    titleTextField.isUserInteractionEnabled = false
+    subtitleTextField.isUserInteractionEnabled = false
+    deleteMovieButton.isUserInteractionEnabled = false
+    let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+    activityIndicator.startAnimating()
+    navigationItem.rightBarButtonItem = UIBarButtonItem(customView: activityIndicator)
+  }
+
+  func stopWaitingAnimation(restoreUI: Bool) {
+    navigationItem.leftBarButtonItem!.isEnabled = true
+    titleTextField.isUserInteractionEnabled = true
+    subtitleTextField.isUserInteractionEnabled = true
+    deleteMovieButton.isUserInteractionEnabled = true
+    navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done,
+                                                        target: self,
+                                                        action: #selector(doneButtonClicked))
+  }
+}
