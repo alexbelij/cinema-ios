@@ -118,10 +118,12 @@ extension EditMovieController: UITextFieldDelegate {
 
 extension EditMovieController {
   @IBAction private func cancelButtonClicked() {
+    dismissKeyboard()
     delegate?.editMovieControllerDidCancelEditing(self)
   }
 
   @IBAction private func doneButtonClicked() {
+    dismissKeyboard()
     guard let delegate = self.delegate else { return }
     let edits = self.allEdits
     if edits.isEmpty {
@@ -141,6 +143,7 @@ extension EditMovieController {
   }
 
   @IBAction private func deleteButtonClicked() {
+    dismissKeyboard()
     let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
     alert.addAction(UIAlertAction(title: NSLocalizedString("edit.deleteMovie", comment: ""),
                                   style: .destructive) { _ in
