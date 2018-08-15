@@ -81,7 +81,7 @@ extension LibrarySettingsController {
 // MARK: - User Actions
 
 extension LibrarySettingsController {
-  @IBAction private func deleteLibraryButtonTapped() {
+  @IBAction private func removeLibraryButtonTapped() {
     view.endEditing(false)
     let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
     let format = NSLocalizedString("librarySettings.removeLibrary.format", comment: "")

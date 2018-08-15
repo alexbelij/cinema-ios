@@ -13,7 +13,7 @@
 "discard" = "Verwerfen";
 "diskType.bluRay" = "Blu-ray";
 "diskType.dvd" = "DVD";
-"edit.deleteMovie" = "Film löschen";
+"edit.removeMovie" = "Film entfernen";
 "edit.failed" = "Deine Änderungen konnten nicht gespeichert werden!";
 "edit.noTitleAlert" = "Ein Film braucht einen Titel.";
 "edit.sectionHeader.subtitle" = "Untertitel (optional)";

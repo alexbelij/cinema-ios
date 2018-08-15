@@ -28,7 +28,7 @@ class EditMovieController: UITableViewController {
   }
   @IBOutlet private weak var subtitleTextField: UITextField!
 
-  @IBOutlet private weak var deleteMovieButton: UIButton!
+  @IBOutlet private weak var removeMovieButton: UIButton!
 
   enum Edit: Hashable {
     case titleChange(String)
@@ -60,7 +60,7 @@ extension EditMovieController {
     super.viewDidLoad()
     titleTextField.delegate = self
     subtitleTextField.delegate = self
-    deleteMovieButton.setTitle(NSLocalizedString("edit.deleteMovie", comment: ""), for: .normal)
+    removeMovieButton.setTitle(NSLocalizedString("edit.removeMovie", comment: ""), for: .normal)
 
     reassign(property: \EditMovieController.movieTitle)
     reassign(property: \EditMovieController.subtitle)
@@ -142,10 +142,10 @@ extension EditMovieController {
     }
   }
 
-  @IBAction private func deleteButtonClicked() {
+  @IBAction private func removeButtonClicked() {
     dismissKeyboard()
     let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-    alert.addAction(UIAlertAction(title: NSLocalizedString("edit.deleteMovie", comment: ""),
+    alert.addAction(UIAlertAction(title: NSLocalizedString("edit.removeMovie", comment: ""),
                                   style: .destructive) { _ in
       self.delegate?.editMovieController(self, didFinishEditingWithResult: .deleted)
     })
@@ -163,7 +163,7 @@ extension EditMovieController {
     navigationItem.leftBarButtonItem!.isEnabled = false
     titleTextField.isUserInteractionEnabled = false
     subtitleTextField.isUserInteractionEnabled = false
-    deleteMovieButton.isUserInteractionEnabled = false
+    removeMovieButton.isUserInteractionEnabled = false
     let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
     activityIndicator.startAnimating()
     navigationItem.rightBarButtonItem = UIBarButtonItem(customView: activityIndicator)
@@ -173,7 +173,7 @@ extension EditMovieController {
     navigationItem.leftBarButtonItem!.isEnabled = true
     titleTextField.isUserInteractionEnabled = true
     subtitleTextField.isUserInteractionEnabled = true
-    deleteMovieButton.isUserInteractionEnabled = true
+    removeMovieButton.isUserInteractionEnabled = true
     navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done,
                                                         target: self,
                                                         action: #selector(doneButtonClicked))
