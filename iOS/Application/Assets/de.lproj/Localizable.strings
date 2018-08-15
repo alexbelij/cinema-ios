@@ -18,13 +18,9 @@
 "edit.noTitleAlert" = "Ein Film braucht einen Titel.";
 "edit.sectionHeader.subtitle" = "Untertitel (optional)";
 "edit.sectionHeader.title" = "Titel";
-"error.dataAccessError" = "Die Mediathek konnte nicht geladen werden.";
 "error.genericError" = "Es ist ein unbekannter Fehler aufgetreten.";
 "error.genericTitle" = "Hoppla!";
-"error.invalidDataFormat" = "Die Datei kann nicht geöffnet werden. Home-Cinema konnte die Datei nicht lesen.";
-"error.storageError" = "Die Mediathek konnte nicht gespeichert werden.";
 "error.tryAgain" = "Bitte versuch es erneut.";
-"error.unsupportedSchemaVersion" = "Du benötigst eine neuere Version von Home-Cinema, um die Datei zu importieren.";
 "genre.action" = "Action";
 "genre.adventure" = "Abenteuer";
 "genre.animation" = "Animation";

@@ -70,7 +70,7 @@ public class CinemaKitStartupManager: StartupManager {
     os_log("gathering dependencies", log: CinemaKitStartupManager.logger, type: .info)
 
     // Library Manager
-    let libraryManager = OnePersistentMovieLibraryManager(url: CinemaKitStartupManager.libraryDataFileURL)
+    let libraryManager = InMemoryMovieLibraryManager(libraryFactory: DefaultMovieLibraryFactory())
 
     // MovieDb Client
     let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en
@@ -83,4 +83,10 @@ public class CinemaKitStartupManager: StartupManager {
 
 private func directoryUrl(for directory: FileManager.SearchPathDirectory) -> URL {
   return FileManager.default.urls(for: directory, in: .userDomainMask).first!
+}
+
+private class DefaultMovieLibraryFactory: MovieLibraryFactory {
+  func makeLibrary(with metadata: MovieLibraryMetadata) -> InternalMovieLibrary {
+    return InMemoryMovieLibrary(metadata: metadata)
+  }
 }

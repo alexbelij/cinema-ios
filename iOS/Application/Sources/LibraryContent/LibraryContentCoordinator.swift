@@ -170,11 +170,6 @@ extension LibraryContentCoordinator: EditMovieCoordinatorDelegate {
 
   func editMovieCoordinator(_ coordinator: EditMovieCoordinator, didFailWithError error: Error) {
     switch error {
-      case MovieLibraryError.movieDoesNotExist:
-        guard let movie = self.movieDetailsCoordinator?.movie else {
-          preconditionFailure("MovieDetailsCoordinator should present movie details")
-        }
-        fatalError("tried to edit movie which is not in library: \(movie)")
       default:
         DispatchQueue.main.async {
           let alert = UIAlertController(title: NSLocalizedString("edit.failed", comment: ""),

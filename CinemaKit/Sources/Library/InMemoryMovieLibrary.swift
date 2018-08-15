@@ -17,7 +17,7 @@ class InMemoryMovieLibrary: InternalMovieLibrary {
 
   func fetchMovies(for id: GenreIdentifier,
                    then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void) {
-    completion(.success(movies))
+    completion(.success(movies.filter { $0.genreIds.contains(id) }))
   }
 
   func containsMovie(with id: TmdbIdentifier) -> Bool {

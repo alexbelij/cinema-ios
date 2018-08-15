@@ -28,9 +28,6 @@ public struct MovieLibraryContentUpdate {
 }
 
 public enum MovieLibraryError: Error {
-  case dataAccessError
-  case storageError
-  case movieDoesNotExist(id: TmdbIdentifier)
 }
 
 public protocol MovieLibrary: class {
