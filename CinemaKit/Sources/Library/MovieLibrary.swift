@@ -1,6 +1,6 @@
 import Foundation
 
-public struct MovieLibraryMetadata: Hashable, Equatable, Codable {
+public struct MovieLibraryMetadata: Codable {
   public let id: UUID
   public var name: String
 

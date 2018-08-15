@@ -97,7 +97,7 @@ public struct PagingSequence<PageElement>: Sequence, IteratorProtocol {
   }
 }
 
-public struct PartialMovie: Equatable, Hashable {
+public struct PartialMovie {
   public let tmdbID: TmdbIdentifier
   public let title: String
   public let releaseYear: Int?

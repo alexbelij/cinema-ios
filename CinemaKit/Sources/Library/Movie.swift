@@ -24,7 +24,7 @@ public struct GenreIdentifier: RawRepresentable, CustomStringConvertible, Hashab
   }
 }
 
-public struct Movie: Hashable {
+public struct Movie {
   public let tmdbID: TmdbIdentifier
   public var title: String
   public var subtitle: String?
@@ -56,12 +56,14 @@ public struct Movie: Hashable {
       return title
     }
   }
-
-  public var hashValue: Int {
-    return tmdbID.rawValue
-  }
 }
 
 public enum DiskType: String {
   case dvd, bluRay
+}
+
+extension Collection where Element == Movie {
+  public func index(of movie: Movie) -> Index? {
+    return index { $0.tmdbID == movie.tmdbID }
+  }
 }
