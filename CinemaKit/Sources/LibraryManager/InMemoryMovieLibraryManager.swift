@@ -41,7 +41,7 @@ class InMemoryMovieLibraryManager: MovieLibraryManager {
     completion(.success(()))
   }
 
-  func removeLibrary(withID id: UUID,
+  func removeLibrary(with id: UUID,
                      then completion: @escaping (AsyncResult<Void, MovieLibraryManagerError>) -> Void) {
     let library = libraries.removeValue(forKey: id)!
     delegate?.libraryManager(self, didRemove: library)

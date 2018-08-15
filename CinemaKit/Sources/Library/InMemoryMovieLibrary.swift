@@ -39,9 +39,10 @@ class InMemoryMovieLibrary: InternalMovieLibrary {
     completion(.success(()))
   }
 
-  func remove(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
-    guard let index = movies.index(of: movie) else { preconditionFailure() }
-    movies.remove(at: index)
+  func removeMovie(with tmdbID: TmdbIdentifier,
+                   then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
+    guard let index = movies.index(where: { $0.tmdbID == tmdbID }) else { preconditionFailure() }
+    let movie = movies.remove(at: index)
     let update = MovieLibraryContentUpdate(removedMovies: [movie])
     delegates.invoke { $0.library(self, didUpdateContent: update) }
     completion(.success(()))

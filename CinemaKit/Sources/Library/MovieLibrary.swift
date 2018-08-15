@@ -45,7 +45,8 @@ public protocol MovieLibrary: class {
   // managing library content
   func add(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
   func update(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
-  func remove(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
+  func removeMovie(with tmdbID: TmdbIdentifier,
+                   then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
 }
 
 protocol InternalMovieLibrary: MovieLibrary {

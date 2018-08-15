@@ -69,7 +69,9 @@ extension EditMovieCoordinator: EditMovieControllerDelegate {
           self.applyEdits(edits, to: &movie)
           self.library.update(movie) { result in self.handleResult(result, for: .edited(movie)) }
         case .deleted:
-          self.library.remove(self.movieToEdit) { result in self.handleResult(result, for: .deleted) }
+          self.library.removeMovie(with: self.movieToEdit.tmdbID) { result in
+            self.handleResult(result, for: .deleted)
+          }
       }
     }
   }

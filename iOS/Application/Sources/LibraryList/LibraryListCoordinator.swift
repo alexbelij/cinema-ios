@@ -123,7 +123,7 @@ extension LibraryListCoordinator {
     libraryListController.showPlaceholder(for: metadata)
     navigationController.popViewController(animated: true)
     DispatchQueue.global(qos: .userInitiated).async {
-      self.libraryManager.removeLibrary(withID: metadata.id) { result in
+      self.libraryManager.removeLibrary(with: metadata.id) { result in
         DispatchQueue.main.async {
           switch result {
             case .success:

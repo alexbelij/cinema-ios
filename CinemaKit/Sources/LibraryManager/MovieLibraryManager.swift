@@ -20,7 +20,7 @@ public protocol MovieLibraryManager: class {
                   then completion: @escaping (AsyncResult<MovieLibrary, MovieLibraryManagerError>) -> Void)
   func updateLibrary(with metadata: MovieLibraryMetadata,
                      then completion: @escaping (AsyncResult<Void, MovieLibraryManagerError>) -> Void)
-  func removeLibrary(withID id: UUID, then completion: @escaping (AsyncResult<Void, MovieLibraryManagerError>) -> Void)
+  func removeLibrary(with id: UUID, then completion: @escaping (AsyncResult<Void, MovieLibraryManagerError>) -> Void)
 }
 
 public enum MovieLibraryManagerError: Error {
