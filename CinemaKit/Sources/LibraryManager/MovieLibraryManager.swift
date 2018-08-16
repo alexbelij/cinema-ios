@@ -19,7 +19,7 @@ public protocol MovieLibraryManager: class {
   func addLibrary(with metadata: MovieLibraryMetadata,
                   then completion: @escaping (AsyncResult<MovieLibrary, MovieLibraryManagerError>) -> Void)
   func updateLibrary(with metadata: MovieLibraryMetadata,
-                     then completion: @escaping (AsyncResult<Void, MovieLibraryManagerError>) -> Void)
+                     then completion: @escaping (AsyncResult<MovieLibrary, MovieLibraryManagerError>) -> Void)
   func removeLibrary(with id: UUID, then completion: @escaping (AsyncResult<Void, MovieLibraryManagerError>) -> Void)
 }
 

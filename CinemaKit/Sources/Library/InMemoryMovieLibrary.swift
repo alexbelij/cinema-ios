@@ -24,19 +24,19 @@ class InMemoryMovieLibrary: InternalMovieLibrary {
     return movies.contains { $0.tmdbID == id }
   }
 
-  func add(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
+  func add(_ movie: Movie, then completion: @escaping (AsyncResult<Movie, MovieLibraryError>) -> Void) {
     movies.append(movie)
     let update = MovieLibraryContentUpdate(addedMovies: [movie])
     delegates.invoke { $0.library(self, didUpdateContent: update) }
-    completion(.success(()))
+    completion(.success(movie))
   }
 
-  func update(_ movie: Movie, then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
+  func update(_ movie: Movie, then completion: @escaping (AsyncResult<Movie, MovieLibraryError>) -> Void) {
     guard let index = movies.index(of: movie) else { preconditionFailure() }
     movies[index] = movie
     let update = MovieLibraryContentUpdate(updatedMovies: [movie.tmdbID: movie])
     delegates.invoke { $0.library(self, didUpdateContent: update) }
-    completion(.success(()))
+    completion(.success(movie))
   }
 
   func removeMovie(with tmdbID: TmdbIdentifier,

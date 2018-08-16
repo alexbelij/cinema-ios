@@ -34,11 +34,11 @@ class InMemoryMovieLibraryManager: MovieLibraryManager {
   }
 
   func updateLibrary(with metadata: MovieLibraryMetadata,
-                     then completion: @escaping (AsyncResult<Void, MovieLibraryManagerError>) -> Void) {
+                     then completion: @escaping (AsyncResult<MovieLibrary, MovieLibraryManagerError>) -> Void) {
     let library = libraries[metadata.id]!
     library.metadata = metadata
     delegate?.libraryManager(self, didUpdate: library)
-    completion(.success(()))
+    completion(.success(library))
   }
 
   func removeLibrary(with id: UUID,
