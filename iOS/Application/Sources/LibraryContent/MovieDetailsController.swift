@@ -93,15 +93,14 @@ class MovieDetailsController: UIViewController {
   @IBOutlet private weak var releaseDateLabel: UILabel!
   @IBOutlet private weak var releaseDateStackView: UIStackView!
 
-  var certification: RemoteProperty<String> = .loading {
+  var certification: String? {
     didSet {
       self.loadViewIfNeeded()
-      self.certificationStackView.isHidden = true
-      switch certification {
-        case .loading, .unavailable: break
-        case let .available(certification):
-          self.certificationLabel.text = certification
-          self.certificationStackView.isHidden = false
+      if let text = certification {
+        self.certificationLabel.text = text
+        self.certificationStackView.isHidden = false
+      } else {
+        self.certificationStackView.isHidden = true
       }
     }
   }
@@ -119,16 +118,13 @@ class MovieDetailsController: UIViewController {
 
   @IBOutlet private weak var storyLineLabel: UILabel!
 
-  var overview: RemoteProperty<String> = .loading {
+  var overview: String? {
     didSet {
       self.loadViewIfNeeded()
-      switch overview {
-        case .loading:
-          self.overviewLabel.text = NSLocalizedString("loading", comment: "")
-        case .unavailable:
-          self.overviewLabel.text = NSLocalizedString("details.missing.overview", comment: "")
-        case let .available(overview):
-          self.overviewLabel.text = overview
+      if let text = overview {
+        self.overviewLabel.text = text
+      } else {
+        self.overviewLabel.text = NSLocalizedString("details.missing.overview", comment: "")
       }
     }
   }

@@ -28,6 +28,7 @@ public struct MovieLibraryContentUpdate {
 }
 
 public enum MovieLibraryError: Error {
+  case detailsFetchError
 }
 
 public protocol MovieLibrary: class {
@@ -43,7 +44,9 @@ public protocol MovieLibrary: class {
   func containsMovie(with id: TmdbIdentifier) -> Bool // call only when movies have already been fetched
 
   // managing library content
-  func add(_ movie: Movie, then completion: @escaping (AsyncResult<Movie, MovieLibraryError>) -> Void)
+  func addMovie(with tmdbID: TmdbIdentifier,
+                diskType: DiskType,
+                then completion: @escaping (AsyncResult<Movie, MovieLibraryError>) -> Void)
   func update(_ movie: Movie, then completion: @escaping (AsyncResult<Movie, MovieLibraryError>) -> Void)
   func removeMovie(with tmdbID: TmdbIdentifier,
                    then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)

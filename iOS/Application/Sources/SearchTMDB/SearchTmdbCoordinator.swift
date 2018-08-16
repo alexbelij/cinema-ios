@@ -70,19 +70,20 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
         controller.reloadRow(forMovieWithId: model.movie.tmdbID)
       }
       DispatchQueue.global(qos: .userInitiated).async {
-        self.add(model.movie, withDiskType: diskType) { error in
-          if error == nil {
-            DispatchQueue.main.async {
-              model.state = .addedToLibrary
-              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
-              self.popularMoviesController.removeMovie(withId: model.movie.tmdbID)
-            }
-          } else {
-            DispatchQueue.main.async {
-              model.state = .new
-              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
-              self.showAddingFailedAlert(for: model.movie)
-            }
+        self.library.addMovie(with: model.tmdbID, diskType: diskType) { result in
+          switch result {
+            case .failure:
+              DispatchQueue.main.async {
+                model.state = .new
+                controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+                self.showAddingFailedAlert(for: model.movie)
+              }
+            case .success:
+              DispatchQueue.main.async {
+                model.state = .addedToLibrary
+                controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+                self.popularMoviesController.removeMovie(withId: model.movie.tmdbID)
+              }
           }
         }
       }
@@ -98,21 +99,22 @@ extension SearchTmdbCoordinator: PopularMoviesControllerDelegate {
         controller.reloadRow(forMovieWithId: model.movie.tmdbID)
       }
       DispatchQueue.global(qos: .userInitiated).async {
-        self.add(model.movie, withDiskType: diskType) { error in
-          if error == nil {
-            DispatchQueue.main.async {
-              model.state = .addedToLibrary
-              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
-              DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
-                controller.removeMovie(withId: model.movie.tmdbID)
+        self.library.addMovie(with: model.tmdbID, diskType: diskType) { result in
+          switch result {
+            case .failure:
+              DispatchQueue.main.async {
+                model.state = .new
+                controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+                self.showAddingFailedAlert(for: model.movie)
               }
-            }
-          } else {
-            DispatchQueue.main.async {
-              model.state = .new
-              controller.reloadRow(forMovieWithId: model.movie.tmdbID)
-              self.showAddingFailedAlert(for: model.movie)
-            }
+            case .success:
+              DispatchQueue.main.async {
+                model.state = .addedToLibrary
+                controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+                  controller.removeMovie(withId: model.movie.tmdbID)
+                }
+              }
           }
         }
       }
@@ -133,23 +135,6 @@ extension SearchTmdbCoordinator {
     }
     alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     controller.present(alert, animated: true)
-  }
-
-  private func add(_ item: PartialMovie,
-                   withDiskType diskType: DiskType,
-                   then completion: @escaping (Error?) -> Void) {
-    let fullItem = Movie(tmdbID: item.tmdbID,
-                         title: item.title,
-                         runtime: self.movieDb.runtime(for: item.tmdbID),
-                         releaseDate: self.movieDb.releaseDate(for: item.tmdbID),
-                         diskType: diskType,
-                         genreIds: self.movieDb.genreIds(for: item.tmdbID))
-    library.add(fullItem) { result in
-      switch result {
-        case let .failure(error): completion(error)
-        case .success: completion(nil)
-      }
-    }
   }
 
   private func showAddingFailedAlert(for movie: PartialMovie) {

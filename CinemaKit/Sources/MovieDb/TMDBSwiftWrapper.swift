@@ -65,43 +65,6 @@ public class TMDBSwiftWrapper: MovieDbClient {
     return UIImage(data: data)
   }
 
-  public func overview(for id: TmdbIdentifier) -> String? {
-    return movie(for: id)?.overview
-  }
-
-  public func certification(for id: TmdbIdentifier) -> String? {
-    var releaseDates: [MovieReleaseDatesMDB]? = nil
-    let certificationJson = cache.string(for: "certification-\(id)") {
-      var jsonString: String?
-      waitUntil { done in
-        MovieMDB.release_dates(movieID: id.rawValue) { apiReturn, releaseDates1 in
-          if let json = apiReturn.json, apiReturn.json!["results"].exists(),
-             let releaseDates1 = releaseDates1 {
-            jsonString = json["results"].rawString()
-            releaseDates = releaseDates1
-          }
-          done()
-        }
-      }
-      return jsonString
-    }
-    if releaseDates == nil && certificationJson != nil {
-      var array = [MovieReleaseDatesMDB]()
-      JSON(parseJSON: certificationJson!).forEach {
-        array.append(MovieReleaseDatesMDB(results: $0.1))
-      }
-      releaseDates = array
-    }
-    return releaseDates?.first { $0.iso_3166_1 == self.country.rawValue }?.release_dates[0].certification
-  }
-
-  public func genreIds(for id: TmdbIdentifier) -> [GenreIdentifier] {
-    if let genres = movie(for: id)?.genres.map({ GenreIdentifier(rawValue: $0.id!) }) {
-      return genres
-    }
-    return []
-  }
-
   private func movie(for id: TmdbIdentifier) -> MovieDetailedMDB? {
     var createdMovie: MovieDetailedMDB? = nil
     let movieJson = cache.string(for: "movie-\(id)-\(language.rawValue)") {
@@ -141,11 +104,6 @@ public class TMDBSwiftWrapper: MovieDbClient {
     return movies
   }
 
-  public func runtime(for id: TmdbIdentifier) -> Measurement<UnitDuration>? {
-    guard let runtime = movie(for: id)?.runtime, runtime > 0 else { return nil }
-    return Measurement(value: Double(runtime), unit: UnitDuration.minutes)
-  }
-
   public func popularMovies() -> PagingSequence<PartialMovie> {
     return PagingSequence<PartialMovie> { page -> [PartialMovie]? in
       var movies = [PartialMovie]()
@@ -169,12 +127,6 @@ public class TMDBSwiftWrapper: MovieDbClient {
     return PartialMovie(tmdbID: identifier, title: movieMDB.title!, releaseYear: year)
   }
 
-  public func releaseDate(for id: TmdbIdentifier) -> Date? {
-    guard let movie = movie(for: id),
-          let releaseDate = movie.release_date else { return nil }
-    return TMDBSwiftWrapper.releaseDateFormatter.date(from: releaseDate)
-  }
-
   private func waitUntil(_ asyncProcess: (_ done: @escaping () -> Void) -> Void) {
     if Thread.isMainThread {
       fatalError("must not be called on the main thread")
@@ -183,5 +135,54 @@ public class TMDBSwiftWrapper: MovieDbClient {
     let done = { _ = semaphore.signal() }
     asyncProcess(done)
     semaphore.wait()
+  }
+}
+
+extension TMDBSwiftWrapper: MovieProvider {
+  func movie(with tmdbID: TmdbIdentifier, diskType: DiskType) -> Movie? {
+    guard let movie = movie(for: tmdbID) else { return nil }
+    var runtime: Measurement<UnitDuration>?
+    if let value = movie.runtime, value > 0 {
+      runtime = Measurement(value: Double(value), unit: .minutes)
+    }
+    var releaseDate: Date?
+    if let value = movie.release_date {
+      releaseDate = TMDBSwiftWrapper.releaseDateFormatter.date(from: value)
+    }
+    return Movie(tmdbID: tmdbID,
+                 title: movie.title!,
+                 subtitle: nil,
+                 diskType: diskType,
+                 runtime: runtime,
+                 releaseDate: releaseDate,
+                 genreIds: movie.genres.map { GenreIdentifier(rawValue: $0.id!) },
+                 certification: certification(for: tmdbID),
+                 overview: movie.overview)
+  }
+
+  private func certification(for id: TmdbIdentifier) -> String? {
+    var releaseDates: [MovieReleaseDatesMDB]?
+    let certificationJson = cache.string(for: "certification-\(id)") {
+      var jsonString: String?
+      waitUntil { done in
+        MovieMDB.release_dates(movieID: id.rawValue) { apiReturn, releaseDates1 in
+          if let json = apiReturn.json, apiReturn.json!["results"].exists(),
+             let releaseDates1 = releaseDates1 {
+            jsonString = json["results"].rawString()
+            releaseDates = releaseDates1
+          }
+          done()
+        }
+      }
+      return jsonString
+    }
+    if releaseDates == nil && certificationJson != nil {
+      var array = [MovieReleaseDatesMDB]()
+      JSON(parseJSON: certificationJson!).forEach {
+        array.append(MovieReleaseDatesMDB(results: $0.1))
+      }
+      releaseDates = array
+    }
+    return releaseDates?.first { $0.iso_3166_1 == self.country.rawValue }?.release_dates[0].certification
   }
 }

@@ -44,12 +44,6 @@ extension MovieDetailsCoordinator {
                           size: PosterSize(minWidth: Int(0.345 * UIScreen.main.bounds.size.width)),
                           purpose: .details)
     }
-    self.fetchRemoteValue(for: \MovieDetailsController.certification, on: queue, in: group) {
-      self.movieDb.certification(for: id)?.nilIfEmptyString
-    }
-    self.fetchRemoteValue(for: \MovieDetailsController.overview, on: queue, in: group) {
-      self.movieDb.overview(for: id)?.nilIfEmptyString
-    }
     group.notify(queue: .main) {
       UIApplication.shared.isNetworkActivityIndicatorVisible = false
     }
@@ -91,10 +85,10 @@ extension MovieDetailsCoordinator {
     movieDetailsController.runtime = movie.runtime
     movieDetailsController.releaseDate = movie.releaseDate
     movieDetailsController.diskType = movie.diskType
+    movieDetailsController.certification = movie.certification
+    movieDetailsController.overview = movie.overview
     if resetRemoteProperties {
       movieDetailsController.poster = .loading
-      movieDetailsController.certification = .loading
-      movieDetailsController.overview = .loading
     }
   }
 }

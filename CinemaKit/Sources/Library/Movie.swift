@@ -28,25 +28,31 @@ public struct Movie {
   public let tmdbID: TmdbIdentifier
   public var title: String
   public var subtitle: String?
-  public let runtime: Measurement<UnitDuration>?
-  public var releaseDate: Date?
   public let diskType: DiskType
-  public var genreIds: [GenreIdentifier]
+  public let runtime: Measurement<UnitDuration>?
+  public let releaseDate: Date?
+  public let genreIds: [GenreIdentifier]
+  public let certification: String?
+  public let overview: String?
 
   public init(tmdbID: TmdbIdentifier,
               title: String,
               subtitle: String? = nil,
+              diskType: DiskType = .bluRay,
               runtime: Measurement<UnitDuration>? = nil,
               releaseDate: Date? = nil,
-              diskType: DiskType = .bluRay,
-              genreIds: [GenreIdentifier] = []) {
+              genreIds: [GenreIdentifier] = [],
+              certification: String? = nil,
+              overview: String? = nil) {
     self.tmdbID = tmdbID
     self.title = title
     self.subtitle = subtitle
+    self.diskType = diskType
     self.runtime = runtime
     self.releaseDate = releaseDate
-    self.diskType = diskType
     self.genreIds = genreIds
+    self.certification = certification
+    self.overview = overview
   }
 
   public var fullTitle: String {

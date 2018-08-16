@@ -69,13 +69,13 @@ public class CinemaKitStartupManager: StartupManager {
   private func makeDependencies() -> AppDependencies {
     os_log("gathering dependencies", log: CinemaKitStartupManager.logger, type: .info)
 
-    // Library Manager
-    let libraryManager = InMemoryMovieLibraryManager(libraryFactory: DefaultMovieLibraryFactory())
-
     // MovieDb Client
     let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en
     let country = MovieDbCountry(rawValue: Locale.current.regionCode ?? "US") ?? .unitedStates
     let movieDb = TMDBSwiftWrapper(language: language, country: country)
+
+    // Library Manager
+    let libraryManager = InMemoryMovieLibraryManager(libraryFactory: DefaultMovieLibraryFactory(tmdbWrapper: movieDb))
 
     return AppDependencies(libraryManager: libraryManager, movieDb: movieDb)
   }
@@ -86,7 +86,13 @@ private func directoryUrl(for directory: FileManager.SearchPathDirectory) -> URL
 }
 
 private class DefaultMovieLibraryFactory: MovieLibraryFactory {
+  private let tmdbWrapper: TMDBSwiftWrapper
+
+  init(tmdbWrapper: TMDBSwiftWrapper) {
+    self.tmdbWrapper = tmdbWrapper
+  }
+
   func makeLibrary(with metadata: MovieLibraryMetadata) -> InternalMovieLibrary {
-    return InMemoryMovieLibrary(metadata: metadata)
+    return InMemoryMovieLibrary(metadata: metadata, movieProvider: tmdbWrapper)
   }
 }

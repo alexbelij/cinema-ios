@@ -1,3 +1,7 @@
+protocol MovieProvider {
+  func movie(with tmdbID: TmdbIdentifier, diskType: DiskType) -> Movie?
+}
+
 class InMemoryMovieLibrary: InternalMovieLibrary {
   var metadata: MovieLibraryMetadata {
     didSet {
@@ -5,10 +9,12 @@ class InMemoryMovieLibrary: InternalMovieLibrary {
     }
   }
   let delegates: MulticastDelegate<MovieLibraryDelegate> = MulticastDelegate()
+  private let movieProvider: MovieProvider
   private var movies = [Movie]()
 
-  init(metadata: MovieLibraryMetadata) {
+  init(metadata: MovieLibraryMetadata, movieProvider: MovieProvider) {
     self.metadata = metadata
+    self.movieProvider = movieProvider
   }
 
   func fetchMovies(then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void) {
@@ -24,7 +30,13 @@ class InMemoryMovieLibrary: InternalMovieLibrary {
     return movies.contains { $0.tmdbID == id }
   }
 
-  func add(_ movie: Movie, then completion: @escaping (AsyncResult<Movie, MovieLibraryError>) -> Void) {
+  func addMovie(with tmdbID: TmdbIdentifier,
+                diskType: DiskType,
+                then completion: @escaping (AsyncResult<Movie, MovieLibraryError>) -> Void) {
+    guard let movie = movieProvider.movie(with: tmdbID, diskType: diskType) else {
+      completion(.failure(.detailsFetchError))
+      return
+    }
     movies.append(movie)
     let update = MovieLibraryContentUpdate(addedMovies: [movie])
     delegates.invoke { $0.library(self, didUpdateContent: update) }

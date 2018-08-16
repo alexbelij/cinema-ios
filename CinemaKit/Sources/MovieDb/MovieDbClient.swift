@@ -7,13 +7,8 @@ public protocol MovieDbClient {
 
   func poster(for id: TmdbIdentifier, size: PosterSize, purpose: PosterPurpose) -> UIImage?
   func backdrop(for id: TmdbIdentifier, size: BackdropSize) -> UIImage?
-  func overview(for id: TmdbIdentifier) -> String?
-  func certification(for id: TmdbIdentifier) -> String?
-  func genreIds(for id: TmdbIdentifier) -> [GenreIdentifier]
   func searchMovies(searchText: String) -> [PartialMovie]
-  func runtime(for id: TmdbIdentifier) -> Measurement<UnitDuration>?
   func popularMovies() -> PagingSequence<PartialMovie>
-  func releaseDate(for id: TmdbIdentifier) -> Date?
 }
 
 public enum PosterPurpose {
