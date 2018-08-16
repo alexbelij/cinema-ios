@@ -29,6 +29,7 @@ class EditMovieController: UITableViewController {
   @IBOutlet private weak var subtitleTextField: UITextField!
 
   @IBOutlet private weak var removeMovieButton: UIButton!
+  @IBOutlet private weak var removeButtonActivityIndicator: UIActivityIndicatorView!
 
   enum Edit: Hashable {
     case titleChange(String)
@@ -131,7 +132,9 @@ extension EditMovieController {
     } else {
       switch delegate.editMovieController(self, shouldAcceptEdits: edits) {
         case .accepted:
-          delegate.editMovieController(self, didFinishEditingWithResult: .edited(edits))
+          let editResult = EditResult.edited(edits)
+          startWaitingAnimation(for: editResult)
+          delegate.editMovieController(self, didFinishEditingWithResult: editResult)
         case let .rejected(reason):
           let alert = UIAlertController(title: NSLocalizedString("error.genericTitle", comment: ""),
                                         message: reason,
@@ -147,7 +150,9 @@ extension EditMovieController {
     let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
     alert.addAction(UIAlertAction(title: NSLocalizedString("edit.removeMovie", comment: ""),
                                   style: .destructive) { _ in
-      self.delegate?.editMovieController(self, didFinishEditingWithResult: .deleted)
+      let editResult = EditResult.deleted
+      self.startWaitingAnimation(for: editResult)
+      self.delegate?.editMovieController(self, didFinishEditingWithResult: editResult)
     })
     alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     self.present(alert, animated: true)
@@ -159,23 +164,37 @@ extension EditMovieController {
 }
 
 extension EditMovieController {
-  func startWaitingAnimation() {
+  private func startWaitingAnimation(for editResult: EditResult) {
     navigationItem.leftBarButtonItem!.isEnabled = false
     titleTextField.isUserInteractionEnabled = false
     subtitleTextField.isUserInteractionEnabled = false
-    removeMovieButton.isUserInteractionEnabled = false
-    let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
-    activityIndicator.startAnimating()
-    navigationItem.rightBarButtonItem = UIBarButtonItem(customView: activityIndicator)
+    switch editResult {
+      case .edited:
+        removeMovieButton.isUserInteractionEnabled = false
+        let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: activityIndicator)
+        activityIndicator.startAnimating()
+      case .deleted:
+        navigationItem.rightBarButtonItem!.isEnabled = false
+        removeMovieButton.isHidden = true
+        removeButtonActivityIndicator.startAnimating()
+    }
   }
 
   func stopWaitingAnimation(restoreUI: Bool) {
-    navigationItem.leftBarButtonItem!.isEnabled = true
-    titleTextField.isUserInteractionEnabled = true
-    subtitleTextField.isUserInteractionEnabled = true
-    removeMovieButton.isUserInteractionEnabled = true
-    navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done,
-                                                        target: self,
-                                                        action: #selector(doneButtonClicked))
+    if navigationItem.rightBarButtonItem!.customView != nil {
+      navigationItem.rightBarButtonItem = nil
+    }
+    removeButtonActivityIndicator.stopAnimating()
+    if restoreUI {
+      navigationItem.leftBarButtonItem!.isEnabled = true
+      titleTextField.isUserInteractionEnabled = true
+      subtitleTextField.isUserInteractionEnabled = true
+      removeMovieButton.isUserInteractionEnabled = true
+      removeMovieButton.isHidden = false
+      navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done,
+                                                          target: self,
+                                                          action: #selector(doneButtonClicked))
+    }
   }
 }

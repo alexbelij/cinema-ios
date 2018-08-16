@@ -61,7 +61,6 @@ extension EditMovieCoordinator: EditMovieControllerDelegate {
 
   func editMovieController(_ controller: EditMovieController,
                            didFinishEditingWithResult editResult: EditMovieController.EditResult) {
-    controller.startWaitingAnimation()
     DispatchQueue.global(qos: .userInitiated).async {
       switch editResult {
         case let .edited(edits):
