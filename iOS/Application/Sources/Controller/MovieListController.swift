@@ -49,20 +49,22 @@ class MovieListController: UITableViewController {
     let resultsController = GenericSearchResultsController<MovieListController.ListItem>(
         cell: MovieListListItemTableCell.self,
         estimatedRowHeight: MovieListListItemTableCell.rowHeight)
-    resultsController.onSelection = { [delegate] selectedItem in
-      delegate?.movieListController(self, didSelect: selectedItem.movie)
+    resultsController.onSelection = { [weak self] selectedItem in
+      guard let `self` = self else { return }
+      self.delegate?.movieListController(self, didSelect: selectedItem.movie)
     }
-    resultsController.cellConfiguration = { [posterProvider] tableView, indexPath, listItem in
+    resultsController.cellConfiguration = { [weak self, weak resultsController] tableView, indexPath, listItem in
+      guard let `self` = self, let resultsController = resultsController else { return UITableViewCell() }
       let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
-      cell.configure(for: listItem, posterProvider: posterProvider) {
+      cell.configure(for: listItem, posterProvider: self.posterProvider) {
         guard let rowIndex = resultsController.items.index(where: { $0.movie.tmdbID == listItem.movie.tmdbID })
             else { return }
         tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
       }
       return cell
     }
-    resultsController.prefetchHandler = { [weak self] tableView, indexPaths in
-      guard let `self` = self else { return }
+    resultsController.prefetchHandler = { [weak self, weak resultsController] tableView, indexPaths in
+      guard let `self` = self, let resultsController = resultsController else { return }
       for indexPath in indexPaths {
         let listItem = resultsController.items[indexPath.row]
         if case .unknown = listItem.poster {

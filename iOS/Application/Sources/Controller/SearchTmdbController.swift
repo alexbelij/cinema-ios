@@ -34,23 +34,25 @@ class SearchTmdbController: UIViewController {
       self.delegate?.searchTmdbController(self, didSelect: selectedItem)
     }
     resultsController.deselectImmediately = true
-    resultsController.cellConfiguration = { [posterProvider] tableView, indexPath, listItem in
+    resultsController.cellConfiguration = { [weak self, weak resultsController] tableView, indexPath, listItem in
+      guard let `self` = self, let resultsController = resultsController else { return UITableViewCell() }
       let cell: SearchTmdbSearchResultTableCell = tableView.dequeueReusableCell(for: indexPath)
-      cell.configure(for: listItem, posterProvider: posterProvider) {
+      cell.configure(for: listItem, posterProvider: self.posterProvider) {
         guard let rowIndex = resultsController.items.index(where: { $0.movie.tmdbID == listItem.movie.tmdbID })
             else { return }
         tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
       }
       return cell
     }
-    resultsController.prefetchHandler = { [posterProvider] tableView, indexPaths in
+    resultsController.prefetchHandler = { [weak self, weak resultsController] tableView, indexPaths in
+      guard let `self` = self, let resultsController = resultsController else { return }
       for indexPath in indexPaths {
         let model = resultsController.items[indexPath.row]
         if case .unknown = model.poster {
           model.poster = .loading
           DispatchQueue.global(qos: .background).async {
             fetchPoster(for: model,
-                        using: posterProvider,
+                        using: self.posterProvider,
                         size: MovieListListItemTableCell.posterSize,
                         purpose: .searchResult) {
               guard let rowIndex = resultsController.items.index(where: { $0.movie.tmdbID == model.movie.tmdbID })

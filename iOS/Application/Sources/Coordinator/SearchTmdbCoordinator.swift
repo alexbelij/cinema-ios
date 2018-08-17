@@ -31,7 +31,9 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
     self.navigationController = UINavigationController(rootViewController: searchTmdbController)
 
     popularMoviesController.delegate = self
-    let movies = movieDb.popularMovies().lazy.filter { !self.library.containsMediaItem(with: $0.tmdbID) }
+    let movies = self.movieDb.popularMovies().lazy.filter { [library = self.library] in
+      !library.containsMediaItem(with: $0.tmdbID)
+    }
     popularMoviesController.movieIterator = AnyIterator(movies.makeIterator())
     popularMoviesController.posterProvider = MovieDbPosterProvider(movieDb)
 
