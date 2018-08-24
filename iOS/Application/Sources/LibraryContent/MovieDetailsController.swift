@@ -121,7 +121,7 @@ class MovieDetailsController: UIViewController {
   var overview: String? {
     didSet {
       self.loadViewIfNeeded()
-      if let text = overview {
+      if let text = overview?.nilIfEmptyString {
         self.overviewLabel.text = text
       } else {
         self.overviewLabel.text = NSLocalizedString("details.missing.overview", comment: "")
