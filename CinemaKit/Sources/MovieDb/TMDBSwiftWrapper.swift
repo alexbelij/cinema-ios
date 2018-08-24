@@ -138,8 +138,8 @@ public class TMDBSwiftWrapper: MovieDbClient {
   }
 }
 
-extension TMDBSwiftWrapper: MovieProvider {
-  func movie(with tmdbID: TmdbIdentifier, diskType: DiskType) -> Movie? {
+extension TMDBSwiftWrapper: TmdbMoviePropertiesProvider {
+  func tmdbProperties(for tmdbID: TmdbIdentifier) -> (String, Movie.TmdbProperties)? {
     guard let movie = movie(for: tmdbID) else { return nil }
     var runtime: Measurement<UnitDuration>?
     if let value = movie.runtime, value > 0 {
@@ -149,15 +149,12 @@ extension TMDBSwiftWrapper: MovieProvider {
     if let value = movie.release_date {
       releaseDate = TMDBSwiftWrapper.releaseDateFormatter.date(from: value)
     }
-    return Movie(tmdbID: tmdbID,
-                 title: movie.title!,
-                 subtitle: nil,
-                 diskType: diskType,
-                 runtime: runtime,
-                 releaseDate: releaseDate,
-                 genreIds: movie.genres.map { GenreIdentifier(rawValue: $0.id!) },
-                 certification: certification(for: tmdbID),
-                 overview: movie.overview)
+    let properties = Movie.TmdbProperties(runtime: runtime,
+                                          releaseDate: releaseDate,
+                                          genreIds: movie.genres.map { GenreIdentifier(rawValue: $0.id!) },
+                                          certification: certification(for: tmdbID),
+                                          overview: movie.overview)
+    return (movie.title!, properties)
   }
 
   private func certification(for id: TmdbIdentifier) -> String? {

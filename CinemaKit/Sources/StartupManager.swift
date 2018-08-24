@@ -93,6 +93,6 @@ private class DefaultMovieLibraryFactory: MovieLibraryFactory {
   }
 
   func makeLibrary(with metadata: MovieLibraryMetadata) -> InternalMovieLibrary {
-    return InMemoryMovieLibrary(metadata: metadata, movieProvider: tmdbWrapper)
+    return InMemoryMovieLibrary(metadata: metadata, tmdbPropertiesProvider: tmdbWrapper)
   }
 }

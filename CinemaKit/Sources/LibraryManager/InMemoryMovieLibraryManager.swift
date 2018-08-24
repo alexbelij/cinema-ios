@@ -1,3 +1,4 @@
+import CloudKit
 import Foundation
 import os.log
 
@@ -8,7 +9,7 @@ protocol MovieLibraryFactory {
 class InMemoryMovieLibraryManager: MovieLibraryManager {
   weak var delegate: MovieLibraryManagerDelegate?
   private let libraryFactory: MovieLibraryFactory
-  private var libraries: [UUID: InternalMovieLibrary]
+  private var libraries: [CKRecordID: InternalMovieLibrary]
 
   init(libraryFactory: MovieLibraryFactory) {
     self.libraryFactory = libraryFactory
@@ -41,7 +42,7 @@ class InMemoryMovieLibraryManager: MovieLibraryManager {
     completion(.success(library))
   }
 
-  func removeLibrary(with id: UUID,
+  func removeLibrary(with id: CKRecordID,
                      then completion: @escaping (AsyncResult<Void, MovieLibraryManagerError>) -> Void) {
     let library = libraries.removeValue(forKey: id)!
     delegate?.libraryManager(self, didRemove: library)
