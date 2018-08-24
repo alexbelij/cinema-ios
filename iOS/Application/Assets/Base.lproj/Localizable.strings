@@ -15,7 +15,6 @@
 "diskType.dvd" = "DVD";
 "edit.removeMovie" = "Remove Movie";
 "edit.failed" = "Your edits could not be saved!";
-"edit.noTitleAlert" = "A movie must have a title.";
 "edit.sectionHeader.subtitle" = "Subtitle (optional)";
 "edit.sectionHeader.title" = "Title";
 "error.genericError" = "An unknown error occurred.";

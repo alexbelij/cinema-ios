@@ -149,7 +149,7 @@ extension LibraryContentCoordinator: MovieDetailsCoordinatorDelegate {
 
 extension LibraryContentCoordinator: EditMovieCoordinatorDelegate {
   func editMovieCoordinator(_ coordinator: EditMovieCoordinator,
-                            didFinishEditingWithResult editResult: EditMovieCoordinator.EditResult) {
+                            didFinishEditingWith editResult: EditMovieCoordinator.EditResult) {
     switch editResult {
       case let .edited(editedMovie):
         guard let movieDetailsCoordinator = self.movieDetailsCoordinator else {
@@ -168,7 +168,7 @@ extension LibraryContentCoordinator: EditMovieCoordinatorDelegate {
     self.editMovieCoordinator = nil
   }
 
-  func editMovieCoordinator(_ coordinator: EditMovieCoordinator, didFailWithError error: Error) {
+  func editMovieCoordinator(_ coordinator: EditMovieCoordinator, didFailWith error: Error) {
     switch error {
       default:
         DispatchQueue.main.async {

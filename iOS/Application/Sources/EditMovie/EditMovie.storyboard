@@ -32,6 +32,9 @@
                                                     <nil key="textColor"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                     <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                                    <connections>
+                                                        <action selector="titleTextFieldDidChange:" destination="dNn-o6-z2I" eventType="editingChanged" id="fHY-vP-aya"/>
+                                                    </connections>
                                                 </textField>
                                             </subviews>
                                             <constraints>

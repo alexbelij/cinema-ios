@@ -1,56 +1,31 @@
+import CinemaKit
 import Foundation
 import UIKit
 
 protocol EditMovieControllerDelegate: class {
-  func editMovieController(_ controller: EditMovieController,
-                           shouldAcceptEdits edits: Set<EditMovieController.Edit>) -> EditMovieController.EditApproval
   func editMovieControllerDidCancelEditing(_ controller: EditMovieController)
   func editMovieController(_ controller: EditMovieController,
-                           didFinishEditingWithResult editResult: EditMovieController.EditResult)
+                           didFinishEditingWith editResult: EditMovieController.EditResult)
 }
 
 class EditMovieController: UITableViewController {
   weak var delegate: EditMovieControllerDelegate?
 
-  var movieTitle: String = "" {
+  var movie: Movie! {
     didSet {
-      self.loadViewIfNeeded()
-      self.titleTextField.text = movieTitle
+      setup()
     }
   }
-  @IBOutlet private weak var titleTextField: UITextField!
 
-  var subtitle: String? {
-    didSet {
-      self.loadViewIfNeeded()
-      self.subtitleTextField.text = subtitle
-    }
-  }
+  @IBOutlet private weak var titleTextField: UITextField!
   @IBOutlet private weak var subtitleTextField: UITextField!
 
   @IBOutlet private weak var removeMovieButton: UIButton!
   @IBOutlet private weak var removeButtonActivityIndicator: UIActivityIndicatorView!
 
-  enum Edit: Hashable {
-    case titleChange(String)
-    case subtitleChange(String?)
-
-    var hashValue: Int {
-      switch self {
-        case .titleChange: return 0
-        case .subtitleChange: return 1
-      }
-    }
-  }
-
   enum EditResult {
-    case edited(Set<Edit>)
+    case edited(Movie)
     case deleted
-  }
-
-  enum EditApproval {
-    case accepted
-    case rejected(reason: String)
   }
 }
 
@@ -62,14 +37,11 @@ extension EditMovieController {
     titleTextField.delegate = self
     subtitleTextField.delegate = self
     removeMovieButton.setTitle(NSLocalizedString("edit.removeMovie", comment: ""), for: .normal)
-
-    reassign(property: \EditMovieController.movieTitle)
-    reassign(property: \EditMovieController.subtitle)
   }
 
-  private func reassign<Type>(property: ReferenceWritableKeyPath<EditMovieController, Type>) {
-    let value = self[keyPath: property]
-    self[keyPath: property] = value
+  private func setup() {
+    titleTextField.text = movie.title
+    subtitleTextField.text = movie.subtitle
   }
 }
 
@@ -85,23 +57,6 @@ extension EditMovieController {
   }
 }
 
-// MARK: - Edit Management
-
-extension EditMovieController {
-  private var allEdits: Set<Edit> {
-    var edits = [Edit]()
-    let newTitle = self.titleTextField.text ?? ""
-    if newTitle != movieTitle {
-      edits.append(.titleChange(newTitle))
-    }
-    let newSubtitle = self.subtitleTextField.text?.nilIfEmptyString
-    if newSubtitle != subtitle {
-      edits.append(.subtitleChange(newSubtitle))
-    }
-    return Set(edits)
-  }
-}
-
 // MARK: - UITextFieldDelegate
 
 extension EditMovieController: UITextFieldDelegate {
@@ -112,6 +67,11 @@ extension EditMovieController: UITextFieldDelegate {
       textField.resignFirstResponder()
     }
     return false
+  }
+
+  @IBAction private func titleTextFieldDidChange(_ textField: UITextField) {
+    let isTextFieldEmpty = titleTextField.text?.isEmpty ?? true
+    navigationItem.rightBarButtonItem!.isEnabled = !isTextFieldEmpty
   }
 }
 
@@ -126,22 +86,16 @@ extension EditMovieController {
   @IBAction private func doneButtonClicked() {
     dismissKeyboard()
     guard let delegate = self.delegate else { return }
-    let edits = self.allEdits
-    if edits.isEmpty {
+    let newTitle = self.titleTextField.text ?? ""
+    let newSubtitle = self.subtitleTextField.text?.nilIfEmptyString
+    if newTitle == movie.title && newSubtitle == movie.subtitle {
       delegate.editMovieControllerDidCancelEditing(self)
     } else {
-      switch delegate.editMovieController(self, shouldAcceptEdits: edits) {
-        case .accepted:
-          let editResult = EditResult.edited(edits)
-          startWaitingAnimation(for: editResult)
-          delegate.editMovieController(self, didFinishEditingWithResult: editResult)
-        case let .rejected(reason):
-          let alert = UIAlertController(title: NSLocalizedString("error.genericTitle", comment: ""),
-                                        message: reason,
-                                        preferredStyle: .alert)
-          alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default))
-          self.present(alert, animated: true)
-      }
+      var editedMovie = movie!
+      editedMovie.title = newTitle
+      editedMovie.subtitle = newSubtitle
+      startWaitingAnimation(for: .edited(editedMovie))
+      delegate.editMovieController(self, didFinishEditingWith: .edited(editedMovie))
     }
   }
 
@@ -152,7 +106,7 @@ extension EditMovieController {
                                   style: .destructive) { _ in
       let editResult = EditResult.deleted
       self.startWaitingAnimation(for: editResult)
-      self.delegate?.editMovieController(self, didFinishEditingWithResult: editResult)
+      self.delegate?.editMovieController(self, didFinishEditingWith: editResult)
     })
     alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     self.present(alert, animated: true)
