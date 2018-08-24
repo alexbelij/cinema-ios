@@ -35,6 +35,7 @@
 		CB65D7AD1F8A108A00457386 /* ArrayTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB65D7A91F8A103000457386 /* ArrayTableController.swift */; };
 		CB6F1A0E211083AF009239BD /* ExternalMovieViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB6F1A0C2110836F009239BD /* ExternalMovieViewModel.swift */; };
 		CB797D372120289F00F59618 /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */; };
+		CB7F2743212594CB006EC6A5 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB7F2742212594CB006EC6A5 /* CloudKit.framework */; };
 		CB84B1891FEAF5E500B455D4 /* SortPrefixes.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB84B18B1FEAF5E500B455D4 /* SortPrefixes.plist */; };
 		CB9484C11EFA643500D9651E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = CB9484C31EFA643500D9651E /* Localizable.strings */; };
 		CBB569671EA4D6A2005F7BA7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB569661EA4D6A2005F7BA7 /* AppDelegate.swift */; };
@@ -134,6 +135,8 @@
 		CB65D7A91F8A103000457386 /* ArrayTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayTableController.swift; sourceTree = "<group>"; };
 		CB65D7AA1F8A103000457386 /* DimmingPresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DimmingPresentationController.swift; sourceTree = "<group>"; };
 		CB6F1A0C2110836F009239BD /* ExternalMovieViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalMovieViewModel.swift; sourceTree = "<group>"; };
+		CB7F2741212594C9006EC6A5 /* Cinema_iOS_Application.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Cinema_iOS_Application.entitlements; sourceTree = "<group>"; };
+		CB7F2742212594CB006EC6A5 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		CB84B18A1FEAF5E500B455D4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Base; path = Base.lproj/SortPrefixes.plist; sourceTree = "<group>"; };
 		CB9484C21EFA643500D9651E /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CB9484C61EFA691100D9651E /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -195,6 +198,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB7F2743212594CB006EC6A5 /* CloudKit.framework in Frameworks */,
 				CB1A15D02061322D003BD8D0 /* CinemaKit.framework in Frameworks */,
 				67F28248E64E29D9A77D9D8F /* Pods_iOS_Application.framework in Frameworks */,
 			);
@@ -206,6 +210,7 @@
 		BB3DEC8F5B7536E8785F2DD4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CB7F2742212594CB006EC6A5 /* CloudKit.framework */,
 				5FCC01CFBB4BB1DDCACBD358 /* Pods_CinemaKit.framework */,
 				13242D2B0EF60F72BA6B29B0 /* Pods_iOS_Application.framework */,
 			);
@@ -268,6 +273,7 @@
 				CB9484C31EFA643500D9651E /* Localizable.strings */,
 				CB0F41321F5C526B00095350 /* Localizable.stringsdict */,
 				CB84B18B1FEAF5E500B455D4 /* SortPrefixes.plist */,
+				CB7F2741212594C9006EC6A5 /* Cinema_iOS_Application.entitlements */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -550,6 +556,17 @@
 						DevelopmentTeam = 77DM9DN8P3;
 						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+							com.apple.Push = {
+								enabled = 1;
+							};
+							com.apple.iCloud = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -953,6 +970,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = iOS/Application/Assets/Cinema_iOS_Application.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = 77DM9DN8P3;
 				INFOPLIST_FILE = "$(SRCROOT)/iOS/Application/Assets/Info.plist";
@@ -973,6 +991,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = iOS/Application/Assets/Cinema_iOS_Application.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = 77DM9DN8P3;
 				INFOPLIST_FILE = "$(SRCROOT)/iOS/Application/Assets/Info.plist";
