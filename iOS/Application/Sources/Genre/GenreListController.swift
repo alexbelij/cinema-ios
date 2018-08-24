@@ -21,7 +21,7 @@ class GenreListController: UITableViewController {
   enum ListData {
     case loading
     case available([GenreIdentifier])
-    case unavailable(Error)
+    case unavailable
   }
 
   weak var delegate: GenreListControllerDelegate?
@@ -111,9 +111,9 @@ extension GenreListController {
           backgroundView = nil
           separatorStyle = .singleLine
         }
-      case let .unavailable(error):
+      case .unavailable:
         backgroundView = GenericEmptyView(
-            description: .basic(L10n.errorMessage(for: error))
+            description: .basic(NSLocalizedString("error.genericError", comment: ""))
         )
         separatorStyle = .none
     }

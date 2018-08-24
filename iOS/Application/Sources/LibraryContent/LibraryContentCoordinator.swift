@@ -97,9 +97,9 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 
   private func handleFetchedMovies(result: AsyncResult<[Movie], MovieLibraryError>) {
     switch result {
-      case let .failure(error):
+      case .failure:
         DispatchQueue.main.async {
-          self.movieListController.listData = .unavailable(error)
+          self.movieListController.listData = .unavailable
         }
       case let .success(movies):
         DispatchQueue.main.async {

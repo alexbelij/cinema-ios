@@ -33,13 +33,6 @@ enum L10n {
       return nil
     }
   }
-
-  static func errorMessage(for error: Error) -> String {
-    switch error {
-      default:
-        return NSLocalizedString("error.genericError", comment: "")
-    }
-  }
 }
 
 extension DiskType {

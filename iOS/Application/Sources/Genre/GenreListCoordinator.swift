@@ -51,9 +51,9 @@ class GenreListCoordinator: CustomPresentableCoordinator {
   private func fetchListData() {
     library.fetchMovies { result in
       switch result {
-        case let .failure(error):
+        case .failure:
           DispatchQueue.main.async {
-            self.genreListController.listData = .unavailable(error)
+            self.genreListController.listData = .unavailable
           }
         case let .success(movies):
           DispatchQueue.main.async {

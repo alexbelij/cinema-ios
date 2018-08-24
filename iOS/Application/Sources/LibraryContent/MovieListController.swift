@@ -11,7 +11,7 @@ class MovieListController: UITableViewController {
   enum ListData {
     case loading
     case available([Movie])
-    case unavailable(Error)
+    case unavailable
   }
 
   final class ListItem: PosterHaving {
@@ -173,9 +173,9 @@ extension MovieListController {
           backgroundView = nil
           separatorStyle = .singleLine
         }
-      case let .unavailable(error):
+      case .unavailable:
         backgroundView = GenericEmptyView(
-            description: .basic(L10n.errorMessage(for: error))
+            description: .basic(NSLocalizedString("error.genericError", comment: ""))
         )
         separatorStyle = .none
     }
