@@ -124,6 +124,10 @@ extension PopularMoviesController {
     footerView.activityIndicator.stopAnimating()
   }
 
+  override func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+    return movies[indexPath.row].state == .new
+  }
+
   override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     self.delegate?.popularMoviesController(self, didSelect: movies[indexPath.row])
   }
