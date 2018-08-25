@@ -57,7 +57,7 @@ class MovieListController: UITableViewController {
     resultsController.cellConfiguration = { [weak self, weak resultsController] tableView, indexPath, listItem in
       guard let `self` = self, let resultsController = resultsController else { return UITableViewCell() }
       let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
-      cell.configure(for: listItem, posterProvider: self.posterProvider) {
+      cell.configure(for: listItem, posterProvider: self.posterProvider, isSectionIndexVisible: false) {
         guard let rowIndex = resultsController.items.index(where: { $0.movie.tmdbID == listItem.movie.tmdbID })
             else { return }
         tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
@@ -213,7 +213,7 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
     let item = viewModel.item(at: indexPath)
-    cell.configure(for: item, posterProvider: posterProvider) { [weak self] in
+    cell.configure(for: item, posterProvider: posterProvider, isSectionIndexVisible: true) { [weak self] in
       guard let `self` = self else { return }
       guard let newIndexPath = self.viewModel.indexPath(for: item) else { return }
       tableView.reloadRowWithoutAnimation(at: newIndexPath)
@@ -407,6 +407,8 @@ private class ViewModel {
 class MovieListListItemTableCell: UITableViewCell {
   static let rowHeight: CGFloat = 100
   static let posterSize = PosterSize(minWidth: 60)
+  private static let separatorInsetsWithSectionIndex = UIEdgeInsets(top: 0, left: 80, bottom: 0, right: 16)
+  private static let separatorInsetsWithoutSectionIndex = UIEdgeInsets(top: 0, left: 80, bottom: 0, right: 0)
   private static let runtimeFormatter: DateComponentsFormatter = {
     let formatter = DateComponentsFormatter()
     formatter.unitsStyle = .full
@@ -428,6 +430,7 @@ class MovieListListItemTableCell: UITableViewCell {
 
   func configure(for item: MovieListController.ListItem,
                  posterProvider: PosterProvider,
+                 isSectionIndexVisible: Bool,
                  onNeedsReload: @escaping () -> Void) {
     titleLabel.text = item.movie.fullTitle
     if let seconds = item.movie.runtime?.converted(to: UnitDuration.seconds).value {
@@ -452,5 +455,8 @@ class MovieListListItemTableCell: UITableViewCell {
       case .loading, .unavailable:
         posterView.image = #imageLiteral(resourceName: "GenericPoster")
     }
+    separatorInset = isSectionIndexVisible
+        ? MovieListListItemTableCell.separatorInsetsWithSectionIndex
+        : MovieListListItemTableCell.separatorInsetsWithoutSectionIndex
   }
 }
