@@ -17,7 +17,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="egB-DD-Wor">
+                        <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="20" minimumInteritemSpacing="10" id="egB-DD-Wor">
                             <size key="itemSize" width="150" height="230"/>
                             <size key="headerReferenceSize" width="50" height="40"/>
                             <size key="footerReferenceSize" width="50" height="80"/>
@@ -83,7 +83,7 @@
                                             <blurEffect style="light"/>
                                         </visualEffectView>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A long title reaching into the second line" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EMQ-UV-WWr">
-                                            <rect key="frame" x="0.0" y="199" width="150" height="29"/>
+                                            <rect key="frame" x="0.0" y="201" width="150" height="29"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
@@ -93,7 +93,7 @@
                                 <constraints>
                                     <constraint firstItem="09H-dc-NCx" firstAttribute="trailing" secondItem="wd4-JF-0Co" secondAttribute="trailing" id="5Rg-xJ-Dhi"/>
                                     <constraint firstItem="wd4-JF-0Co" firstAttribute="centerX" secondItem="XXR-x3-I0h" secondAttribute="centerX" id="CXn-VM-h22"/>
-                                    <constraint firstItem="EMQ-UV-WWr" firstAttribute="top" secondItem="wd4-JF-0Co" secondAttribute="bottom" constant="4" id="G5W-jC-gtf"/>
+                                    <constraint firstItem="EMQ-UV-WWr" firstAttribute="top" secondItem="wd4-JF-0Co" secondAttribute="bottom" constant="6" id="G5W-jC-gtf"/>
                                     <constraint firstItem="09H-dc-NCx" firstAttribute="bottom" secondItem="wd4-JF-0Co" secondAttribute="bottom" id="LJT-da-rST"/>
                                     <constraint firstItem="09H-dc-NCx" firstAttribute="top" secondItem="wd4-JF-0Co" secondAttribute="top" id="RFb-bf-yuX"/>
                                     <constraint firstItem="wd4-JF-0Co" firstAttribute="top" secondItem="XXR-x3-I0h" secondAttribute="top" id="YeS-R4-ad5"/>
@@ -104,8 +104,8 @@
                                 <size key="customSize" width="150" height="230"/>
                                 <connections>
                                     <outlet property="activityIndicator" destination="f7H-29-8ft" id="r5l-lD-8Ql"/>
-                                    <outlet property="checkmarkView" destination="BPr-qn-BwP" id="xg4-PU-R0q"/>
                                     <outlet property="blurView" destination="09H-dc-NCx" id="UBq-RZ-ySN"/>
+                                    <outlet property="checkmarkView" destination="BPr-qn-BwP" id="xg4-PU-R0q"/>
                                     <outlet property="posterView" destination="wd4-JF-0Co" id="DXs-vh-YZE"/>
                                     <outlet property="titleLabel" destination="EMQ-UV-WWr" id="qry-t9-kfW"/>
                                 </connections>
