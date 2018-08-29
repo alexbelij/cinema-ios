@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14105" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -19,18 +19,20 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WUu-nS-8zo">
-                        <rect key="frame" x="24" y="17" width="295" height="24"/>
+                        <rect key="frame" x="20" y="0.0" width="307" height="56.5"/>
                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
                 </subviews>
                 <constraints>
-                    <constraint firstItem="WUu-nS-8zo" firstAttribute="centerY" secondItem="z3h-xM-tLn" secondAttribute="centerY" id="FgJ-l6-RW4"/>
-                    <constraint firstAttribute="trailingMargin" secondItem="WUu-nS-8zo" secondAttribute="trailing" constant="8" id="MQL-CU-vGt"/>
-                    <constraint firstItem="WUu-nS-8zo" firstAttribute="leading" secondItem="z3h-xM-tLn" secondAttribute="leadingMargin" constant="8" id="Udh-F0-6rR"/>
+                    <constraint firstItem="WUu-nS-8zo" firstAttribute="top" secondItem="z3h-xM-tLn" secondAttribute="top" id="3f3-Qr-APm"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="WUu-nS-8zo" secondAttribute="trailing" id="MQL-CU-vGt"/>
+                    <constraint firstAttribute="bottom" secondItem="WUu-nS-8zo" secondAttribute="bottom" id="O4e-HJ-Tsk"/>
+                    <constraint firstItem="WUu-nS-8zo" firstAttribute="leading" secondItem="z3h-xM-tLn" secondAttribute="leadingMargin" constant="4" id="Udh-F0-6rR"/>
                 </constraints>
             </tableViewCellContentView>
+            <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
             <connections>
                 <outlet property="label" destination="WUu-nS-8zo" id="Or3-ws-OVr"/>
             </connections>
