@@ -26,9 +26,9 @@ public protocol MovieLibrary: class {
   var delegates: MulticastDelegate<MovieLibraryDelegate> { get }
 
   // accessing library content
-  func fetchMovies(then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void)
+  func fetchMovies(then completion: @escaping (Result<[Movie], MovieLibraryError>) -> Void)
   func fetchMovies(for id: GenreIdentifier,
-                   then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void)
+                   then completion: @escaping (Result<[Movie], MovieLibraryError>) -> Void)
 
   // getting information about the library
   func containsMovie(with id: TmdbIdentifier) -> Bool // call only when movies have already been fetched
@@ -36,10 +36,10 @@ public protocol MovieLibrary: class {
   // managing library content
   func addMovie(with tmdbID: TmdbIdentifier,
                 diskType: DiskType,
-                then completion: @escaping (AsyncResult<Movie, MovieLibraryError>) -> Void)
-  func update(_ movie: Movie, then completion: @escaping (AsyncResult<Movie, MovieLibraryError>) -> Void)
+                then completion: @escaping (Result<Movie, MovieLibraryError>) -> Void)
+  func update(_ movie: Movie, then completion: @escaping (Result<Movie, MovieLibraryError>) -> Void)
   func removeMovie(with tmdbID: TmdbIdentifier,
-                   then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void)
+                   then completion: @escaping (Result<Void, MovieLibraryError>) -> Void)
 }
 
 protocol InternalMovieLibrary: MovieLibrary {

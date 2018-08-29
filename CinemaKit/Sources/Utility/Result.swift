@@ -1,4 +1,4 @@
-public enum AsyncResult<Value, ErrorType: Error> {
+public enum Result<Value, ErrorType: Error> {
   case failure(ErrorType)
   case success(Value)
 

@@ -17,12 +17,11 @@ class InMemoryMovieLibrary: InternalMovieLibrary {
     self.tmdbPropertiesProvider = tmdbPropertiesProvider
   }
 
-  func fetchMovies(then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void) {
+  func fetchMovies(then completion: @escaping (Result<[Movie], MovieLibraryError>) -> Void) {
     completion(.success(movies))
   }
 
-  func fetchMovies(for id: GenreIdentifier,
-                   then completion: @escaping (AsyncResult<[Movie], MovieLibraryError>) -> Void) {
+  func fetchMovies(for id: GenreIdentifier, then completion: @escaping (Result<[Movie], MovieLibraryError>) -> Void) {
     completion(.success(movies.filter { $0.genreIds.contains(id) }))
   }
 
@@ -32,7 +31,7 @@ class InMemoryMovieLibrary: InternalMovieLibrary {
 
   func addMovie(with tmdbID: TmdbIdentifier,
                 diskType: DiskType,
-                then completion: @escaping (AsyncResult<Movie, MovieLibraryError>) -> Void) {
+                then completion: @escaping (Result<Movie, MovieLibraryError>) -> Void) {
     guard let (title, tmdbProperties) = tmdbPropertiesProvider.tmdbProperties(for: tmdbID) else {
       completion(.failure(.detailsFetchError))
       return
@@ -48,7 +47,7 @@ class InMemoryMovieLibrary: InternalMovieLibrary {
     completion(.success(movie))
   }
 
-  func update(_ movie: Movie, then completion: @escaping (AsyncResult<Movie, MovieLibraryError>) -> Void) {
+  func update(_ movie: Movie, then completion: @escaping (Result<Movie, MovieLibraryError>) -> Void) {
     guard let index = movies.index(of: movie) else { preconditionFailure() }
     movies[index] = movie
     let update = MovieLibraryContentUpdate(updatedMovies: [movie.tmdbID: movie])
@@ -56,8 +55,7 @@ class InMemoryMovieLibrary: InternalMovieLibrary {
     completion(.success(movie))
   }
 
-  func removeMovie(with tmdbID: TmdbIdentifier,
-                   then completion: @escaping (AsyncResult<Void, MovieLibraryError>) -> Void) {
+  func removeMovie(with tmdbID: TmdbIdentifier, then completion: @escaping (Result<Void, MovieLibraryError>) -> Void) {
     guard let index = movies.index(where: { $0.tmdbID == tmdbID }) else { preconditionFailure() }
     let movie = movies.remove(at: index)
     let update = MovieLibraryContentUpdate(removedMovies: [movie])

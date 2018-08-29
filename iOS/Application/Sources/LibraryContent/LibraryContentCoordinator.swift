@@ -95,7 +95,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     }
   }
 
-  private func handleFetchedMovies(result: AsyncResult<[Movie], MovieLibraryError>) {
+  private func handleFetchedMovies(result: Result<[Movie], MovieLibraryError>) {
     switch result {
       case .failure:
         DispatchQueue.main.async {

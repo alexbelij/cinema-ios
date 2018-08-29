@@ -22,12 +22,12 @@ class InMemoryMovieLibraryManager: MovieLibraryManager {
   }
 
   func fetchLibraries(
-      then completion: @escaping (AsyncResult<[MovieLibrary], MovieLibraryManagerError>) -> Void) {
+      then completion: @escaping (Result<[MovieLibrary], MovieLibraryManagerError>) -> Void) {
     completion(.success(Array(libraries.values)))
   }
 
   func addLibrary(with metadata: MovieLibraryMetadata,
-                  then completion: @escaping (AsyncResult<MovieLibrary, MovieLibraryManagerError>) -> Void) {
+                  then completion: @escaping (Result<MovieLibrary, MovieLibraryManagerError>) -> Void) {
     let library = libraryFactory.makeLibrary(with: metadata)
     libraries[metadata.id] = library
     delegate?.libraryManager(self, didAdd: library)
@@ -35,7 +35,7 @@ class InMemoryMovieLibraryManager: MovieLibraryManager {
   }
 
   func updateLibrary(with metadata: MovieLibraryMetadata,
-                     then completion: @escaping (AsyncResult<MovieLibrary, MovieLibraryManagerError>) -> Void) {
+                     then completion: @escaping (Result<MovieLibrary, MovieLibraryManagerError>) -> Void) {
     let library = libraries[metadata.id]!
     library.metadata = metadata
     delegate?.libraryManager(self, didUpdate: library)
@@ -43,7 +43,7 @@ class InMemoryMovieLibraryManager: MovieLibraryManager {
   }
 
   func removeLibrary(with id: CKRecordID,
-                     then completion: @escaping (AsyncResult<Void, MovieLibraryManagerError>) -> Void) {
+                     then completion: @escaping (Result<Void, MovieLibraryManagerError>) -> Void) {
     let library = libraries.removeValue(forKey: id)!
     delegate?.libraryManager(self, didRemove: library)
     completion(.success(()))

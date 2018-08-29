@@ -55,7 +55,7 @@ extension EditMovieCoordinator: EditMovieControllerDelegate {
     }
   }
 
-  private func handleResult<R>(_ result: AsyncResult<R, MovieLibraryError>, for editResult: EditResult) {
+  private func handleResult<R>(_ result: Result<R, MovieLibraryError>, for editResult: EditResult) {
     DispatchQueue.main.async {
       self.editMovieController.stopWaitingAnimation(restoreUI: result.isFailure)
       switch result {
