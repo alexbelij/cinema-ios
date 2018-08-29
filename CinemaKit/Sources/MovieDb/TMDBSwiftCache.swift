@@ -14,21 +14,25 @@ protocol TMDBSwiftCache {
 class StandardTMDBSwiftCache: TMDBSwiftCache {
 
   private static let logger = Logging.createLogger(category: "TMDB-Cache")
-  private let movieCache: Storage
-  private let posterCache: Storage
-  private let largePosterCache: Storage
-  private let backdropCache: Storage
+  private let movieCache: Storage<String>
+  private let posterCache: Storage<UIImage>
+  private let largePosterCache: Storage<UIImage>
+  private let backdropCache: Storage<UIImage>
 
   init?() {
     do {
       movieCache = try Storage(diskConfig: DiskConfig(name: "MovieCache", maxSize: 10_000_000),
-                               memoryConfig: MemoryConfig(expiry: .never))
+                               memoryConfig: MemoryConfig(expiry: .never),
+                               transformer: TransformerFactory.forCodable(ofType: String.self))
       posterCache = try Storage(diskConfig: DiskConfig(name: "PosterCache", maxSize: 50_000_000),
-                                memoryConfig: MemoryConfig(expiry: .never))
+                                memoryConfig: MemoryConfig(expiry: .never),
+                                transformer: TransformerFactory.forImage())
       largePosterCache = try Storage(diskConfig: DiskConfig(name: "LargePosterCache", maxSize: 10_000_000),
-                                     memoryConfig: MemoryConfig(expiry: .never))
+                                     memoryConfig: MemoryConfig(expiry: .never),
+                                     transformer: TransformerFactory.forImage())
       backdropCache = try Storage(diskConfig: DiskConfig(name: "BackdropCache", maxSize: 50_000_000),
-                                  memoryConfig: MemoryConfig(expiry: .never))
+                                  memoryConfig: MemoryConfig(expiry: .never),
+                                  transformer: TransformerFactory.forImage())
     } catch {
       os_log("unable to create cache: %{public}@",
              log: StandardTMDBSwiftCache.logger,
@@ -67,31 +71,19 @@ class StandardTMDBSwiftCache: TMDBSwiftCache {
   }
 
   func poster(for key: String, orSupply supplier: () -> UIImage?) -> UIImage? {
-    let wrapper: ImageWrapper? = cachingImpl(key: key, cache: posterCache) {
-      guard let image = supplier() else { return nil }
-      return ImageWrapper(image: image)
-    }
-    return wrapper?.image
+    return cachingImpl(key: key, cache: posterCache, supplier: supplier)
   }
 
   func largePoster(for key: String, orSupply supplier: () -> UIImage?) -> UIImage? {
-    let wrapper: ImageWrapper? = cachingImpl(key: key, cache: largePosterCache) {
-      guard let image = supplier() else { return nil }
-      return ImageWrapper(image: image)
-    }
-    return wrapper?.image
+    return cachingImpl(key: key, cache: largePosterCache, supplier: supplier)
   }
 
   func backdrop(for key: String, orSupply supplier: () -> UIImage?) -> UIImage? {
-    let wrapper: ImageWrapper? = cachingImpl(key: key, cache: backdropCache) {
-      guard let image = supplier() else { return nil }
-      return ImageWrapper(image: image)
-    }
-    return wrapper?.image
+    return cachingImpl(key: key, cache: backdropCache, supplier: supplier)
   }
 
-  private func cachingImpl<Element: Codable>(key: String, cache: Storage, supplier: () -> Element?) -> Element? {
-    if let cachedElement = try? cache.object(ofType: Element.self, forKey: key) {
+  private func cachingImpl<Element>(key: String, cache: Storage<Element>, supplier: () -> Element?) -> Element? {
+    if let cachedElement = try? cache.object(forKey: key) {
       return cachedElement
     }
     if let createdElement = supplier() {
