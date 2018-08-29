@@ -101,17 +101,18 @@ extension CoreCoordinator: LibraryContentCoordinatorDelegate {
   }
 
   private func showLibrarySheet(for libraries: [MovieLibrary]) {
-    let controller = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
+    let config = LibrarySheetCellConfig(sharedLibraryExists: libraries.contains { $0.metadata.isShared })
+    let controller = TabularSheetController<LibrarySheetItem>(cellConfig: config)
     libraries.sorted(by: StandardSortDescriptors.byLibraryName)
              .forEach { library in
-               let isCurrentLibrary = self.primaryLibrary.metadata.id == library.metadata.id
-               controller.addSheetItem(SelectableLabelSheetItem(title: library.metadata.name,
-                                                                showCheckmark: isCurrentLibrary) { _ in
+               let metadata = library.metadata
+               controller.addSheetItem(.library(name: metadata.name,
+                                                shared: metadata.isShared,
+                                                selected: self.primaryLibrary.metadata.id == metadata.id) { _ in
                  self.switchLibrary(to: library)
                })
              }
-    controller.addSheetItem(SelectableLabelSheetItem(title: NSLocalizedString("core.librarySettings", comment: ""),
-                                                     showCheckmark: false) { _ in
+    controller.addSheetItem(.settings { _ in
       self.librarySettingsCoordinator = LibraryListCoordinator(dependencies: self.dependencies)
       self.tabBarController.present(self.librarySettingsCoordinator!.rootViewController, animated: true)
     })
