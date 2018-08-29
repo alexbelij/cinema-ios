@@ -131,7 +131,6 @@ extension LibrarySettingsController {
         switch indexPath.row {
           case 0:
             let cell: TextFieldTableCell = tableView.dequeueReusableCell(for: indexPath)
-            cell.shouldResignFirstResponderOnReturn = true
             cell.onChange = { [weak self] newText in
               guard let `self` = self else { return }
               let oldText = self.updatedMetadata!.name

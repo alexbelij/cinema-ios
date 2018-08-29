@@ -28,15 +28,9 @@ class TextFieldTableCell: UITableViewCell, UITextFieldDelegate {
     }
   }
 
-  var shouldResignFirstResponderOnReturn: Bool = true
-
   func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-    if shouldResignFirstResponderOnReturn {
-      textField.resignFirstResponder()
-      return false
-    } else {
-      return true
-    }
+    textField.resignFirstResponder()
+    return false
   }
 
   var onChange: ((String) -> Void)?

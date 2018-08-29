@@ -32,4 +32,17 @@ class ButtonTableCell: UITableViewCell {
       }
     }
   }
+
+  @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
+  var showsActivityIndicator: Bool = false {
+    didSet {
+      if showsActivityIndicator {
+        activityIndicator.startAnimating()
+        label.isHidden = true
+      } else {
+        activityIndicator.stopAnimating()
+        label.isHidden = false
+      }
+    }
+  }
 }

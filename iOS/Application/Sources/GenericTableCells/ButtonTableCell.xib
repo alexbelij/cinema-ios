@@ -24,16 +24,22 @@
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
+                    <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="aOB-3d-oBi">
+                        <rect key="frame" x="177" y="11" width="20" height="20"/>
+                    </activityIndicatorView>
                 </subviews>
                 <constraints>
                     <constraint firstAttribute="trailingMargin" secondItem="kC8-Mj-4mw" secondAttribute="trailing" id="BpX-Qc-3hq"/>
                     <constraint firstItem="kC8-Mj-4mw" firstAttribute="top" secondItem="JoY-cM-B7L" secondAttribute="topMargin" constant="4" id="ESY-1k-0h7"/>
+                    <constraint firstItem="aOB-3d-oBi" firstAttribute="centerX" secondItem="JoY-cM-B7L" secondAttribute="centerX" id="VUE-ZF-OLI"/>
+                    <constraint firstItem="aOB-3d-oBi" firstAttribute="centerY" secondItem="JoY-cM-B7L" secondAttribute="centerY" id="dlc-wk-kZM"/>
                     <constraint firstAttribute="bottomMargin" secondItem="kC8-Mj-4mw" secondAttribute="bottom" constant="4" id="ozW-Pz-fnR"/>
                     <constraint firstItem="kC8-Mj-4mw" firstAttribute="leading" secondItem="JoY-cM-B7L" secondAttribute="leadingMargin" id="u45-SD-tTN"/>
                 </constraints>
             </tableViewCellContentView>
             <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
             <connections>
+                <outlet property="activityIndicator" destination="aOB-3d-oBi" id="03s-UI-ZVH"/>
                 <outlet property="label" destination="kC8-Mj-4mw" id="Pr8-y9-F5q"/>
             </connections>
         </tableViewCell>
