@@ -10,12 +10,17 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
 
   // other properties
   var library: MovieLibrary {
+    willSet {
+      library.delegates.remove(self)
+    }
     didSet {
+      library.delegates.add(self)
       setup()
     }
   }
   private var movieDb: MovieDbClient
   private var cachedSearchResults = [ExternalMovieViewModel]()
+  private var tmdbIDsInLibrary: Set<TmdbIdentifier>?
 
   // managed controllers
   private let navigationController: UINavigationController
@@ -35,15 +40,23 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
     searchTmdbController.posterProvider = MovieDbPosterProvider(movieDb)
     searchTmdbController.additionalViewController = popularMoviesController
 
+    library.delegates.add(self)
     setup()
   }
 
   private func setup() {
-    DispatchQueue.main.async {
-      let movies = self.movieDb.popularMovies().lazy.filter { [library = self.library] in
-        !library.containsMovie(with: $0.tmdbID)
+    library.fetchMovies { result in
+      switch result {
+        case .failure: break
+        case let .success(movies):
+          DispatchQueue.main.async {
+            self.tmdbIDsInLibrary = Set(movies.map { $0.tmdbID })
+            let movies = self.movieDb.popularMovies().lazy.filter { [set = self.tmdbIDsInLibrary] in
+              !(set?.contains($0.tmdbID) ?? false)
+            }
+            self.popularMoviesController.movieIterator = AnyIterator(movies.makeIterator())
+          }
       }
-      self.popularMoviesController.movieIterator = AnyIterator(movies.makeIterator())
     }
   }
 }
@@ -55,9 +68,8 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
       if let existing = cachedSearchResults.first(where: { $0.movie.tmdbID == movie.tmdbID }) {
         return existing
       } else {
-        return ExternalMovieViewModel(
-            movie,
-            state: self.library.containsMovie(with: movie.tmdbID) ? .addedToLibrary : .new)
+        let hasBeenAdded = self.tmdbIDsInLibrary?.contains(movie.tmdbID) ?? false
+        return ExternalMovieViewModel(movie, state: hasBeenAdded ? .addedToLibrary : .new)
       }
     }
     return cachedSearchResults
@@ -144,5 +156,23 @@ extension SearchTmdbCoordinator {
                                   preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default))
     rootViewController.present(alert, animated: true)
+  }
+}
+
+extension SearchTmdbCoordinator: MovieLibraryDelegate {
+  func libraryDidUpdateMetadata(_ library: MovieLibrary) {
+  }
+
+  func library(_ library: MovieLibrary, didUpdateMovies changeSet: ChangeSet<TmdbIdentifier, Movie>) {
+    DispatchQueue.main.async {
+      if self.tmdbIDsInLibrary == nil { return }
+      for movie in changeSet.insertions {
+        self.tmdbIDsInLibrary!.insert(movie.tmdbID)
+        self.popularMoviesController.removeMovie(withId: movie.tmdbID)
+      }
+      for (tmdbID, _) in changeSet.deletions {
+        self.tmdbIDsInLibrary!.remove(tmdbID)
+      }
+    }
   }
 }

@@ -18,9 +18,6 @@ public protocol MovieLibrary: class {
   func fetchMovies(for id: GenreIdentifier,
                    then completion: @escaping (Result<[Movie], MovieLibraryError>) -> Void)
 
-  // getting information about the library
-  func containsMovie(with id: TmdbIdentifier) -> Bool // call only when movies have already been fetched
-
   // managing library content
   func addMovie(with tmdbID: TmdbIdentifier,
                 diskType: DiskType,

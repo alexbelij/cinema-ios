@@ -25,10 +25,6 @@ class InMemoryMovieLibrary: InternalMovieLibrary {
     completion(.success(movies.filter { $0.genreIds.contains(id) }))
   }
 
-  func containsMovie(with id: TmdbIdentifier) -> Bool {
-    return movies.contains { $0.tmdbID == id }
-  }
-
   func addMovie(with tmdbID: TmdbIdentifier,
                 diskType: DiskType,
                 then completion: @escaping (Result<Movie, MovieLibraryError>) -> Void) {
