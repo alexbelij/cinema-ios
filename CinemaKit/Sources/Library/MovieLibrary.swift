@@ -1,20 +1,8 @@
 import Foundation
 
 public protocol MovieLibraryDelegate: class {
-  func library(_ library: MovieLibrary, didUpdateContent contentUpdate: MovieLibraryContentUpdate)
+  func library(_ library: MovieLibrary, didUpdateMovies changeSet: ChangeSet<TmdbIdentifier, Movie>)
   func libraryDidUpdateMetadata(_ library: MovieLibrary)
-}
-
-public struct MovieLibraryContentUpdate {
-  public var addedMovies: [Movie]
-  public var removedMovies: [Movie]
-  public var updatedMovies: [TmdbIdentifier: Movie]
-
-  init(addedMovies: [Movie] = [], removedMovies: [Movie] = [], updatedMovies: [TmdbIdentifier: Movie] = [:]) {
-    self.addedMovies = addedMovies
-    self.removedMovies = removedMovies
-    self.updatedMovies = updatedMovies
-  }
 }
 
 public enum MovieLibraryError: Error {

@@ -42,24 +42,24 @@ class InMemoryMovieLibrary: InternalMovieLibrary {
                                                 diskType: diskType)
     let movie = Movie(cloudProperties, tmdbProperties)
     movies.append(movie)
-    let update = MovieLibraryContentUpdate(addedMovies: [movie])
-    delegates.invoke { $0.library(self, didUpdateContent: update) }
+    let changeSet = ChangeSet<TmdbIdentifier, Movie>(insertions: [movie])
+    delegates.invoke { $0.library(self, didUpdateMovies: changeSet) }
     completion(.success(movie))
   }
 
   func update(_ movie: Movie, then completion: @escaping (Result<Movie, MovieLibraryError>) -> Void) {
     guard let index = movies.index(of: movie) else { preconditionFailure() }
     movies[index] = movie
-    let update = MovieLibraryContentUpdate(updatedMovies: [movie.tmdbID: movie])
-    delegates.invoke { $0.library(self, didUpdateContent: update) }
+    let changeSet = ChangeSet<TmdbIdentifier, Movie>(modifications: [movie.tmdbID: movie])
+    delegates.invoke { $0.library(self, didUpdateMovies: changeSet) }
     completion(.success(movie))
   }
 
   func removeMovie(with tmdbID: TmdbIdentifier, then completion: @escaping (Result<Void, MovieLibraryError>) -> Void) {
     guard let index = movies.index(where: { $0.tmdbID == tmdbID }) else { preconditionFailure() }
     let movie = movies.remove(at: index)
-    let update = MovieLibraryContentUpdate(removedMovies: [movie])
-    delegates.invoke { $0.library(self, didUpdateContent: update) }
+    let changeSet = ChangeSet<TmdbIdentifier, Movie>(deletions: [movie.tmdbID: movie])
+    delegates.invoke { $0.library(self, didUpdateMovies: changeSet) }
     completion(.success(()))
   }
 }

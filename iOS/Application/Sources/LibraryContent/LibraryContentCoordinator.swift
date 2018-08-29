@@ -203,18 +203,18 @@ extension LibraryContentCoordinator: MovieLibraryDelegate {
     updateTitle()
   }
 
-  func library(_ library: MovieLibrary, didUpdateContent contentUpdate: MovieLibraryContentUpdate) {
+  func library(_ library: MovieLibrary, didUpdateMovies changeSet: ChangeSet<TmdbIdentifier, Movie>) {
     guard case var .available(listItems) = movieListController.listData else { return }
 
     // updated movies
-    if !contentUpdate.updatedMovies.isEmpty {
-      for (id, movie) in contentUpdate.updatedMovies {
+    if !changeSet.modifications.isEmpty {
+      for (id, movie) in changeSet.modifications {
         guard let index = listItems.index(where: { $0.tmdbID == id }) else { continue }
         listItems.remove(at: index)
         listItems.insert(movie, at: index)
       }
       if let movieDetailsCoordinator = self.movieDetailsCoordinator,
-         let updatedMovie = contentUpdate.updatedMovies[movieDetailsCoordinator.movie.tmdbID] {
+         let updatedMovie = changeSet.modifications[movieDetailsCoordinator.movie.tmdbID] {
         DispatchQueue.main.async {
           movieDetailsCoordinator.updateNonRemoteProperties(with: updatedMovie)
         }
@@ -225,15 +225,15 @@ extension LibraryContentCoordinator: MovieLibraryDelegate {
     let newMovies: [Movie]
     switch content {
       case .all:
-        newMovies = contentUpdate.addedMovies
+        newMovies = changeSet.insertions
       case let .allWith(genreId):
-        newMovies = contentUpdate.addedMovies.filter { $0.genreIds.contains(genreId) }
+        newMovies = changeSet.insertions.filter { $0.genreIds.contains(genreId) }
     }
     listItems.append(contentsOf: newMovies)
 
     // removed movies
-    if !contentUpdate.removedMovies.isEmpty {
-      for movie in contentUpdate.removedMovies {
+    if !changeSet.deletions.isEmpty {
+      for (_, movie) in changeSet.deletions {
         guard let index = listItems.index(of: movie) else { continue }
         listItems.remove(at: index)
       }

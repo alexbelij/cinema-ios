@@ -30,7 +30,8 @@ class InMemoryMovieLibraryManager: MovieLibraryManager {
                   then completion: @escaping (Result<MovieLibrary, MovieLibraryManagerError>) -> Void) {
     let library = libraryFactory.makeLibrary(with: metadata)
     libraries[metadata.id] = library
-    delegate?.libraryManager(self, didAdd: library)
+    let changeSet = ChangeSet<CKRecordID, MovieLibrary>(insertions: [library])
+    delegate?.libraryManager(self, didUpdateLibraries: changeSet)
     completion(.success(library))
   }
 
@@ -38,14 +39,16 @@ class InMemoryMovieLibraryManager: MovieLibraryManager {
                      then completion: @escaping (Result<MovieLibrary, MovieLibraryManagerError>) -> Void) {
     let library = libraries[metadata.id]!
     library.metadata = metadata
-    delegate?.libraryManager(self, didUpdate: library)
+    let changeSet = ChangeSet<CKRecordID, MovieLibrary>(modifications: [library.metadata.id: library])
+    delegate?.libraryManager(self, didUpdateLibraries: changeSet)
     completion(.success(library))
   }
 
   func removeLibrary(with id: CKRecordID,
                      then completion: @escaping (Result<Void, MovieLibraryManagerError>) -> Void) {
     let library = libraries.removeValue(forKey: id)!
-    delegate?.libraryManager(self, didRemove: library)
+    let changeSet = ChangeSet<CKRecordID, MovieLibrary>(deletions: [library.metadata.id: library])
+    delegate?.libraryManager(self, didUpdateLibraries: changeSet)
     completion(.success(()))
   }
 }

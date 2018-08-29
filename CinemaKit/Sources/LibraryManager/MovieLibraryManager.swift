@@ -2,9 +2,8 @@ import CloudKit
 import Foundation
 
 public protocol MovieLibraryManagerDelegate: class {
-  func libraryManager(_ libraryManager: MovieLibraryManager, didAdd library: MovieLibrary)
-  func libraryManager(_ libraryManager: MovieLibraryManager, didUpdate library: MovieLibrary)
-  func libraryManager(_ libraryManager: MovieLibraryManager, didRemove library: MovieLibrary)
+  func libraryManager(_ libraryManager: MovieLibraryManager,
+                      didUpdateLibraries changeSet: ChangeSet<CKRecordID, MovieLibrary>)
 }
 
 public protocol MovieLibraryManager: class {

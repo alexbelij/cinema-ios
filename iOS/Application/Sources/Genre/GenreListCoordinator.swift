@@ -91,9 +91,9 @@ extension GenreListCoordinator: MovieLibraryDelegate {
   func libraryDidUpdateMetadata(_ library: MovieLibrary) {
   }
 
-  func library(_ library: MovieLibrary, didUpdateContent contentUpdate: MovieLibraryContentUpdate) {
+  func library(_ library: MovieLibrary, didUpdateMovies changeSet: ChangeSet<TmdbIdentifier, Movie>) {
     DispatchQueue.global().async {
-      self.update(with: contentUpdate)
+      self.update(with: changeSet)
     }
   }
 
@@ -102,16 +102,16 @@ extension GenreListCoordinator: MovieLibraryDelegate {
   // The easiest way is to query the entire library again.
   // But if no movies have been deleted (the most common use case) we can simplify
   // the process by adding only the new genre ids to the already computed ones.
-  private func update(with contentUpdate: MovieLibraryContentUpdate) {
-    if contentUpdate.removedMovies.isEmpty {
+  private func update(with changeSet: ChangeSet<TmdbIdentifier, Movie>) {
+    if changeSet.deletions.isEmpty {
       DispatchQueue.main.sync {
         if case let .available(genreListItems) = genreListController.listData {
           var existingGenreIds = Set(genreListItems)
-          contentUpdate.addedMovies.flatMap { $0.genreIds }.forEach { existingGenreIds.insert($0) }
+          changeSet.insertions.flatMap { $0.genreIds }.forEach { existingGenreIds.insert($0) }
           let updatedGenreIds = Array(existingGenreIds)
           // swiftlint:disable:next force_cast
           (self.genreListController.genreImageProvider as! RandomMovieGenreImageProvider)
-              .updateWithNewMovies(contentUpdate.addedMovies)
+              .updateWithNewMovies(changeSet.insertions)
           self.genreListController.listData = .available(updatedGenreIds)
         }
       }
