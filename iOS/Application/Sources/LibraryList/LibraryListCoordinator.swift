@@ -76,18 +76,18 @@ extension LibraryListCoordinator {
   }
 
   private func libraryListControllerDidSelect(_ metadata: MovieLibraryMetadata) {
-    librarySettingsController = UIStoryboard.libraryList.instantiate(LibrarySettingsController.self)
+    librarySettingsController = LibrarySettingsController(for: metadata)
     librarySettingsController!.onMetadataUpdate = { [weak self] metadata in
       guard let `self` = self else { return }
       self.updateMetadata(metadata)
     }
     librarySettingsController!.onShareButtonTap = { [weak self] in
       guard let `self` = self else { return }
-      self.showCloudSharingController(for: self.librarySettingsController!.metadata!)
+      self.showCloudSharingController(for: self.librarySettingsController!.metadata)
     }
     librarySettingsController!.onRemoveLibrary = { [weak self] in
       guard let `self` = self else { return }
-      self.removeLibrary(with: self.librarySettingsController!.metadata!)
+      self.removeLibrary(with: self.librarySettingsController!.metadata)
     }
     librarySettingsController!.onDisappear = { [weak self] in
       guard let `self` = self else { return }
@@ -144,7 +144,7 @@ extension LibraryListCoordinator {
 extension LibraryListCoordinator {
   private func updateMetadata(_ metadata: MovieLibraryMetadata) {
     libraryListController.showPlaceholder(for: metadata)
-    let originalMetadata = librarySettingsController!.metadata!
+    let originalMetadata = librarySettingsController!.metadata
     DispatchQueue.global(qos: .userInitiated).async {
       self.libraryManager.updateLibrary(with: metadata) { result in
         DispatchQueue.main.async {

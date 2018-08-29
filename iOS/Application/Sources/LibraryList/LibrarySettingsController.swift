@@ -24,9 +24,8 @@ class LibrarySettingsController: UITableViewController {
     }
   }
 
-  var metadata: MovieLibraryMetadata! {
+  var metadata: MovieLibraryMetadata {
     didSet {
-      guard metadata != nil else { preconditionFailure("metadata has not been set") }
       guard isViewLoaded else { return }
       configure(for: metadata)
     }
@@ -40,6 +39,15 @@ class LibrarySettingsController: UITableViewController {
   private var viewModel: [Section]!
 
   private var shouldIgnoreEdits = false
+
+  init(for metadata: MovieLibraryMetadata) {
+    self.metadata = metadata
+    super.init(style: .grouped)
+  }
+
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("use LibrarySettingsController.init() instead")
+  }
 }
 
 // MARK: - View Controller Lifecycle
@@ -47,7 +55,10 @@ class LibrarySettingsController: UITableViewController {
 extension LibrarySettingsController {
   override func viewDidLoad() {
     super.viewDidLoad()
-    guard metadata != nil else { preconditionFailure("metadata has not been set") }
+    tableView.register(TextFieldTableCell.self)
+    tableView.register(MessageTableCell.self)
+    tableView.register(ButtonTableCell.self)
+    tableView.keyboardDismissMode = .onDrag
     configure(for: metadata)
   }
 
@@ -198,113 +209,4 @@ extension LibrarySettingsController {
     }
     tableView.deselectRow(at: indexPath, animated: true)
   }
-}
-
-class TextFieldTableCell: UITableViewCell, UITextFieldDelegate {
-  @IBOutlet private weak var textField: UITextField!
-
-  override func awakeFromNib() {
-    super.awakeFromNib()
-    textField.delegate = self
-    textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-  }
-
-  var isEnabled: Bool {
-    get {
-      return textField.isEnabled
-    }
-    set {
-      textField.isEnabled = newValue
-      textField.textColor = newValue ? .black : .disabledControlText
-    }
-  }
-
-  var textValue: String {
-    get {
-      return textField.text ?? ""
-    }
-    set {
-      textField.text = newValue
-    }
-  }
-
-  var shouldResignFirstResponderOnReturn: Bool = true
-
-  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-    if shouldResignFirstResponderOnReturn {
-      textField.resignFirstResponder()
-      return false
-    } else {
-      return true
-    }
-  }
-
-  var onChange: ((String) -> Void)?
-
-  @objc
-  func textFieldDidChange(_ textField: UITextField) {
-    onChange?(textField.text ?? "")
-  }
-}
-
-class ButtonTableCell: UITableViewCell {
-  enum ButtonStyle {
-    case `default`
-    case destructive
-  }
-
-  var actionTitle: String {
-    get {
-      return label.text ?? ""
-    }
-    set {
-      label.text = newValue
-    }
-  }
-  @IBOutlet private weak var label: UILabel!
-
-  var actionTitleAlignment: NSTextAlignment = .left {
-    didSet {
-      label.textAlignment = actionTitleAlignment
-    }
-  }
-
-  var buttonStyle: ButtonStyle = .default {
-    didSet {
-      switch buttonStyle {
-        case .default:
-          label.textColor = tintColor
-        case .destructive:
-          label.textColor = .destructive
-      }
-    }
-  }
-}
-
-class MessageTableCell: UITableViewCell {
-  enum MessageStyle {
-    case `default`
-    case error
-  }
-
-  var messageStyle: MessageStyle = .default {
-    didSet {
-      switch messageStyle {
-        case .default:
-          label.textColor = .black
-        case .error:
-          label.textColor = .red
-      }
-    }
-  }
-
-  var message: String {
-    get {
-      return label.text ?? ""
-    }
-    set {
-      label.text = newValue
-    }
-  }
-  @IBOutlet private weak var label: UILabel!
 }
