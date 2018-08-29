@@ -36,6 +36,10 @@
 "genre.war" = "Kriegsfilm";
 "genre.western" = "Western";
 "genres" = "Genres";
+"iCloud.notAuthenticated.subtitle" = "Bitte aktiviere iCloud für Cinema, damit du von all deinen Geräten auf deine Filme zugreifen kannst.";
+"iCloud.notAuthenticated.title" = "iCloud erforderlich";
+"iCloud.userDeletedZone" = "Deine Filme wurden aus iCloud gelöscht.";
+"iCloud.userDeletedZone.actionTitle" = "Neu beginnen";
 "import.succeeded" = "Aktualisierung abgeschlossen";
 "import.progress" = "Deine Mediathek wird aktualisiert";
 "library" = "Mediathek";

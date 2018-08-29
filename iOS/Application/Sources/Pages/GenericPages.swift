@@ -57,6 +57,14 @@ class ActionPage: UIViewController {
     }
   }
   @IBOutlet private var secondaryLabel: UILabel!
+  
+  var image: UIImage? {
+    didSet {
+      guard isViewLoaded else { return }
+      imageView.image = image
+    }
+  }
+  @IBOutlet private var imageView: UIImageView!
 
   var actionTitle: String! {
     didSet {
@@ -70,11 +78,13 @@ class ActionPage: UIViewController {
 
   static func initWith(primaryText: String,
                        secondaryText: String? = nil,
+                       image: UIImage? = nil,
                        actionTitle: String,
                        actionHandler: @escaping () -> Void) -> ActionPage {
     let page = UIStoryboard(name: "GenericPages", bundle: nil).instantiate(ActionPage.self)
     page.primaryText = primaryText
     page.secondaryText = secondaryText
+    page.image = image
     page.actionTitle = actionTitle
     page.actionHandler = actionHandler
     return page
@@ -84,6 +94,7 @@ class ActionPage: UIViewController {
     super.viewDidLoad()
     primaryLabel.text = primaryText
     secondaryLabel.text = secondaryText
+    imageView.image = image
     button.setTitle(actionTitle, for: .normal)
   }
 

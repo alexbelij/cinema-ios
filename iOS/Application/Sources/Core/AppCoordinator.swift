@@ -8,7 +8,9 @@ class AppCoordinator: AutoPresentableCoordinator {
   enum State {
     case launched
     case initializing
+    case showingNotAuthenticatedUI(UIViewController)
     case upAndRunning(AppDependencies, CoreCoordinator)
+    case showingRestartUI(UIViewController)
   }
 
   private static let logger = Logging.createLogger(category: "AppCoordinator")
@@ -46,7 +48,13 @@ class AppCoordinator: AutoPresentableCoordinator {
               self.loadData(using: dependencies)
             }
           case .couldNotDetermine, .restricted, .noAccount:
-            fatalError("not implemented")
+            os_log("account status is not .accepted, error=%{public}@",
+                   log: AppCoordinator.logger,
+                   type: .default,
+                   String(describing: error))
+            DispatchQueue.main.async {
+              self.showNotAuthenticatedPage()
+            }
         }
       }
     }
@@ -69,7 +77,9 @@ class AppCoordinator: AutoPresentableCoordinator {
             case let .globalError(event):
               switch event {
                 case .notAuthenticated:
-                  fatalError("not implemented")
+                  DispatchQueue.main.async {
+                    self.showNotAuthenticatedPage()
+                  }
                 case .userDeletedZone:
                   os_log("user has deleted zone -> reinitialize (local data will be removed)",
                          log: AppCoordinator.logger,
@@ -100,7 +110,9 @@ class AppCoordinator: AutoPresentableCoordinator {
               case let .globalError(event):
                 switch event {
                   case .notAuthenticated:
-                    fatalError("not implemented")
+                    DispatchQueue.main.async {
+                      self.showNotAuthenticatedPage()
+                    }
                   case .userDeletedZone:
                     os_log("user has deleted zone -> reinitialize (local data will be removed)",
                            log: AppCoordinator.logger,
@@ -174,16 +186,49 @@ extension AppCoordinator {
     let event = notification.userInfo![ApplicationWideEvent.userInfoKey] as! ApplicationWideEvent
     switch event {
       case .notAuthenticated:
-        // TODO show custom ui
-        fatalError("not implemented")
+        DispatchQueue.main.async {
+          self.showNotAuthenticatedPage()
+        }
       case .userDeletedZone:
-        // TODO show custom ui
-        fatalError("not implemented")
+        DispatchQueue.main.async {
+          self.showRestartUI()
+        }
     }
   }
 }
 
 extension AppCoordinator {
+  private func showNotAuthenticatedPage() {
+    dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
+    if case .showingNotAuthenticatedUI = state { return }
+    let page = ActionPage.initWith(
+        primaryText: NSLocalizedString("iCloud.notAuthenticated.title", comment: ""),
+        secondaryText: NSLocalizedString("iCloud.notAuthenticated.subtitle", comment: ""),
+        image: #imageLiteral(resourceName: "CloudFailure"),
+        actionTitle: NSLocalizedString("continue", comment: "")) { [weak self] in
+      guard let `self` = self else { return }
+      self.initializationRound = 0
+      self.startUp()
+    }
+    state = .showingNotAuthenticatedUI(page)
+    window.rootViewController = page
+  }
+
+  private func showRestartUI() {
+    dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
+    if case .showingRestartUI = state { return }
+    let page = ActionPage.initWith(
+        primaryText: NSLocalizedString("iCloud.userDeletedZone", comment: ""),
+        image: #imageLiteral(resourceName: "CloudDeleted"),
+        actionTitle: NSLocalizedString("iCloud.userDeletedZone.actionTitle", comment: "")) { [weak self] in
+      guard let `self` = self else { return }
+      self.initializationRound = 0
+      self.startUp()
+    }
+    state = .showingRestartUI(page)
+    window.rootViewController = page
+  }
+
   private func replaceRootViewController(of window: UIWindow, with newController: UIViewController) {
     dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
     if let snapShot = window.snapshotView(afterScreenUpdates: true) {

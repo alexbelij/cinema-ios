@@ -36,6 +36,10 @@
 "genre.war" = "War";
 "genre.western" = "Western";
 "genres" = "Genres";
+"iCloud.notAuthenticated.subtitle" = "Please enable iCloud for Cinema so you can access your movies on all your devices.";
+"iCloud.notAuthenticated.title" = "iCloud Required";
+"iCloud.userDeletedZone" = "Your movies have been deleted from iCloud.";
+"iCloud.userDeletedZone.actionTitle" = "Start Fresh";
 "import.succeeded" = "Import Complete";
 "import.progress" = "Importing into your Library";
 "library" = "Library";
