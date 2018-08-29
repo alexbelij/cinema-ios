@@ -5,7 +5,7 @@ import UIKit
 protocol EditMovieCoordinatorDelegate: class {
   func editMovieCoordinator(_ coordinator: EditMovieCoordinator,
                             didFinishEditingWith editResult: EditMovieCoordinator.EditResult)
-  func editMovieCoordinator(_ coordinator: EditMovieCoordinator, didFailWith error: Error)
+  func editMovieCoordinator(_ coordinator: EditMovieCoordinator, didFailWith error: MovieLibraryError)
 }
 
 class EditMovieCoordinator: CustomPresentableCoordinator {
@@ -17,6 +17,13 @@ class EditMovieCoordinator: CustomPresentableCoordinator {
 
   // other properties
   private let library: MovieLibrary
+  var movie: Movie {
+    didSet {
+      DispatchQueue.main.async {
+        self.editMovieController.movie = self.movie
+      }
+    }
+  }
 
   // managed controller
   private let navigationController: UINavigationController
@@ -30,6 +37,7 @@ class EditMovieCoordinator: CustomPresentableCoordinator {
 
   init(for movie: Movie, in library: MovieLibrary) {
     self.library = library
+    self.movie = movie
     navigationController = UINavigationController(rootViewController: editMovieController)
     editMovieController.delegate = self
     editMovieController.movie = movie

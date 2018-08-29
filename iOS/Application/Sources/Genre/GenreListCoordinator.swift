@@ -20,6 +20,7 @@ class GenreListCoordinator: CustomPresentableCoordinator {
     }
   }
   private let movieDb: MovieDbClient
+  private let notificationCenter: NotificationCenter
 
   // other properties
   private let backdropSize: BackdropSize
@@ -35,6 +36,7 @@ class GenreListCoordinator: CustomPresentableCoordinator {
     self.dependencies = dependencies
     self.library = library
     self.movieDb = dependencies.movieDb
+    self.notificationCenter = dependencies.notificationCenter
     navigationController = UINavigationController(rootViewController: genreListController)
     self.backdropSize = BackdropSize(minWidth: Int(genreListController.view.bounds.width))
     self.genreListController.delegate = self
@@ -51,9 +53,16 @@ class GenreListCoordinator: CustomPresentableCoordinator {
   private func fetchListData() {
     library.fetchMovies { result in
       switch result {
-        case .failure:
-          DispatchQueue.main.async {
-            self.genreListController.listData = .unavailable
+        case let .failure(error):
+          switch error {
+            case let .globalError(event):
+              self.notificationCenter.post(event.notification)
+            case .nonRecoverableError:
+              DispatchQueue.main.async {
+                self.genreListController.listData = .unavailable
+              }
+            case .detailsFetchError, .movieDoesNotExist:
+              fatalError("should not occur: \(error)")
           }
         case let .success(movies):
           DispatchQueue.main.async {

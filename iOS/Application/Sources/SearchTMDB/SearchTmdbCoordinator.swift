@@ -15,10 +15,11 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
     }
     didSet {
       library.delegates.add(self)
-      setup()
+      setupPopularMovies()
     }
   }
-  private var movieDb: MovieDbClient
+  private let movieDb: MovieDbClient
+  private let notificationCenter: NotificationCenter
   private var cachedSearchResults = [ExternalMovieViewModel]()
   private var tmdbIDsInLibrary: Set<TmdbIdentifier>?
 
@@ -27,9 +28,10 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
   private let searchTmdbController = UIStoryboard.searchTmdb.instantiate(SearchTmdbController.self)
   private let popularMoviesController = UIStoryboard.popularMovies.instantiate(PopularMoviesController.self)
 
-  init(for library: MovieLibrary, using movieDb: MovieDbClient) {
+  init(for library: MovieLibrary, dependencies: AppDependencies) {
     self.library = library
-    self.movieDb = movieDb
+    self.movieDb = dependencies.movieDb
+    self.notificationCenter = dependencies.notificationCenter
 
     self.navigationController = UINavigationController(rootViewController: searchTmdbController)
 
@@ -40,11 +42,11 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
     searchTmdbController.posterProvider = MovieDbPosterProvider(movieDb)
     searchTmdbController.additionalViewController = popularMoviesController
 
-    library.delegates.add(self)
-    setup()
+    self.library.delegates.add(self)
+    setupPopularMovies()
   }
 
-  private func setup() {
+  private func setupPopularMovies() {
     library.fetchMovies { result in
       switch result {
         case .failure: break
@@ -83,22 +85,38 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
       }
       DispatchQueue.global(qos: .userInitiated).async {
         self.library.addMovie(with: model.tmdbID, diskType: diskType) { result in
-          switch result {
-            case .failure:
-              DispatchQueue.main.async {
-                model.state = .new
-                controller.reloadRow(forMovieWithId: model.movie.tmdbID)
-                self.showAddingFailedAlert(for: model.movie)
-              }
-            case .success:
-              DispatchQueue.main.async {
-                model.state = .addedToLibrary
-                controller.reloadRow(forMovieWithId: model.movie.tmdbID)
-                self.popularMoviesController.removeMovie(withId: model.movie.tmdbID)
-              }
-          }
+          self.handleAddResult(result, for: model)
         }
       }
+    }
+  }
+
+  private func handleAddResult(_ result: Result<Movie, MovieLibraryError>, for model: ExternalMovieViewModel) {
+    switch result {
+      case let .failure(error):
+        switch error {
+          case .detailsFetchError:
+            fatalError("not implemented")
+          case let .globalError(event):
+            notificationCenter.post(event.notification)
+          case .nonRecoverableError:
+            DispatchQueue.main.async {
+              model.state = .new
+              self.searchTmdbController.reloadRow(forMovieWithId: model.movie.tmdbID)
+              self.popularMoviesController.reloadRow(forMovieWithId: model.movie.tmdbID)
+              self.rootViewController.presentErrorAlert()
+            }
+          case .movieDoesNotExist:
+            fatalError("should not occur: \(error)")
+        }
+      case .success:
+        DispatchQueue.main.async {
+          model.state = .addedToLibrary
+          self.searchTmdbController.reloadRow(forMovieWithId: model.movie.tmdbID)
+          DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+            self.popularMoviesController.removeMovie(withId: model.movie.tmdbID)
+          }
+        }
     }
   }
 }
@@ -112,22 +130,7 @@ extension SearchTmdbCoordinator: PopularMoviesControllerDelegate {
       }
       DispatchQueue.global(qos: .userInitiated).async {
         self.library.addMovie(with: model.tmdbID, diskType: diskType) { result in
-          switch result {
-            case .failure:
-              DispatchQueue.main.async {
-                model.state = .new
-                controller.reloadRow(forMovieWithId: model.movie.tmdbID)
-                self.showAddingFailedAlert(for: model.movie)
-              }
-            case .success:
-              DispatchQueue.main.async {
-                model.state = .addedToLibrary
-                controller.reloadRow(forMovieWithId: model.movie.tmdbID)
-                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
-                  controller.removeMovie(withId: model.movie.tmdbID)
-                }
-              }
-          }
+          self.handleAddResult(result, for: model)
         }
       }
     }
@@ -147,15 +150,6 @@ extension SearchTmdbCoordinator {
     }
     alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
     controller.present(alert, animated: true)
-  }
-
-  private func showAddingFailedAlert(for movie: PartialMovie) {
-    let format = NSLocalizedString("addMovie.failed", comment: "")
-    let alert = UIAlertController(title: .localizedStringWithFormat(format, movie.title),
-                                  message: NSLocalizedString("error.tryAgain", comment: ""),
-                                  preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default))
-    rootViewController.present(alert, animated: true)
   }
 }
 

@@ -65,8 +65,8 @@ class MovieRecord: RecordType {
 }
 
 extension MovieRecord {
-  static func queryPredicate(forMoviesInLibrary library: MovieLibrary) -> NSPredicate {
-    let reference = CKReference(recordID: library.metadata.id, action: .deleteSelf)
+  static func queryPredicate(forMoviesInLibraryWithID id: CKRecordID) -> NSPredicate {
+    let reference = CKReference(recordID: id, action: .deleteSelf)
     return NSPredicate(format: "library == %@", reference)
   }
 }

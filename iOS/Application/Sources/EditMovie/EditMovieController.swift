@@ -13,6 +13,7 @@ class EditMovieController: UITableViewController {
 
   var movie: Movie! {
     didSet {
+      guard isViewLoaded else { return }
       setup()
     }
   }
@@ -37,6 +38,7 @@ extension EditMovieController {
     titleTextField.delegate = self
     subtitleTextField.delegate = self
     removeMovieButton.setTitle(NSLocalizedString("edit.removeMovie", comment: ""), for: .normal)
+    setup()
   }
 
   private func setup() {

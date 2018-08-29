@@ -1,3 +1,4 @@
+import CloudKit
 import Foundation
 
 public protocol MovieLibraryDelegate: class {
@@ -7,6 +8,26 @@ public protocol MovieLibraryDelegate: class {
 
 public enum MovieLibraryError: Error {
   case detailsFetchError
+  case globalError(ApplicationWideEvent)
+  case nonRecoverableError
+  case movieDoesNotExist
+}
+
+extension CloudKitError {
+  var asMovieLibraryError: MovieLibraryError {
+    switch self {
+      case .itemNoLongerExists:
+        return .movieDoesNotExist
+      case .notAuthenticated:
+        return .globalError(.notAuthenticated)
+      case .userDeletedZone:
+        return .globalError(.userDeletedZone)
+      case .nonRecoverableError:
+        return .nonRecoverableError
+      case .conflict, .zoneNotFound:
+        fatalError("\(self) can not be expressed as MovieLibraryError")
+    }
+  }
 }
 
 public protocol MovieLibrary: class {
@@ -29,4 +50,7 @@ public protocol MovieLibrary: class {
 
 protocol InternalMovieLibrary: MovieLibrary {
   var metadata: MovieLibraryMetadata { get set }
+
+  func processChanges(_ changes: FetchedChanges)
+  func cleanupForRemoval()
 }

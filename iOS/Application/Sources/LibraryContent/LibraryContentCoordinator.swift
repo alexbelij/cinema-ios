@@ -19,6 +19,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 
   // other properties
   private let dependencies: AppDependencies
+  private let notificationCenter: NotificationCenter
   var library: MovieLibrary {
     willSet {
       library.delegates.remove(self)
@@ -56,6 +57,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
        navigationController: UINavigationController,
        dependencies: AppDependencies) {
     self.dependencies = dependencies
+    self.notificationCenter = dependencies.notificationCenter
     self.library = library
     self.content = content
     self.navigationController = navigationController
@@ -97,9 +99,16 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 
   private func handleFetchedMovies(result: Result<[Movie], MovieLibraryError>) {
     switch result {
-      case .failure:
-        DispatchQueue.main.async {
-          self.movieListController.listData = .unavailable
+      case let .failure(error):
+        switch error {
+          case let .globalError(event):
+            notificationCenter.post(event.notification)
+          case .nonRecoverableError:
+            DispatchQueue.main.async {
+              self.movieListController.listData = .unavailable
+            }
+          case .detailsFetchError, .movieDoesNotExist:
+            fatalError("should not occur")
         }
       case let .success(movies):
         DispatchQueue.main.async {
@@ -168,21 +177,14 @@ extension LibraryContentCoordinator: EditMovieCoordinatorDelegate {
     self.editMovieCoordinator = nil
   }
 
-  func editMovieCoordinator(_ coordinator: EditMovieCoordinator, didFailWith error: Error) {
+  func editMovieCoordinator(_ coordinator: EditMovieCoordinator, didFailWith error: MovieLibraryError) {
     switch error {
-      default:
-        DispatchQueue.main.async {
-          let alert = UIAlertController(title: NSLocalizedString("edit.failed", comment: ""),
-                                        message: NSLocalizedString("error.tryAgain", comment: ""),
-                                        preferredStyle: .alert)
-          alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
-          alert.addAction(UIAlertAction(title: NSLocalizedString("discard", comment: ""),
-                                        style: .destructive) { _ in
-            coordinator.rootViewController.dismiss(animated: true)
-            self.editMovieCoordinator = nil
-          })
-          coordinator.rootViewController.present(alert, animated: true)
-        }
+      case let .globalError(event):
+        notificationCenter.post(event.notification)
+      case .nonRecoverableError:
+        coordinator.rootViewController.presentErrorAlert()
+      case .detailsFetchError, .movieDoesNotExist:
+        fatalError("should not occur: \(error)")
     }
   }
 }
@@ -200,7 +202,9 @@ extension LibraryContentCoordinator {
 
 extension LibraryContentCoordinator: MovieLibraryDelegate {
   func libraryDidUpdateMetadata(_ library: MovieLibrary) {
-    updateTitle()
+    DispatchQueue.main.async {
+      self.updateTitle()
+    }
   }
 
   func library(_ library: MovieLibrary, didUpdateMovies changeSet: ChangeSet<TmdbIdentifier, Movie>) {
@@ -212,12 +216,6 @@ extension LibraryContentCoordinator: MovieLibraryDelegate {
         guard let index = listItems.index(where: { $0.tmdbID == id }) else { continue }
         listItems.remove(at: index)
         listItems.insert(movie, at: index)
-      }
-      if let movieDetailsCoordinator = self.movieDetailsCoordinator,
-         let updatedMovie = changeSet.modifications[movieDetailsCoordinator.movie.tmdbID] {
-        DispatchQueue.main.async {
-          movieDetailsCoordinator.updateNonRemoteProperties(with: updatedMovie)
-        }
       }
     }
 
@@ -238,8 +236,25 @@ extension LibraryContentCoordinator: MovieLibraryDelegate {
         listItems.remove(at: index)
       }
     }
-
     DispatchQueue.main.async {
+      if let movieDetailsCoordinator = self.movieDetailsCoordinator {
+        if let updatedMovie = changeSet.modifications[movieDetailsCoordinator.movie.tmdbID] {
+          movieDetailsCoordinator.updateNonRemoteProperties(with: updatedMovie)
+          self.editMovieCoordinator?.movie = updatedMovie
+        } else if changeSet.deletions[movieDetailsCoordinator.movie.tmdbID] != nil {
+          if let editMovieCoordinator = self.editMovieCoordinator {
+            editMovieCoordinator.rootViewController.dismiss(animated: true) {
+              self.navigationController.popToViewController(self.movieListController, animated: true)
+              self.movieDetailsCoordinator = nil
+            }
+            self.editMovieCoordinator = nil
+          } else {
+            self.navigationController.popToViewController(self.movieListController, animated: true)
+            self.movieDetailsCoordinator = nil
+          }
+        }
+      }
+
       // commit changes only when controller is not being dismissed anyway
       if listItems.isEmpty && self.dismissWhenEmpty {
         self.movieListController.onViewDidAppear = { [weak self] in

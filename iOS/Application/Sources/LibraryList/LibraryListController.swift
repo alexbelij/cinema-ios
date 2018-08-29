@@ -39,29 +39,44 @@ extension LibraryListController {
     tableView?.reloadData()
   }
 
-  func addPlaceholder(for metadata: MovieLibraryMetadata) {
-    viewModel.append(.placeholder(metadata))
-    viewModel.sort(by: LibraryListController.sortDescriptor)
-    let index = viewModelIndex(for: metadata)!
-    tableView?.insertRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-  }
-
   func showPlaceholder(for metadata: MovieLibraryMetadata) {
-    guard let index = viewModelIndex(for: metadata) else { preconditionFailure("library not found") }
-    viewModel.remove(at: index)
-    viewModel.insert(.placeholder(metadata), at: index)
-    tableView?.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+    showItem(.placeholder(metadata), with: metadata)
   }
 
-  func hidePlaceholder(for metadata: MovieLibraryMetadata) {
-    guard let index = viewModelIndex(for: metadata) else { preconditionFailure("placeholder not found") }
-    viewModel.remove(at: index)
-    viewModel.insert(.selectLibrary(metadata), at: index)
-    tableView?.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+  func showLibrary(with metadata: MovieLibraryMetadata) {
+    showItem(.selectLibrary(metadata), with: metadata)
   }
 
-  func removePlaceholder(for metadata: MovieLibraryMetadata) {
-    guard let index = viewModelIndex(for: metadata) else { preconditionFailure("placeholder not found") }
+  private func showItem(_ newItem: ListItem, with metadata: MovieLibraryMetadata) {
+    if let oldIndex = viewModelIndex(for: metadata) {
+      let shouldUpdate: Bool
+      switch (viewModel[oldIndex], newItem) {
+        case let (.placeholder(oldMetadata), .placeholder),
+             let (.selectLibrary(oldMetadata), .selectLibrary):
+          shouldUpdate = oldMetadata != metadata
+        default:
+          shouldUpdate = true
+      }
+      if shouldUpdate {
+        viewModel.remove(at: oldIndex)
+        viewModel.append(newItem)
+        viewModel.sort(by: LibraryListController.sortDescriptor)
+        let newIndex = viewModelIndex(for: metadata)!
+        if oldIndex != newIndex {
+          tableView.moveRow(at: IndexPath(row: oldIndex, section: 0), to: IndexPath(row: newIndex, section: 0))
+        }
+        tableView.reloadRows(at: [IndexPath(row: newIndex, section: 0)], with: .automatic)
+      }
+    } else {
+      viewModel.append(newItem)
+      viewModel.sort(by: LibraryListController.sortDescriptor)
+      let newIndex = viewModelIndex(for: metadata)!
+      tableView.insertRows(at: [IndexPath(row: newIndex, section: 0)], with: .automatic)
+    }
+  }
+
+  func removeItem(for metadata: MovieLibraryMetadata) {
+    guard let index = viewModelIndex(for: metadata) else { return }
     viewModel.remove(at: index)
     tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
   }
@@ -86,9 +101,9 @@ extension LibraryListController {
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     switch viewModel[indexPath.row] {
-      case let .placeholder(text):
+      case let .placeholder(metadata):
         let cell: PlaceholderTableCell = tableView.dequeueReusableCell(for: indexPath)
-        cell.configure(for: text)
+        cell.configure(for: metadata)
         return cell
       case let .selectLibrary(metadata):
         let cell = tableView.dequeueReusableCell(withIdentifier: "ExistingLibraryTableCell", for: indexPath)

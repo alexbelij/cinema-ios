@@ -8,8 +8,16 @@ protocol PopularMoviesControllerDelegate: class {
 
 class PopularMoviesController: UICollectionViewController {
   weak var delegate: PopularMoviesControllerDelegate?
-  // FIXME should reload when didSet
-  var movieIterator: AnyIterator<PartialMovie> = AnyIterator(EmptyIterator())
+  var movieIterator: AnyIterator<PartialMovie> = AnyIterator(EmptyIterator()) {
+    didSet {
+      guard isViewLoaded else { return }
+      if !movies.isEmpty {
+        movies = []
+        collectionView!.reloadData()
+        fetchMovies(count: maxMovieCount)
+      }
+    }
+  }
   var maxMovieCount: Int = 10
   var posterProvider: PosterProvider = EmptyPosterProvider()
   private var movies = [ExternalMovieViewModel]()
@@ -63,13 +71,12 @@ extension PopularMoviesController: UICollectionViewDataSourcePrefetching {
     return cell
   }
 
-  public func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+  func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
     for indexPath in indexPaths {
       let item = movies[indexPath.row]
       if case .unknown = item.poster {
         item.poster = .loading
         DispatchQueue.global(qos: .background).async {
-          sleep(2)
           fetchPoster(for: item,
                       using: self.posterProvider,
                       size: PosterCell.posterSize,
@@ -151,18 +158,14 @@ extension PopularMoviesController {
       footerView.activityIndicator.startAnimating()
     }
     DispatchQueue.global(qos: .userInitiated).async {
-      for _ in 0..<count {
-        guard let movie = self.movieIterator.next() else { break }
-        DispatchQueue.main.sync {
-          self.movies.append(ExternalMovieViewModel(movie, state: .new))
-          self.collectionView?.insertItems(at: [IndexPath(row: self.movies.count - 1, section: 0)])
-        }
-      }
+      let newMovies = self.movieIterator.prefix(count).map { ExternalMovieViewModel($0, state: .new) }
       DispatchQueue.main.sync {
-        self.isFetchingMovies = false
-        if let footerView = self.collectionView!.supplementaryView(forElementKind: UICollectionElementKindSectionFooter,
-                                                                   at: IndexPath(row: 0,
-                                                                                 section: 0)) as? TmdbFooterView {
+        let index = self.movies.count
+        self.movies.append(contentsOf: newMovies)
+        self.collectionView!.insertItems(at: (index..<(index + newMovies.count)).map { IndexPath(row: $0, section: 0) })
+        if let footerView = self.collectionView!.supplementaryView(
+            forElementKind: UICollectionElementKindSectionFooter,
+            at: IndexPath(row: 0, section: 0)) as? TmdbFooterView {
           footerView.activityIndicator.stopAnimating()
           DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
             if self.movies.isEmpty {
@@ -173,6 +176,7 @@ extension PopularMoviesController {
             }
           }
         }
+        self.isFetchingMovies = false
       }
     }
   }

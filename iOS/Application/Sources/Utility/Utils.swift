@@ -47,6 +47,16 @@ extension UITableView {
   }
 }
 
+extension UIViewController {
+  func presentErrorAlert() {
+    let alert = UIAlertController(title: NSLocalizedString("error.genericError", comment: ""),
+                                  message: NSLocalizedString("error.tryAgain", comment: ""),
+                                  preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default))
+    present(alert, animated: true)
+  }
+}
+
 enum ImageState {
   case unknown
   case loading
