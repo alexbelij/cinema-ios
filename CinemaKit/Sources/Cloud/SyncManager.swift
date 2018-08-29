@@ -59,6 +59,8 @@ class DefaultSyncManager: SyncManager {
           completion(.conflict(serverRecord: ckerror.serverRecord!))
         } else if ckerror.code == CKError.Code.unknownItem {
           completion(.itemNoLongerExists)
+        } else if ckerror.code == CKError.Code.permissionFailure {
+          completion(.permissionFailure)
         } else if ckerror.code == CKError.Code.networkFailure
                   || ckerror.code == CKError.Code.networkUnavailable
                   || ckerror.code == CKError.Code.requestRateLimited
@@ -120,6 +122,8 @@ class DefaultSyncManager: SyncManager {
           completion(.userDeletedZone)
         } else if ckerror.code == CKError.Code.unknownItem {
           completion(nil)
+        } else if ckerror.code == CKError.Code.permissionFailure {
+          completion(.permissionFailure)
         } else if ckerror.code == CKError.Code.networkFailure
                   || ckerror.code == CKError.Code.networkUnavailable
                   || ckerror.code == CKError.Code.requestRateLimited

@@ -99,6 +99,15 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
             fatalError("not implemented")
           case let .globalError(event):
             notificationCenter.post(event.notification)
+          case .permissionFailure:
+            DispatchQueue.main.async {
+              model.state = .new
+              self.searchTmdbController.reloadRow(forMovieWithId: model.movie.tmdbID)
+              self.popularMoviesController.reloadRow(forMovieWithId: model.movie.tmdbID)
+              self.rootViewController.presentPermissionFailureAlert {
+                self.notificationCenter.post(ApplicationWideEvent.shouldFetchChanges.notification)
+              }
+            }
           case .nonRecoverableError:
             DispatchQueue.main.async {
               model.state = .new

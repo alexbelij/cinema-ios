@@ -132,7 +132,7 @@ extension MovieLibraryData {
             completion(.failure(.globalError(.notAuthenticated)))
           case .nonRecoverableError:
             completion(.failure(.nonRecoverableError))
-          case .conflict, .itemNoLongerExists, .zoneNotFound:
+          case .conflict, .itemNoLongerExists, .zoneNotFound, .permissionFailure:
             fatalError("should not occur: \(error)")
         }
       } else if let records = records {

@@ -53,6 +53,7 @@
 		CB7F273721244616006EC6A5 /* Base.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB7F273621244616006EC6A5 /* Base.swift */; };
 		CB7F273D2125820B006EC6A5 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB7F27392125820B006EC6A5 /* SubscriptionManager.swift */; };
 		CB7F273E2125820B006EC6A5 /* SubscriptionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB7F273A2125820B006EC6A5 /* SubscriptionStore.swift */; };
+		CB7F273F2125820B006EC6A5 /* ShareManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB7F273B2125820B006EC6A5 /* ShareManager.swift */; };
 		CB7F27402125820B006EC6A5 /* ServerChangeTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB7F273C2125820B006EC6A5 /* ServerChangeTokenStore.swift */; };
 		CB7F2743212594CB006EC6A5 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB7F2742212594CB006EC6A5 /* CloudKit.framework */; };
 		CB84B1891FEAF5E500B455D4 /* SortPrefixes.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB84B18B1FEAF5E500B455D4 /* SortPrefixes.plist */; };
@@ -171,6 +172,7 @@
 		CB7F273621244616006EC6A5 /* Base.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Base.swift; sourceTree = "<group>"; };
 		CB7F27392125820B006EC6A5 /* SubscriptionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		CB7F273A2125820B006EC6A5 /* SubscriptionStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionStore.swift; sourceTree = "<group>"; };
+		CB7F273B2125820B006EC6A5 /* ShareManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShareManager.swift; sourceTree = "<group>"; };
 		CB7F273C2125820B006EC6A5 /* ServerChangeTokenStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerChangeTokenStore.swift; sourceTree = "<group>"; };
 		CB7F2741212594C9006EC6A5 /* Cinema_iOS_Application.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Cinema_iOS_Application.entitlements; sourceTree = "<group>"; };
 		CB7F2742212594CB006EC6A5 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
@@ -444,6 +446,7 @@
 				CB7F273C2125820B006EC6A5 /* ServerChangeTokenStore.swift */,
 				CB7F27392125820B006EC6A5 /* SubscriptionManager.swift */,
 				CB7F273A2125820B006EC6A5 /* SubscriptionStore.swift */,
+				CB7F273B2125820B006EC6A5 /* ShareManager.swift */,
 			);
 			path = Cloud;
 			sourceTree = "<group>";
@@ -752,6 +755,7 @@
 				CB797D372120289F00F59618 /* AppDependencies.swift in Sources */,
 				CBC2E3BB2136A7750088F5C8 /* ChangeSet.swift in Sources */,
 				CBBC59362121BDD200067DEA /* MovieLibraryManager.swift in Sources */,
+				CB7F273F2125820B006EC6A5 /* ShareManager.swift in Sources */,
 				CB1A15DD2061347E003BD8D0 /* MovieDbClient.swift in Sources */,
 				CB1A15DE2061347E003BD8D0 /* TMDBSwiftCache.swift in Sources */,
 				CB1A15D62061326A003BD8D0 /* MulticastDelegate.swift in Sources */,

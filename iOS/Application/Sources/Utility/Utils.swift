@@ -55,6 +55,16 @@ extension UIViewController {
     alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default))
     present(alert, animated: true)
   }
+
+  func presentPermissionFailureAlert(handler: @escaping () -> Void) {
+    let alert = UIAlertController(title: NSLocalizedString("error.permissionFailure", comment: ""),
+                                  message: nil,
+                                  preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default) { _ in
+      handler()
+    })
+    present(alert, animated: true)
+  }
 }
 
 enum ImageState {

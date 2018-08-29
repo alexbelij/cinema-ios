@@ -4,11 +4,14 @@ import UIKit
 class LibrarySettingsController: UITableViewController {
   enum Section: Equatable {
     case name
+    case share
+    case shareOptions
     case delete
 
     var header: String? {
       switch self {
         case .name: return NSLocalizedString("librarySettings.nameSection.header", comment: "")
+        case .share, .shareOptions: return NSLocalizedString("librarySettings.shareSection.header", comment: "")
         case .delete: return nil
       }
     }
@@ -16,7 +19,7 @@ class LibrarySettingsController: UITableViewController {
     var isSelectable: Bool {
       switch self {
         case .name: return false
-        case .delete: return true
+        case .share, .shareOptions, .delete: return true
       }
     }
   }
@@ -31,6 +34,7 @@ class LibrarySettingsController: UITableViewController {
   private var originalMetadata: MovieLibraryMetadata!
   private var updatedMetadata: MovieLibraryMetadata!
   var onMetadataUpdate: ((MovieLibraryMetadata) -> Void)?
+  var onShareButtonTap: (() -> Void)?
   var onRemoveLibrary: (() -> Void)?
   var onDisappear: (() -> Void)?
   private var viewModel: [Section]!
@@ -61,7 +65,10 @@ extension LibrarySettingsController {
 
 extension LibrarySettingsController {
   private func configure(for metadata: MovieLibraryMetadata) {
-    viewModel = [.name, .delete]
+    viewModel = [.name, metadata.isShared ? .shareOptions : .share]
+    if metadata.isCurrentUserOwner {
+      viewModel.append(.delete)
+    }
     originalMetadata = metadata
     updatedMetadata = metadata
     tableView.reloadData()
@@ -97,6 +104,16 @@ extension LibrarySettingsController {
     return viewModel![section].header
   }
 
+  override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+    switch viewModel![section] {
+      case .shareOptions:
+        return metadata.isCurrentUserOwner
+            ? nil
+            : NSLocalizedString("librarySettings.howToRemoveSharedLibrary", comment: "")
+      default: return nil
+    }
+  }
+
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     switch viewModel![indexPath.section] {
       case .name:
@@ -117,6 +134,7 @@ extension LibrarySettingsController {
               }
             }
             cell.textValue = updatedMetadata.name
+            cell.isEnabled = metadata.currentUserCanModify
             return cell
           default:
             let cell: MessageTableCell = tableView.dequeueReusableCell(for: indexPath)
@@ -124,6 +142,18 @@ extension LibrarySettingsController {
             cell.messageStyle = .error
             return cell
         }
+      case .share:
+        let cell: ButtonTableCell = tableView.dequeueReusableCell(for: indexPath)
+        cell.actionTitle = NSLocalizedString("librarySettings.shareLibrary", comment: "")
+        cell.buttonStyle = .default
+        cell.actionTitleAlignment = .left
+        return cell
+      case .shareOptions:
+        let cell: ButtonTableCell = tableView.dequeueReusableCell(for: indexPath)
+        cell.actionTitle = NSLocalizedString("librarySettings.shareOptions", comment: "")
+        cell.buttonStyle = .default
+        cell.actionTitleAlignment = .left
+        return cell
       case .delete:
         let cell: ButtonTableCell = tableView.dequeueReusableCell(for: indexPath)
         cell.actionTitle = NSLocalizedString("librarySettings.deleteSection.delete", comment: "")
@@ -142,11 +172,24 @@ extension LibrarySettingsController {
     switch viewModel![indexPath.section] {
       case .name:
         break
+      case .share, .shareOptions:
+        commitMetadataEdits()
+        onShareButtonTap?()
       case .delete:
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        let format = NSLocalizedString("librarySettings.removeLibrary.private.actionTitleFormat", comment: "")
-        alert.addAction(UIAlertAction(title: .localizedStringWithFormat(format, updatedMetadata.name),
-                                      style: .destructive) { _ in
+        let alert: UIAlertController
+        let deleteActionTitle: String
+        if metadata.isShared {
+          alert = UIAlertController(
+              title: NSLocalizedString("librarySettings.removeLibrary.shared.alert.title", comment: ""),
+              message: NSLocalizedString("librarySettings.removeLibrary.shared.alert.message", comment: ""),
+              preferredStyle: .alert)
+          deleteActionTitle = NSLocalizedString("librarySettings.removeLibrary.shared.actionTitle", comment: "")
+        } else {
+          alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+          let format = NSLocalizedString("librarySettings.removeLibrary.private.actionTitleFormat", comment: "")
+          deleteActionTitle = .localizedStringWithFormat(format, updatedMetadata.name)
+        }
+        alert.addAction(UIAlertAction(title: deleteActionTitle, style: .destructive) { _ in
           self.shouldIgnoreEdits = true
           self.onRemoveLibrary?()
         })
@@ -164,6 +207,16 @@ class TextFieldTableCell: UITableViewCell, UITextFieldDelegate {
     super.awakeFromNib()
     textField.delegate = self
     textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+  }
+
+  var isEnabled: Bool {
+    get {
+      return textField.isEnabled
+    }
+    set {
+      textField.isEnabled = newValue
+      textField.textColor = newValue ? .black : .disabledControlText
+    }
   }
 
   var textValue: String {

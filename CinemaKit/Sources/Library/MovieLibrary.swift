@@ -11,6 +11,7 @@ public enum MovieLibraryError: Error {
   case globalError(ApplicationWideEvent)
   case nonRecoverableError
   case movieDoesNotExist
+  case permissionFailure
 }
 
 extension CloudKitError {
@@ -22,6 +23,8 @@ extension CloudKitError {
         return .globalError(.notAuthenticated)
       case .userDeletedZone:
         return .globalError(.userDeletedZone)
+      case .permissionFailure:
+        return .permissionFailure
       case .nonRecoverableError:
         return .nonRecoverableError
       case .conflict, .zoneNotFound:

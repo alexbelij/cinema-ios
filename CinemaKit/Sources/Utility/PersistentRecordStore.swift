@@ -2,9 +2,15 @@ import CloudKit
 import os.log
 
 protocol PersistentRecordStore {
-  func loadRecords() -> [CKRecord]?
+  func loadRecords(asCKShare: Bool) -> [CKRecord]?
   func save(_ records: [CKRecord])
   func clear()
+}
+
+extension PersistentRecordStore {
+  func loadRecords() -> [CKRecord]? {
+    return loadRecords(asCKShare: false)
+  }
 }
 
 extension PersistentRecordStore {
@@ -22,7 +28,7 @@ class FileBasedRecordStore: PersistentRecordStore {
     self.fileURL = fileURL
   }
 
-  func loadRecords() -> [CKRecord]? {
+  func loadRecords(asCKShare: Bool) -> [CKRecord]? {
     guard FileManager.default.fileExists(atPath: fileURL.path) else { return nil }
     do {
       let urlData = try Data(contentsOf: fileURL)
@@ -30,7 +36,12 @@ class FileBasedRecordStore: PersistentRecordStore {
       return try decoder.decode([Data].self, from: urlData).map {
         let coder = NSKeyedUnarchiver(forReadingWith: $0)
         coder.requiresSecureCoding = true
-        let record = CKRecord(coder: coder)!
+        let record: CKRecord
+        if asCKShare {
+          record = CKShare(coder: coder)
+        } else {
+          record = CKRecord(coder: coder)!
+        }
         coder.finishDecoding()
         return record
       }

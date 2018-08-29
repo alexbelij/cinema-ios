@@ -15,6 +15,7 @@
 "edit.sectionHeader.subtitle" = "Subtitle (optional)";
 "edit.sectionHeader.title" = "Title";
 "error.genericError" = "Something went wrong.";
+"error.permissionFailure" = "The owner of this library no longer allows you to make changes.";
 "error.tryAgain" = "Please try again later.";
 "genre.action" = "Action";
 "genre.adventure" = "Adventure";
@@ -48,10 +49,17 @@
 "library.search.placeholder" = "Search movies";
 "libraryList.libraries" = "Libraries";
 "libraryList.addNewLibrary" = "Add new library…";
+"librarySettings.howToRemoveSharedLibrary" = "You can delete this library by removing yourself from the participant list.";
 "librarySettings.nameSection.header" = "Name";
 "librarySettings.nameSection.notEmptyMessage" = "Enter at least one character.";
+"librarySettings.removeLibrary.shared.alert.title" = "Remove Shared Library?";
+"librarySettings.removeLibrary.shared.alert.message" = "If you remove this shared library, other people will no longer have access, and it will be removed from all their devices.";
+"librarySettings.removeLibrary.shared.actionTitle" = "Remove";
 "librarySettings.removeLibrary.private.actionTitleFormat" = "Remove %@";
 "librarySettings.deleteSection.delete" = "Remove Library";
+"librarySettings.shareLibrary" = "Share Library…";
+"librarySettings.shareOptions" = "Share Options…";
+"librarySettings.shareSection.header" = "Sharing";
 "loading" = "Loading…";
 "no" = "No";
 "ok" = "OK";

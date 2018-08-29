@@ -11,6 +11,7 @@ private extension CloudTarget {
   var subscriptionID: String {
     switch self {
       case .deviceSyncZone: return "DeviceSyncZoneSubscriptionID"
+      case .sharedDatabase: return "SharedDatabaseSubscriptionID"
     }
   }
 
@@ -19,6 +20,8 @@ private extension CloudTarget {
     switch self {
       case .deviceSyncZone:
         subscription = CKRecordZoneSubscription(zoneID: deviceSyncZoneID, subscriptionID: subscriptionID)
+      case .sharedDatabase:
+        subscription = CKDatabaseSubscription(subscriptionID: subscriptionID)
     }
     let notificationInfo = CKNotificationInfo()
     notificationInfo.shouldSendContentAvailable = true
@@ -29,6 +32,7 @@ private extension CloudTarget {
   var scope: CKDatabaseScope {
     switch self {
       case .deviceSyncZone: return .private
+      case .sharedDatabase: return .shared
     }
   }
 }
@@ -48,7 +52,13 @@ class DefaultSubscriptionManager: SubscriptionManager {
   }
 
   func subscribeForChanges(then completion: @escaping (CloudKitError?) -> Void) {
-    subscribeForChanges(for: .deviceSyncZone) { completion($0) }
+    subscribeForChanges(for: .deviceSyncZone) { error in
+      if let error = error {
+        completion(error)
+      } else {
+        self.subscribeForChanges(for: .sharedDatabase, then: completion)
+      }
+    }
   }
 
   private func subscribeForChanges(for target: CloudTarget,
