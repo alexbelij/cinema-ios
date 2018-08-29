@@ -64,7 +64,6 @@ extension LibraryListCoordinator {
       self?.librarySettingsControllerDidTapRemoveButton(settingsController)
     }
     settingsController.metadata = metadata
-    settingsController.canRemoveLibrary = libraryManager.libraryCount > 1
     self.navigationController.pushViewController(settingsController, animated: true)
   }
 

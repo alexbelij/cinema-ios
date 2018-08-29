@@ -46,6 +46,7 @@ class InMemoryMovieLibraryManager: MovieLibraryManager {
 
   func removeLibrary(with id: CKRecordID,
                      then completion: @escaping (Result<Void, MovieLibraryManagerError>) -> Void) {
+    // TODO add new library when only one left
     let library = libraries.removeValue(forKey: id)!
     let changeSet = ChangeSet<CKRecordID, MovieLibrary>(deletions: [library.metadata.id: library])
     delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }

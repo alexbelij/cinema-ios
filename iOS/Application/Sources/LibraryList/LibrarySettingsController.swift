@@ -9,12 +9,6 @@ class LibrarySettingsController: UITableViewController {
       configure(for: metadata)
     }
   }
-  var canRemoveLibrary = true {
-    didSet {
-      guard isViewLoaded else { return }
-      removeLibraryButton.isEnabled = canRemoveLibrary
-    }
-  }
   var onMetadataUpdate: (() -> Void)?
   var onRemoveButtonTap: (() -> Void)?
 
@@ -31,7 +25,6 @@ extension LibrarySettingsController {
     super.viewDidLoad()
     nameTextField.delegate = self
     removeLibraryButton.setTitle(NSLocalizedString("librarySettings.removeLibrary", comment: ""), for: .normal)
-    removeLibraryButton.isEnabled = canRemoveLibrary
     guard metadata != nil else { preconditionFailure("libraryMetadata has not been set") }
     configure(for: metadata)
   }
