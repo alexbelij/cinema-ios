@@ -7,7 +7,7 @@ protocol MovieLibraryFactory {
 }
 
 class InMemoryMovieLibraryManager: MovieLibraryManager {
-  weak var delegate: MovieLibraryManagerDelegate?
+  let delegates: MulticastDelegate<MovieLibraryManagerDelegate> = MulticastDelegate()
   private let libraryFactory: MovieLibraryFactory
   private var libraries: [CKRecordID: InternalMovieLibrary]
 
@@ -31,7 +31,7 @@ class InMemoryMovieLibraryManager: MovieLibraryManager {
     let library = libraryFactory.makeLibrary(with: metadata)
     libraries[metadata.id] = library
     let changeSet = ChangeSet<CKRecordID, MovieLibrary>(insertions: [library])
-    delegate?.libraryManager(self, didUpdateLibraries: changeSet)
+    delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
     completion(.success(library))
   }
 
@@ -40,7 +40,7 @@ class InMemoryMovieLibraryManager: MovieLibraryManager {
     let library = libraries[metadata.id]!
     library.metadata = metadata
     let changeSet = ChangeSet<CKRecordID, MovieLibrary>(modifications: [library.metadata.id: library])
-    delegate?.libraryManager(self, didUpdateLibraries: changeSet)
+    delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
     completion(.success(library))
   }
 
@@ -48,7 +48,7 @@ class InMemoryMovieLibraryManager: MovieLibraryManager {
                      then completion: @escaping (Result<Void, MovieLibraryManagerError>) -> Void) {
     let library = libraries.removeValue(forKey: id)!
     let changeSet = ChangeSet<CKRecordID, MovieLibrary>(deletions: [library.metadata.id: library])
-    delegate?.libraryManager(self, didUpdateLibraries: changeSet)
+    delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
     completion(.success(()))
   }
 }

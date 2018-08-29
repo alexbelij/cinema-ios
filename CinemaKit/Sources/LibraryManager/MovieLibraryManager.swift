@@ -7,7 +7,7 @@ public protocol MovieLibraryManagerDelegate: class {
 }
 
 public protocol MovieLibraryManager: class {
-  var delegate: MovieLibraryManagerDelegate? { get set }
+  var delegates: MulticastDelegate<MovieLibraryManagerDelegate> { get }
 
   // accessing library content
   func fetchLibraries(then completion: @escaping (Result<[MovieLibrary], MovieLibraryManagerError>) -> Void)
