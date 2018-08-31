@@ -44,9 +44,7 @@ class AppCoordinator: AutoPresentableCoordinator {
       CKContainer.default().accountStatus { status, error in
         switch status {
           case .available:
-            CinemaKitStartupManager(using: self.application).initialize { dependencies in
-              self.loadData(using: dependencies)
-            }
+            self.initializeCinemaKit()
           case .couldNotDetermine, .restricted, .noAccount:
             os_log("account status is not .accepted, error=%{public}@",
                    log: AppCoordinator.logger,
@@ -56,6 +54,15 @@ class AppCoordinator: AutoPresentableCoordinator {
               self.showNotAuthenticatedPage()
             }
         }
+      }
+    }
+  }
+
+  private func initializeCinemaKit() {
+    CinemaKitStartupManager(using: self.application).initialize { progress in
+      switch progress {
+        case let .ready(dependencies):
+          self.loadData(using: dependencies)
       }
     }
   }

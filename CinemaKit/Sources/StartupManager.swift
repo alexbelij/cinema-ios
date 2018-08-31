@@ -21,7 +21,11 @@ struct LocalCloudKitCacheInvalidationFlag {
 }
 
 public protocol StartupManager {
-  func initialize(then completion: @escaping (AppDependencies) -> Void)
+  func initialize(handler: @escaping (StartupProgress) -> Void)
+}
+
+public enum StartupProgress {
+  case ready(AppDependencies)
 }
 
 public class CinemaKitStartupManager: StartupManager {
@@ -62,12 +66,14 @@ public class CinemaKitStartupManager: StartupManager {
 
   private let application: UIApplication
   private let container = CKContainer.default()
+  private var progressHandler: ((StartupProgress) -> Void)!
 
   public init(using application: UIApplication) {
     self.application = application
   }
 
-  public func initialize(then completion: @escaping (AppDependencies) -> Void) {
+  public func initialize(handler: @escaping (StartupProgress) -> Void) {
+    self.progressHandler = handler
     os_log("initializing CinemaKit", log: CinemaKitStartupManager.logger, type: .default)
     if let previousVersion = previousVersion {
       os_log("app has been launched before (version %{public}@)",
@@ -93,7 +99,7 @@ public class CinemaKitStartupManager: StartupManager {
       resetLocalCloudKitCache()
     }
     setUpDirectories()
-    setUpDeviceSyncZone(then: completion)
+    setUpDeviceSyncZone()
   }
 
   private func clearPosterCache() {
@@ -151,7 +157,7 @@ public class CinemaKitStartupManager: StartupManager {
     }
   }
 
-  private func setUpDeviceSyncZone(then completion: @escaping (AppDependencies) -> Void) {
+  private func setUpDeviceSyncZone() {
     setUpDeviceSyncZone(using: container.queue(withScope: .private), retryCount: defaultRetryCount) { error in
       if let error = error {
         os_log("unable to setup deviceSyncZone: %{public}@",
@@ -160,7 +166,7 @@ public class CinemaKitStartupManager: StartupManager {
                String(describing: error))
         fail()
       } else {
-        self.setUpSubscriptions(then: completion)
+        self.setUpSubscriptions()
       }
     }
   }
@@ -218,7 +224,7 @@ public class CinemaKitStartupManager: StartupManager {
     queue.add(operation)
   }
 
-  private func setUpSubscriptions(then completion: @escaping (AppDependencies) -> Void) {
+  private func setUpSubscriptions() {
     let subscriptionManager = DefaultSubscriptionManager(queueFactory: container)
     subscriptionManager.subscribeForChanges { error in
       if let error = error {
@@ -231,14 +237,12 @@ public class CinemaKitStartupManager: StartupManager {
         DispatchQueue.main.async {
           self.application.registerForRemoteNotifications()
         }
-        let dependencies = self.makeDependencies(with: subscriptionManager)
-        os_log("finished initializing CinemaKit", log: CinemaKitStartupManager.logger, type: .default)
-        completion(dependencies)
+        self.makeDependencies()
       }
     }
   }
 
-  private func makeDependencies(with subscriptionManager: DefaultSubscriptionManager) -> AppDependencies {
+  private func makeDependencies() {
     // MovieDb Client
     let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en
     let country = MovieDbCountry(rawValue: Locale.current.regionCode ?? "US") ?? .unitedStates
@@ -266,9 +270,11 @@ public class CinemaKitStartupManager: StartupManager {
         shareManager: DefaultShareManager(generalOperationQueue: container, queueFactory: container),
         libraryFactory: libraryFactory,
         data: data)
-    return AppDependencies(libraryManager: libraryManager,
-                           movieDb: movieDb,
-                           notificationCenter: NotificationCenter.default)
+    let dependencies = AppDependencies(libraryManager: libraryManager,
+                                       movieDb: movieDb,
+                                       notificationCenter: NotificationCenter.default)
+    os_log("finished initializing CinemaKit", log: CinemaKitStartupManager.logger, type: .default)
+    self.progressHandler!(StartupProgress.ready(dependencies))
   }
 }
 
