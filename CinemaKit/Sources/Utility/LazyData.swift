@@ -1,6 +1,6 @@
 import Dispatch
 
-class RecordData<DataType, ErrorType> {
+class LazyData<DataType, ErrorType> {
   private let queue: DispatchQueue
   private var suspendedCalls = [((DataType) -> Void, (ErrorType) -> Void)]()
   private var isLoading = false
@@ -36,7 +36,7 @@ class RecordData<DataType, ErrorType> {
   }
 
   func loadData() {
-    fatalError("must be subclassed")
+    fatalError("must be overridden")
   }
 
   func abortLoading(with error: ErrorType) {
@@ -75,10 +75,10 @@ class RecordData<DataType, ErrorType> {
   }
 
   func persist(_ data: DataType) {
-    fatalError("must be subclassed")
+    fatalError("must be overridden")
   }
 
   func clear() {
-    fatalError("must be subclassed")
+    fatalError("must be overridden")
   }
 }

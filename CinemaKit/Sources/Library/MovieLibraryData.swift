@@ -15,7 +15,7 @@ class MovieLibraryDataObject {
   }
 }
 
-class MovieLibraryData: RecordData<MovieLibraryDataObject, MovieLibraryError> {
+class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
   private static let logger = Logging.createLogger(category: "MovieLibraryData")
 
   private let databaseOperationQueue: DatabaseOperationQueue

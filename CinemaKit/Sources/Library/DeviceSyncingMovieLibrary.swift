@@ -21,13 +21,13 @@ class DeviceSyncingMovieLibrary: InternalMovieLibrary {
   private let databaseOperationQueue: DatabaseOperationQueue
   private let syncManager: SyncManager
   private let tmdbPropertiesProvider: TmdbMoviePropertiesProvider
-  private var localData: RecordData<MovieLibraryDataObject, MovieLibraryError>
+  private var localData: LazyData<MovieLibraryDataObject, MovieLibraryError>
 
   init(databaseOperationQueue: DatabaseOperationQueue,
        syncManager: SyncManager,
        tmdbPropertiesProvider: TmdbMoviePropertiesProvider,
        metadata: MovieLibraryMetadata,
-       data: RecordData<MovieLibraryDataObject, MovieLibraryError>) {
+       data: LazyData<MovieLibraryDataObject, MovieLibraryError>) {
     self.databaseOperationQueue = databaseOperationQueue
     self.syncManager = syncManager
     self.tmdbPropertiesProvider = tmdbPropertiesProvider

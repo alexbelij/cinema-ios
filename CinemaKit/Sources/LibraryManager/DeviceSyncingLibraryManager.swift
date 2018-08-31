@@ -16,28 +16,25 @@ class DeviceSyncingLibraryManager: MovieLibraryManager {
   private let queueFactory: DatabaseOperationQueueFactory
   private let fetchManager: FetchManager
   private let syncManager: SyncManager
-  private let subscriptionManager: SubscriptionManager
   private let changesManager: ChangesManager
   private let shareManager: ShareManager
   private let libraryFactory: MovieLibraryFactory
-  private let localData: RecordData<MovieLibraryManagerDataObject, MovieLibraryManagerError>
+  private let localData: LazyData<MovieLibraryManagerDataObject, MovieLibraryManagerError>
   private let cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag
 
   init(container: CKContainer,
        queueFactory: DatabaseOperationQueueFactory,
        fetchManager: FetchManager,
        syncManager: SyncManager,
-       subscriptionManager: SubscriptionManager,
        changesManager: ChangesManager,
        shareManager: ShareManager,
        libraryFactory: MovieLibraryFactory,
-       data: RecordData<MovieLibraryManagerDataObject, MovieLibraryManagerError>,
+       data: LazyData<MovieLibraryManagerDataObject, MovieLibraryManagerError>,
        cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag = LocalCloudKitCacheInvalidationFlag()) {
     self.container = container
     self.queueFactory = queueFactory
     self.fetchManager = fetchManager
     self.syncManager = syncManager
-    self.subscriptionManager = subscriptionManager
     self.changesManager = changesManager
     self.shareManager = shareManager
     self.libraryFactory = libraryFactory
@@ -248,7 +245,7 @@ extension DeviceSyncingLibraryManager {
     }, whenUnableToLoad: { error in
       os_log("unable to process changes, because loading failed: %{public}@",
              log: DeviceSyncingLibraryManager.logger,
-             type: .default,
+             type: .error,
              String(describing: error))
     })
   }

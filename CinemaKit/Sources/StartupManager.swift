@@ -262,7 +262,6 @@ public class CinemaKitStartupManager: StartupManager {
         queueFactory: container,
         fetchManager: fetchManager,
         syncManager: syncManager,
-        subscriptionManager: subscriptionManager,
         changesManager: DefaultChangesManager(queueFactory: container),
         shareManager: DefaultShareManager(generalOperationQueue: container, queueFactory: container),
         libraryFactory: libraryFactory,
@@ -293,7 +292,7 @@ private class DefaultMovieLibraryFactory: MovieLibraryFactory {
     let scope = metadata.isCurrentUserOwner ? CKDatabaseScope.private : CKDatabaseScope.shared
     let databaseOperationQueue = queueFactory.queue(withScope: scope)
     let movieRecordStore = FileBasedRecordStore(
-    fileURL: CinemaKitStartupManager.movieRecordsDir.appendingPathComponent("\(metadata.id.recordName).plist"))
+        fileURL: CinemaKitStartupManager.movieRecordsDir.appendingPathComponent("\(metadata.id.recordName).plist"))
     let data = MovieLibraryData(databaseOperationQueue: databaseOperationQueue,
                                 fetchManager: fetchManager,
                                 syncManager: syncManager,
