@@ -1,10 +1,14 @@
 import CloudKit
+import Dispatch
 import os.log
 
 protocol SyncManager {
   func sync(_ record: CKRecord,
             using queue: DatabaseOperationQueue,
             then completion: @escaping (CloudKitError?) -> Void)
+  func syncAll(_ records: [CKRecord],
+               using queue: DatabaseOperationQueue,
+               then completion: @escaping (CloudKitError?) -> Void)
   func delete(_ record: CKRecord,
               using queue: DatabaseOperationQueue,
               then completion: @escaping (CloudKitError?) -> Void)
@@ -79,6 +83,98 @@ class DefaultSyncManager: SyncManager {
                log: DefaultSyncManager.logger,
                type: .debug,
                record.recordType)
+        completion(nil)
+      }
+    }
+    queue.add(operation)
+  }
+
+  func syncAll(_ records: [CKRecord],
+               using queue: DatabaseOperationQueue,
+               then completion: @escaping (CloudKitError?) -> Void) {
+    let batchSize = 300
+    var recordsToProcess = records
+    let numberOfRecordsToProcess: Int = recordsToProcess.count
+    os_log("need to sync %d records -> %d requests",
+           log: DefaultSyncManager.logger,
+           type: .default,
+           numberOfRecordsToProcess,
+           Int(ceil(Double(numberOfRecordsToProcess) / Double(batchSize))))
+    let group = DispatchGroup()
+    var errors = [CloudKitError]()
+    var startIndex = 0
+    var endIndex = min(numberOfRecordsToProcess, batchSize) - 1
+    while startIndex < numberOfRecordsToProcess {
+      os_log("syncing batch (%d through %d)", log: DefaultSyncManager.logger, type: .default, startIndex, endIndex)
+      group.enter()
+      let batch = Array(recordsToProcess[startIndex...endIndex])
+      syncAll(batch, using: queue, retryCount: defaultRetryCount) { error in
+        if let error = error {
+          errors.append(error)
+        }
+        group.leave()
+      }
+      startIndex = endIndex + 1
+      endIndex = min(numberOfRecordsToProcess, endIndex + batchSize)
+    }
+    group.notify(queue: DispatchQueue.global()) {
+      completion(errors.first)
+    }
+  }
+
+  private func syncAll(_ records: [CKRecord],
+                       using queue: DatabaseOperationQueue,
+                       retryCount: Int,
+                       then completion: @escaping (CloudKitError?) -> Void) {
+    os_log("creating modify records operation to batch save %d records",
+           log: DefaultSyncManager.logger,
+           type: .default,
+           records.count)
+    let operation = CKModifyRecordsOperation(recordsToSave: records, recordIDsToDelete: nil)
+    operation.modifyRecordsCompletionBlock = { _, _, error in
+      if let error = error {
+        guard let ckerror = error as? CKError else {
+          os_log("<syncAll> unhandled error: %{public}@",
+                 log: DefaultSyncManager.logger,
+                 type: .error,
+                 String(describing: error))
+          completion(.nonRecoverableError)
+          return
+        }
+        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
+          os_log("retry sync after %.1f seconds", log: DefaultSyncManager.logger, type: .default, retryAfter)
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
+            self.syncAll(records, using: queue, retryCount: retryCount - 1, then: completion)
+          }
+        } else if ckerror.code == CKError.Code.notAuthenticated {
+          completion(.notAuthenticated)
+        } else if ckerror.code == CKError.Code.userDeletedZone {
+          self.cacheInvalidationFlag.set()
+          completion(.userDeletedZone)
+        } else if ckerror.code == CKError.Code.partialFailure {
+          os_log("<syncAll> partial error: %{public}@",
+                 log: DefaultSyncManager.logger,
+                 type: .error,
+                 ckerror.partialErrorsByItemID!.description)
+          completion(.nonRecoverableError)
+        } else if ckerror.code == CKError.Code.networkFailure
+                  || ckerror.code == CKError.Code.networkUnavailable
+                  || ckerror.code == CKError.Code.requestRateLimited
+                  || ckerror.code == CKError.Code.serviceUnavailable
+                  || ckerror.code == CKError.Code.zoneBusy {
+          completion(.nonRecoverableError)
+        } else {
+          os_log("<syncAll> unhandled CKError: %{public}@",
+                 log: DefaultSyncManager.logger,
+                 type: .error,
+                 String(describing: ckerror))
+          completion(.nonRecoverableError)
+        }
+      } else {
+        os_log("pushed %d record",
+               log: DefaultSyncManager.logger,
+               type: .debug,
+               records.count)
         completion(nil)
       }
     }

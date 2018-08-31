@@ -44,7 +44,8 @@
 "import.succeeded" = "Aktualisierung abgeschlossen";
 "import.progress" = "Deine Mediathek wird aktualisiert";
 "library" = "Mediathek";
-"library.defaultName" = "Meine Mediathek";
+"library.defaultName" = "Meine Filme";
+"library.migratedNameFormat" = "Filme von %@";
 "library.empty" = "Die Mediathek ist leer.";
 "library.search.placeholder" = "Filme durchsuchen";
 "libraryList.libraries" = "Mediatheken";
@@ -67,6 +68,17 @@
 "popularMovies.empty" = "Zurzeit gibt es keine beliebten Filme. Versuch es später nochmal.";
 "save" = "Sichern";
 "search.results.empty" = "Keine Treffer für „%@“";
+"setup.complete" = "Einrichtung abgeschlossen";
+"setup.complete.secondaryText" = "Du kannst jetzt auf deine Filme von jedem deiner Geräte zugreifen.";
+"setup.initializing" = "Einrichtung vorbereiten";
+"setup.startFresh" = "Neu beginnen";
+"setup.startFresh.alert.title" = "Neu beginnen?";
+"setup.startFresh.alert.message" = "Es werden alle Filme von diesem Gerät entfernt, jedoch keine in iCloud gespeicherten Filme gelöscht.";
+"setup.startFresh.alert.delete" = "Löschen";
+"setup.upload.failed" = "Hochladen fehlgeschlagen";
+"setup.uploading" = "Hochladen";
+"setup.uploadMovies" = "Filme hochladen";
+"setup.uploadMovies.secondaryText" = "Deine Filme werden in iCloud übertragen.";
 "sort.by.runtime" = "Laufzeit";
 "sort.by.runtime.lessThanTenMinutes" = "Weniger als 10 Minuten";
 "sort.by.runtime.unknownHeader" = "Unbekannt";

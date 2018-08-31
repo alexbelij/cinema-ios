@@ -45,6 +45,10 @@ public enum MovieLibraryManagerError: Error {
   case permissionFailure
 }
 
+protocol InternalMovieLibraryManager: MovieLibraryManager {
+  func migrateLegacyLibrary(with name: String, at url: URL, then completion: @escaping (Bool) -> Void)
+}
+
 extension CloudKitError {
   var asMovieLibraryManagerError: MovieLibraryManagerError {
     switch self {

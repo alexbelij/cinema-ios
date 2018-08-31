@@ -41,12 +41,13 @@ public struct Movie {
     init(tmdbID: TmdbIdentifier,
          libraryID: CKRecordID,
          title: String,
+         subtitle: String? = nil,
          diskType: DiskType) {
       self.id = CKRecordID(recordName: UUID().uuidString, zoneID: libraryID.zoneID)
       self.tmdbID = tmdbID
       self.libraryID = libraryID
       self.title = title
-      self.subtitle = nil
+      self.subtitle = subtitle
       self.diskType = diskType
     }
 

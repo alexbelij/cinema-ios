@@ -44,7 +44,8 @@
 "import.succeeded" = "Import Complete";
 "import.progress" = "Importing into your Library";
 "library" = "Library";
-"library.defaultName" = "My Library";
+"library.defaultName" = "My Movies";
+"library.migratedNameFormat" = "Movies from %@";
 "library.empty" = "The library is empty.";
 "library.search.placeholder" = "Search movies";
 "libraryList.libraries" = "Libraries";
@@ -67,6 +68,17 @@
 "popularMovies.empty" = "There are no popular movies at the moment. Please, come back later.";
 "save" = "Save";
 "search.results.empty" = "No results for “%@”";
+"setup.complete" = "Setup Complete";
+"setup.complete.secondaryText" = "You can now access all your movies from any of your devices.";
+"setup.initializing" = "Setting up";
+"setup.startFresh" = "Start Fresh";
+"setup.startFresh.alert.title" = "Start Fresh?";
+"setup.startFresh.alert.message" = "All movies on this device will be removed, but any movies stored in iCloud will not be deleted.";
+"setup.startFresh.alert.delete" = "Delete";
+"setup.upload.failed" = "Upload Failed";
+"setup.uploading" = "Uploading";
+"setup.uploadMovies" = "Upload Movies";
+"setup.uploadMovies.secondaryText" = "Your movies will be transferred to iCloud.";
 "sort.by.runtime" = "Runtime";
 "sort.by.runtime.lessThanTenMinutes" = "Less than 10 minutes";
 "sort.by.runtime.unknownHeader" = "Unknown";

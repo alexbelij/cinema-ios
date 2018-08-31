@@ -8,7 +8,7 @@ protocol MovieLibraryFactory {
   func makeLibrary(with metadata: MovieLibraryMetadata) -> InternalMovieLibrary
 }
 
-class DeviceSyncingLibraryManager: MovieLibraryManager {
+class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
   private static let logger = Logging.createLogger(category: "LibraryManager")
 
   let delegates = MulticastDelegate<MovieLibraryManagerDelegate>()
@@ -513,6 +513,52 @@ extension DeviceSyncingLibraryManager: CloudSharingControllerCallback {
         self.localData.persist()
         let changeSet = ChangeSet<CKRecordID, MovieLibrary>(deletions: [library.metadata.id: library])
         self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
+      }
+    }
+  }
+}
+
+extension DeviceSyncingLibraryManager {
+  func migrateLegacyLibrary(with name: String, at url: URL, then completion: @escaping (Bool) -> Void) {
+    let metadata = MovieLibraryMetadata(name: name)
+    let libraryRecord = LibraryRecord(from: metadata)
+    self.syncManager.sync(libraryRecord.rawRecord, using: self.queueFactory.queue(withScope: .private)) { error in
+      if let error = error {
+        switch error {
+          case .notAuthenticated, .userDeletedZone, .nonRecoverableError:
+            os_log("unable to add library record for migration: %{public}@",
+                   log: DeviceSyncingLibraryManager.logger,
+                   type: .error,
+                   String(describing: error))
+            completion(false)
+          case .conflict, .itemNoLongerExists, .zoneNotFound, .permissionFailure:
+            fatalError("should not occur: \(error)")
+        }
+      } else {
+        self.localData.access(onceLoaded: { data in
+          let library: InternalMovieLibrary
+          if data.libraries[metadata.id] == nil {
+            // libraries were loaded from local cache which does not contains the new one yet
+            library = self.libraryFactory.makeLibrary(with: metadata)
+            data.libraries[metadata.id] = library
+            data.libraryRecords[metadata.id] = libraryRecord
+            self.localData.persist()
+          } else {
+            // libraries have not been cached yet -> all fetched, including the new one
+            library = data.libraries[metadata.id]!
+          }
+          library.migrateMovies(from: url) { success in
+            let changeSet = ChangeSet<CKRecordID, MovieLibrary>(insertions: [library])
+            self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
+            completion(success)
+          }
+        }, whenUnableToLoad: { error in
+          os_log("unable to add library: %{public}@",
+                 log: DeviceSyncingLibraryManager.logger,
+                 type: .error,
+                 String(describing: error))
+          completion(false)
+        })
       }
     }
   }

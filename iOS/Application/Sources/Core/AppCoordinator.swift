@@ -8,9 +8,10 @@ class AppCoordinator: AutoPresentableCoordinator {
   enum State {
     case launched
     case initializing
-    case showingNotAuthenticatedUI(UIViewController)
+    case settingUp(StartupCoordinator)
+    case notAuthenticated(UIViewController)
     case upAndRunning(AppDependencies, CoreCoordinator)
-    case showingRestartUI(UIViewController)
+    case readyForRestart(UIViewController)
   }
 
   private static let logger = Logging.createLogger(category: "AppCoordinator")
@@ -59,8 +60,33 @@ class AppCoordinator: AutoPresentableCoordinator {
   }
 
   private func initializeCinemaKit() {
-    CinemaKitStartupManager(using: self.application).initialize { progress in
+    let migratedLibraryNameFormat = NSLocalizedString("library.migratedNameFormat", comment: "")
+    let migratedLibraryName = String.localizedStringWithFormat(migratedLibraryNameFormat, UIDevice.current.name)
+    CinemaKitStartupManager(using: self.application, migratedLibraryName: migratedLibraryName).initialize { progress in
       switch progress {
+        case .settingUpCloudEnvironment:
+          DispatchQueue.main.async {
+            let coordinator = StartupCoordinator()
+            coordinator.change(to: .initializingCloud)
+            self.state = .settingUp(coordinator)
+            self.window.rootViewController = coordinator.rootViewController
+          }
+        case let .foundLegacyData(shouldMigrateDecision):
+          DispatchQueue.main.async {
+            guard case let .settingUp(coordinator) = self.state else {
+              os_log("found legacy data but not in setup mode -> aborting migration",
+                     log: AppCoordinator.logger,
+                     type: .error)
+              shouldMigrateDecision(false)
+              return
+            }
+            coordinator.change(to: .foundLegacyData(shouldMigrateDecision))
+          }
+        case .migrationFailed:
+          DispatchQueue.main.async {
+            guard case let .settingUp(coordinator) = self.state else { fatalError("illegal state") }
+            coordinator.change(to: .migratingFailed)
+          }
         case let .ready(dependencies):
           self.loadData(using: dependencies)
       }
@@ -115,7 +141,17 @@ class AppCoordinator: AutoPresentableCoordinator {
         self.handleFetchedLibraries([library], using: dependencies)
       }
     } else {
-      self.finishStartup(with: libraries.first!, using: dependencies)
+      let library = libraries.first!
+      let finishCall = {
+        DispatchQueue.main.async {
+          self.finishStartup(with: library, dependencies: dependencies)
+        }
+      }
+      if case let .settingUp(coordinator) = self.state {
+        coordinator.change(to: .finished(finishCall))
+      } else {
+        finishCall()
+      }
     }
   }
 
@@ -153,15 +189,13 @@ class AppCoordinator: AutoPresentableCoordinator {
     }
   }
 
-  private func finishStartup(with library: MovieLibrary, using dependencies: AppDependencies) {
-    DispatchQueue.main.async {
-      let coreCoordinator = CoreCoordinator(for: library, dependencies: dependencies)
-      self.state = .upAndRunning(dependencies, coreCoordinator)
-      os_log("up and running", log: AppCoordinator.logger, type: .default)
-      self.window.rootViewController = coreCoordinator.rootViewController
-      if self.application.applicationState == .active {
-        dependencies.libraryManager.fetchChanges { _ in }
-      }
+  private func finishStartup(with library: MovieLibrary, dependencies: AppDependencies) {
+    let coreCoordinator = CoreCoordinator(for: library, dependencies: dependencies)
+    self.state = .upAndRunning(dependencies, coreCoordinator)
+    os_log("up and running", log: AppCoordinator.logger, type: .default)
+    self.window.rootViewController = coreCoordinator.rootViewController
+    if self.application.applicationState == .active {
+      dependencies.libraryManager.fetchChanges { _ in }
     }
   }
 }
@@ -230,7 +264,7 @@ extension AppCoordinator {
 extension AppCoordinator {
   private func showNotAuthenticatedPage() {
     dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
-    if case .showingNotAuthenticatedUI = state { return }
+    if case .notAuthenticated = state { return }
     let page = ActionPage.initWith(
         primaryText: NSLocalizedString("iCloud.notAuthenticated.title", comment: ""),
         secondaryText: NSLocalizedString("iCloud.notAuthenticated.subtitle", comment: ""),
@@ -240,13 +274,13 @@ extension AppCoordinator {
       self.initializationRound = 0
       self.startUp()
     }
-    state = .showingNotAuthenticatedUI(page)
+    state = .notAuthenticated(page)
     window.rootViewController = page
   }
 
   private func showRestartUI() {
     dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
-    if case .showingRestartUI = state { return }
+    if case .readyForRestart = state { return }
     let page = ActionPage.initWith(
         primaryText: NSLocalizedString("iCloud.userDeletedZone", comment: ""),
         image: #imageLiteral(resourceName: "CloudDeleted"),
@@ -255,7 +289,7 @@ extension AppCoordinator {
       self.initializationRound = 0
       self.startUp()
     }
-    state = .showingRestartUI(page)
+    state = .readyForRestart(page)
     window.rootViewController = page
   }
 

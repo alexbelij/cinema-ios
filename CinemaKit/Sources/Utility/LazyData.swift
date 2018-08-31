@@ -10,6 +10,17 @@ class LazyData<DataType, ErrorType> {
     queue = DispatchQueue(label: label)
   }
 
+  func initializeWithDefaultValue() {
+    queue.async {
+      guard self.data == nil else { fatalError("data has already been initialized") }
+      self.data = self.makeWithDefaultValue()
+    }
+  }
+
+  func makeWithDefaultValue() -> DataType {
+    fatalError("must be overridden")
+  }
+
   func access(onceLoaded dataHandler: @escaping (DataType) -> Void,
               whenUnableToLoad errorHandler: @escaping (ErrorType) -> Void) {
     queue.async {

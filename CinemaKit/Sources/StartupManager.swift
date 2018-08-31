@@ -25,6 +25,9 @@ public protocol StartupManager {
 }
 
 public enum StartupProgress {
+  case settingUpCloudEnvironment
+  case foundLegacyData((Bool) -> Void)
+  case migrationFailed
   case ready(AppDependencies)
 }
 
@@ -44,15 +47,15 @@ public class CinemaKitStartupManager: StartupManager {
   private static let posterCacheDir = cachesDir.appendingPathComponent("PosterCache", isDirectory: true)
 
   // cinema data file
-  private static let libraryDataFileURL = documentsDir.appendingPathComponent("cinema.data")
-  private static let legacyLibraryDataFileURL = appSupportDir.appendingPathComponent("cinema.data")
+  private static let legacyLibraryDataFileURL12 = appSupportDir.appendingPathComponent("cinema.data")
+  private static let legacyLibraryDataFileURL141 = documentsDir.appendingPathComponent("cinema.data")
 
   private lazy var previousVersion: AppVersion? = {
     if let versionString = UserDefaults.standard.string(forKey: CinemaKitStartupManager.appVersionKey) {
       return AppVersion(versionString)
-    } else if FileManager.default.fileExists(atPath: CinemaKitStartupManager.libraryDataFileURL.path) {
+    } else if FileManager.default.fileExists(atPath: CinemaKitStartupManager.legacyLibraryDataFileURL141.path) {
       return "1.4.1"
-    } else if FileManager.default.fileExists(atPath: CinemaKitStartupManager.legacyLibraryDataFileURL.path) {
+    } else if FileManager.default.fileExists(atPath: CinemaKitStartupManager.legacyLibraryDataFileURL12.path) {
       return "1.2"
     } else {
       return nil
@@ -66,10 +69,12 @@ public class CinemaKitStartupManager: StartupManager {
 
   private let application: UIApplication
   private let container = CKContainer.default()
+  private let migratedLibraryName: String
   private var progressHandler: ((StartupProgress) -> Void)!
 
-  public init(using application: UIApplication) {
+  public init(using application: UIApplication, migratedLibraryName: String) {
     self.application = application
+    self.migratedLibraryName = migratedLibraryName
   }
 
   public func initialize(handler: @escaping (StartupProgress) -> Void) {
@@ -178,6 +183,7 @@ public class CinemaKitStartupManager: StartupManager {
       completion(nil)
       return
     }
+    progressHandler!(StartupProgress.settingUpCloudEnvironment)
     os_log("creating modify record zones operation to set up zone",
            log: CinemaKitStartupManager.logger,
            type: .default)
@@ -273,6 +279,56 @@ public class CinemaKitStartupManager: StartupManager {
     let dependencies = AppDependencies(libraryManager: libraryManager,
                                        movieDb: movieDb,
                                        notificationCenter: NotificationCenter.default)
+    checkForMigration(dependencies)
+  }
+
+  private func checkForMigration(_ dependencies: AppDependencies) {
+    os_log("looking for legacy library file", log: CinemaKitStartupManager.logger, type: .info)
+    let legacyURLs = [CinemaKitStartupManager.legacyLibraryDataFileURL141,
+                      CinemaKitStartupManager.legacyLibraryDataFileURL12]
+    if let dataFileURL = legacyURLs.first(where: { url in FileManager.default.fileExists(atPath: url.path) }) {
+      os_log("found legacy library data file", log: CinemaKitStartupManager.logger, type: .info)
+      progressHandler(StartupProgress.foundLegacyData { shouldMigrate in
+        self.handleMigration(shouldMigrate: shouldMigrate, dataFileURL: dataFileURL, dependencies: dependencies)
+      })
+    } else {
+      os_log("no legacy library data file found", log: CinemaKitStartupManager.logger, type: .info)
+      finishStartup(dependencies)
+    }
+  }
+
+  private func handleMigration(shouldMigrate: Bool, dataFileURL: URL, dependencies: AppDependencies) {
+    if shouldMigrate {
+      dependencies.internalLibraryManager.migrateLegacyLibrary(with: self.migratedLibraryName,
+                                                               at: dataFileURL) { success in
+        if success {
+          os_log("migration of legacy data succeeded", log: CinemaKitStartupManager.logger, type: .info)
+          self.removeLegacyDataFile(at: dataFileURL)
+          self.finishStartup(dependencies)
+        } else {
+          os_log("migration of legacy data failed", log: CinemaKitStartupManager.logger, type: .info)
+          self.progressHandler(StartupProgress.migrationFailed)
+        }
+      }
+    } else {
+      self.removeLegacyDataFile(at: dataFileURL)
+      self.finishStartup(dependencies)
+    }
+  }
+
+  private func removeLegacyDataFile(at url: URL) {
+    os_log("removing legacy data file", log: CinemaKitStartupManager.logger, type: .info)
+    do {
+      try FileManager.default.removeItem(at: url)
+    } catch {
+      os_log("unable to remove legacy data file: %{public}@",
+             log: CinemaKitStartupManager.logger,
+             type: .fault,
+             String(describing: error))
+    }
+  }
+
+  private func finishStartup(_ dependencies: AppDependencies) {
     os_log("finished initializing CinemaKit", log: CinemaKitStartupManager.logger, type: .default)
     self.progressHandler!(StartupProgress.ready(dependencies))
   }

@@ -40,6 +40,10 @@ class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
     super.init(label: "de.martinbauer.cinema.MovieLibraryData")
   }
 
+  override func makeWithDefaultValue() -> MovieLibraryDataObject {
+    return MovieLibraryDataObject(movies: [:], movieRecords: [:], recordIDsByTmdbID: [:])
+  }
+
   override func loadData() {
     if let rawMovieRecords = movieRecordStore.loadRecords() {
       os_log("loaded records from store", log: MovieLibraryData.logger, type: .debug)
@@ -64,6 +68,7 @@ class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
   }
 
   private func makeData(_ movieRecords: [MovieRecord]) {
+    let start = DispatchTime.now().uptimeNanoseconds
     let minimumCapacity = movieRecords.count
     var moviesDict: [CKRecordID: Movie] = Dictionary(minimumCapacity: minimumCapacity)
     var movieRecordsDict: [CKRecordID: MovieRecord] = Dictionary(minimumCapacity: minimumCapacity)
@@ -100,6 +105,8 @@ class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
              duplicates.count)
       syncManager.delete(duplicates, using: databaseOperationQueue)
     }
+    let end = DispatchTime.now().uptimeNanoseconds
+    print("loading data took \((end - start) / 1_000_000) ms")
     completeLoading(with: MovieLibraryDataObject(movies: moviesDict,
                                                  movieRecords: movieRecordsDict,
                                                  recordIDsByTmdbID: recordIDsByTmdbIDDict))
