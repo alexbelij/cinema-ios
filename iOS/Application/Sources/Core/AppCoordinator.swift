@@ -19,7 +19,6 @@ class AppCoordinator: AutoPresentableCoordinator {
   private let window = UIWindow(frame: UIScreen.main.bounds)
   private var state = State.launched
   private var initializationRound = 0
-  private var importCoordinator: ImportCoordinator?
 
   init(application: UIApplication) {
     self.application = application
@@ -205,24 +204,6 @@ class AppCoordinator: AutoPresentableCoordinator {
     if self.application.applicationState == .active {
       dependencies.libraryManager.fetchChanges { _ in }
     }
-  }
-}
-
-// MARK: - Importing from URL
-
-extension AppCoordinator: ImportCoordinatorDelegate {
-  func handleImport(from url: URL) -> Bool {
-    dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
-    guard case let State.upAndRunning(dependencies, coreCoordinator) = state else { return false }
-    importCoordinator = ImportCoordinator(importUrl: url, dependencies: dependencies)
-    importCoordinator!.delegate = self
-    coreCoordinator.rootViewController.present(importCoordinator!.rootViewController, animated: true)
-    return true
-  }
-
-  func importCoordinatorDidFinish(_ coordinator: ImportCoordinator) {
-    coordinator.rootViewController.dismiss(animated: true)
-    self.importCoordinator = nil
   }
 }
 
