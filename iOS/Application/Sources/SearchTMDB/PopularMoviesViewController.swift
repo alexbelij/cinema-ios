@@ -98,12 +98,12 @@ extension PopularMoviesController {
                                viewForSupplementaryElementOfKind kind: String,
                                at indexPath: IndexPath) -> UICollectionReusableView {
     switch kind {
-      case UICollectionElementKindSectionHeader:
+      case UICollectionView.elementKindSectionHeader:
         let reusableView: TitleHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
                                                                                             for: indexPath)
         reusableView.configure(title: NSLocalizedString("popularMovies", comment: ""))
         return reusableView
-      case UICollectionElementKindSectionFooter:
+      case UICollectionView.elementKindSectionFooter:
         return collectionView.dequeueReusableSupplementaryView(ofKind: kind,
                                                                for: indexPath) as TmdbFooterView
       default:
@@ -115,7 +115,7 @@ extension PopularMoviesController {
                                willDisplaySupplementaryView view: UICollectionReusableView,
                                forElementKind elementKind: String,
                                at indexPath: IndexPath) {
-    guard elementKind == UICollectionElementKindSectionFooter,
+    guard elementKind == UICollectionView.elementKindSectionFooter,
           let footerView = view as? TmdbFooterView else { return }
     if isFetchingMovies {
       footerView.activityIndicator.startAnimating()
@@ -126,7 +126,7 @@ extension PopularMoviesController {
                                didEndDisplayingSupplementaryView view: UICollectionReusableView,
                                forElementOfKind elementKind: String,
                                at indexPath: IndexPath) {
-    guard elementKind == UICollectionElementKindSectionFooter,
+    guard elementKind == UICollectionView.elementKindSectionFooter,
           let footerView = view as? TmdbFooterView else { return }
     footerView.activityIndicator.stopAnimating()
   }
@@ -153,7 +153,7 @@ extension PopularMoviesController {
     guard !isFetchingMovies else { return }
     isFetchingMovies = true
     self.collectionView!.backgroundView = nil
-    if let footerView = self.collectionView!.supplementaryView(forElementKind: UICollectionElementKindSectionFooter,
+    if let footerView = self.collectionView!.supplementaryView(forElementKind: UICollectionView.elementKindSectionFooter,
                                                                at: IndexPath(row: 0, section: 0)) as? TmdbFooterView {
       footerView.activityIndicator.startAnimating()
     }
@@ -164,7 +164,7 @@ extension PopularMoviesController {
         self.movies.append(contentsOf: newMovies)
         self.collectionView!.insertItems(at: (index..<(index + newMovies.count)).map { IndexPath(row: $0, section: 0) })
         if let footerView = self.collectionView!.supplementaryView(
-            forElementKind: UICollectionElementKindSectionFooter,
+            forElementKind: UICollectionView.elementKindSectionFooter,
             at: IndexPath(row: 0, section: 0)) as? TmdbFooterView {
           footerView.activityIndicator.stopAnimating()
           DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {

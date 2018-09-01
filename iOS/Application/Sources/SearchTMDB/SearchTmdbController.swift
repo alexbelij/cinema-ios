@@ -68,19 +68,19 @@ class SearchTmdbController: UIViewController {
   weak var delegate: SearchTmdbControllerDelegate?
   var additionalViewController: UIViewController? {
     get {
-      return childViewControllers.first
+      return children.first
     }
     set {
       loadViewIfNeeded()
       if let child = newValue {
-        addChildViewController(child)
+        addChild(child)
         child.view.frame = containerView.bounds
         containerView.addSubview(child.view)
-        child.didMove(toParentViewController: self)
-      } else if let child = childViewControllers.first {
-        child.willMove(toParentViewController: nil)
+        child.didMove(toParent: self)
+      } else if let child = children.first {
+        child.willMove(toParent: nil)
         child.view.removeFromSuperview()
-        child.removeFromParentViewController()
+        child.removeFromParent()
       }
     }
   }
@@ -132,7 +132,7 @@ class SearchTmdbSearchResultTableCell: UITableViewCell {
   @IBOutlet private weak var posterView: UIImageView!
   @IBOutlet private weak var titleLabel: UILabel!
   @IBOutlet private weak var yearLabel: UILabel!
-  private lazy var activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+  private lazy var activityIndicator = UIActivityIndicatorView(style: .gray)
 
   override func awakeFromNib() {
     super.awakeFromNib()

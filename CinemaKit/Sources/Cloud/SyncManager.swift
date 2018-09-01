@@ -4,15 +4,15 @@ import os.log
 
 protocol SyncManager {
   func sync(_ record: CKRecord,
-            in scope: CKDatabaseScope,
+            in scope: CKDatabase.Scope,
             then completion: @escaping (CloudKitError?) -> Void)
   func syncAll(_ records: [CKRecord],
-               in scope: CKDatabaseScope,
+               in scope: CKDatabase.Scope,
                then completion: @escaping (CloudKitError?) -> Void)
   func delete(_ record: CKRecord,
-              in scope: CKDatabaseScope,
+              in scope: CKDatabase.Scope,
               then completion: @escaping (CloudKitError?) -> Void)
-  func delete(_ recordIDs: [CKRecordID], in scope: CKDatabaseScope)
+  func delete(_ recordIDs: [CKRecord.ID], in scope: CKDatabase.Scope)
 }
 
 class DefaultSyncManager: SyncManager {
@@ -30,7 +30,7 @@ class DefaultSyncManager: SyncManager {
     self.dataInvalidationFlag = dataInvalidationFlag
   }
 
-  private func databaseOperationQueue(for scope: CKDatabaseScope) -> DatabaseOperationQueue {
+  private func databaseOperationQueue(for scope: CKDatabase.Scope) -> DatabaseOperationQueue {
     switch scope {
       case .private:
         return privateDatabaseOperationQueue
@@ -41,12 +41,12 @@ class DefaultSyncManager: SyncManager {
     }
   }
 
-  func sync(_ record: CKRecord, in scope: CKDatabaseScope, then completion: @escaping (CloudKitError?) -> Void) {
+  func sync(_ record: CKRecord, in scope: CKDatabase.Scope, then completion: @escaping (CloudKitError?) -> Void) {
     sync(record, in: scope, retryCount: defaultRetryCount, then: completion)
   }
 
   private func sync(_ record: CKRecord,
-                    in scope: CKDatabaseScope,
+                    in scope: CKDatabase.Scope,
                     retryCount: Int,
                     then completion: @escaping (CloudKitError?) -> Void) {
     os_log("creating modify records operation to save %{public}@",
@@ -104,7 +104,7 @@ class DefaultSyncManager: SyncManager {
     databaseOperationQueue(for: scope).add(operation)
   }
 
-  func syncAll(_ records: [CKRecord], in scope: CKDatabaseScope, then completion: @escaping (CloudKitError?) -> Void) {
+  func syncAll(_ records: [CKRecord], in scope: CKDatabase.Scope, then completion: @escaping (CloudKitError?) -> Void) {
     let batchSize = 300
     var recordsToProcess = records
     let numberOfRecordsToProcess: Int = recordsToProcess.count
@@ -136,7 +136,7 @@ class DefaultSyncManager: SyncManager {
   }
 
   private func syncAll(_ records: [CKRecord],
-                       in scope: CKDatabaseScope,
+                       in scope: CKDatabase.Scope,
                        retryCount: Int,
                        then completion: @escaping (CloudKitError?) -> Void) {
     os_log("creating modify records operation to batch save %d records",
@@ -194,12 +194,12 @@ class DefaultSyncManager: SyncManager {
     databaseOperationQueue(for: scope).add(operation)
   }
 
-  func delete(_ record: CKRecord, in scope: CKDatabaseScope, then completion: @escaping (CloudKitError?) -> Void) {
+  func delete(_ record: CKRecord, in scope: CKDatabase.Scope, then completion: @escaping (CloudKitError?) -> Void) {
     delete(record, in: scope, retryCount: defaultRetryCount, then: completion)
   }
 
   private func delete(_ record: CKRecord,
-                      in scope: CKDatabaseScope,
+                      in scope: CKDatabase.Scope,
                       retryCount: Int,
                       then completion: @escaping (CloudKitError?) -> Void) {
     os_log("creating modify records operation to delete %{public}@",
@@ -255,7 +255,7 @@ class DefaultSyncManager: SyncManager {
     databaseOperationQueue(for: scope).add(operation)
   }
 
-  func delete(_ recordIDs: [CKRecordID], in scope: CKDatabaseScope) {
+  func delete(_ recordIDs: [CKRecord.ID], in scope: CKDatabase.Scope) {
     os_log("creating modify records operation to delete %d records (no callback)",
            log: DefaultSyncManager.logger,
            type: .default,

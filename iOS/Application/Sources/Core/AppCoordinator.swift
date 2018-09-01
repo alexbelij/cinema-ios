@@ -238,7 +238,7 @@ extension AppCoordinator {
     fetchChanges(with: dependencies.libraryManager) { completionHandler($0) }
   }
 
-  func acceptCloudKitShare(with shareMetadata: CKShareMetadata) {
+  func acceptCloudKitShare(with shareMetadata: CKShare.Metadata) {
     dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
     guard case let State.upAndRunning(dependencies, coreCoordinator) = state else { return }
     DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + .milliseconds(400)) {

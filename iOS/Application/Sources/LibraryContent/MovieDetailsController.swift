@@ -157,7 +157,7 @@ extension MovieDetailsController {
 
   override func viewDidDisappear(_ animated: Bool) {
     super.viewDidDisappear(animated)
-    if isMovingFromParentViewController {
+    if isMovingFromParent {
       self.delegate?.movieDetailsControllerDidDismiss(self)
     }
   }

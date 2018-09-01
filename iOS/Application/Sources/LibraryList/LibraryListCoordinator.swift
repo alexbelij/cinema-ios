@@ -297,7 +297,7 @@ extension LibraryListCoordinator: UICloudSharingControllerDelegate {
 
 extension LibraryListCoordinator: MovieLibraryManagerDelegate {
   func libraryManager(_ libraryManager: MovieLibraryManager,
-                      didUpdateLibraries changeSet: ChangeSet<CKRecordID, MovieLibrary>) {
+                      didUpdateLibraries changeSet: ChangeSet<CKRecord.ID, MovieLibrary>) {
     DispatchQueue.main.async {
       for library in changeSet.insertions {
         self.libraryListController.showLibrary(with: library.metadata)

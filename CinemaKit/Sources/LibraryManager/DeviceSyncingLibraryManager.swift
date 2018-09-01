@@ -84,7 +84,7 @@ extension DeviceSyncingLibraryManager {
         let library = self.libraryFactory.makeLibrary(with: metadata)
         model.add(library, with: record)
         self.modelController.persist()
-        let changeSet = ChangeSet<CKRecordID, MovieLibrary>(insertions: [library])
+        let changeSet = ChangeSet<CKRecord.ID, MovieLibrary>(insertions: [library])
         self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
         completion(.success(library))
       }
@@ -122,7 +122,7 @@ extension DeviceSyncingLibraryManager {
           case .itemNoLongerExists:
             if let library = model.remove(metadata.id) {
               self.modelController.persist()
-              let changeSet = ChangeSet<CKRecordID, MovieLibrary>(deletions: [metadata.id: library])
+              let changeSet = ChangeSet<CKRecord.ID, MovieLibrary>(deletions: [metadata.id: library])
               self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
             }
             completion(.failure(.libraryDoesNotExist))
@@ -139,14 +139,15 @@ extension DeviceSyncingLibraryManager {
         let library = model.library(for: metadata.id)!
         model.update(record)
         self.modelController.persist()
-        let changeSet = ChangeSet<CKRecordID, MovieLibrary>(modifications: [library.metadata.id: library])
+        let changeSet = ChangeSet<CKRecord.ID, MovieLibrary>(modifications: [library.metadata.id: library])
         self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
         completion(.success(library))
       }
     }
   }
 
-  func removeLibrary(with id: CKRecordID, then completion: @escaping (Result<Void, MovieLibraryManagerError>) -> Void) {
+  func removeLibrary(with id: CKRecord.ID,
+                     then completion: @escaping (Result<Void, MovieLibraryManagerError>) -> Void) {
     modelController.access(onceLoaded: { model in
       guard let record = model.record(for: id) else {
         completion(.success(()))
@@ -170,7 +171,7 @@ extension DeviceSyncingLibraryManager {
           case .itemNoLongerExists:
             if model.remove(library.metadata.id) != nil {
               self.modelController.persist()
-              let changeSet = ChangeSet<CKRecordID, MovieLibrary>(deletions: [library.metadata.id: library])
+              let changeSet = ChangeSet<CKRecord.ID, MovieLibrary>(deletions: [library.metadata.id: library])
               self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
             }
             completion(.success(()))
@@ -182,7 +183,7 @@ extension DeviceSyncingLibraryManager {
       } else {
         model.remove(library.metadata.id)
         self.modelController.persist()
-        let changeSet = ChangeSet<CKRecordID, MovieLibrary>(deletions: [library.metadata.id: library])
+        let changeSet = ChangeSet<CKRecord.ID, MovieLibrary>(deletions: [library.metadata.id: library])
         self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
         completion(.success(()))
       }
@@ -215,7 +216,7 @@ extension DeviceSyncingLibraryManager {
 
   private func processChanges(_ changes: FetchedChanges) {
     modelController.access(onceLoaded: { model in
-      var changeSet = ChangeSet<CKRecordID, MovieLibrary>()
+      var changeSet = ChangeSet<CKRecord.ID, MovieLibrary>()
       self.process(deletedSharedZoneIDs: changes.deletedSharedZoneIDs,
                    changeSet: &changeSet,
                    model: model)
@@ -264,8 +265,7 @@ extension DeviceSyncingLibraryManager {
             let metadata = MovieLibraryMetadata(from: libraryRecord, shareMetadata.share)
             let library = self.libraryFactory.makeLibrary(with: metadata)
             model.add(library, with: libraryRecord, shareMetadata.share)
-            // swiftlint:disable:next force_cast
-            let title = shareMetadata.share[CKShareTitleKey] as! String
+            let title: String = shareMetadata.share[CKShare.SystemFieldKey.title]!
             self.delegates.invoke { $0.libraryManager(self, didAcceptSharedLibrary: library, with: title) }
           }
           self.modelController.persist()
@@ -274,8 +274,8 @@ extension DeviceSyncingLibraryManager {
     }
   }
 
-  private func process(deletedSharedZoneIDs: [CKRecordZoneID],
-                       changeSet: inout ChangeSet<CKRecordID, MovieLibrary>,
+  private func process(deletedSharedZoneIDs: [CKRecordZone.ID],
+                       changeSet: inout ChangeSet<CKRecord.ID, MovieLibrary>,
                        model: MovieLibraryManagerModel) {
     for zoneID in deletedSharedZoneIDs {
       let deletedLibraries = model.allLibraries.filter { $0.metadata.id.zoneID == zoneID }
@@ -287,10 +287,10 @@ extension DeviceSyncingLibraryManager {
   }
 
   private func process(changedRecords: [CKRecord],
-                       changeSet: inout ChangeSet<CKRecordID, MovieLibrary>,
+                       changeSet: inout ChangeSet<CKRecord.ID, MovieLibrary>,
                        model: MovieLibraryManagerModel) -> [CKShare] {
     let libraryRecords = changedRecords.filter { $0.recordType == LibraryRecord.recordType }.map { LibraryRecord($0) }
-    var shares = Dictionary(uniqueKeysWithValues: changedRecords.filter { $0.recordType == CKShare.recordType }
+    var shares = Dictionary(uniqueKeysWithValues: changedRecords.filter { $0.recordType == CKShare.SystemType.share }
                                                                 // swiftlint:disable:next force_cast
                                                                 .map { ($0.recordID, $0 as! CKShare) })
     for record in libraryRecords {
@@ -332,8 +332,8 @@ extension DeviceSyncingLibraryManager {
     return sharesToFetchMetadata
   }
 
-  private func process(deletedRecordIDsAndTypes: [(CKRecordID, String)],
-                       changeSet: inout ChangeSet<CKRecordID, MovieLibrary>,
+  private func process(deletedRecordIDsAndTypes: [(CKRecord.ID, CKRecord.RecordType)],
+                       changeSet: inout ChangeSet<CKRecord.ID, MovieLibrary>,
                        model: MovieLibraryManagerModel) {
     for (recordID, recordType) in deletedRecordIDsAndTypes where recordType == LibraryRecord.recordType {
       if let library = model.remove(recordID) {
@@ -383,8 +383,8 @@ extension DeviceSyncingLibraryManager {
       let rootRecord = model.record(for: library.metadata.id)!
       let share = CKShare(rootRecord: rootRecord.rawRecord)
       share.publicPermission = .none
-      share[CKShareTitleKey] = library.metadata.name as CKRecordValue
-      share[CKShareTypeKey] = (kUTTypeDatabase as String) as CKRecordValue
+      share[CKShare.SystemFieldKey.title] = library.metadata.name
+      share[CKShare.SystemFieldKey.shareType] = (kUTTypeDatabase as String)
       self.shareManager.saveShare(share, with: rootRecord.rawRecord) { error in
         self.prepareShareCompletion(library, share, rootRecord, error, completion)
       }
@@ -403,7 +403,7 @@ extension DeviceSyncingLibraryManager {
           case let .conflict(serverRecord):
             let libraryRecord = LibraryRecord(serverRecord)
             model.update(libraryRecord)
-            share[CKShareTitleKey] = libraryRecord.name as CKRecordValue
+            share[CKShare.SystemFieldKey.title] = libraryRecord.name
             os_log("using updated library record for share", log: DeviceSyncingLibraryManager.logger, type: .default)
             self.shareManager.saveShare(share, with: serverRecord) { error in
               self.prepareShareCompletion(library, share, libraryRecord, error, completion)
@@ -414,9 +414,10 @@ extension DeviceSyncingLibraryManager {
             fatalError("should not occur: \(error)")
         }
       } else {
+
         model.setShare(share, with: rootRecord)
         self.modelController.persist()
-        let changeSet = ChangeSet<CKRecordID, MovieLibrary>(modifications: [library.metadata.id: library])
+        let changeSet = ChangeSet<CKRecord.ID, MovieLibrary>(modifications: [library.metadata.id: library])
         self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
         completion(.success(share))
       }
@@ -425,7 +426,7 @@ extension DeviceSyncingLibraryManager {
 
   func acceptCloudKitShare(with shareMetadata: CKShareMetadataProtocol,
                            then completion: @escaping (Result<AcceptShareResult, MovieLibraryManagerError>) -> Void) {
-    let title = shareMetadata.title!
+    let title: String = shareMetadata.share[CKShare.SystemFieldKey.title]!
     modelController.access(onceLoaded: { model in
       if shareMetadata.rootRecordID.zoneID == deviceSyncZoneID {
         self.delegates.invoke {
@@ -511,7 +512,7 @@ extension DeviceSyncingLibraryManager {
         let library = self.libraryFactory.makeLibrary(with: metadata)
         model.add(library, with: libraryRecord, shareMetadata.share)
         self.modelController.persist()
-        let title = shareMetadata.title!
+        let title: String = shareMetadata.share[CKShare.SystemFieldKey.title]!
         self.delegates.invoke { $0.libraryManager(self, didAcceptSharedLibrary: library, with: title) }
         completion(.success(.accepted))
       }
@@ -540,10 +541,11 @@ extension DeviceSyncingLibraryManager: CloudSharingControllerCallback {
                 fatalError("should not occur: \(error)")
             }
           } else if let rawRecord = rawRecord {
+
             self.modelController.access { model in
               model.setShare(nil, with: LibraryRecord(rawRecord))
               self.modelController.persist()
-              let changeSet = ChangeSet<CKRecordID, MovieLibrary>(modifications: [library.metadata.id: library])
+              let changeSet = ChangeSet<CKRecord.ID, MovieLibrary>(modifications: [library.metadata.id: library])
               self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
             }
           }
@@ -551,7 +553,7 @@ extension DeviceSyncingLibraryManager: CloudSharingControllerCallback {
       } else {
         model.remove(library.metadata.id)
         self.modelController.persist()
-        let changeSet = ChangeSet<CKRecordID, MovieLibrary>(deletions: [library.metadata.id: library])
+        let changeSet = ChangeSet<CKRecord.ID, MovieLibrary>(deletions: [library.metadata.id: library])
         self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
       }
     }
@@ -589,7 +591,7 @@ extension DeviceSyncingLibraryManager {
             self.modelController.persist()
           }
           library.migrateMovies(from: url) { success in
-            let changeSet = ChangeSet<CKRecordID, MovieLibrary>(insertions: [library])
+            let changeSet = ChangeSet<CKRecord.ID, MovieLibrary>(insertions: [library])
             self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
             completion(success)
           }
