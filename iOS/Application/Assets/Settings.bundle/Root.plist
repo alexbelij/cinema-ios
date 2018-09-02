@@ -16,6 +16,24 @@
 			<key>DefaultValue</key>
 			<string>2.0</string>
 		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>reset.title</string>
+			<key>FooterText</key>
+			<string>reset.footer</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>reset.localData</string>
+			<key>Key</key>
+			<string>LocalCloudKitCacheIsInvalid</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
 	</array>
 </dict>
 </plist>
