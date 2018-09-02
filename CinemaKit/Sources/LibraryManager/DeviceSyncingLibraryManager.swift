@@ -152,7 +152,6 @@ extension DeviceSyncingLibraryManager {
   }
 
   func removeLibrary(with id: CKRecordID, then completion: @escaping (Result<Void, MovieLibraryManagerError>) -> Void) {
-    // TODO add new library when only one left
     localData.access(onceLoaded: { data in
       guard let record = data.libraryRecords[id] else {
         completion(.success(()))

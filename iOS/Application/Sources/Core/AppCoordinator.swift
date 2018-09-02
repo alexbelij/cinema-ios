@@ -96,50 +96,57 @@ class AppCoordinator: AutoPresentableCoordinator {
               fatalError("should not occur: \(error)")
           }
         case let .success(libraries):
-          self.handleFetchedLibraries(libraries, dependencies: dependencies)
+          self.handleFetchedLibraries(libraries, using: dependencies)
       }
     }
   }
 
-  private func handleFetchedLibraries(_ libraries: [MovieLibrary], dependencies: AppDependencies) {
+  private func handleFetchedLibraries(_ libraries: [MovieLibrary], using dependencies: AppDependencies) {
     if libraries.isEmpty {
       os_log("no libraries found -> creating default one", log: AppCoordinator.logger, type: .default)
-      let metadata = MovieLibraryMetadata(name: NSLocalizedString("library.defaultName", comment: ""))
-      dependencies.libraryManager.addLibrary(with: metadata) { result in
-        switch result {
-          case let .failure(error):
-            switch error {
-              case let .globalError(event):
-                switch event {
-                  case .notAuthenticated:
-                    DispatchQueue.main.async {
-                      self.showNotAuthenticatedPage()
-                    }
-                  case .userDeletedZone:
-                    os_log("user has deleted zone -> reinitialize (local data will be removed)",
-                           log: AppCoordinator.logger,
-                           type: .default)
-                    DispatchQueue.main.async {
-                      self.startUp()
-                    }
-                  case .shouldFetchChanges:
-                    fatalError("should not occur: \(error)")
-                }
-              case .nonRecoverableError:
-                fatalError("non-recoverable error during creation of initial library")
-              case .libraryDoesNotExist, .permissionFailure:
-                fatalError("should not occur: \(error)")
-            }
-          case let .success(library):
-            self.finishStartup(with: library, dependencies: dependencies)
-        }
+      makeDefaultLibrary(using: dependencies) { library in
+        self.handleFetchedLibraries([library], using: dependencies)
       }
     } else {
-      self.finishStartup(with: libraries.first!, dependencies: dependencies)
+      self.finishStartup(with: libraries.first!, using: dependencies)
     }
   }
 
-  private func finishStartup(with library: MovieLibrary, dependencies: AppDependencies) {
+  private func makeDefaultLibrary(using dependencies: AppDependencies,
+                                  then completion: @escaping (MovieLibrary) -> Void) {
+    let metadata = MovieLibraryMetadata(name: NSLocalizedString("library.defaultName", comment: ""))
+    dependencies.libraryManager.addLibrary(with: metadata) { result in
+      switch result {
+        case let .failure(error):
+          switch error {
+            case let .globalError(event):
+              switch event {
+                case .notAuthenticated:
+                  DispatchQueue.main.async {
+                    self.showNotAuthenticatedPage()
+                  }
+                case .userDeletedZone:
+                  os_log("user has deleted zone -> reinitialize (local data will be removed)",
+                         log: AppCoordinator.logger,
+                         type: .default)
+                  DispatchQueue.main.async {
+                    self.startUp()
+                  }
+                case .shouldFetchChanges:
+                  fatalError("should not occur: \(error)")
+              }
+            case .nonRecoverableError:
+              fatalError("non-recoverable error during creation of default library")
+            case .libraryDoesNotExist, .permissionFailure:
+              fatalError("should not occur: \(error)")
+          }
+        case let .success(library):
+          completion(library)
+      }
+    }
+  }
+
+  private func finishStartup(with library: MovieLibrary, using dependencies: AppDependencies) {
     DispatchQueue.main.async {
       let coreCoordinator = CoreCoordinator(for: library, dependencies: dependencies)
       self.state = .upAndRunning(dependencies, coreCoordinator)
