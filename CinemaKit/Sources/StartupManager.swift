@@ -69,6 +69,7 @@ public class CinemaKitStartupManager: StartupManager {
 
   private let application: UIApplication
   private let container = CKContainer.default()
+  private let userDefaults: UserDefaultsProtocol = UserDefaults.standard
   private let migratedLibraryName: String
   private var progressHandler: ((StartupProgress) -> Void)!
 
@@ -99,7 +100,7 @@ public class CinemaKitStartupManager: StartupManager {
       os_log("app has never been launched before", log: CinemaKitStartupManager.logger, type: .info)
       markCurrentVersion()
     }
-    if UserDefaults.standard.bool(forKey: LocalCloudKitCacheInvalidationFlag.key) {
+    if userDefaults.bool(forKey: LocalCloudKitCacheInvalidationFlag.key) {
       os_log("local CloudKit cache was invalidated", log: CinemaKitStartupManager.logger, type: .default)
       resetLocalCloudKitCache()
     }
@@ -124,8 +125,8 @@ public class CinemaKitStartupManager: StartupManager {
   }
 
   private func resetLocalCloudKitCache() {
-    UserDefaults.standard.removeObject(forKey: LocalCloudKitCacheInvalidationFlag.key)
-    UserDefaults.standard.removeObject(forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
+    userDefaults.removeObject(forKey: LocalCloudKitCacheInvalidationFlag.key)
+    userDefaults.removeObject(forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
     do {
       let fileManager = FileManager.default
       try fileManager.removeItem(at: FileBasedSubscriptionStore.fileURL)
@@ -179,7 +180,7 @@ public class CinemaKitStartupManager: StartupManager {
   private func setUpDeviceSyncZone(using queue: DatabaseOperationQueue,
                                    retryCount: Int,
                                    then completion: @escaping (CloudKitError?) -> Void) {
-    if UserDefaults.standard.bool(forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey) {
+    if userDefaults.bool(forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey) {
       completion(nil)
       return
     }
@@ -223,7 +224,7 @@ public class CinemaKitStartupManager: StartupManager {
         }
       } else {
         os_log("device sync zone is set up", log: CinemaKitStartupManager.logger, type: .info)
-        UserDefaults.standard.set(true, forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
+        self.userDefaults.set(true, forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
         completion(nil)
       }
     }
@@ -278,7 +279,8 @@ public class CinemaKitStartupManager: StartupManager {
         data: data)
     let dependencies = AppDependencies(libraryManager: libraryManager,
                                        movieDb: movieDb,
-                                       notificationCenter: NotificationCenter.default)
+                                       notificationCenter: NotificationCenter.default,
+                                       userDefaults: userDefaults)
     checkForMigration(dependencies)
   }
 

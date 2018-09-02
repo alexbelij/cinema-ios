@@ -7,10 +7,15 @@ public struct AppDependencies {
   let internalLibraryManager: InternalMovieLibraryManager
   public let movieDb: MovieDbClient
   public let notificationCenter: NotificationCenter
+  public let userDefaults: UserDefaultsProtocol
 
-  init(libraryManager: InternalMovieLibraryManager, movieDb: MovieDbClient, notificationCenter: NotificationCenter) {
+  init(libraryManager: InternalMovieLibraryManager,
+       movieDb: MovieDbClient,
+       notificationCenter: NotificationCenter,
+       userDefaults: UserDefaultsProtocol) {
     self.internalLibraryManager = libraryManager
     self.movieDb = movieDb
     self.notificationCenter = notificationCenter
+    self.userDefaults = userDefaults
   }
 }
