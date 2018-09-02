@@ -65,6 +65,7 @@
 		CB9484C11EFA643500D9651E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = CB9484C31EFA643500D9651E /* Localizable.strings */; };
 		CBB569671EA4D6A2005F7BA7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB569661EA4D6A2005F7BA7 /* AppDelegate.swift */; };
 		CBB569701EA4D6A2005F7BA7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CBB5696F1EA4D6A2005F7BA7 /* Assets.xcassets */; };
+		CBBA793A213BDCAB008D84E5 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = CBBA7939213BDCAB008D84E5 /* Settings.bundle */; };
 		CBBC59202121BCE000067DEA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBBC591F2121BCE000067DEA /* LaunchScreen.storyboard */; };
 		CBBC59232121BCFB00067DEA /* MovieList.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBBC59212121BCFB00067DEA /* MovieList.storyboard */; };
 		CBBC59242121BCFB00067DEA /* MovieListListItemTableCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CBBC59222121BCFB00067DEA /* MovieListListItemTableCell.xib */; };
@@ -199,6 +200,7 @@
 		CBB569741EA4D6A2005F7BA7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CBB5697B1EA4D6C3005F7BA7 /* Movie.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Movie.swift; sourceTree = "<group>"; };
 		CBB5697C1EA4D6C3005F7BA7 /* MovieLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieLibrary.swift; sourceTree = "<group>"; };
+		CBBA7939213BDCAB008D84E5 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		CBBC591F2121BCE000067DEA /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		CBBC59212121BCFB00067DEA /* MovieList.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MovieList.storyboard; sourceTree = "<group>"; };
 		CBBC59222121BCFB00067DEA /* MovieListListItemTableCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MovieListListItemTableCell.xib; sourceTree = "<group>"; };
@@ -346,6 +348,7 @@
 				CB0F41321F5C526B00095350 /* Localizable.stringsdict */,
 				CB84B18B1FEAF5E500B455D4 /* SortPrefixes.plist */,
 				CB7F2741212594C9006EC6A5 /* Cinema_iOS_Application.entitlements */,
+				CBBA7939213BDCAB008D84E5 /* Settings.bundle */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -714,6 +717,7 @@
 				CB9484C11EFA643500D9651E /* Localizable.strings in Resources */,
 				CBB569701EA4D6A2005F7BA7 /* Assets.xcassets in Resources */,
 				CBC2E3C22136DF790088F5C8 /* TextFieldTableCell.xib in Resources */,
+				CBBA793A213BDCAB008D84E5 /* Settings.bundle in Resources */,
 				CBBC592C2121BD2C00067DEA /* SearchTmdb.storyboard in Resources */,
 				CBBC593F2121BDED00067DEA /* LibraryList.storyboard in Resources */,
 				CBBC59322121BD5500067DEA /* SelectableLabelCell.xib in Resources */,
