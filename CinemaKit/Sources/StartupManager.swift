@@ -36,6 +36,8 @@ public class CinemaKitStartupManager: StartupManager {
   private static let libraryRecordStoreURL = appSupportDir.appendingPathComponent("Libraries.plist")
   private static let shareRecordStoreURL = appSupportDir.appendingPathComponent("Shares.plist")
   fileprivate static let movieRecordsDir = appSupportDir.appendingPathComponent("MovieRecords", isDirectory: true)
+  private static let cachesDir = directoryUrl(for: .cachesDirectory)
+  private static let posterCacheDir = cachesDir.appendingPathComponent("PosterCache", isDirectory: true)
 
   // cinema data file
   private static let libraryDataFileURL = documentsDir.appendingPathComponent("cinema.data")
@@ -77,6 +79,7 @@ public class CinemaKitStartupManager: StartupManager {
                log: CinemaKitStartupManager.logger,
                type: .info,
                previousVersion.description)
+        clearPosterCache()
         markCurrentVersion()
       } else if previousVersion > currentVersion {
         fatalError("unsupported -> clean app data")
@@ -91,6 +94,18 @@ public class CinemaKitStartupManager: StartupManager {
     }
     setUpDirectories()
     setUpDeviceSyncZone(then: completion)
+  }
+
+  private func clearPosterCache() {
+    do {
+      os_log("clearing poster cache", log: CinemaKitStartupManager.logger, type: .default)
+      try FileManager.default.removeItem(at: CinemaKitStartupManager.posterCacheDir)
+    } catch {
+      os_log("unable to clear poster cache: %{public}@",
+             log: CinemaKitStartupManager.logger,
+             type: .fault,
+             String(describing: error))
+    }
   }
 
   private func markCurrentVersion() {
