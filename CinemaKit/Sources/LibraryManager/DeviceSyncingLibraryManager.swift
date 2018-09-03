@@ -392,7 +392,6 @@ extension DeviceSyncingLibraryManager {
             fatalError("should not occur: \(error)")
         }
       } else {
-        // TODO create library, share, open share options (should show participants)
         data.shareRecords[share.recordID] = share
         var newMetadata = MovieLibraryMetadata(from: data.libraryRecords[library.metadata.id]!,
                                                currentUserCanModify: true)

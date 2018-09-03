@@ -271,6 +271,10 @@ extension LibraryListCoordinator: UICloudSharingControllerDelegate {
       }
     }
   }
+
+  func cloudSharingControllerDidSaveShare(_ csc: UICloudSharingController) {
+    libraryManager.fetchChanges { _ in }
+  }
 }
 
 // MARK: - Responding to library changes
