@@ -43,6 +43,7 @@ public class CinemaKitStartupManager: StartupManager {
   private static let libraryRecordStoreURL = appSupportDir.appendingPathComponent("Libraries.plist")
   private static let shareRecordStoreURL = appSupportDir.appendingPathComponent("Shares.plist")
   fileprivate static let movieRecordsDir = appSupportDir.appendingPathComponent("MovieRecords", isDirectory: true)
+  fileprivate static let tmdbPropertiesDir = appSupportDir.appendingPathComponent("TmdbProperties", isDirectory: true)
   private static let cachesDir = directoryUrl(for: .cachesDirectory)
   private static let posterCacheDir = cachesDir.appendingPathComponent("PosterCache", isDirectory: true)
 
@@ -148,6 +149,7 @@ public class CinemaKitStartupManager: StartupManager {
     makeDirectory(at: CinemaKitStartupManager.documentsDir)
     makeDirectory(at: CinemaKitStartupManager.appSupportDir)
     makeDirectory(at: CinemaKitStartupManager.movieRecordsDir)
+    makeDirectory(at: CinemaKitStartupManager.tmdbPropertiesDir)
   }
 
   private func makeDirectory(at url: URL) {
@@ -357,12 +359,15 @@ private class DefaultMovieLibraryFactory: MovieLibraryFactory {
     let databaseOperationQueue = queueFactory.queue(withScope: scope)
     let movieRecordStore = FileBasedRecordStore(
         fileURL: CinemaKitStartupManager.movieRecordsDir.appendingPathComponent("\(metadata.id.recordName).plist"))
+    let tmdbPropertiesStore = FileBasedTmdbPropertiesStore(
+        fileURL: CinemaKitStartupManager.tmdbPropertiesDir.appendingPathComponent("\(metadata.id.recordName).json"))
     let data = MovieLibraryData(databaseOperationQueue: databaseOperationQueue,
                                 fetchManager: fetchManager,
                                 syncManager: syncManager,
                                 tmdbPropertiesProvider: tmdbWrapper,
                                 libraryID: metadata.id,
-                                movieRecordStore: movieRecordStore)
+                                movieRecordStore: movieRecordStore,
+                                tmdbPropertiesStore: tmdbPropertiesStore)
     return DeviceSyncingMovieLibrary(databaseOperationQueue: databaseOperationQueue,
                                      syncManager: syncManager,
                                      tmdbPropertiesProvider: tmdbWrapper,
