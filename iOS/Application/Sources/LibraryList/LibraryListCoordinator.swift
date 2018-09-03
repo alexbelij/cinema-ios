@@ -264,12 +264,6 @@ extension LibraryListCoordinator: UICloudSharingControllerDelegate {
 
   func cloudSharingControllerDidStopSharing(_ csc: UICloudSharingController) {
     sharingCallback!.didStopSharingLibrary(with: libraryMetadataForCloudSharingController!)
-    DispatchQueue.main.async {
-      if let settingsController = self.librarySettingsController,
-         settingsController.metadata.id == self.libraryMetadataForCloudSharingController!.id {
-        self.navigationController.popToViewController(self.libraryListController, animated: true)
-      }
-    }
   }
 
   func cloudSharingControllerDidSaveShare(_ csc: UICloudSharingController) {
