@@ -85,4 +85,5 @@
 "sort.by.title" = "Titel";
 "sort.by.year" = "Erscheinungsjahr";
 "sort.by.year.unknownHeader" = "Unbekannt";
+"thisMayTakeSomeTime" = "Das kann einige Zeit in Anspruch nehmen.";
 "yes" = "Ja";

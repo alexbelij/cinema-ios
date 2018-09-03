@@ -24,7 +24,9 @@ class StartupCoordinator: PageCoordinator {
               primaryActionHandler: { [weak self] in
                 guard let `self` = self else { return }
                 shouldMigrateDecision(true)
-                self.showPage(WaitingPage.initWith(primaryText: NSLocalizedString("setup.uploading", comment: "")))
+                self.showPage(WaitingPage.initWith(
+                    primaryText: NSLocalizedString("setup.uploading", comment: ""),
+                    secondaryText: NSLocalizedString("thisMayTakeSomeTime", comment: "")))
               },
               secondaryActionTitle: NSLocalizedString("setup.startFresh", comment: ""),
               secondaryActionHandler: { self.showFreshStartAlert { shouldMigrateDecision(false) } })

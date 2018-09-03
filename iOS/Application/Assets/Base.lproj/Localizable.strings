@@ -85,5 +85,6 @@
 "sort.by.title" = "Title";
 "sort.by.year" = "Year";
 "sort.by.year.unknownHeader" = "Unknown";
+"thisMayTakeSomeTime" = "This may take some time.";
 "yes" = "Yes";
 
