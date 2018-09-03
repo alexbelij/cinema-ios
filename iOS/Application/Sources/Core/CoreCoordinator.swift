@@ -113,10 +113,14 @@ extension CoreCoordinator: LibraryContentCoordinatorDelegate {
                })
              }
     controller.addSheetItem(.settings { _ in
-      self.librarySettingsCoordinator = LibraryListCoordinator(dependencies: self.dependencies)
-      self.tabBarController.present(self.librarySettingsCoordinator!.rootViewController, animated: true)
+      self.showLibrarySettings()
     })
     self.tabBarController.present(controller, animated: true)
+  }
+
+  func showLibrarySettings() {
+    self.librarySettingsCoordinator = LibraryListCoordinator(dependencies: self.dependencies)
+    self.tabBarController.present(self.librarySettingsCoordinator!.rootViewController, animated: true)
   }
 
   private func switchLibrary(to newLibrary: MovieLibrary) {

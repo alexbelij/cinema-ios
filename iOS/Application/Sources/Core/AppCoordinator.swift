@@ -180,8 +180,11 @@ extension AppCoordinator {
 
   func acceptCloudKitShare(with shareMetadata: CKShareMetadata) {
     dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
-    guard case let State.upAndRunning(dependencies, _) = state else { return }
+    guard case let State.upAndRunning(dependencies, coreCoordinator) = state else { return }
     dependencies.libraryManager.acceptCloudKitShare(with: shareMetadata)
+    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
+      coreCoordinator.showLibrarySettings()
+    }
   }
 
   func applicationDidBecomeActive() {
