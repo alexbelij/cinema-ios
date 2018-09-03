@@ -46,7 +46,7 @@ class FileBasedRecordStore: PersistentRecordStore {
         return record
       }
     } catch {
-      os_log("cache is corrupt -> delete", log: FileBasedRecordStore.logger, type: .error)
+      os_log("cache is corrupt: %{public}@", log: FileBasedRecordStore.logger, type: .error, String(describing: error))
       clear()
       return nil
     }

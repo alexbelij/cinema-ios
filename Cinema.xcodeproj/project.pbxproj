@@ -267,6 +267,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		816BF0D02582F9B8DDE7B600 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				816BF337C1C387B6E159CA70 /* LazyData.swift */,
+				816BF5BD7B80EE7F92F43A89 /* PersistentRecordStore.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
 		816BFF5ADD5FF164C57D3CAB /* GenericTableCells */ = {
 			isa = PBXGroup;
 			children = (
@@ -306,6 +315,7 @@
 				CBED94151F6BF64800FA4045 /* Library */,
 				CBBC59092121BBC400067DEA /* LibraryManager */,
 				CBED94141F6BF63500FA4045 /* MovieDb */,
+				816BF0D02582F9B8DDE7B600 /* Persistence */,
 				CB797D642120ACDB00F59618 /* Utility */,
 				CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */,
 				816BFC85BEEA3CBEDD260D8E /* AppVersion.swift */,
@@ -389,10 +399,8 @@
 			isa = PBXGroup;
 			children = (
 				CBC2E3BA2136A7750088F5C8 /* ChangeSet.swift */,
-				816BF337C1C387B6E159CA70 /* LazyData.swift */,
 				816BFB089CECEE7E6D463824 /* Logging.swift */,
 				816BF1736861B92F3C805B3D /* MulticastDelegate.swift */,
-				816BF5BD7B80EE7F92F43A89 /* PersistentRecordStore.swift */,
 				816BF2DB9CBD6D603F273231 /* Result.swift */,
 				816BF465F46F0045D7B2CAD3 /* UserDefaults.swift */,
 				816BF530E641C52408287FAF /* Utilities.swift */,
