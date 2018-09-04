@@ -1,7 +1,7 @@
 "addLibrary.name.placeholder" = "Name";
 "addLibrary.title" = "New Library";
 "addMovie.alert.howToAdd.title" = "How do you want to add the movie?";
-"addMovie.search.placeholder" = "Enter the movie title…";
+"addMovie.search.placeholder" = "Search";
 "addMovie.title" = "Add Movie";
 "cancel" = "Cancel";
 "continue" = "Continue";
@@ -41,15 +41,13 @@
 "iCloud.notAuthenticated.title" = "iCloud Required";
 "iCloud.userDeletedZone" = "Your movies have been deleted from iCloud.";
 "iCloud.userDeletedZone.actionTitle" = "Start Fresh";
-"import.succeeded" = "Import Complete";
-"import.progress" = "Importing into your Library";
 "library" = "Library";
 "library.defaultName" = "My Movies";
 "library.migratedNameFormat" = "Movies from %@";
 "library.empty" = "The library is empty.";
-"library.search.placeholder" = "Search movies";
+"library.search.placeholder" = "Search";
 "libraryList.libraries" = "Libraries";
-"libraryList.addNewLibrary" = "Add new library…";
+"libraryList.addNewLibrary" = "Add New Library…";
 "librarySettings.howToRemoveSharedLibrary" = "You can delete this library by removing yourself from the participant list.";
 "librarySettings.nameSection.header" = "Name";
 "librarySettings.nameSection.notEmptyMessage" = "Enter at least one character.";
@@ -64,7 +62,7 @@
 "loading" = "Loading…";
 "no" = "No";
 "ok" = "OK";
-"popularMovies" = "Popular movies";
+"popularMovies" = "Popular Movies";
 "popularMovies.empty" = "There are no popular movies at the moment. Please, come back later.";
 "save" = "Save";
 "search.results.empty" = "No results for “%@”";

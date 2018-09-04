@@ -1,7 +1,7 @@
 "addLibrary.name.placeholder" = "Name";
 "addLibrary.title" = "Neue Mediathek";
 "addMovie.alert.howToAdd.title" = "Wie willst du den Film hinzufügen?";
-"addMovie.search.placeholder" = "Gib den Filmtitel ein …";
+"addMovie.search.placeholder" = "Suchen";
 "addMovie.title" = "Film hinzufügen";
 "cancel" = "Abbrechen";
 "continue" = "Fortfahren";
@@ -41,13 +41,11 @@
 "iCloud.notAuthenticated.title" = "iCloud erforderlich";
 "iCloud.userDeletedZone" = "Deine Filme wurden aus iCloud gelöscht.";
 "iCloud.userDeletedZone.actionTitle" = "Neu beginnen";
-"import.succeeded" = "Aktualisierung abgeschlossen";
-"import.progress" = "Deine Mediathek wird aktualisiert";
 "library" = "Mediathek";
 "library.defaultName" = "Meine Filme";
 "library.migratedNameFormat" = "Filme von %@";
 "library.empty" = "Die Mediathek ist leer.";
-"library.search.placeholder" = "Filme durchsuchen";
+"library.search.placeholder" = "Suchen";
 "libraryList.libraries" = "Mediatheken";
 "libraryList.addNewLibrary" = "Neue Mediathek hinzufügen …";
 "librarySettings.howToRemoveSharedLibrary" = "Du kannst diese Mediathek löschen, indem du dich von der Liste der Teilnehmer entfernst.";

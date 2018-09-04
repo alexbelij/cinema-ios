@@ -18,23 +18,5 @@
 			<string>%d Movies</string>
 		</dict>
 	</dict>
-	<key>import.succeeded.changes</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@movies@</string>
-		<key>movies</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>zero</key>
-			<string>No new movies were added.</string>
-			<key>one</key>
-			<string>Added one new movie.</string>
-			<key>other</key>
-			<string>Added %d new movies.</string>
-		</dict>
-	</dict>
 </dict>
 </plist>
