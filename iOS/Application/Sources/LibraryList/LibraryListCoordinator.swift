@@ -1,15 +1,20 @@
 import CinemaKit
 import CloudKit
 import Dispatch
+import MobileCoreServices
+import os.log
 import UIKit
 
-class LibraryListCoordinator: CustomPresentableCoordinator {
+class LibraryListCoordinator: NSObject, CustomPresentableCoordinator {
+  private static let logger = Logging.createLogger(category: "LibraryListCoordinator")
   var rootViewController: UIViewController {
     return navigationController
   }
   private let dependencies: AppDependencies
   private let libraryManager: MovieLibraryManager
   private let notificationCenter: NotificationCenter
+  private var libraryMetadataForCloudSharingController: MovieLibraryMetadata?
+  private var sharingCallback: CloudSharingControllerCallback?
 
   // managed controller
   private let navigationController: UINavigationController
@@ -22,6 +27,7 @@ class LibraryListCoordinator: CustomPresentableCoordinator {
     self.notificationCenter = dependencies.notificationCenter
     self.libraryListController = UIStoryboard.libraryList.instantiate(LibraryListController.self)
     self.navigationController = UINavigationController(rootViewController: libraryListController)
+    super.init()
     self.libraryListController.onDoneButtonTap = { [weak self] in
       self?.libraryListControllerDidTabDoneButton()
     }
@@ -50,7 +56,7 @@ extension LibraryListCoordinator {
               self.notificationCenter.post(event.notification)
             case .nonRecoverableError:
               fatalError("unable to load libraries")
-            case .libraryDoesNotExist:
+            case .libraryDoesNotExist, .permissionFailure:
               fatalError("should not occur")
           }
         case let .success(libraries):
@@ -70,14 +76,18 @@ extension LibraryListCoordinator {
   }
 
   private func libraryListControllerDidSelect(_ metadata: MovieLibraryMetadata) {
-    librarySettingsController = UIStoryboard.libraryList.instantiate(LibrarySettingsController.self)
+    librarySettingsController = LibrarySettingsController(for: metadata)
     librarySettingsController!.onMetadataUpdate = { [weak self] metadata in
       guard let `self` = self else { return }
       self.updateMetadata(metadata)
     }
+    librarySettingsController!.onShareButtonTap = { [weak self] in
+      guard let `self` = self else { return }
+      self.showCloudSharingController(for: self.librarySettingsController!.metadata)
+    }
     librarySettingsController!.onRemoveLibrary = { [weak self] in
       guard let `self` = self else { return }
-      self.removeLibrary(with: self.librarySettingsController!.metadata!)
+      self.removeLibrary(with: self.librarySettingsController!.metadata)
     }
     librarySettingsController!.onDisappear = { [weak self] in
       guard let `self` = self else { return }
@@ -117,7 +127,7 @@ extension LibraryListCoordinator {
                 case .nonRecoverableError:
                   self.libraryListController.removeItem(for: metadata)
                   self.rootViewController.presentErrorAlert()
-                case .libraryDoesNotExist:
+                case .libraryDoesNotExist, .permissionFailure:
                   fatalError("should not occur: \(error)")
               }
             case .success:
@@ -134,7 +144,7 @@ extension LibraryListCoordinator {
 extension LibraryListCoordinator {
   private func updateMetadata(_ metadata: MovieLibraryMetadata) {
     libraryListController.showPlaceholder(for: metadata)
-    let originalMetadata = librarySettingsController!.metadata!
+    let originalMetadata = librarySettingsController!.metadata
     DispatchQueue.global(qos: .userInitiated).async {
       self.libraryManager.updateLibrary(with: metadata) { result in
         DispatchQueue.main.async {
@@ -143,6 +153,11 @@ extension LibraryListCoordinator {
               switch error {
                 case let .globalError(event):
                   self.notificationCenter.post(event.notification)
+                case .permissionFailure:
+                  self.libraryListController.showLibrary(with: originalMetadata)
+                  self.rootViewController.presentPermissionFailureAlert {
+                    self.notificationCenter.post(ApplicationWideEvent.shouldFetchChanges.notification)
+                  }
                 case .nonRecoverableError:
                   self.libraryListController.showLibrary(with: originalMetadata)
                   self.rootViewController.presentErrorAlert()
@@ -153,6 +168,47 @@ extension LibraryListCoordinator {
               self.libraryListController.showLibrary(with: metadata)
           }
         }
+      }
+    }
+  }
+
+  private func showCloudSharingController(for metadata: MovieLibraryMetadata) {
+    libraryMetadataForCloudSharingController = metadata
+    libraryManager.prepareCloudSharingController(forLibraryWith: metadata) { result in
+      switch result {
+        case let .failure(error):
+          switch error {
+            case let .globalError(event):
+              self.notificationCenter.post(event.notification)
+            case .nonRecoverableError:
+              DispatchQueue.main.async {
+                self.rootViewController.presentErrorAlert()
+              }
+            case .libraryDoesNotExist:
+              DispatchQueue.main.async {
+                self.navigationController.popViewController(animated: true)
+              }
+            case .permissionFailure:
+              fatalError("should not occur: \(error)")
+          }
+        case let .success(parameters):
+          DispatchQueue.main.async {
+            let sharingController: UICloudSharingController
+            switch parameters {
+              case let .hasNotBeenShared(preparationHandler, callback):
+                sharingController = UICloudSharingController { _, closure in
+                  preparationHandler(closure)
+                }
+                self.sharingCallback = callback
+                sharingController.availablePermissions = [.allowPrivate, .allowReadOnly]
+              case let .hasBeenShared(share, container, callback):
+                sharingController = UICloudSharingController(share: share, container: container)
+                self.sharingCallback = callback
+                sharingController.availablePermissions = [.allowPrivate, .allowReadWrite, .allowReadOnly]
+            }
+            sharingController.delegate = self
+            self.librarySettingsController!.present(sharingController, animated: true)
+          }
       }
     }
   }
@@ -172,7 +228,7 @@ extension LibraryListCoordinator {
                 case .nonRecoverableError:
                   self.libraryListController.showLibrary(with: metadata)
                   self.rootViewController.presentErrorAlert()
-                case .libraryDoesNotExist:
+                case .permissionFailure, .libraryDoesNotExist:
                   fatalError("should not occur: \(error)")
               }
             case .success:
@@ -181,6 +237,37 @@ extension LibraryListCoordinator {
         }
       }
     }
+  }
+}
+
+// MARK: - Cloud Sharing Controller Delegate
+
+extension LibraryListCoordinator: UICloudSharingControllerDelegate {
+  func cloudSharingController(_ csc: UICloudSharingController, failedToSaveShareWithError error: Error) {
+    os_log("sharing failed with error %{public}@",
+           log: LibraryListCoordinator.logger,
+           type: .error,
+           String(describing: error))
+  }
+
+  func itemTitle(for csc: UICloudSharingController) -> String? {
+    return libraryMetadataForCloudSharingController!.name
+  }
+
+  func itemThumbnailData(for csc: UICloudSharingController) -> Data? {
+    return NSDataAsset(name: "LibraryThumbnail")!.data
+  }
+
+  func itemType(for csc: UICloudSharingController) -> String? {
+    return kUTTypeDatabase as String
+  }
+
+  func cloudSharingControllerDidStopSharing(_ csc: UICloudSharingController) {
+    sharingCallback!.didStopSharingLibrary(with: libraryMetadataForCloudSharingController!)
+  }
+
+  func cloudSharingControllerDidSaveShare(_ csc: UICloudSharingController) {
+    libraryManager.fetchChanges { _ in }
   }
 }
 
@@ -202,6 +289,10 @@ extension LibraryListCoordinator: MovieLibraryManagerDelegate {
       for (id, library) in changeSet.deletions {
         self.libraryListController.removeItem(for: library.metadata)
         if let settingsController = self.librarySettingsController, settingsController.metadata.id == id {
+          if let sharingController = self.navigationController.presentedViewController,
+             sharingController is UICloudSharingController {
+            sharingController.dismiss(animated: true)
+          }
           self.navigationController.popToViewController(self.libraryListController, animated: true)
         }
       }

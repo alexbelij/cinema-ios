@@ -87,7 +87,7 @@ extension DeviceSyncingMovieLibrary {
                                  _ completion: @escaping (Result<Movie, MovieLibraryError>) -> Void) {
     if let error = error {
       switch error {
-        case .notAuthenticated, .userDeletedZone, .nonRecoverableError:
+        case .notAuthenticated, .userDeletedZone, .permissionFailure, .nonRecoverableError:
           completion(.failure(error.asMovieLibraryError))
         case .conflict, .itemNoLongerExists, .zoneNotFound:
           fatalError("should not occur: \(error)")
@@ -153,11 +153,11 @@ extension DeviceSyncingMovieLibrary {
             completion(.failure(.movieDoesNotExist))
           case .userDeletedZone:
             completion(.failure(error.asMovieLibraryError))
-          case .notAuthenticated, .nonRecoverableError:
+          case .notAuthenticated, .permissionFailure, .nonRecoverableError:
             // reset record
             // TODO check if change tag has changed (serverRecordChanged)
             data.movies[movie.cloudProperties.id]!.cloudProperties.setCustomFields(in: record)
-            completion(.failure(.nonRecoverableError))
+            completion(.failure(error.asMovieLibraryError))
           case .zoneNotFound:
             fatalError("should not occur: \(error)")
         }
@@ -193,7 +193,7 @@ extension DeviceSyncingMovieLibrary {
       switch error {
         case .itemNoLongerExists:
           completion(.success(()))
-        case .notAuthenticated, .userDeletedZone, .nonRecoverableError:
+        case .notAuthenticated, .userDeletedZone, .permissionFailure, .nonRecoverableError:
           completion(.failure(error.asMovieLibraryError))
         case .conflict, .zoneNotFound:
           fatalError("should not occur: \(error)")

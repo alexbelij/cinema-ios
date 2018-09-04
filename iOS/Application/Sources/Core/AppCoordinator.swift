@@ -87,10 +87,12 @@ class AppCoordinator: AutoPresentableCoordinator {
                   DispatchQueue.main.async {
                     self.startUp()
                   }
+                case .shouldFetchChanges:
+                  fatalError("should not occur: \(error)")
               }
             case .nonRecoverableError:
               fatalError("non-recoverable error during initial libraries fetch")
-            case .libraryDoesNotExist:
+            case .libraryDoesNotExist, .permissionFailure:
               fatalError("should not occur: \(error)")
           }
         case let .success(libraries):
@@ -120,10 +122,12 @@ class AppCoordinator: AutoPresentableCoordinator {
                     DispatchQueue.main.async {
                       self.startUp()
                     }
+                  case .shouldFetchChanges:
+                    fatalError("should not occur: \(error)")
                 }
               case .nonRecoverableError:
                 fatalError("non-recoverable error during creation of initial library")
-              case .libraryDoesNotExist:
+              case .libraryDoesNotExist, .permissionFailure:
                 fatalError("should not occur: \(error)")
             }
           case let .success(library):
@@ -174,6 +178,15 @@ extension AppCoordinator {
     dependencies.libraryManager.fetchChanges(then: completionHandler)
   }
 
+  func acceptCloudKitShare(with shareMetadata: CKShareMetadata) {
+    dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
+    guard case let State.upAndRunning(dependencies, coreCoordinator) = state else { return }
+    dependencies.libraryManager.acceptCloudKitShare(with: shareMetadata)
+    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
+      coreCoordinator.showLibrarySettings()
+    }
+  }
+
   func applicationDidBecomeActive() {
     dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
     guard case let State.upAndRunning(dependencies, _) = state else { return }
@@ -193,6 +206,9 @@ extension AppCoordinator {
         DispatchQueue.main.async {
           self.showRestartUI()
         }
+      case .shouldFetchChanges:
+        guard case let .upAndRunning(dependencies, _) = state else { return }
+        dependencies.libraryManager.fetchChanges { _ in }
     }
   }
 }

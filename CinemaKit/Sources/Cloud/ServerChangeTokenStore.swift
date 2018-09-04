@@ -2,6 +2,9 @@ import CloudKit
 import os.log
 
 protocol ServerChangeTokenStore {
+  func get(for scope: CKDatabaseScope) -> CKServerChangeToken?
+  func set(_ token: CKServerChangeToken?, for scope: CKDatabaseScope)
+
   func get(for zoneID: CKRecordZoneID) -> CKServerChangeToken?
   func set(_ token: CKServerChangeToken?, for zoneID: CKRecordZoneID)
 }
@@ -9,6 +12,15 @@ protocol ServerChangeTokenStore {
 private extension CKRecordZoneID {
   var serverChangeTokenKey: String {
     return "\(ownerName)|\(zoneName)"
+  }
+}
+
+private extension CKDatabaseScope {
+  var serverChangeTokenKey: String {
+    switch self {
+      case .shared: return "SharedDatabase"
+      case .private, .public: fatalError("not implemented")
+    }
   }
 }
 
@@ -36,6 +48,14 @@ class FileBasedServerChangeTokenStore: ServerChangeTokenStore {
     } else {
       tokens = [:]
     }
+  }
+
+  func get(for scope: CKDatabaseScope) -> CKServerChangeToken? {
+    return get(for: scope.serverChangeTokenKey)
+  }
+
+  func set(_ token: CKServerChangeToken?, for scope: CKDatabaseScope) {
+    set(token, for: scope.serverChangeTokenKey)
   }
 
   func get(for zoneID: CKRecordZoneID) -> CKServerChangeToken? {

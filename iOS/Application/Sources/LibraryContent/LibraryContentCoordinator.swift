@@ -107,7 +107,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
             DispatchQueue.main.async {
               self.movieListController.listData = .unavailable
             }
-          case .detailsFetchError, .movieDoesNotExist:
+          case .detailsFetchError, .movieDoesNotExist, .permissionFailure:
             fatalError("should not occur")
         }
       case let .success(movies):
@@ -124,10 +124,12 @@ extension LibraryContentCoordinator: MovieListControllerDelegate {
   func movieListController(_ controller: MovieListController, didSelect movie: Movie) {
     movieDetailsCoordinator = MovieDetailsCoordinator(for: movie, using: dependencies.movieDb)
     movieDetailsCoordinator!.delegate = self
-    let editButton = UIBarButtonItem(barButtonSystemItem: .edit,
-                                     target: self,
-                                     action: #selector(editButtonTapped))
-    movieDetailsCoordinator!.rootViewController.navigationItem.rightBarButtonItem = editButton
+    if library.metadata.currentUserCanModify {
+      let editButton = UIBarButtonItem(barButtonSystemItem: .edit,
+                                       target: self,
+                                       action: #selector(editButtonTapped))
+      movieDetailsCoordinator!.rootViewController.navigationItem.rightBarButtonItem = editButton
+    }
     self.navigationController.pushViewController(movieDetailsCoordinator!.rootViewController, animated: true)
   }
 
@@ -181,6 +183,12 @@ extension LibraryContentCoordinator: EditMovieCoordinatorDelegate {
     switch error {
       case let .globalError(event):
         notificationCenter.post(event.notification)
+      case .permissionFailure:
+        DispatchQueue.main.async {
+          coordinator.rootViewController.presentPermissionFailureAlert {
+            self.notificationCenter.post(ApplicationWideEvent.shouldFetchChanges.notification)
+          }
+        }
       case .nonRecoverableError:
         coordinator.rootViewController.presentErrorAlert()
       case .detailsFetchError, .movieDoesNotExist:
@@ -204,6 +212,21 @@ extension LibraryContentCoordinator: MovieLibraryDelegate {
   func libraryDidUpdateMetadata(_ library: MovieLibrary) {
     DispatchQueue.main.async {
       self.updateTitle()
+      if self.movieDetailsCoordinator != nil {
+        if library.metadata.currentUserCanModify &&
+           self.movieDetailsCoordinator!.rootViewController.navigationItem.rightBarButtonItem == nil {
+          let editButton = UIBarButtonItem(barButtonSystemItem: .edit,
+                                           target: self,
+                                           action: #selector(self.editButtonTapped))
+          self.movieDetailsCoordinator!.rootViewController.navigationItem.rightBarButtonItem = editButton
+        } else if !library.metadata.currentUserCanModify &&
+                  self.movieDetailsCoordinator!.rootViewController.navigationItem.rightBarButtonItem != nil {
+          self.movieDetailsCoordinator!.rootViewController.navigationItem.rightBarButtonItem = nil
+          self.editMovieCoordinator?.rootViewController.dismiss(animated: true) {
+            self.editMovieCoordinator = nil
+          }
+        }
+      }
     }
   }
 

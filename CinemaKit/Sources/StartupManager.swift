@@ -33,6 +33,7 @@ public class CinemaKitStartupManager: StartupManager {
   private static let appSupportDir = directoryUrl(for: .applicationSupportDirectory)
       .appendingPathComponent(Bundle.main.bundleIdentifier!, isDirectory: true)
   private static let libraryRecordStoreURL = appSupportDir.appendingPathComponent("Libraries.plist")
+  private static let shareRecordStoreURL = appSupportDir.appendingPathComponent("Shares.plist")
   fileprivate static let movieRecordsDir = appSupportDir.appendingPathComponent("MovieRecords", isDirectory: true)
 
   // cinema data file
@@ -64,6 +65,7 @@ public class CinemaKitStartupManager: StartupManager {
       try fileManager.removeItem(at: FileBasedSubscriptionStore.fileURL)
       try fileManager.removeItem(at: FileBasedServerChangeTokenStore.fileURL)
       try fileManager.removeItem(at: CinemaKitStartupManager.libraryRecordStoreURL)
+      try fileManager.removeItem(at: CinemaKitStartupManager.shareRecordStoreURL)
       try fileManager.removeItem(at: CinemaKitStartupManager.movieRecordsDir)
     } catch {
       os_log("unable to remove local data: %{public}@",
@@ -190,7 +192,7 @@ public class CinemaKitStartupManager: StartupManager {
     // Library Manager
     let syncManager = DefaultSyncManager()
     let fetchManager = DefaultFetchManager()
-    let libraryFactory = DefaultMovieLibraryFactory(databaseOperationQueue: container.queue(withScope: .private),
+    let libraryFactory = DefaultMovieLibraryFactory(queueFactory: container,
                                                     fetchManager: fetchManager,
                                                     syncManager: syncManager,
                                                     tmdbWrapper: movieDb)
@@ -198,7 +200,8 @@ public class CinemaKitStartupManager: StartupManager {
         queueFactory: container,
         fetchManager: fetchManager,
         libraryFactory: libraryFactory,
-        libraryRecordStore: FileBasedRecordStore(fileURL: CinemaKitStartupManager.libraryRecordStoreURL))
+        libraryRecordStore: FileBasedRecordStore(fileURL: CinemaKitStartupManager.libraryRecordStoreURL),
+        shareRecordStore: FileBasedRecordStore(fileURL: CinemaKitStartupManager.shareRecordStoreURL))
     let libraryManager = DeviceSyncingLibraryManager(
         container: container,
         queueFactory: container,
@@ -206,6 +209,7 @@ public class CinemaKitStartupManager: StartupManager {
         syncManager: syncManager,
         subscriptionManager: subscriptionManager,
         changesManager: DefaultChangesManager(queueFactory: container),
+        shareManager: DefaultShareManager(generalOperationQueue: container, queueFactory: container),
         libraryFactory: libraryFactory,
         data: data)
     return AppDependencies(libraryManager: libraryManager,
@@ -215,24 +219,26 @@ public class CinemaKitStartupManager: StartupManager {
 }
 
 private class DefaultMovieLibraryFactory: MovieLibraryFactory {
-  private let databaseOperationQueue: DatabaseOperationQueue
+  private let queueFactory: DatabaseOperationQueueFactory
   private let fetchManager: FetchManager
   private let syncManager: SyncManager
   private let tmdbWrapper: TMDBSwiftWrapper
 
-  init(databaseOperationQueue: DatabaseOperationQueue,
+  init(queueFactory: DatabaseOperationQueueFactory,
        fetchManager: FetchManager,
        syncManager: SyncManager,
        tmdbWrapper: TMDBSwiftWrapper) {
-    self.databaseOperationQueue = databaseOperationQueue
+    self.queueFactory = queueFactory
     self.fetchManager = fetchManager
     self.syncManager = syncManager
     self.tmdbWrapper = tmdbWrapper
   }
 
   func makeLibrary(with metadata: MovieLibraryMetadata) -> InternalMovieLibrary {
+    let scope = metadata.isCurrentUserOwner ? CKDatabaseScope.private : CKDatabaseScope.shared
+    let databaseOperationQueue = queueFactory.queue(withScope: scope)
     let movieRecordStore = FileBasedRecordStore(
-        fileURL: CinemaKitStartupManager.movieRecordsDir.appendingPathComponent("\(metadata.id.recordName).plist"))
+    fileURL: CinemaKitStartupManager.movieRecordsDir.appendingPathComponent("\(metadata.id.recordName).plist"))
     let data = MovieLibraryData(databaseOperationQueue: databaseOperationQueue,
                                 fetchManager: fetchManager,
                                 syncManager: syncManager,

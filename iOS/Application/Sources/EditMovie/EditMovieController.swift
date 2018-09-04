@@ -9,20 +9,40 @@ protocol EditMovieControllerDelegate: class {
 }
 
 class EditMovieController: UITableViewController {
+  enum Section: Equatable {
+    case title
+    case subtitle
+    case delete
+
+    var header: String? {
+      switch self {
+        case .title: return NSLocalizedString("edit.sectionHeader.title", comment: "")
+        case .subtitle: return NSLocalizedString("edit.sectionHeader.subtitle", comment: "")
+        case .delete: return nil
+      }
+    }
+
+    var isSelectable: Bool {
+      switch self {
+        case .title, .subtitle: return false
+        case .delete: return true
+      }
+    }
+  }
+
   weak var delegate: EditMovieControllerDelegate?
 
   var movie: Movie! {
     didSet {
       guard isViewLoaded else { return }
-      setup()
+      configure(for: movie!)
     }
   }
 
-  @IBOutlet private weak var titleTextField: UITextField!
-  @IBOutlet private weak var subtitleTextField: UITextField!
-
-  @IBOutlet private weak var removeMovieButton: UIButton!
-  @IBOutlet private weak var removeButtonActivityIndicator: UIActivityIndicatorView!
+  private var originalMovie: Movie!
+  private var updatedMovie: Movie!
+  private var viewModel: [Section]!
+  private var showsActivityIndicatorInDeleteSection = false
 
   enum EditResult {
     case edited(Movie)
@@ -35,45 +55,109 @@ class EditMovieController: UITableViewController {
 extension EditMovieController {
   override func viewDidLoad() {
     super.viewDidLoad()
-    titleTextField.delegate = self
-    subtitleTextField.delegate = self
-    removeMovieButton.setTitle(NSLocalizedString("edit.removeMovie", comment: ""), for: .normal)
-    setup()
+    tableView.register(TextFieldTableCell.self)
+    tableView.register(MessageTableCell.self)
+    tableView.register(ButtonTableCell.self)
+    configure(for: movie!)
   }
+}
 
-  private func setup() {
-    titleTextField.text = movie.title
-    subtitleTextField.text = movie.subtitle
+// MARK: - Setup
+
+extension EditMovieController {
+  private func configure(for movie: Movie) {
+    viewModel = [.title, .subtitle, .delete]
+    originalMovie = movie
+    updatedMovie = movie
+    tableView.reloadData()
   }
 }
 
 // MARK: - Table View
 
 extension EditMovieController {
+  override func numberOfSections(in tableView: UITableView) -> Int {
+    return viewModel.count
+  }
+
+  override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    switch viewModel![section] {
+      case .title: return updatedMovie.title.isEmpty ? 2 : 1
+      default: return 1
+    }
+  }
+
   override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    switch section {
-      case 0: return NSLocalizedString("edit.sectionHeader.title", comment: "")
-      case 1: return NSLocalizedString("edit.sectionHeader.subtitle", comment: "")
-      default: return nil
-    }
-  }
-}
-
-// MARK: - UITextFieldDelegate
-
-extension EditMovieController: UITextFieldDelegate {
-  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-    if let nextField = self.view.viewWithTag(textField.tag + 1) as? UITextField {
-      nextField.becomeFirstResponder()
-    } else {
-      textField.resignFirstResponder()
-    }
-    return false
+    return viewModel![section].header
   }
 
-  @IBAction private func titleTextFieldDidChange(_ textField: UITextField) {
-    let isTextFieldEmpty = titleTextField.text?.isEmpty ?? true
-    navigationItem.rightBarButtonItem!.isEnabled = !isTextFieldEmpty
+  override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    switch viewModel![indexPath.section] {
+      case .title:
+        switch indexPath.row {
+          case 0:
+            let cell: TextFieldTableCell = tableView.dequeueReusableCell(for: indexPath)
+            cell.onChange = { [weak self] newText in
+              guard let `self` = self else { return }
+              let oldText = self.updatedMovie!.title
+              self.updatedMovie.title = newText
+              if oldText.isEmpty && !newText.isEmpty {
+                let section = self.viewModel.index(of: .title)!
+                self.tableView.deleteRows(at: [IndexPath(row: 1, section: section)], with: .fade)
+                self.navigationItem.rightBarButtonItem!.isEnabled = true
+              } else if !oldText.isEmpty && newText.isEmpty {
+                let section = self.viewModel.index(of: .title)!
+                self.tableView.insertRows(at: [IndexPath(row: 1, section: section)], with: .fade)
+                self.navigationItem.rightBarButtonItem!.isEnabled = false
+              }
+            }
+            cell.textValue = updatedMovie.title
+            return cell
+          default:
+            let cell: MessageTableCell = tableView.dequeueReusableCell(for: indexPath)
+            cell.message = NSLocalizedString("librarySettings.nameSection.notEmptyMessage", comment: "")
+            cell.messageStyle = .error
+            return cell
+        }
+      case .subtitle:
+        let cell: TextFieldTableCell = tableView.dequeueReusableCell(for: indexPath)
+        cell.onChange = { [weak self] newText in
+          guard let `self` = self else { return }
+          self.updatedMovie.subtitle = newText.nilIfEmptyString
+        }
+        cell.textValue = updatedMovie.subtitle ?? ""
+        return cell
+      case .delete:
+        let cell: ButtonTableCell = tableView.dequeueReusableCell(for: indexPath)
+        cell.actionTitle = NSLocalizedString("edit.removeMovie", comment: "")
+        cell.buttonStyle = .destructive
+        cell.actionTitleAlignment = .center
+        cell.showsActivityIndicator = showsActivityIndicatorInDeleteSection
+        return cell
+    }
+  }
+
+  override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+    return viewModel![indexPath.section].isSelectable ? indexPath : nil
+  }
+
+  override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    view.endEditing(false)
+    switch viewModel![indexPath.section] {
+      case .title, .subtitle:
+        break
+      case .delete:
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("edit.removeMovie", comment: ""),
+                                      style: .destructive) { _ in
+          let editResult = EditResult.deleted
+          self.startWaitingAnimation(for: editResult)
+          self.delegate?.editMovieController(self, didFinishEditingWith: editResult)
+        })
+        alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
+        self.present(alert, animated: true)
+    }
+    tableView.deselectRow(at: indexPath, animated: true)
   }
 }
 
@@ -81,76 +165,61 @@ extension EditMovieController: UITextFieldDelegate {
 
 extension EditMovieController {
   @IBAction private func cancelButtonClicked() {
-    dismissKeyboard()
+    view.endEditing(true)
     delegate?.editMovieControllerDidCancelEditing(self)
   }
 
   @IBAction private func doneButtonClicked() {
-    dismissKeyboard()
+    view.endEditing(true)
     guard let delegate = self.delegate else { return }
-    let newTitle = self.titleTextField.text ?? ""
-    let newSubtitle = self.subtitleTextField.text?.nilIfEmptyString
-    if newTitle == movie.title && newSubtitle == movie.subtitle {
+    if updatedMovie.title == originalMovie.title && updatedMovie.subtitle == originalMovie.subtitle {
       delegate.editMovieControllerDidCancelEditing(self)
     } else {
-      var editedMovie = movie!
-      editedMovie.title = newTitle
-      editedMovie.subtitle = newSubtitle
-      startWaitingAnimation(for: .edited(editedMovie))
-      delegate.editMovieController(self, didFinishEditingWith: .edited(editedMovie))
+      startWaitingAnimation(for: .edited(updatedMovie))
+      delegate.editMovieController(self, didFinishEditingWith: .edited(updatedMovie))
     }
-  }
-
-  @IBAction private func removeButtonClicked() {
-    dismissKeyboard()
-    let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-    alert.addAction(UIAlertAction(title: NSLocalizedString("edit.removeMovie", comment: ""),
-                                  style: .destructive) { _ in
-      let editResult = EditResult.deleted
-      self.startWaitingAnimation(for: editResult)
-      self.delegate?.editMovieController(self, didFinishEditingWith: editResult)
-    })
-    alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
-    self.present(alert, animated: true)
-  }
-
-  @IBAction private func dismissKeyboard() {
-    self.view?.endEditing(false)
   }
 }
 
 extension EditMovieController {
   private func startWaitingAnimation(for editResult: EditResult) {
-    navigationItem.leftBarButtonItem!.isEnabled = false
-    titleTextField.isUserInteractionEnabled = false
-    subtitleTextField.isUserInteractionEnabled = false
+    tableView.visibleCells.forEach { cell in
+      cell.isUserInteractionEnabled = false
+    }
     switch editResult {
       case .edited:
-        removeMovieButton.isUserInteractionEnabled = false
+        UIView.animate(withDuration: 0.1) { () -> Void in
+          self.navigationItem.leftBarButtonItem!.isEnabled = false
+        }
         let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: activityIndicator)
+        navigationItem.setRightBarButton(UIBarButtonItem(customView: activityIndicator), animated: true)
         activityIndicator.startAnimating()
       case .deleted:
-        navigationItem.rightBarButtonItem!.isEnabled = false
-        removeMovieButton.isHidden = true
-        removeButtonActivityIndicator.startAnimating()
+        UIView.animate(withDuration: 0.1) { () -> Void in
+          self.navigationItem.leftBarButtonItem!.isEnabled = false
+          self.navigationItem.rightBarButtonItem!.isEnabled = false
+        }
+        showsActivityIndicatorInDeleteSection = true
+        if let index = viewModel.index(of: .delete) {
+          tableView.reloadRows(at: [IndexPath(row: 0, section: index)], with: .automatic)
+        }
     }
   }
 
-  func stopWaitingAnimation(restoreUI: Bool) {
-    if navigationItem.rightBarButtonItem!.customView != nil {
-      navigationItem.rightBarButtonItem = nil
+  func stopWaitingAnimation() {
+    tableView.visibleCells.forEach { cell in
+      cell.isUserInteractionEnabled = true
     }
-    removeButtonActivityIndicator.stopAnimating()
-    if restoreUI {
-      navigationItem.leftBarButtonItem!.isEnabled = true
-      titleTextField.isUserInteractionEnabled = true
-      subtitleTextField.isUserInteractionEnabled = true
-      removeMovieButton.isUserInteractionEnabled = true
-      removeMovieButton.isHidden = false
-      navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done,
-                                                          target: self,
-                                                          action: #selector(doneButtonClicked))
+    showsActivityIndicatorInDeleteSection = false
+    if let index = viewModel.index(of: .delete) {
+      tableView.reloadRows(at: [IndexPath(row: 0, section: index)], with: .automatic)
     }
+    UIView.animate(withDuration: 0.1) { () -> Void in
+      self.navigationItem.leftBarButtonItem!.isEnabled = true
+    }
+    let doneButton = UIBarButtonItem(barButtonSystemItem: .done,
+                                     target: self,
+                                     action: #selector(doneButtonClicked))
+    navigationItem.setRightBarButton(doneButton, animated: true)
   }
 }

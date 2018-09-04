@@ -22,6 +22,7 @@ class SearchTmdbCoordinator: CustomPresentableCoordinator {
   private let notificationCenter: NotificationCenter
   private var cachedSearchResults = [ExternalMovieViewModel]()
   private var tmdbIDsInLibrary: Set<TmdbIdentifier>?
+  private var popularMoviesScheduledForRemoval = Set<TmdbIdentifier>()
 
   // managed controllers
   private let navigationController: UINavigationController
@@ -99,11 +100,22 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
             fatalError("not implemented")
           case let .globalError(event):
             notificationCenter.post(event.notification)
+          case .permissionFailure:
+            DispatchQueue.main.async {
+              model.state = .new
+              self.searchTmdbController.reloadRow(forMovieWithId: model.movie.tmdbID)
+              self.popularMoviesController.reloadRow(forMovieWithId: model.movie.tmdbID)
+              self.popularMoviesScheduledForRemoval.remove(model.tmdbID)
+              self.rootViewController.presentPermissionFailureAlert {
+                self.notificationCenter.post(ApplicationWideEvent.shouldFetchChanges.notification)
+              }
+            }
           case .nonRecoverableError:
             DispatchQueue.main.async {
               model.state = .new
               self.searchTmdbController.reloadRow(forMovieWithId: model.movie.tmdbID)
               self.popularMoviesController.reloadRow(forMovieWithId: model.movie.tmdbID)
+              self.popularMoviesScheduledForRemoval.remove(model.tmdbID)
               self.rootViewController.presentErrorAlert()
             }
           case .movieDoesNotExist:
@@ -113,8 +125,10 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
         DispatchQueue.main.async {
           model.state = .addedToLibrary
           self.searchTmdbController.reloadRow(forMovieWithId: model.movie.tmdbID)
+          self.popularMoviesController.reloadRow(forMovieWithId: model.movie.tmdbID)
           DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
             self.popularMoviesController.removeMovie(withId: model.movie.tmdbID)
+            self.popularMoviesScheduledForRemoval.remove(model.tmdbID)
           }
         }
     }
@@ -127,6 +141,7 @@ extension SearchTmdbCoordinator: PopularMoviesControllerDelegate {
       DispatchQueue.main.async {
         model.state = .updateInProgress
         controller.reloadRow(forMovieWithId: model.movie.tmdbID)
+        self.popularMoviesScheduledForRemoval.insert(model.tmdbID)
       }
       DispatchQueue.global(qos: .userInitiated).async {
         self.library.addMovie(with: model.tmdbID, diskType: diskType) { result in
@@ -162,7 +177,9 @@ extension SearchTmdbCoordinator: MovieLibraryDelegate {
       if self.tmdbIDsInLibrary == nil { return }
       for movie in changeSet.insertions {
         self.tmdbIDsInLibrary!.insert(movie.tmdbID)
-        self.popularMoviesController.removeMovie(withId: movie.tmdbID)
+        if !self.popularMoviesScheduledForRemoval.contains(movie.tmdbID) {
+          self.popularMoviesController.removeMovie(withId: movie.tmdbID)
+        }
       }
       for (tmdbID, _) in changeSet.deletions {
         self.tmdbIDsInLibrary!.remove(tmdbID)

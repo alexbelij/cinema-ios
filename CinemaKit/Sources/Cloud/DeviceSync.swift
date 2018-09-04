@@ -6,4 +6,5 @@ let defaultRetryCount = 2
 
 enum CloudTarget: String, Codable {
   case deviceSyncZone
+  case sharedDatabase
 }

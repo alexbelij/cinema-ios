@@ -7,6 +7,15 @@ public protocol MovieLibraryManagerDelegate: class {
                       didUpdateLibraries changeSet: ChangeSet<CKRecordID, MovieLibrary>)
 }
 
+public enum CloudSharingControllerParameters {
+  case hasBeenShared(CKShare, CKContainer, CloudSharingControllerCallback)
+  case hasNotBeenShared((@escaping (CKShare?, CKContainer?, Error?) -> Void) -> Void, CloudSharingControllerCallback)
+}
+
+public protocol CloudSharingControllerCallback {
+  func didStopSharingLibrary(with metadata: MovieLibraryMetadata)
+}
+
 public protocol MovieLibraryManager: class {
   var delegates: MulticastDelegate<MovieLibraryManagerDelegate> { get }
 
@@ -21,12 +30,19 @@ public protocol MovieLibraryManager: class {
   func removeLibrary(with id: CKRecordID, then completion: @escaping (Result<Void, MovieLibraryManagerError>) -> Void)
 
   func fetchChanges(then completion: @escaping (UIBackgroundFetchResult) -> Void)
+
+  // Sharing
+  func prepareCloudSharingController(
+      forLibraryWith metadata: MovieLibraryMetadata,
+      then completion: @escaping (Result<CloudSharingControllerParameters, MovieLibraryManagerError>) -> Void)
+  func acceptCloudKitShare(with shareMetadata: CKShareMetadata)
 }
 
 public enum MovieLibraryManagerError: Error {
   case globalError(ApplicationWideEvent)
   case nonRecoverableError
   case libraryDoesNotExist
+  case permissionFailure
 }
 
 extension CloudKitError {
@@ -38,6 +54,8 @@ extension CloudKitError {
         return .globalError(.notAuthenticated)
       case .userDeletedZone:
         return .globalError(.userDeletedZone)
+      case .permissionFailure:
+        return .permissionFailure
       case .nonRecoverableError:
         return .nonRecoverableError
       case .conflict, .zoneNotFound:

@@ -15,6 +15,7 @@
 "edit.sectionHeader.subtitle" = "Untertitel (optional)";
 "edit.sectionHeader.title" = "Titel";
 "error.genericError" = "Es ist ein Fehler aufgetreten.";
+"error.permissionFailure" = "Der Besitzer dieser Mediathek erlaubt keine Bearbeitung mehr.";
 "error.tryAgain" = "Bitte versuche es später erneut.";
 "genre.action" = "Action";
 "genre.adventure" = "Abenteuer";
@@ -48,10 +49,17 @@
 "library.search.placeholder" = "Filme durchsuchen";
 "libraryList.libraries" = "Mediatheken";
 "libraryList.addNewLibrary" = "Neue Mediathek hinzufügen …";
+"librarySettings.howToRemoveSharedLibrary" = "Du kannst diese Mediathek löschen, indem du dich von der Liste der Teilnehmer entfernst.";
 "librarySettings.nameSection.header" = "Name";
 "librarySettings.nameSection.notEmptyMessage" = "Gib mindestens ein Zeichen ein.";
+"librarySettings.removeLibrary.shared.alert.title" = "Geteilte Mediathek entfernen?";
+"librarySettings.removeLibrary.shared.alert.message" = "Wenn diese geteilte Mediathek entfernt wird, können andere nicht mehr darauf zugreifen und sie wird auf all ihren Geräten gelöscht.";
+"librarySettings.removeLibrary.shared.actionTitle" = "Löschen";
 "librarySettings.removeLibrary.private.actionTitleFormat" = "%@ entfernen";
 "librarySettings.deleteSection.delete" = "Mediathek entfernen";
+"librarySettings.shareLibrary" = "Mediathek freigeben …";
+"librarySettings.shareOptions" = "Freigabeoptionen …";
+"librarySettings.shareSection.header" = "Freigabe";
 "loading" = "Laden …";
 "no" = "Nein";
 "ok" = "OK";

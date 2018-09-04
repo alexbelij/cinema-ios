@@ -5,7 +5,8 @@ protocol DeviceSyncable: Equatable {
 
   var id: CKRecordID { get }
 
-  init(from record: CustomRecordType)
+  // conforming types should have an initializer of the form
+  // init(from record: CustomRecordType, <custom properties>...)
 
   func setCustomFields(in record: CustomRecordType)
 }
@@ -32,6 +33,10 @@ extension RecordType {
 
   var id: CKRecordID {
     return rawRecord.recordID
+  }
+
+  var shareID: CKRecordID? {
+    return rawRecord.share?.recordID
   }
 }
 
@@ -74,6 +79,7 @@ public enum CloudKitError: Error {
   case notAuthenticated
   case zoneNotFound
   case userDeletedZone
+  case permissionFailure
   case nonRecoverableError
 }
 
@@ -82,6 +88,7 @@ public enum ApplicationWideEvent {
 
   case notAuthenticated
   case userDeletedZone
+  case shouldFetchChanges
 
   public var notification: Notification {
     let userInfo: [AnyHashable: Any] = [ApplicationWideEvent.userInfoKey: self]

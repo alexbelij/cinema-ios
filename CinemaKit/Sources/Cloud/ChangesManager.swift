@@ -2,11 +2,12 @@ import CloudKit
 import os.log
 
 struct FetchedChanges {
+  let deletedSharedZoneIDs: [CKRecordZoneID]
   let changedRecords: [CKRecord]
   let deletedRecordIDsAndTypes: [(CKRecordID, String)]
 
   var hasChanges: Bool {
-    return !(changedRecords.isEmpty && deletedRecordIDsAndTypes.isEmpty)
+    return !(deletedSharedZoneIDs.isEmpty && changedRecords.isEmpty && deletedRecordIDsAndTypes.isEmpty)
   }
 }
 
@@ -29,14 +30,111 @@ class DefaultChangesManager: ChangesManager {
   }
 
   func fetchChanges(then completion: @escaping (FetchedChanges?, CloudKitError?) -> Void) {
-    self.fetchChangesInZones(withIDs: [deviceSyncZoneID],
-                             using: self.queueFactory.queue(withScope: .private)) { changes, error in
+    fetchChangesInDatabase(withScope: .shared, retryCount: defaultRetryCount) { changes, error in
       if let error = error {
         completion(nil, error)
-      } else if let changes = changes {
-        completion(FetchedChanges(changedRecords: changes.0, deletedRecordIDsAndTypes: changes.1), nil)
+      } else if let (changedZoneIDs, deletedZoneIDs) = changes {
+        var changedRecords = [CKRecord]()
+        var deletedRecordIDsAndTypes = [(CKRecordID, String)]()
+        var errors = [CloudKitError]()
+        let group = DispatchGroup()
+        if !changedZoneIDs.isEmpty {
+          group.enter()
+          self.fetchChangesInZones(withIDs: changedZoneIDs,
+                                   using: self.queueFactory.queue(withScope: .shared)) { changes, error in
+            if let error = error {
+              errors.append(error)
+            } else if let changes = changes {
+              changedRecords.append(contentsOf: changes.0)
+              deletedRecordIDsAndTypes.append(contentsOf: changes.1)
+            }
+            group.leave()
+          }
+        }
+        group.enter()
+        self.fetchChangesInZones(withIDs: [deviceSyncZoneID],
+                                 using: self.queueFactory.queue(withScope: .private)) { changes, error in
+          if let error = error {
+            errors.append(error)
+          } else if let changes = changes {
+            changedRecords.append(contentsOf: changes.0)
+            deletedRecordIDsAndTypes.append(contentsOf: changes.1)
+          }
+          group.leave()
+        }
+        group.notify(queue: DispatchQueue.global()) {
+          if errors.isEmpty {
+            let changes = FetchedChanges(deletedSharedZoneIDs: deletedZoneIDs,
+                                         changedRecords: changedRecords,
+                                         deletedRecordIDsAndTypes: deletedRecordIDsAndTypes)
+            completion(changes, nil)
+          } else {
+            completion(nil, errors.first)
+          }
+        }
       }
     }
+  }
+
+  private func fetchChangesInDatabase(
+      withScope scope: CKDatabaseScope,
+      retryCount: Int,
+      then completion: @escaping (([CKRecordZoneID], [CKRecordZoneID])?, CloudKitError?) -> Void) {
+    os_log("creating fetch database changes operation for %{public}@ database",
+           log: DefaultChangesManager.logger,
+           type: .default,
+           scope.description)
+    let previousChangeToken = serverChangeTokenStore.get(for: scope)
+    let operation = CKFetchDatabaseChangesOperation(previousServerChangeToken: previousChangeToken)
+
+    // collect changes and deletions
+    var changedZoneIDs = [CKRecordZoneID]()
+    operation.recordZoneWithIDChangedBlock = { zoneID in changedZoneIDs.append(zoneID) }
+    var deletedZoneIDs = [CKRecordZoneID]()
+    operation.recordZoneWithIDWasDeletedBlock = { zoneID in deletedZoneIDs.append(zoneID) }
+
+    // handle result
+    operation.fetchDatabaseChangesCompletionBlock = { newChangeToken, _, error in
+      if let error = error {
+        guard let ckerror = error as? CKError else {
+          os_log("<fetchChangesForDatabase> unhandled error: %{public}@",
+                 log: DefaultChangesManager.logger,
+                 type: .error,
+                 String(describing: error))
+          completion(nil, .nonRecoverableError)
+          return
+        }
+        if ckerror.code == CKError.Code.changeTokenExpired {
+          self.cacheInvalidationFlag.set()
+        } else if ckerror.code == CKError.Code.notAuthenticated {
+          completion(nil, .notAuthenticated)
+        } else if ckerror.code == CKError.Code.networkFailure
+                  || ckerror.code == CKError.Code.networkUnavailable
+                  || ckerror.code == CKError.Code.requestRateLimited
+                  || ckerror.code == CKError.Code.serviceUnavailable
+                  || ckerror.code == CKError.Code.zoneBusy {
+          completion(nil, .nonRecoverableError)
+        } else {
+          os_log("<fetchChangesForDatabase> unhandled CKError: %{public}@",
+                 log: DefaultChangesManager.logger,
+                 type: .error,
+                 String(describing: ckerror))
+          completion(nil, .nonRecoverableError)
+        }
+      } else {
+        if let newChangeToken = newChangeToken, newChangeToken != previousChangeToken {
+          self.serverChangeTokenStore.set(newChangeToken, for: scope)
+        }
+        os_log("fetched %d changed and %d deleted zones in %{public}@ database",
+               log: DefaultChangesManager.logger,
+               type: .debug,
+               changedZoneIDs.count,
+               deletedZoneIDs.count,
+               scope.description)
+        completion((changedZoneIDs, deletedZoneIDs), nil)
+      }
+    }
+    queueFactory.queue(withScope: scope).add(operation)
   }
 
   private func fetchChangesInZones(

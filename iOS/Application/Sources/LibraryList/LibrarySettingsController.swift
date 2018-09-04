@@ -4,11 +4,14 @@ import UIKit
 class LibrarySettingsController: UITableViewController {
   enum Section: Equatable {
     case name
+    case share
+    case shareOptions
     case delete
 
     var header: String? {
       switch self {
         case .name: return NSLocalizedString("librarySettings.nameSection.header", comment: "")
+        case .share, .shareOptions: return NSLocalizedString("librarySettings.shareSection.header", comment: "")
         case .delete: return nil
       }
     }
@@ -16,14 +19,13 @@ class LibrarySettingsController: UITableViewController {
     var isSelectable: Bool {
       switch self {
         case .name: return false
-        case .delete: return true
+        case .share, .shareOptions, .delete: return true
       }
     }
   }
 
-  var metadata: MovieLibraryMetadata! {
+  var metadata: MovieLibraryMetadata {
     didSet {
-      guard metadata != nil else { preconditionFailure("metadata has not been set") }
       guard isViewLoaded else { return }
       configure(for: metadata)
     }
@@ -31,11 +33,21 @@ class LibrarySettingsController: UITableViewController {
   private var originalMetadata: MovieLibraryMetadata!
   private var updatedMetadata: MovieLibraryMetadata!
   var onMetadataUpdate: ((MovieLibraryMetadata) -> Void)?
+  var onShareButtonTap: (() -> Void)?
   var onRemoveLibrary: (() -> Void)?
   var onDisappear: (() -> Void)?
   private var viewModel: [Section]!
 
   private var shouldIgnoreEdits = false
+
+  init(for metadata: MovieLibraryMetadata) {
+    self.metadata = metadata
+    super.init(style: .grouped)
+  }
+
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("use LibrarySettingsController.init() instead")
+  }
 }
 
 // MARK: - View Controller Lifecycle
@@ -43,7 +55,10 @@ class LibrarySettingsController: UITableViewController {
 extension LibrarySettingsController {
   override func viewDidLoad() {
     super.viewDidLoad()
-    guard metadata != nil else { preconditionFailure("metadata has not been set") }
+    tableView.register(TextFieldTableCell.self)
+    tableView.register(MessageTableCell.self)
+    tableView.register(ButtonTableCell.self)
+    tableView.keyboardDismissMode = .onDrag
     configure(for: metadata)
   }
 
@@ -61,7 +76,10 @@ extension LibrarySettingsController {
 
 extension LibrarySettingsController {
   private func configure(for metadata: MovieLibraryMetadata) {
-    viewModel = [.name, .delete]
+    viewModel = [.name, metadata.isShared ? .shareOptions : .share]
+    if metadata.isCurrentUserOwner {
+      viewModel.append(.delete)
+    }
     originalMetadata = metadata
     updatedMetadata = metadata
     tableView.reloadData()
@@ -97,13 +115,22 @@ extension LibrarySettingsController {
     return viewModel![section].header
   }
 
+  override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+    switch viewModel![section] {
+      case .shareOptions:
+        return metadata.isCurrentUserOwner
+            ? nil
+            : NSLocalizedString("librarySettings.howToRemoveSharedLibrary", comment: "")
+      default: return nil
+    }
+  }
+
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     switch viewModel![indexPath.section] {
       case .name:
         switch indexPath.row {
           case 0:
             let cell: TextFieldTableCell = tableView.dequeueReusableCell(for: indexPath)
-            cell.shouldResignFirstResponderOnReturn = true
             cell.onChange = { [weak self] newText in
               guard let `self` = self else { return }
               let oldText = self.updatedMetadata!.name
@@ -117,6 +144,7 @@ extension LibrarySettingsController {
               }
             }
             cell.textValue = updatedMetadata.name
+            cell.isEnabled = metadata.currentUserCanModify
             return cell
           default:
             let cell: MessageTableCell = tableView.dequeueReusableCell(for: indexPath)
@@ -124,6 +152,18 @@ extension LibrarySettingsController {
             cell.messageStyle = .error
             return cell
         }
+      case .share:
+        let cell: ButtonTableCell = tableView.dequeueReusableCell(for: indexPath)
+        cell.actionTitle = NSLocalizedString("librarySettings.shareLibrary", comment: "")
+        cell.buttonStyle = .default
+        cell.actionTitleAlignment = .left
+        return cell
+      case .shareOptions:
+        let cell: ButtonTableCell = tableView.dequeueReusableCell(for: indexPath)
+        cell.actionTitle = NSLocalizedString("librarySettings.shareOptions", comment: "")
+        cell.buttonStyle = .default
+        cell.actionTitleAlignment = .left
+        return cell
       case .delete:
         let cell: ButtonTableCell = tableView.dequeueReusableCell(for: indexPath)
         cell.actionTitle = NSLocalizedString("librarySettings.deleteSection.delete", comment: "")
@@ -142,11 +182,24 @@ extension LibrarySettingsController {
     switch viewModel![indexPath.section] {
       case .name:
         break
+      case .share, .shareOptions:
+        commitMetadataEdits()
+        onShareButtonTap?()
       case .delete:
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        let format = NSLocalizedString("librarySettings.removeLibrary.private.actionTitleFormat", comment: "")
-        alert.addAction(UIAlertAction(title: .localizedStringWithFormat(format, updatedMetadata.name),
-                                      style: .destructive) { _ in
+        let alert: UIAlertController
+        let deleteActionTitle: String
+        if metadata.isShared {
+          alert = UIAlertController(
+              title: NSLocalizedString("librarySettings.removeLibrary.shared.alert.title", comment: ""),
+              message: NSLocalizedString("librarySettings.removeLibrary.shared.alert.message", comment: ""),
+              preferredStyle: .alert)
+          deleteActionTitle = NSLocalizedString("librarySettings.removeLibrary.shared.actionTitle", comment: "")
+        } else {
+          alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+          let format = NSLocalizedString("librarySettings.removeLibrary.private.actionTitleFormat", comment: "")
+          deleteActionTitle = .localizedStringWithFormat(format, updatedMetadata.name)
+        }
+        alert.addAction(UIAlertAction(title: deleteActionTitle, style: .destructive) { _ in
           self.shouldIgnoreEdits = true
           self.onRemoveLibrary?()
         })
@@ -155,103 +208,4 @@ extension LibrarySettingsController {
     }
     tableView.deselectRow(at: indexPath, animated: true)
   }
-}
-
-class TextFieldTableCell: UITableViewCell, UITextFieldDelegate {
-  @IBOutlet private weak var textField: UITextField!
-
-  override func awakeFromNib() {
-    super.awakeFromNib()
-    textField.delegate = self
-    textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-  }
-
-  var textValue: String {
-    get {
-      return textField.text ?? ""
-    }
-    set {
-      textField.text = newValue
-    }
-  }
-
-  var shouldResignFirstResponderOnReturn: Bool = true
-
-  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-    if shouldResignFirstResponderOnReturn {
-      textField.resignFirstResponder()
-      return false
-    } else {
-      return true
-    }
-  }
-
-  var onChange: ((String) -> Void)?
-
-  @objc
-  func textFieldDidChange(_ textField: UITextField) {
-    onChange?(textField.text ?? "")
-  }
-}
-
-class ButtonTableCell: UITableViewCell {
-  enum ButtonStyle {
-    case `default`
-    case destructive
-  }
-
-  var actionTitle: String {
-    get {
-      return label.text ?? ""
-    }
-    set {
-      label.text = newValue
-    }
-  }
-  @IBOutlet private weak var label: UILabel!
-
-  var actionTitleAlignment: NSTextAlignment = .left {
-    didSet {
-      label.textAlignment = actionTitleAlignment
-    }
-  }
-
-  var buttonStyle: ButtonStyle = .default {
-    didSet {
-      switch buttonStyle {
-        case .default:
-          label.textColor = tintColor
-        case .destructive:
-          label.textColor = .destructive
-      }
-    }
-  }
-}
-
-class MessageTableCell: UITableViewCell {
-  enum MessageStyle {
-    case `default`
-    case error
-  }
-
-  var messageStyle: MessageStyle = .default {
-    didSet {
-      switch messageStyle {
-        case .default:
-          label.textColor = .black
-        case .error:
-          label.textColor = .red
-      }
-    }
-  }
-
-  var message: String {
-    get {
-      return label.text ?? ""
-    }
-    set {
-      label.text = newValue
-    }
-  }
-  @IBOutlet private weak var label: UILabel!
 }

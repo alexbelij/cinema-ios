@@ -18,6 +18,7 @@ class DeviceSyncingLibraryManager: MovieLibraryManager {
   private let syncManager: SyncManager
   private let subscriptionManager: SubscriptionManager
   private let changesManager: ChangesManager
+  private let shareManager: ShareManager
   private let libraryFactory: MovieLibraryFactory
   private let localData: RecordData<MovieLibraryManagerDataObject, MovieLibraryManagerError>
   private let cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag
@@ -28,6 +29,7 @@ class DeviceSyncingLibraryManager: MovieLibraryManager {
        syncManager: SyncManager,
        subscriptionManager: SubscriptionManager,
        changesManager: ChangesManager,
+       shareManager: ShareManager,
        libraryFactory: MovieLibraryFactory,
        data: RecordData<MovieLibraryManagerDataObject, MovieLibraryManagerError>,
        cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag = LocalCloudKitCacheInvalidationFlag()) {
@@ -37,6 +39,7 @@ class DeviceSyncingLibraryManager: MovieLibraryManager {
     self.syncManager = syncManager
     self.subscriptionManager = subscriptionManager
     self.changesManager = changesManager
+    self.shareManager = shareManager
     self.libraryFactory = libraryFactory
     self.localData = data
     self.cacheInvalidationFlag = cacheInvalidationFlag
@@ -70,7 +73,7 @@ extension DeviceSyncingLibraryManager {
       switch error {
         case .notAuthenticated, .userDeletedZone, .nonRecoverableError:
           completion(.failure(error.asMovieLibraryManagerError))
-        case .conflict, .itemNoLongerExists, .zoneNotFound:
+        case .conflict, .itemNoLongerExists, .zoneNotFound, .permissionFailure:
           fatalError("should not occur: \(error)")
       }
     } else {
@@ -94,7 +97,8 @@ extension DeviceSyncingLibraryManager {
         return
       }
       metadata.setCustomFields(in: record)
-      let queue = self.queueFactory.queue(withScope: .private)
+      let scope = metadata.isCurrentUserOwner ? CKDatabaseScope.private : CKDatabaseScope.shared
+      let queue = self.queueFactory.queue(withScope: scope)
       self.syncManager.sync(record.rawRecord, using: queue) { error in
         self.updateCompletion(metadata, record, error, completion)
       }
@@ -128,11 +132,11 @@ extension DeviceSyncingLibraryManager {
             completion(.failure(.libraryDoesNotExist))
           case .userDeletedZone:
             completion(.failure(error.asMovieLibraryManagerError))
-          case .notAuthenticated, .nonRecoverableError:
+          case .notAuthenticated, .permissionFailure, .nonRecoverableError:
             // reset record
             // TODO check if change tag has changed (serverRecordChanged)
             data.libraries[metadata.id]!.metadata.setCustomFields(in: record)
-            completion(.failure(.nonRecoverableError))
+            completion(.failure(error.asMovieLibraryManagerError))
           case .zoneNotFound:
             fatalError("should not occur: \(error)")
         }
@@ -155,7 +159,8 @@ extension DeviceSyncingLibraryManager {
         return
       }
       let library = data.libraries[id]!
-      let queue = self.queueFactory.queue(withScope: .private)
+      let scope = data.libraries[id]!.metadata.isCurrentUserOwner ? CKDatabaseScope.private : CKDatabaseScope.shared
+      let queue = self.queueFactory.queue(withScope: scope)
       self.syncManager.delete(record.rawRecord, using: queue) { error in
         self.removeCompletion(library, error, completion)
       }
@@ -171,7 +176,7 @@ extension DeviceSyncingLibraryManager {
       switch error {
         case .itemNoLongerExists:
           completion(.success(()))
-        case .notAuthenticated, .userDeletedZone, .nonRecoverableError:
+        case .notAuthenticated, .userDeletedZone, .permissionFailure, .nonRecoverableError:
           completion(.failure(error.asMovieLibraryManagerError))
         case .conflict, .zoneNotFound:
           fatalError("should not occur: \(error)")
@@ -208,7 +213,7 @@ extension DeviceSyncingLibraryManager {
                    type: .error,
                    String(describing: error))
             completion(.failed)
-          case .conflict, .itemNoLongerExists, .zoneNotFound:
+          case .conflict, .itemNoLongerExists, .zoneNotFound, .permissionFailure:
             fatalError("should not occur: \(error)")
         }
       } else if let changes = changes {
@@ -225,6 +230,9 @@ extension DeviceSyncingLibraryManager {
   private func processChanges(_ changes: FetchedChanges) {
     localData.access(onceLoaded: { data in
       var changeSet = ChangeSet<CKRecordID, MovieLibrary>()
+      self.process(deletedSharedZoneIDs: changes.deletedSharedZoneIDs,
+                   changeSet: &changeSet,
+                   data: data)
       self.process(changedRecords: changes.changedRecords, changeSet: &changeSet, data: data)
       self.process(deletedRecordIDsAndTypes: changes.deletedRecordIDsAndTypes,
                    changeSet: &changeSet,
@@ -246,6 +254,18 @@ extension DeviceSyncingLibraryManager {
     })
   }
 
+  func process(deletedSharedZoneIDs: [CKRecordZoneID],
+               changeSet: inout ChangeSet<CKRecordID, MovieLibrary>,
+               data: MovieLibraryManagerDataObject) {
+    for zoneID in deletedSharedZoneIDs {
+      for removedLibrary in data.libraries.values.filter({ $0.metadata.id.zoneID == zoneID }) {
+        data.libraries.removeValue(forKey: removedLibrary.metadata.id)
+        data.libraryRecords.removeValue(forKey: removedLibrary.metadata.id)
+        changeSet.deletions[removedLibrary.metadata.id] = removedLibrary
+      }
+    }
+  }
+
   private func process(changedRecords: [CKRecord],
                        changeSet: inout ChangeSet<CKRecordID, MovieLibrary>,
                        data: MovieLibraryManagerDataObject) {
@@ -253,18 +273,36 @@ extension DeviceSyncingLibraryManager {
     for rawRecord in changedRecords where rawRecord.recordType == LibraryRecord.recordType {
       let record = LibraryRecord(rawRecord)
       data.libraryRecords[record.id] = record
-      let newMetadata = MovieLibraryMetadata(from: record)
       if let existingLibrary = data.libraries[record.id] {
+        let newMetadata = MovieLibraryMetadata(from: record,
+                                               currentUserCanModify: existingLibrary.metadata.currentUserCanModify)
         if existingLibrary.metadata != newMetadata {
           updatedMetadata[newMetadata.id] = newMetadata
-          existingLibrary.metadata = newMetadata
           changeSet.modifications[newMetadata.id] = existingLibrary
         }
       } else {
+        let isCurrentUserOwner = record.id.zoneID.ownerName == CKCurrentUserDefaultName
+        let newMetadata = MovieLibraryMetadata(from: record, currentUserCanModify: isCurrentUserOwner)
         let newLibrary = self.libraryFactory.makeLibrary(with: newMetadata)
         data.libraries[record.id] = newLibrary
         changeSet.insertions.append(newLibrary)
       }
+    }
+    for rawRecord in changedRecords where rawRecord.recordType == "cloudkit.share" {
+      // swiftlint:disable:next force_cast
+      let share = rawRecord as! CKShare
+      data.shareRecords[share.recordID] = share
+      if let (libraryID, _) =
+      data.libraryRecords.first(where: { _, record in record.shareID == share.recordID }) {
+        let library = data.libraries[libraryID]!
+        var newMetadata = updatedMetadata[library.metadata.id] ?? library.metadata
+        newMetadata.currentUserCanModify = share.currentUserParticipant?.permission == .readWrite
+        updatedMetadata[newMetadata.id] = newMetadata
+        changeSet.modifications[newMetadata.id] = library
+      }
+    }
+    for (id, newMetadata) in updatedMetadata {
+      data.libraries[id]!.metadata = newMetadata
     }
   }
 
@@ -276,6 +314,210 @@ extension DeviceSyncingLibraryManager {
       let removedLibrary = data.libraries.removeValue(forKey: recordID)!
       data.libraryRecords.removeValue(forKey: recordID)
       changeSet.deletions[removedLibrary.metadata.id] = removedLibrary
+    }
+    for (recordID, recordType) in deletedRecordIDsAndTypes where recordType == "cloudkit.share" {
+      data.shareRecords.removeValue(forKey: recordID)
+    }
+  }
+}
+
+// MARK: - sharing
+
+extension DeviceSyncingLibraryManager {
+  func prepareCloudSharingController(
+      forLibraryWith metadata: MovieLibraryMetadata,
+      then completion: @escaping (Result<CloudSharingControllerParameters, MovieLibraryManagerError>) -> Void) {
+    localData.access(onceLoaded: { data in
+      guard let library = data.libraries[metadata.id] else {
+        completion(.failure(.libraryDoesNotExist))
+        return
+      }
+      if metadata.isShared {
+        guard let share = data.shareRecords[metadata.shareRecordID!] else {
+          fatalError("share should have been already fetched")
+        }
+        completion(.success(.hasBeenShared(share, self.container, self)))
+      } else {
+        let preparationHandler = { sharingCompletion in
+          self.prepareShare(for: library) { result in
+            switch result {
+              case let .failure(error):
+                sharingCompletion(nil, nil, error)
+              case let .success(share):
+                sharingCompletion(share, self.container, nil)
+            }
+          }
+        } as (@escaping (CKShare?, CKContainer?, Error?) -> Void) -> Void
+        completion(.success(.hasNotBeenShared(preparationHandler, self)))
+      }
+    }, whenUnableToLoad: { error in
+      completion(.failure(error))
+    })
+  }
+
+  private func prepareShare(for library: InternalMovieLibrary,
+                            then completion: @escaping (Result<CKShare, MovieLibraryManagerError>) -> Void) {
+    localData.access { data in
+      let rootRecord = data.libraryRecords[library.metadata.id]!
+      let share = CKShare(rootRecord: rootRecord.rawRecord)
+      share.publicPermission = .none
+      share[CKShareTitleKey] = library.metadata.name as CKRecordValue
+      share[CKShareTypeKey] = (kUTTypeDatabase as String) as CKRecordValue
+      self.shareManager.saveShare(share, with: rootRecord.rawRecord) { error in
+        self.prepareShareCompletion(library, share, rootRecord, error, completion)
+      }
+    }
+  }
+
+  private func prepareShareCompletion(
+      _ library: InternalMovieLibrary,
+      _ share: CKShare,
+      _ rootRecord: LibraryRecord,
+      _ error: CloudKitError?,
+      _ completion: @escaping (Result<CKShare, MovieLibraryManagerError>) -> Void) {
+    localData.access { data in
+      if let error = error {
+        switch error {
+          case let .conflict(serverRecord):
+            let libraryRecord = LibraryRecord(serverRecord)
+            data.libraryRecords[library.metadata.id] = libraryRecord
+            share[CKShareTitleKey] = libraryRecord.name as CKRecordValue
+            os_log("using updated library record for share", log: DeviceSyncingLibraryManager.logger, type: .default)
+            self.shareManager.saveShare(share, with: serverRecord) { error in
+              self.prepareShareCompletion(library, share, libraryRecord, error, completion)
+            }
+          case .notAuthenticated, .userDeletedZone, .itemNoLongerExists, .nonRecoverableError:
+            completion(.failure(error.asMovieLibraryManagerError))
+          case .zoneNotFound, .permissionFailure:
+            fatalError("should not occur: \(error)")
+        }
+      } else {
+        data.shareRecords[share.recordID] = share
+        var newMetadata = MovieLibraryMetadata(from: data.libraryRecords[library.metadata.id]!,
+                                               currentUserCanModify: true)
+        newMetadata.shareRecordID = share.recordID
+        library.metadata = newMetadata
+        self.localData.persist()
+        let changeSet = ChangeSet<CKRecordID, MovieLibrary>(modifications: [library.metadata.id: library])
+        self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
+        completion(.success(share))
+      }
+    }
+  }
+
+  func acceptCloudKitShare(with shareMetadata: CKShareMetadata) {
+    shareManager.acceptShare(with: shareMetadata) { error in
+      self.acceptShareCompletion(shareMetadata, error)
+    }
+  }
+
+  private func acceptShareCompletion(_ shareMetadata: CKShareMetadata, _ error: CloudKitError?) {
+    if let error = error {
+      switch error {
+        case .itemNoLongerExists:
+          os_log("owner stopped sharing", log: DeviceSyncingLibraryManager.logger, type: .default)
+        case .notAuthenticated, .zoneNotFound, .userDeletedZone, .nonRecoverableError:
+          os_log("unable to accept share %{public}@",
+                 log: DeviceSyncingLibraryManager.logger,
+                 type: .error,
+                 String(describing: error))
+        case .conflict, .permissionFailure:
+          fatalError("should not occur: \(error)")
+      }
+    } else {
+      localData.access(onceLoaded: { data in
+        guard data.libraries[shareMetadata.rootRecordID] == nil else {
+          os_log("already fetched shared library", log: DeviceSyncingLibraryManager.logger, type: .default)
+          return
+        }
+        self.fetchManager.fetchRecord(with: shareMetadata.rootRecordID,
+                                      using: self.queueFactory.queue(withScope: .shared)) { rootRecord, error in
+          self.fetchRootRecordCompletion(shareMetadata, rootRecord, error)
+        }
+      }, whenUnableToLoad: { error in
+        os_log("accepted share, but could not load libraries: %{public}@",
+               log: DeviceSyncingLibraryManager.logger,
+               type: .error,
+               String(describing: error))
+      })
+    }
+  }
+
+  private func fetchRootRecordCompletion(_ shareMetadata: CKShareMetadata,
+                                         _ rootRecord: CKRecord?,
+                                         _ error: CloudKitError?) {
+    if let error = error {
+      switch error {
+        case .zoneNotFound, .itemNoLongerExists:
+          os_log("owner stopped sharing record", log: DeviceSyncingLibraryManager.logger, type: .default)
+        case .notAuthenticated, .nonRecoverableError:
+          os_log("unable to fetch shared record %{public}@",
+                 log: DeviceSyncingLibraryManager.logger,
+                 type: .error,
+                 String(describing: error))
+        case .conflict, .userDeletedZone, .permissionFailure:
+          fatalError("should not occur: \(error)")
+      }
+    } else if let rootRecord = rootRecord {
+      localData.access { data in
+        let libraryRecord = LibraryRecord(rootRecord)
+        let currentUserCanModify = shareMetadata.share.currentUserParticipant?.permission == .readWrite
+        let metadata = MovieLibraryMetadata(from: libraryRecord, currentUserCanModify: currentUserCanModify)
+        let library = self.libraryFactory.makeLibrary(with: metadata)
+        data.libraries[libraryRecord.id] = library
+        data.libraryRecords[libraryRecord.id] = libraryRecord
+        data.shareRecords[shareMetadata.share.recordID] = shareMetadata.share
+        self.localData.persist()
+        let changeSet = ChangeSet<CKRecordID, MovieLibrary>(insertions: [library])
+        self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
+      }
+    }
+  }
+}
+
+extension DeviceSyncingLibraryManager: CloudSharingControllerCallback {
+  func didStopSharingLibrary(with metadata: MovieLibraryMetadata) {
+    localData.access { data in
+      guard let library = data.libraries[metadata.id] else {
+        preconditionFailure("library has been removed while presenting sharing controller")
+      }
+      if library.metadata.isCurrentUserOwner {
+        data.shareRecords.removeValue(forKey: library.metadata.shareRecordID!)
+        library.metadata.shareRecordID = nil
+        self.fetchManager.fetchRecord(with: library.metadata.id,
+                                      using: self.queueFactory.queue(withScope: .private)) { rawRecord, error in
+          if let error = error {
+            switch error {
+              case .nonRecoverableError:
+                self.cacheInvalidationFlag.set()
+                os_log("unable to fetch record after sharing stopped: %{public}@",
+                       log: DeviceSyncingLibraryManager.logger,
+                       type: .error,
+                       String(describing: error))
+              case .notAuthenticated, .userDeletedZone, .itemNoLongerExists, .zoneNotFound, .conflict,
+                   .permissionFailure:
+                fatalError("should not occur: \(error)")
+            }
+          } else if let rawRecord = rawRecord {
+            self.localData.access { data in
+              let record = LibraryRecord(rawRecord)
+              data.libraryRecords[record.id] = record
+              library.metadata = MovieLibraryMetadata(from: record, currentUserCanModify: true)
+              self.localData.persist()
+              let changeSet = ChangeSet<CKRecordID, MovieLibrary>(modifications: [library.metadata.id: library])
+              self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
+            }
+          }
+        }
+      } else {
+        data.libraries.removeValue(forKey: library.metadata.id)
+        data.libraryRecords.removeValue(forKey: library.metadata.id)
+        data.shareRecords.removeValue(forKey: library.metadata.shareRecordID!)
+        library.cleanupForRemoval()
+        self.localData.persist()
+        let changeSet = ChangeSet<CKRecordID, MovieLibrary>(deletions: [library.metadata.id: library])
+        self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
+      }
     }
   }
 }

@@ -20,9 +20,10 @@ class CoreCoordinator: CustomPresentableCoordinator {
   private let tabBarController = UITabBarController()
 
   // child coordinators
+  private let libraryContentNavigationController: UINavigationController
   private let libraryContentCoordinator: LibraryContentCoordinator
   private let genreListCoordinator: GenreListCoordinator
-  private let searchTmdbCoordinator: SearchTmdbCoordinator
+  private var searchTmdbCoordinator: SearchTmdbCoordinator?
   private var librarySettingsCoordinator: LibraryListCoordinator?
 
   init(for library: MovieLibrary, dependencies: AppDependencies) {
@@ -30,13 +31,13 @@ class CoreCoordinator: CustomPresentableCoordinator {
     self.libraryManager = dependencies.libraryManager
     self.notificationCenter = dependencies.notificationCenter
     self.primaryLibrary = library
-    let libraryContentNav = UINavigationController()
+    libraryContentNavigationController = UINavigationController()
     libraryContentCoordinator = LibraryContentCoordinator(for: library,
                                                           displaying: .all,
-                                                          navigationController: libraryContentNav,
+                                                          navigationController: libraryContentNavigationController,
                                                           dependencies: dependencies)
     libraryContentCoordinator.showsLibrarySwitch = true
-    libraryContentNav.tabBarItem = UITabBarItem(
+    libraryContentNavigationController.tabBarItem = UITabBarItem(
         title: NSLocalizedString("library", comment: ""),
         image: #imageLiteral(resourceName: "Tab-Library-normal"),
         selectedImage: #imageLiteral(resourceName: "Tab-Library-selected")
@@ -50,19 +51,27 @@ class CoreCoordinator: CustomPresentableCoordinator {
         selectedImage: #imageLiteral(resourceName: "Tab-Genre-selected")
     )
 
-    searchTmdbCoordinator = SearchTmdbCoordinator(for: primaryLibrary, dependencies: dependencies)
-    searchTmdbCoordinator.rootViewController.tabBarItem = UITabBarItem(
-        title: NSLocalizedString("addMovie.title", comment: ""),
-        image: #imageLiteral(resourceName: "Tab-AddMovie-normal"),
-        selectedImage: #imageLiteral(resourceName: "Tab-AddMovie-selected")
-    )
-
-    tabBarController.viewControllers = [libraryContentNav,
-                                        genreListCoordinator.rootViewController,
-                                        searchTmdbCoordinator.rootViewController]
-
     libraryManager.delegates.add(self)
     libraryContentCoordinator.delegate = self
+    setTabs(includeSearchTab: library.metadata.currentUserCanModify)
+  }
+
+  private func setTabs(includeSearchTab: Bool) {
+    if includeSearchTab {
+      searchTmdbCoordinator = SearchTmdbCoordinator(for: primaryLibrary, dependencies: dependencies)
+      searchTmdbCoordinator!.rootViewController.tabBarItem = UITabBarItem(
+          title: NSLocalizedString("addMovie.title", comment: ""),
+          image: #imageLiteral(resourceName: "Tab-AddMovie-normal"),
+          selectedImage: #imageLiteral(resourceName: "Tab-AddMovie-selected")
+      )
+      tabBarController.viewControllers = [libraryContentNavigationController,
+                                          genreListCoordinator.rootViewController,
+                                          searchTmdbCoordinator!.rootViewController]
+    } else {
+      searchTmdbCoordinator = nil
+      tabBarController.viewControllers = [libraryContentNavigationController,
+                                          genreListCoordinator.rootViewController]
+    }
   }
 }
 
@@ -79,7 +88,7 @@ extension CoreCoordinator: LibraryContentCoordinatorDelegate {
                 self.notificationCenter.post(event.notification)
               case .nonRecoverableError:
                 fatalError("unable to fetch libraries: \(error)")
-              case .libraryDoesNotExist:
+              case .libraryDoesNotExist, .permissionFailure:
                 fatalError("should not occur: \(error)")
             }
           case let .success(libraries):
@@ -92,21 +101,26 @@ extension CoreCoordinator: LibraryContentCoordinatorDelegate {
   }
 
   private func showLibrarySheet(for libraries: [MovieLibrary]) {
-    let controller = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
+    let config = LibrarySheetCellConfig(sharedLibraryExists: libraries.contains { $0.metadata.isShared })
+    let controller = TabularSheetController<LibrarySheetItem>(cellConfig: config)
     libraries.sorted(by: StandardSortDescriptors.byLibraryName)
              .forEach { library in
-               let isCurrentLibrary = self.primaryLibrary.metadata.id == library.metadata.id
-               controller.addSheetItem(SelectableLabelSheetItem(title: library.metadata.name,
-                                                                showCheckmark: isCurrentLibrary) { _ in
+               let metadata = library.metadata
+               controller.addSheetItem(.library(name: metadata.name,
+                                                shared: metadata.isShared,
+                                                selected: self.primaryLibrary.metadata.id == metadata.id) { _ in
                  self.switchLibrary(to: library)
                })
              }
-    controller.addSheetItem(SelectableLabelSheetItem(title: NSLocalizedString("core.librarySettings", comment: ""),
-                                                     showCheckmark: false) { _ in
-      self.librarySettingsCoordinator = LibraryListCoordinator(dependencies: self.dependencies)
-      self.tabBarController.present(self.librarySettingsCoordinator!.rootViewController, animated: true)
+    controller.addSheetItem(.settings { _ in
+      self.showLibrarySettings()
     })
     self.tabBarController.present(controller, animated: true)
+  }
+
+  func showLibrarySettings() {
+    self.librarySettingsCoordinator = LibraryListCoordinator(dependencies: self.dependencies)
+    self.tabBarController.present(self.librarySettingsCoordinator!.rootViewController, animated: true)
   }
 
   private func switchLibrary(to newLibrary: MovieLibrary) {
@@ -115,7 +129,7 @@ extension CoreCoordinator: LibraryContentCoordinatorDelegate {
       self.primaryLibrary = newLibrary
       self.libraryContentCoordinator.library = newLibrary
       self.genreListCoordinator.library = newLibrary
-      self.searchTmdbCoordinator.library = newLibrary
+      self.setTabs(includeSearchTab: newLibrary.metadata.currentUserCanModify)
     }
   }
 
@@ -128,7 +142,13 @@ extension CoreCoordinator: MovieLibraryManagerDelegate {
   func libraryManager(_ libraryManager: MovieLibraryManager,
                       didUpdateLibraries changeSet: ChangeSet<CKRecordID, MovieLibrary>) {
     DispatchQueue.main.async {
-      if changeSet.deletions[self.primaryLibrary.metadata.id] != nil {
+      if changeSet.modifications[self.primaryLibrary.metadata.id] != nil {
+        if self.primaryLibrary.metadata.currentUserCanModify && self.searchTmdbCoordinator == nil {
+          self.setTabs(includeSearchTab: true)
+        } else if !self.primaryLibrary.metadata.currentUserCanModify && self.searchTmdbCoordinator != nil {
+          self.setTabs(includeSearchTab: false)
+        }
+      } else if changeSet.deletions[self.primaryLibrary.metadata.id] != nil {
         libraryManager.fetchLibraries { result in
           switch result {
             case let .failure(error):

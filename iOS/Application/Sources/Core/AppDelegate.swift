@@ -22,6 +22,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     appCoordinator.applicationDidBecomeActive()
   }
 
+  func application(_ application: UIApplication,
+                   userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShareMetadata) {
+    appCoordinator.acceptCloudKitShare(with: cloudKitShareMetadata)
+  }
+
   func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey: Any]) -> Bool {
     return appCoordinator.handleImport(from: url)
   }
