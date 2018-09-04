@@ -3,16 +3,13 @@ import os.log
 import UIKit.UIImage
 
 protocol TMDBSwiftCache {
-
   func string(for key: String, orSupply supplier: () -> String?) -> String?
   func poster(for key: String, orSupply supplier: () -> UIImage?) -> UIImage?
   func largePoster(for key: String, orSupply supplier: () -> UIImage?) -> UIImage?
   func backdrop(for key: String, orSupply supplier: () -> UIImage?) -> UIImage?
-
 }
 
 class StandardTMDBSwiftCache: TMDBSwiftCache {
-
   private static let logger = Logging.createLogger(category: "TMDB-Cache")
   private let movieCache: Storage<String>
   private let posterCache: Storage<UIImage>
