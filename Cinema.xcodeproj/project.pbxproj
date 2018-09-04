@@ -929,7 +929,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 84DFA87D2F17B7C5A92E65FB /* Pods-CinemaKit.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
@@ -962,7 +962,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C62540F445D01CD5E2C22CA4 /* Pods-CinemaKit.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
@@ -1108,7 +1108,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 00B2E6E2A80AF1B32174C48F /* Pods-iOS Application.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = iOS/Application/Assets/Cinema_iOS_Application.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -1129,7 +1129,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 62F940D580E4634B69CB1469 /* Pods-iOS Application.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = iOS/Application/Assets/Cinema_iOS_Application.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
