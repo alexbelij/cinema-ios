@@ -30,7 +30,7 @@
 			<key>Title</key>
 			<string>reset.localData</string>
 			<key>Key</key>
-			<string>LocalCloudKitCacheIsInvalid</string>
+			<string>ShouldResetLocalData</string>
 			<key>DefaultValue</key>
 			<false/>
 		</dict>
