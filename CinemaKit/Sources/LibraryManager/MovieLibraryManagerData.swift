@@ -119,8 +119,12 @@ class MovieLibraryManagerData: LazyData<MovieLibraryManagerDataObject, MovieLibr
         if let shareRecord = shareRecordsDict[shareRecordID] {
           currentUserCanModify = shareRecord.currentUserParticipant?.permission == .readWrite
         } else {
-          // TODO libraryRecord has changed
-          fatalError()
+          os_log("found library record without corresponding CKShare -> reloading",
+                 log: MovieLibraryManagerData.logger,
+                 type: .default)
+          clear()
+          fetchLibraryRecords()
+          return
         }
       } else {
         currentUserCanModify = true
