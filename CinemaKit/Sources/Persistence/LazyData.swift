@@ -78,6 +78,12 @@ class LazyData<DataType, ErrorType> {
     suspendedCalls.removeAll()
   }
 
+  func requestReload() {
+    queue.async {
+      self.data = nil
+    }
+  }
+
   func persist() {
     dispatchPrecondition(condition: DispatchPredicate.onQueue(queue))
     if let data = self.data {

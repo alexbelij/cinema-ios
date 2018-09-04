@@ -154,9 +154,8 @@ extension DeviceSyncingMovieLibrary {
           case .userDeletedZone:
             completion(.failure(error.asMovieLibraryError))
           case .notAuthenticated, .permissionFailure, .nonRecoverableError:
-            // reset record
-            // TODO check if change tag has changed (serverRecordChanged)
-            data.movies[movie.cloudProperties.id]!.cloudProperties.setCustomFields(in: record)
+            // need to reset record (changed keys)
+            self.localData.requestReload()
             completion(.failure(error.asMovieLibraryError))
           case .zoneNotFound:
             fatalError("should not occur: \(error)")

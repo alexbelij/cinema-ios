@@ -130,9 +130,8 @@ extension DeviceSyncingLibraryManager {
           case .userDeletedZone:
             completion(.failure(error.asMovieLibraryManagerError))
           case .notAuthenticated, .permissionFailure, .nonRecoverableError:
-            // reset record
-            // TODO check if change tag has changed (serverRecordChanged)
-            data.libraries[metadata.id]!.metadata.setCustomFields(in: record)
+            // need to reset record (changed keys)
+            self.localData.requestReload()
             completion(.failure(error.asMovieLibraryManagerError))
           case .zoneNotFound:
             fatalError("should not occur: \(error)")
