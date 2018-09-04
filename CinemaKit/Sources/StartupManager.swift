@@ -27,6 +27,7 @@ public protocol StartupManager {
 public class CinemaKitStartupManager: StartupManager {
   private static let logger = Logging.createLogger(category: "CinemaKitStartupManager")
   private static let deviceSyncZoneCreatedKey = "DeviceSyncZoneCreated"
+  private static let appVersionKey = "CFBundleShortVersionString"
 
   // directories
   private static let documentsDir = directoryUrl(for: .documentDirectory)
@@ -35,10 +36,29 @@ public class CinemaKitStartupManager: StartupManager {
   private static let libraryRecordStoreURL = appSupportDir.appendingPathComponent("Libraries.plist")
   private static let shareRecordStoreURL = appSupportDir.appendingPathComponent("Shares.plist")
   fileprivate static let movieRecordsDir = appSupportDir.appendingPathComponent("MovieRecords", isDirectory: true)
+  private static let cachesDir = directoryUrl(for: .cachesDirectory)
+  private static let posterCacheDir = cachesDir.appendingPathComponent("PosterCache", isDirectory: true)
 
   // cinema data file
   private static let libraryDataFileURL = documentsDir.appendingPathComponent("cinema.data")
   private static let legacyLibraryDataFileURL = appSupportDir.appendingPathComponent("cinema.data")
+
+  private lazy var previousVersion: AppVersion? = {
+    if let versionString = UserDefaults.standard.string(forKey: CinemaKitStartupManager.appVersionKey) {
+      return AppVersion(versionString)
+    } else if FileManager.default.fileExists(atPath: CinemaKitStartupManager.libraryDataFileURL.path) {
+      return "1.4.1"
+    } else if FileManager.default.fileExists(atPath: CinemaKitStartupManager.legacyLibraryDataFileURL.path) {
+      return "1.2"
+    } else {
+      return nil
+    }
+  }()
+  private lazy var currentVersion: AppVersion = {
+    // swiftlint:disable:next force_cast
+    let versionString = Bundle.main.object(forInfoDictionaryKey: CinemaKitStartupManager.appVersionKey) as! String
+    return AppVersion(versionString)
+  }()
 
   private let application: UIApplication
   private let container = CKContainer.default()
@@ -49,12 +69,47 @@ public class CinemaKitStartupManager: StartupManager {
 
   public func initialize(then completion: @escaping (AppDependencies) -> Void) {
     os_log("initializing CinemaKit", log: CinemaKitStartupManager.logger, type: .default)
+    if let previousVersion = previousVersion {
+      os_log("app has been launched before (version %{public}@)",
+             log: CinemaKitStartupManager.logger,
+             type: .info,
+             previousVersion.description)
+      if previousVersion < currentVersion {
+        os_log("migrating from version %{public}@",
+               log: CinemaKitStartupManager.logger,
+               type: .info,
+               previousVersion.description)
+        clearPosterCache()
+        markCurrentVersion()
+      } else if previousVersion > currentVersion {
+        fatalError("unsupported -> clean app data")
+      }
+    } else {
+      os_log("app has never been launched before", log: CinemaKitStartupManager.logger, type: .info)
+      markCurrentVersion()
+    }
     if UserDefaults.standard.bool(forKey: LocalCloudKitCacheInvalidationFlag.key) {
       os_log("local CloudKit cache was invalidated", log: CinemaKitStartupManager.logger, type: .default)
       resetLocalCloudKitCache()
     }
     setUpDirectories()
     setUpDeviceSyncZone(then: completion)
+  }
+
+  private func clearPosterCache() {
+    do {
+      os_log("clearing poster cache", log: CinemaKitStartupManager.logger, type: .default)
+      try FileManager.default.removeItem(at: CinemaKitStartupManager.posterCacheDir)
+    } catch {
+      os_log("unable to clear poster cache: %{public}@",
+             log: CinemaKitStartupManager.logger,
+             type: .fault,
+             String(describing: error))
+    }
+  }
+
+  private func markCurrentVersion() {
+    UserDefaults.standard.set(currentVersion.description, forKey: CinemaKitStartupManager.appVersionKey)
   }
 
   private func resetLocalCloudKitCache() {
