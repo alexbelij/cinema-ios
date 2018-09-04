@@ -48,10 +48,19 @@ class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
   }
 
   override func loadData() {
-    if let rawMovieRecords = movieRecordStore.loadRecords(),
-       let tmdbProperties = tmdbPropertiesStore.load() {
-      os_log("loaded records from store", log: MovieLibraryData.logger, type: .debug)
-      makeData(rawMovieRecords.map { MovieRecord($0) }, tmdbProperties)
+    if let rawMovieRecords = movieRecordStore.loadRecords() {
+      let movieRecords = rawMovieRecords.map { MovieRecord($0) }
+      if let tmdbProperties = tmdbPropertiesStore.load() {
+        os_log("loaded records from store", log: MovieLibraryData.logger, type: .debug)
+        makeData(rawMovieRecords.map { MovieRecord($0) }, tmdbProperties)
+      } else {
+        os_log("fetching %d tmdb properties", log: MovieLibraryData.logger, type: .debug, rawMovieRecords.count)
+        self.fetchTmdbProperties(for: movieRecords) { tmdbProperties in
+          os_log("saving fetched tmdb properties store", log: MovieLibraryData.logger, type: .debug)
+          self.tmdbPropertiesStore.save(tmdbProperties)
+          self.makeData(movieRecords, tmdbProperties)
+        }
+      }
     } else {
       os_log("loading records from cloud", log: MovieLibraryData.logger, type: .debug)
       fetchMoviesFromCloud { result in

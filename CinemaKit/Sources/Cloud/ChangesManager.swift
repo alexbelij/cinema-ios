@@ -19,14 +19,14 @@ class DefaultChangesManager: ChangesManager {
   private static let logger = Logging.createLogger(category: "ChangesManager")
   private let queueFactory: DatabaseOperationQueueFactory
   private let serverChangeTokenStore: ServerChangeTokenStore
-  private let cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag
+  private let dataInvalidationFlag: LocalDataInvalidationFlag
 
   init(queueFactory: DatabaseOperationQueueFactory,
        serverChangeTokenStore: ServerChangeTokenStore = FileBasedServerChangeTokenStore(),
-       cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag = LocalCloudKitCacheInvalidationFlag()) {
+       dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
     self.queueFactory = queueFactory
     self.serverChangeTokenStore = serverChangeTokenStore
-    self.cacheInvalidationFlag = cacheInvalidationFlag
+    self.dataInvalidationFlag = dataInvalidationFlag
   }
 
   func fetchChanges(then completion: @escaping (FetchedChanges?, CloudKitError?) -> Void) {
@@ -105,7 +105,7 @@ class DefaultChangesManager: ChangesManager {
           return
         }
         if ckerror.code == CKError.Code.changeTokenExpired {
-          self.cacheInvalidationFlag.set()
+          self.dataInvalidationFlag.set()
         } else if ckerror.code == CKError.Code.notAuthenticated {
           completion(nil, .notAuthenticated)
         } else if ckerror.code == CKError.Code.networkFailure
@@ -165,7 +165,7 @@ class DefaultChangesManager: ChangesManager {
         guard let ckerror = error as? CKError else { return }
         if ckerror.code == CKError.Code.changeTokenExpired
            || ckerror.code == CKError.Code.userDeletedZone {
-          self.cacheInvalidationFlag.set()
+          self.dataInvalidationFlag.set()
         }
       } else {
         if let newChangeToken = newChangeToken, newChangeToken != options[zoneID]!.previousServerChangeToken {
@@ -181,7 +181,7 @@ class DefaultChangesManager: ChangesManager {
     }
     operation.fetchRecordZoneChangesCompletionBlock = { error in
       if let error = error {
-        if self.cacheInvalidationFlag.isSet {
+        if self.dataInvalidationFlag.isSet {
           completion(nil, .userDeletedZone)
           return
         }

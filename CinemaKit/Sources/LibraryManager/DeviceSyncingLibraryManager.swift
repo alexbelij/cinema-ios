@@ -20,7 +20,7 @@ class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
   private let shareManager: ShareManager
   private let libraryFactory: MovieLibraryFactory
   private let localData: LazyData<MovieLibraryManagerDataObject, MovieLibraryManagerError>
-  private let cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag
+  private let dataInvalidationFlag: LocalDataInvalidationFlag
 
   init(container: CKContainer,
        queueFactory: DatabaseOperationQueueFactory,
@@ -30,7 +30,7 @@ class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
        shareManager: ShareManager,
        libraryFactory: MovieLibraryFactory,
        data: LazyData<MovieLibraryManagerDataObject, MovieLibraryManagerError>,
-       cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag = LocalCloudKitCacheInvalidationFlag()) {
+       dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
     self.container = container
     self.queueFactory = queueFactory
     self.fetchManager = fetchManager
@@ -39,7 +39,7 @@ class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
     self.shareManager = shareManager
     self.libraryFactory = libraryFactory
     self.localData = data
-    self.cacheInvalidationFlag = cacheInvalidationFlag
+    self.dataInvalidationFlag = dataInvalidationFlag
   }
 }
 
@@ -484,7 +484,7 @@ extension DeviceSyncingLibraryManager: CloudSharingControllerCallback {
           if let error = error {
             switch error {
               case .nonRecoverableError:
-                self.cacheInvalidationFlag.set()
+                self.dataInvalidationFlag.set()
                 os_log("unable to fetch record after sharing stopped: %{public}@",
                        log: DeviceSyncingLibraryManager.logger,
                        type: .error,

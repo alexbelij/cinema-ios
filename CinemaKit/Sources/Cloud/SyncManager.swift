@@ -18,10 +18,10 @@ protocol SyncManager {
 class DefaultSyncManager: SyncManager {
   private static let logger = Logging.createLogger(category: "SyncManager")
 
-  private let cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag
+  private let dataInvalidationFlag: LocalDataInvalidationFlag
 
-  init(cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag = LocalCloudKitCacheInvalidationFlag()) {
-    self.cacheInvalidationFlag = cacheInvalidationFlag
+  init(dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
+    self.dataInvalidationFlag = dataInvalidationFlag
   }
 
   func sync(_ record: CKRecord,
@@ -57,7 +57,7 @@ class DefaultSyncManager: SyncManager {
         } else if ckerror.code == CKError.Code.notAuthenticated {
           completion(.notAuthenticated)
         } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.cacheInvalidationFlag.set()
+          self.dataInvalidationFlag.set()
           completion(.userDeletedZone)
         } else if ckerror.code == CKError.Code.serverRecordChanged {
           completion(.conflict(serverRecord: ckerror.serverRecord!))
@@ -149,7 +149,7 @@ class DefaultSyncManager: SyncManager {
         } else if ckerror.code == CKError.Code.notAuthenticated {
           completion(.notAuthenticated)
         } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.cacheInvalidationFlag.set()
+          self.dataInvalidationFlag.set()
           completion(.userDeletedZone)
         } else if ckerror.code == CKError.Code.partialFailure {
           os_log("<syncAll> partial error: %{public}@",
@@ -214,7 +214,7 @@ class DefaultSyncManager: SyncManager {
         } else if ckerror.code == CKError.Code.notAuthenticated {
           completion(.notAuthenticated)
         } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.cacheInvalidationFlag.set()
+          self.dataInvalidationFlag.set()
           completion(.userDeletedZone)
         } else if ckerror.code == CKError.Code.unknownItem {
           completion(nil)

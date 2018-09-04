@@ -32,10 +32,10 @@ extension FetchManager {
 class DefaultFetchManager: FetchManager {
   private static let logger = Logging.createLogger(category: "FetchManager")
 
-  private let cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag
+  private let dataInvalidationFlag: LocalDataInvalidationFlag
 
-  init(cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag = LocalCloudKitCacheInvalidationFlag()) {
-    self.cacheInvalidationFlag = cacheInvalidationFlag
+  init(dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
+    self.dataInvalidationFlag = dataInvalidationFlag
   }
 
   func fetchZones(using queue: DatabaseOperationQueue,
@@ -146,7 +146,7 @@ class DefaultFetchManager: FetchManager {
         } else if ckerror.code == CKError.Code.zoneNotFound {
           completion(nil, .zoneNotFound)
         } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.cacheInvalidationFlag.set()
+          self.dataInvalidationFlag.set()
           completion(nil, .userDeletedZone)
         } else if ckerror.code == CKError.Code.networkFailure
                   || ckerror.code == CKError.Code.networkUnavailable

@@ -3,8 +3,8 @@ import Foundation
 import os.log
 import UIKit
 
-struct LocalCloudKitCacheInvalidationFlag {
-  fileprivate static let key = "LocalCloudKitCacheIsInvalid"
+struct LocalDataInvalidationFlag {
+  fileprivate static let key = "ShouldResetLocalData"
   private let userDefaults: UserDefaultsProtocol
 
   init(userDefaults: UserDefaultsProtocol = UserDefaults.standard) {
@@ -12,11 +12,11 @@ struct LocalCloudKitCacheInvalidationFlag {
   }
 
   var isSet: Bool {
-    return userDefaults.bool(forKey: LocalCloudKitCacheInvalidationFlag.key)
+    return userDefaults.bool(forKey: LocalDataInvalidationFlag.key)
   }
 
   func set() {
-    userDefaults.set(true, forKey: LocalCloudKitCacheInvalidationFlag.key)
+    userDefaults.set(true, forKey: LocalDataInvalidationFlag.key)
   }
 }
 
@@ -102,9 +102,9 @@ public class CinemaKitStartupManager: StartupManager {
       os_log("app has never been launched before", log: CinemaKitStartupManager.logger, type: .info)
       markCurrentVersion()
     }
-    if userDefaults.bool(forKey: LocalCloudKitCacheInvalidationFlag.key) {
-      os_log("local CloudKit cache was invalidated", log: CinemaKitStartupManager.logger, type: .default)
-      resetLocalCloudKitCache()
+    if userDefaults.bool(forKey: LocalDataInvalidationFlag.key) {
+      os_log("should reset local data", log: CinemaKitStartupManager.logger, type: .default)
+      resetLocalData()
     } else if userDefaults.bool(forKey: CinemaKitStartupManager.shouldResetMovieDetailsKey) {
       os_log("should reset movie details", log: CinemaKitStartupManager.logger, type: .default)
       resetMovieDetails()
@@ -129,8 +129,8 @@ public class CinemaKitStartupManager: StartupManager {
     UserDefaults.standard.set(currentVersion.description, forKey: CinemaKitStartupManager.appVersionKey)
   }
 
-  private func resetLocalCloudKitCache() {
-    userDefaults.removeObject(forKey: LocalCloudKitCacheInvalidationFlag.key)
+  private func resetLocalData() {
+    userDefaults.removeObject(forKey: LocalDataInvalidationFlag.key)
     userDefaults.removeObject(forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
     do {
       let fileManager = FileManager.default
