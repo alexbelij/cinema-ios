@@ -3,8 +3,8 @@ import Foundation
 import os.log
 import UIKit
 
-struct LocalCloudKitCacheInvalidationFlag {
-  fileprivate static let key = "LocalCloudKitCacheIsInvalid"
+struct LocalDataInvalidationFlag {
+  fileprivate static let key = "ShouldResetLocalData"
   private let userDefaults: UserDefaultsProtocol
 
   init(userDefaults: UserDefaultsProtocol = UserDefaults.standard) {
@@ -12,22 +12,30 @@ struct LocalCloudKitCacheInvalidationFlag {
   }
 
   var isSet: Bool {
-    return userDefaults.bool(forKey: LocalCloudKitCacheInvalidationFlag.key)
+    return userDefaults.bool(forKey: LocalDataInvalidationFlag.key)
   }
 
   func set() {
-    userDefaults.set(true, forKey: LocalCloudKitCacheInvalidationFlag.key)
+    userDefaults.set(true, forKey: LocalDataInvalidationFlag.key)
   }
 }
 
 public protocol StartupManager {
-  func initialize(then completion: @escaping (AppDependencies) -> Void)
+  func initialize(handler: @escaping (StartupProgress) -> Void)
+}
+
+public enum StartupProgress {
+  case settingUpCloudEnvironment
+  case foundLegacyData((Bool) -> Void)
+  case migrationFailed
+  case ready(AppDependencies)
 }
 
 public class CinemaKitStartupManager: StartupManager {
   private static let logger = Logging.createLogger(category: "CinemaKitStartupManager")
   private static let deviceSyncZoneCreatedKey = "DeviceSyncZoneCreated"
   private static let appVersionKey = "CFBundleShortVersionString"
+  private static let shouldResetMovieDetailsKey = "ShouldResetMovieDetails"
 
   // directories
   private static let documentsDir = directoryUrl(for: .documentDirectory)
@@ -36,19 +44,20 @@ public class CinemaKitStartupManager: StartupManager {
   private static let libraryRecordStoreURL = appSupportDir.appendingPathComponent("Libraries.plist")
   private static let shareRecordStoreURL = appSupportDir.appendingPathComponent("Shares.plist")
   fileprivate static let movieRecordsDir = appSupportDir.appendingPathComponent("MovieRecords", isDirectory: true)
+  fileprivate static let tmdbPropertiesDir = appSupportDir.appendingPathComponent("TmdbProperties", isDirectory: true)
   private static let cachesDir = directoryUrl(for: .cachesDirectory)
   private static let posterCacheDir = cachesDir.appendingPathComponent("PosterCache", isDirectory: true)
 
   // cinema data file
-  private static let libraryDataFileURL = documentsDir.appendingPathComponent("cinema.data")
-  private static let legacyLibraryDataFileURL = appSupportDir.appendingPathComponent("cinema.data")
+  private static let legacyLibraryDataFileURL12 = appSupportDir.appendingPathComponent("cinema.data")
+  private static let legacyLibraryDataFileURL141 = documentsDir.appendingPathComponent("cinema.data")
 
   private lazy var previousVersion: AppVersion? = {
     if let versionString = UserDefaults.standard.string(forKey: CinemaKitStartupManager.appVersionKey) {
       return AppVersion(versionString)
-    } else if FileManager.default.fileExists(atPath: CinemaKitStartupManager.libraryDataFileURL.path) {
+    } else if FileManager.default.fileExists(atPath: CinemaKitStartupManager.legacyLibraryDataFileURL141.path) {
       return "1.4.1"
-    } else if FileManager.default.fileExists(atPath: CinemaKitStartupManager.legacyLibraryDataFileURL.path) {
+    } else if FileManager.default.fileExists(atPath: CinemaKitStartupManager.legacyLibraryDataFileURL12.path) {
       return "1.2"
     } else {
       return nil
@@ -62,12 +71,17 @@ public class CinemaKitStartupManager: StartupManager {
 
   private let application: UIApplication
   private let container = CKContainer.default()
+  private let userDefaults: UserDefaultsProtocol = UserDefaults.standard
+  private let migratedLibraryName: String
+  private var progressHandler: ((StartupProgress) -> Void)!
 
-  public init(using application: UIApplication) {
+  public init(using application: UIApplication, migratedLibraryName: String) {
     self.application = application
+    self.migratedLibraryName = migratedLibraryName
   }
 
-  public func initialize(then completion: @escaping (AppDependencies) -> Void) {
+  public func initialize(handler: @escaping (StartupProgress) -> Void) {
+    self.progressHandler = handler
     os_log("initializing CinemaKit", log: CinemaKitStartupManager.logger, type: .default)
     if let previousVersion = previousVersion {
       os_log("app has been launched before (version %{public}@)",
@@ -88,12 +102,15 @@ public class CinemaKitStartupManager: StartupManager {
       os_log("app has never been launched before", log: CinemaKitStartupManager.logger, type: .info)
       markCurrentVersion()
     }
-    if UserDefaults.standard.bool(forKey: LocalCloudKitCacheInvalidationFlag.key) {
-      os_log("local CloudKit cache was invalidated", log: CinemaKitStartupManager.logger, type: .default)
-      resetLocalCloudKitCache()
+    if userDefaults.bool(forKey: LocalDataInvalidationFlag.key) {
+      os_log("should reset local data", log: CinemaKitStartupManager.logger, type: .default)
+      resetLocalData()
+    } else if userDefaults.bool(forKey: CinemaKitStartupManager.shouldResetMovieDetailsKey) {
+      os_log("should reset movie details", log: CinemaKitStartupManager.logger, type: .default)
+      resetMovieDetails()
     }
     setUpDirectories()
-    setUpDeviceSyncZone(then: completion)
+    setUpDeviceSyncZone()
   }
 
   private func clearPosterCache() {
@@ -112,9 +129,9 @@ public class CinemaKitStartupManager: StartupManager {
     UserDefaults.standard.set(currentVersion.description, forKey: CinemaKitStartupManager.appVersionKey)
   }
 
-  private func resetLocalCloudKitCache() {
-    UserDefaults.standard.removeObject(forKey: LocalCloudKitCacheInvalidationFlag.key)
-    UserDefaults.standard.removeObject(forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
+  private func resetLocalData() {
+    userDefaults.removeObject(forKey: LocalDataInvalidationFlag.key)
+    userDefaults.removeObject(forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
     do {
       let fileManager = FileManager.default
       try fileManager.removeItem(at: FileBasedSubscriptionStore.fileURL)
@@ -129,6 +146,21 @@ public class CinemaKitStartupManager: StartupManager {
              String(describing: error))
       fatalError("unable to remove local data")
     }
+    resetMovieDetails()
+  }
+
+  private func resetMovieDetails() {
+    userDefaults.removeObject(forKey: CinemaKitStartupManager.shouldResetMovieDetailsKey)
+    do {
+      let fileManager = FileManager.default
+      try fileManager.removeItem(at: CinemaKitStartupManager.tmdbPropertiesDir)
+    } catch {
+      os_log("unable to remove local data: %{public}@",
+             log: CinemaKitStartupManager.logger,
+             type: .fault,
+             String(describing: error))
+      fatalError("unable to remove local data")
+    }
   }
 
   private func setUpDirectories() {
@@ -136,6 +168,7 @@ public class CinemaKitStartupManager: StartupManager {
     makeDirectory(at: CinemaKitStartupManager.documentsDir)
     makeDirectory(at: CinemaKitStartupManager.appSupportDir)
     makeDirectory(at: CinemaKitStartupManager.movieRecordsDir)
+    makeDirectory(at: CinemaKitStartupManager.tmdbPropertiesDir)
   }
 
   private func makeDirectory(at url: URL) {
@@ -151,7 +184,7 @@ public class CinemaKitStartupManager: StartupManager {
     }
   }
 
-  private func setUpDeviceSyncZone(then completion: @escaping (AppDependencies) -> Void) {
+  private func setUpDeviceSyncZone() {
     setUpDeviceSyncZone(using: container.queue(withScope: .private), retryCount: defaultRetryCount) { error in
       if let error = error {
         os_log("unable to setup deviceSyncZone: %{public}@",
@@ -160,7 +193,7 @@ public class CinemaKitStartupManager: StartupManager {
                String(describing: error))
         fail()
       } else {
-        self.setUpSubscriptions(then: completion)
+        self.setUpSubscriptions()
       }
     }
   }
@@ -168,10 +201,11 @@ public class CinemaKitStartupManager: StartupManager {
   private func setUpDeviceSyncZone(using queue: DatabaseOperationQueue,
                                    retryCount: Int,
                                    then completion: @escaping (CloudKitError?) -> Void) {
-    if UserDefaults.standard.bool(forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey) {
+    if userDefaults.bool(forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey) {
       completion(nil)
       return
     }
+    progressHandler!(StartupProgress.settingUpCloudEnvironment)
     os_log("creating modify record zones operation to set up zone",
            log: CinemaKitStartupManager.logger,
            type: .default)
@@ -211,14 +245,14 @@ public class CinemaKitStartupManager: StartupManager {
         }
       } else {
         os_log("device sync zone is set up", log: CinemaKitStartupManager.logger, type: .info)
-        UserDefaults.standard.set(true, forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
+        self.userDefaults.set(true, forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
         completion(nil)
       }
     }
     queue.add(operation)
   }
 
-  private func setUpSubscriptions(then completion: @escaping (AppDependencies) -> Void) {
+  private func setUpSubscriptions() {
     let subscriptionManager = DefaultSubscriptionManager(queueFactory: container)
     subscriptionManager.subscribeForChanges { error in
       if let error = error {
@@ -231,14 +265,12 @@ public class CinemaKitStartupManager: StartupManager {
         DispatchQueue.main.async {
           self.application.registerForRemoteNotifications()
         }
-        let dependencies = self.makeDependencies(with: subscriptionManager)
-        os_log("finished initializing CinemaKit", log: CinemaKitStartupManager.logger, type: .default)
-        completion(dependencies)
+        self.makeDependencies()
       }
     }
   }
 
-  private func makeDependencies(with subscriptionManager: DefaultSubscriptionManager) -> AppDependencies {
+  private func makeDependencies() {
     // MovieDb Client
     let language = MovieDbLanguage(rawValue: Locale.current.languageCode ?? "en") ?? .en
     let country = MovieDbCountry(rawValue: Locale.current.regionCode ?? "US") ?? .unitedStates
@@ -262,14 +294,66 @@ public class CinemaKitStartupManager: StartupManager {
         queueFactory: container,
         fetchManager: fetchManager,
         syncManager: syncManager,
-        subscriptionManager: subscriptionManager,
         changesManager: DefaultChangesManager(queueFactory: container),
         shareManager: DefaultShareManager(generalOperationQueue: container, queueFactory: container),
         libraryFactory: libraryFactory,
         data: data)
-    return AppDependencies(libraryManager: libraryManager,
-                           movieDb: movieDb,
-                           notificationCenter: NotificationCenter.default)
+    let dependencies = AppDependencies(libraryManager: libraryManager,
+                                       movieDb: movieDb,
+                                       notificationCenter: NotificationCenter.default,
+                                       userDefaults: userDefaults)
+    checkForMigration(dependencies)
+  }
+
+  private func checkForMigration(_ dependencies: AppDependencies) {
+    os_log("looking for legacy library file", log: CinemaKitStartupManager.logger, type: .info)
+    let legacyURLs = [CinemaKitStartupManager.legacyLibraryDataFileURL141,
+                      CinemaKitStartupManager.legacyLibraryDataFileURL12]
+    if let dataFileURL = legacyURLs.first(where: { url in FileManager.default.fileExists(atPath: url.path) }) {
+      os_log("found legacy library data file", log: CinemaKitStartupManager.logger, type: .info)
+      progressHandler(StartupProgress.foundLegacyData { shouldMigrate in
+        self.handleMigration(shouldMigrate: shouldMigrate, dataFileURL: dataFileURL, dependencies: dependencies)
+      })
+    } else {
+      os_log("no legacy library data file found", log: CinemaKitStartupManager.logger, type: .info)
+      finishStartup(dependencies)
+    }
+  }
+
+  private func handleMigration(shouldMigrate: Bool, dataFileURL: URL, dependencies: AppDependencies) {
+    if shouldMigrate {
+      dependencies.internalLibraryManager.migrateLegacyLibrary(with: self.migratedLibraryName,
+                                                               at: dataFileURL) { success in
+        if success {
+          os_log("migration of legacy data succeeded", log: CinemaKitStartupManager.logger, type: .info)
+          self.removeLegacyDataFile(at: dataFileURL)
+          self.finishStartup(dependencies)
+        } else {
+          os_log("migration of legacy data failed", log: CinemaKitStartupManager.logger, type: .info)
+          self.progressHandler(StartupProgress.migrationFailed)
+        }
+      }
+    } else {
+      self.removeLegacyDataFile(at: dataFileURL)
+      self.finishStartup(dependencies)
+    }
+  }
+
+  private func removeLegacyDataFile(at url: URL) {
+    os_log("removing legacy data file", log: CinemaKitStartupManager.logger, type: .info)
+    do {
+      try FileManager.default.removeItem(at: url)
+    } catch {
+      os_log("unable to remove legacy data file: %{public}@",
+             log: CinemaKitStartupManager.logger,
+             type: .fault,
+             String(describing: error))
+    }
+  }
+
+  private func finishStartup(_ dependencies: AppDependencies) {
+    os_log("finished initializing CinemaKit", log: CinemaKitStartupManager.logger, type: .default)
+    self.progressHandler!(StartupProgress.ready(dependencies))
   }
 }
 
@@ -293,13 +377,16 @@ private class DefaultMovieLibraryFactory: MovieLibraryFactory {
     let scope = metadata.isCurrentUserOwner ? CKDatabaseScope.private : CKDatabaseScope.shared
     let databaseOperationQueue = queueFactory.queue(withScope: scope)
     let movieRecordStore = FileBasedRecordStore(
-    fileURL: CinemaKitStartupManager.movieRecordsDir.appendingPathComponent("\(metadata.id.recordName).plist"))
+        fileURL: CinemaKitStartupManager.movieRecordsDir.appendingPathComponent("\(metadata.id.recordName).plist"))
+    let tmdbPropertiesStore = FileBasedTmdbPropertiesStore(
+        fileURL: CinemaKitStartupManager.tmdbPropertiesDir.appendingPathComponent("\(metadata.id.recordName).json"))
     let data = MovieLibraryData(databaseOperationQueue: databaseOperationQueue,
                                 fetchManager: fetchManager,
                                 syncManager: syncManager,
                                 tmdbPropertiesProvider: tmdbWrapper,
                                 libraryID: metadata.id,
-                                movieRecordStore: movieRecordStore)
+                                movieRecordStore: movieRecordStore,
+                                tmdbPropertiesStore: tmdbPropertiesStore)
     return DeviceSyncingMovieLibrary(databaseOperationQueue: databaseOperationQueue,
                                      syncManager: syncManager,
                                      tmdbPropertiesProvider: tmdbWrapper,

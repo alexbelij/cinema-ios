@@ -1,6 +1,6 @@
 import Dispatch
 
-class RecordData<DataType, ErrorType> {
+class LazyData<DataType, ErrorType> {
   private let queue: DispatchQueue
   private var suspendedCalls = [((DataType) -> Void, (ErrorType) -> Void)]()
   private var isLoading = false
@@ -8,6 +8,17 @@ class RecordData<DataType, ErrorType> {
 
   init(label: String) {
     queue = DispatchQueue(label: label)
+  }
+
+  func initializeWithDefaultValue() {
+    queue.async {
+      guard self.data == nil else { fatalError("data has already been initialized") }
+      self.data = self.makeWithDefaultValue()
+    }
+  }
+
+  func makeWithDefaultValue() -> DataType {
+    fatalError("must be overridden")
   }
 
   func access(onceLoaded dataHandler: @escaping (DataType) -> Void,
@@ -36,7 +47,7 @@ class RecordData<DataType, ErrorType> {
   }
 
   func loadData() {
-    fatalError("must be subclassed")
+    fatalError("must be overridden")
   }
 
   func abortLoading(with error: ErrorType) {
@@ -67,6 +78,12 @@ class RecordData<DataType, ErrorType> {
     suspendedCalls.removeAll()
   }
 
+  func requestReload() {
+    queue.async {
+      self.data = nil
+    }
+  }
+
   func persist() {
     dispatchPrecondition(condition: DispatchPredicate.onQueue(queue))
     if let data = self.data {
@@ -75,10 +92,10 @@ class RecordData<DataType, ErrorType> {
   }
 
   func persist(_ data: DataType) {
-    fatalError("must be subclassed")
+    fatalError("must be overridden")
   }
 
   func clear() {
-    fatalError("must be subclassed")
+    fatalError("must be overridden")
   }
 }

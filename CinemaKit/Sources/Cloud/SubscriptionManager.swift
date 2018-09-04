@@ -41,14 +41,14 @@ class DefaultSubscriptionManager: SubscriptionManager {
   private static let logger = Logging.createLogger(category: "SubscriptionManager")
   private let queueFactory: DatabaseOperationQueueFactory
   private let subscriptionStore: SubscriptionStore
-  private let cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag
+  private let dataInvalidationFlag: LocalDataInvalidationFlag
 
   init(queueFactory: DatabaseOperationQueueFactory,
        subscriptionStore: SubscriptionStore = FileBasedSubscriptionStore(),
-       cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag = LocalCloudKitCacheInvalidationFlag()) {
+       dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
     self.queueFactory = queueFactory
     self.subscriptionStore = subscriptionStore
-    self.cacheInvalidationFlag = cacheInvalidationFlag
+    self.dataInvalidationFlag = dataInvalidationFlag
   }
 
   func subscribeForChanges(then completion: @escaping (CloudKitError?) -> Void) {
@@ -174,7 +174,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
         } else if ckerror.code == CKError.Code.notAuthenticated {
           completion(.notAuthenticated)
         } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.cacheInvalidationFlag.set()
+          self.dataInvalidationFlag.set()
           completion(.userDeletedZone)
         } else if ckerror.code == CKError.Code.networkFailure
                   || ckerror.code == CKError.Code.networkUnavailable

@@ -8,6 +8,8 @@ public class TMDBSwiftWrapper: MovieDbClient {
   private static let logger = Logging.createLogger(category: "TMDB")
   private static let apiKey = "ace1ea1cb456b8d6fe092a0ec923e30c"
   private static let baseUrl = "https://image.tmdb.org/t/p/"
+  private static let requestBucketDuration: UInt64 = 12
+  private static let requestsPerBucket = 35
   private static let releaseDateFormatter: DateFormatter = {
     let formatter = DateFormatter()
     formatter.dateFormat = "yyyy-MM-dd"
@@ -19,12 +21,33 @@ public class TMDBSwiftWrapper: MovieDbClient {
 
   private var cache: TMDBSwiftCache
   private var cachedPosterPaths = [TmdbIdentifier: String]()
+  private let queue = DispatchQueue(label: "TMDB")
+  private var remainingRequests = TMDBSwiftWrapper.requestsPerBucket
+  private var requestBucketStartTime: UInt64 = DispatchTime.now().uptimeNanoseconds / 1_000_000_000
 
   public init(language: MovieDbLanguage, country: MovieDbCountry) {
     self.language = language
     self.country = country
     self.cache = StandardTMDBSwiftCache() ?? DummyTMDBSwiftCache()
     TMDBConfig.apikey = TMDBSwiftWrapper.apiKey
+  }
+
+  private func prepareForRequest() {
+    queue.sync {
+      let currentTime = DispatchTime.now().uptimeNanoseconds / 1_000_000_000
+      let delta = currentTime - requestBucketStartTime
+      if delta < TMDBSwiftWrapper.requestBucketDuration {
+        remainingRequests -= 1
+      } else {
+        requestBucketStartTime = currentTime
+        remainingRequests = TMDBSwiftWrapper.requestsPerBucket
+      }
+      if remainingRequests < 1 {
+        let sleepTime = TMDBSwiftWrapper.requestBucketDuration - delta
+        os_log("API limit reached -> waiting %d seconds", log: TMDBSwiftWrapper.logger, type: .default, sleepTime)
+        sleep(UInt32(sleepTime))
+      }
+    }
   }
 
   public func poster(for id: TmdbIdentifier, size: PosterSize, purpose: PosterPurpose) -> UIImage? {
@@ -70,6 +93,7 @@ public class TMDBSwiftWrapper: MovieDbClient {
     let movieJson = cache.string(for: "movie-\(id)-\(language.rawValue)") {
       var jsonString: String?
       waitUntil { done in
+        self.prepareForRequest()
         MovieMDB.movie(movieID: id.rawValue, language: language.rawValue) { apiReturn, movie in
           if let json = apiReturn.json, apiReturn.json!["id"].exists() {
             jsonString = json.rawString()
@@ -89,6 +113,7 @@ public class TMDBSwiftWrapper: MovieDbClient {
   public func searchMovies(searchText: String) -> [PartialMovie] {
     var movies = [PartialMovie]()
     waitUntil { done in
+      self.prepareForRequest()
       SearchMDB.movie(query: searchText,
                       language: language.rawValue,
                       page: 1,
@@ -108,6 +133,7 @@ public class TMDBSwiftWrapper: MovieDbClient {
     return PagingSequence<PartialMovie> { page -> [PartialMovie]? in
       var movies = [PartialMovie]()
       self.waitUntil { done in
+        self.prepareForRequest()
         MovieMDB.popular(language: self.language.rawValue, page: page) { _, result in
           if let result = result {
             movies = result.map(self.toPartialMovie)
@@ -162,6 +188,7 @@ extension TMDBSwiftWrapper: TmdbMoviePropertiesProvider {
     let certificationJson = cache.string(for: "certification-\(id)") {
       var jsonString: String?
       waitUntil { done in
+        self.prepareForRequest()
         MovieMDB.release_dates(movieID: id.rawValue) { apiReturn, releaseDates1 in
           if let json = apiReturn.json, apiReturn.json!["results"].exists(),
              let releaseDates1 = releaseDates1 {

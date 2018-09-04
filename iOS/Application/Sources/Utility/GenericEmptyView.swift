@@ -77,6 +77,7 @@ class GenericEmptyView: UIView {
         stackView.addArrangedSubview(titleLabel)
       case let .detailed(title, message):
         let titleLabel = makeCenteredMultiLineLabel(text: title)
+        titleLabel.textColor = .secondaryText
         titleLabel.font = UIFont.boldSystemFont(ofSize: titleLabel.font.pointSize)
         stackView.addArrangedSubview(titleLabel)
         let messageLabel = makeCenteredMultiLineLabel(text: message)

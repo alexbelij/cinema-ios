@@ -1,6 +1,6 @@
 import UIKit
 
-class ProgressPage: UIViewController {
+class WaitingPage: UIViewController {
   var primaryText: String! {
     didSet {
       guard isViewLoaded else { return }
@@ -17,19 +17,10 @@ class ProgressPage: UIViewController {
   }
   @IBOutlet private var secondaryLabel: UILabel!
 
-  var progress: Progress! {
-    didSet {
-      guard isViewLoaded else { return }
-      progressView.observedProgress = progress
-    }
-  }
-  @IBOutlet private var progressView: UIProgressView!
-
-  static func initWith(primaryText: String, secondaryText: String? = nil, progress: Progress) -> ProgressPage {
-    let page = UIStoryboard(name: "GenericPages", bundle: nil).instantiate(ProgressPage.self)
+  static func initWith(primaryText: String, secondaryText: String? = nil) -> WaitingPage {
+    let page = UIStoryboard(name: "GenericPages", bundle: nil).instantiate(WaitingPage.self)
     page.primaryText = primaryText
     page.secondaryText = secondaryText
-    page.progress = progress
     return page
   }
 
@@ -37,7 +28,6 @@ class ProgressPage: UIViewController {
     super.viewDidLoad()
     primaryLabel.text = primaryText
     secondaryLabel.text = secondaryText
-    progressView.observedProgress = progress
   }
 }
 
@@ -57,7 +47,7 @@ class ActionPage: UIViewController {
     }
   }
   @IBOutlet private var secondaryLabel: UILabel!
-  
+
   var image: UIImage? {
     didSet {
       guard isViewLoaded else { return }
@@ -66,15 +56,13 @@ class ActionPage: UIViewController {
   }
   @IBOutlet private var imageView: UIImageView!
 
-  var actionTitle: String! {
-    didSet {
-      guard isViewLoaded else { return }
-      button.setTitle(actionTitle, for: .normal)
-    }
-  }
+  private var primaryActionTitle: String?
+  private var primaryActionHandler: (() -> Void)?
+  @IBOutlet private var primaryButton: UIButton!
 
-  @IBOutlet private var button: UIButton!
-  private var actionHandler: (() -> Void)!
+  private var secondaryActionTitle: String?
+  private var secondaryActionHandler: (() -> Void)?
+  @IBOutlet private var secondaryButton: UIButton!
 
   static func initWith(primaryText: String,
                        secondaryText: String? = nil,
@@ -85,8 +73,40 @@ class ActionPage: UIViewController {
     page.primaryText = primaryText
     page.secondaryText = secondaryText
     page.image = image
-    page.actionTitle = actionTitle
-    page.actionHandler = actionHandler
+    page.primaryActionTitle = actionTitle
+    page.primaryActionHandler = actionHandler
+    return page
+  }
+
+  static func initWith(primaryText: String,
+                       secondaryText: String? = nil,
+                       image: UIImage? = nil) -> ActionPage {
+    let page = UIStoryboard(name: "GenericPages", bundle: nil).instantiate(ActionPage.self)
+    page.primaryText = primaryText
+    page.secondaryText = secondaryText
+    page.image = image
+    page.primaryActionTitle = nil
+    page.primaryActionHandler = nil
+    page.secondaryActionTitle = nil
+    page.secondaryActionHandler = nil
+    return page
+  }
+
+  static func initWith(primaryText: String,
+                       secondaryText: String? = nil,
+                       image: UIImage? = nil,
+                       primaryActionTitle: String,
+                       primaryActionHandler: @escaping () -> Void,
+                       secondaryActionTitle: String,
+                       secondaryActionHandler: @escaping () -> Void) -> ActionPage {
+    let page = UIStoryboard(name: "GenericPages", bundle: nil).instantiate(ActionPage.self)
+    page.primaryText = primaryText
+    page.secondaryText = secondaryText
+    page.image = image
+    page.primaryActionTitle = primaryActionTitle
+    page.primaryActionHandler = primaryActionHandler
+    page.secondaryActionTitle = secondaryActionTitle
+    page.secondaryActionHandler = secondaryActionHandler
     return page
   }
 
@@ -95,10 +115,19 @@ class ActionPage: UIViewController {
     primaryLabel.text = primaryText
     secondaryLabel.text = secondaryText
     imageView.image = image
-    button.setTitle(actionTitle, for: .normal)
+    primaryButton.setTitle(primaryActionTitle, for: .normal)
+    primaryButton.isHidden = primaryActionHandler == nil
+    secondaryButton.setTitle(secondaryActionTitle, for: .normal)
+    secondaryButton.isHidden = secondaryActionHandler == nil
   }
 
-  @IBAction private func continueButtonTapped() {
-    actionHandler()
+  @IBAction private func primaryButtonTapped() {
+    primaryButton.isUserInteractionEnabled = false
+    primaryActionHandler?()
+  }
+
+  @IBAction private func secondaryButtonTapped() {
+    primaryButton.isUserInteractionEnabled = false
+    secondaryActionHandler?()
   }
 }

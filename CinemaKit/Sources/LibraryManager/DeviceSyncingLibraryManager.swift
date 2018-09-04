@@ -8,7 +8,7 @@ protocol MovieLibraryFactory {
   func makeLibrary(with metadata: MovieLibraryMetadata) -> InternalMovieLibrary
 }
 
-class DeviceSyncingLibraryManager: MovieLibraryManager {
+class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
   private static let logger = Logging.createLogger(category: "LibraryManager")
 
   let delegates = MulticastDelegate<MovieLibraryManagerDelegate>()
@@ -16,33 +16,30 @@ class DeviceSyncingLibraryManager: MovieLibraryManager {
   private let queueFactory: DatabaseOperationQueueFactory
   private let fetchManager: FetchManager
   private let syncManager: SyncManager
-  private let subscriptionManager: SubscriptionManager
   private let changesManager: ChangesManager
   private let shareManager: ShareManager
   private let libraryFactory: MovieLibraryFactory
-  private let localData: RecordData<MovieLibraryManagerDataObject, MovieLibraryManagerError>
-  private let cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag
+  private let localData: LazyData<MovieLibraryManagerDataObject, MovieLibraryManagerError>
+  private let dataInvalidationFlag: LocalDataInvalidationFlag
 
   init(container: CKContainer,
        queueFactory: DatabaseOperationQueueFactory,
        fetchManager: FetchManager,
        syncManager: SyncManager,
-       subscriptionManager: SubscriptionManager,
        changesManager: ChangesManager,
        shareManager: ShareManager,
        libraryFactory: MovieLibraryFactory,
-       data: RecordData<MovieLibraryManagerDataObject, MovieLibraryManagerError>,
-       cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag = LocalCloudKitCacheInvalidationFlag()) {
+       data: LazyData<MovieLibraryManagerDataObject, MovieLibraryManagerError>,
+       dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
     self.container = container
     self.queueFactory = queueFactory
     self.fetchManager = fetchManager
     self.syncManager = syncManager
-    self.subscriptionManager = subscriptionManager
     self.changesManager = changesManager
     self.shareManager = shareManager
     self.libraryFactory = libraryFactory
     self.localData = data
-    self.cacheInvalidationFlag = cacheInvalidationFlag
+    self.dataInvalidationFlag = dataInvalidationFlag
   }
 }
 
@@ -133,9 +130,8 @@ extension DeviceSyncingLibraryManager {
           case .userDeletedZone:
             completion(.failure(error.asMovieLibraryManagerError))
           case .notAuthenticated, .permissionFailure, .nonRecoverableError:
-            // reset record
-            // TODO check if change tag has changed (serverRecordChanged)
-            data.libraries[metadata.id]!.metadata.setCustomFields(in: record)
+            // need to reset record (changed keys)
+            self.localData.requestReload()
             completion(.failure(error.asMovieLibraryManagerError))
           case .zoneNotFound:
             fatalError("should not occur: \(error)")
@@ -152,7 +148,6 @@ extension DeviceSyncingLibraryManager {
   }
 
   func removeLibrary(with id: CKRecordID, then completion: @escaping (Result<Void, MovieLibraryManagerError>) -> Void) {
-    // TODO add new library when only one left
     localData.access(onceLoaded: { data in
       guard let record = data.libraryRecords[id] else {
         completion(.success(()))
@@ -249,7 +244,7 @@ extension DeviceSyncingLibraryManager {
     }, whenUnableToLoad: { error in
       os_log("unable to process changes, because loading failed: %{public}@",
              log: DeviceSyncingLibraryManager.logger,
-             type: .default,
+             type: .error,
              String(describing: error))
     })
   }
@@ -489,7 +484,7 @@ extension DeviceSyncingLibraryManager: CloudSharingControllerCallback {
           if let error = error {
             switch error {
               case .nonRecoverableError:
-                self.cacheInvalidationFlag.set()
+                self.dataInvalidationFlag.set()
                 os_log("unable to fetch record after sharing stopped: %{public}@",
                        log: DeviceSyncingLibraryManager.logger,
                        type: .error,
@@ -517,6 +512,52 @@ extension DeviceSyncingLibraryManager: CloudSharingControllerCallback {
         self.localData.persist()
         let changeSet = ChangeSet<CKRecordID, MovieLibrary>(deletions: [library.metadata.id: library])
         self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
+      }
+    }
+  }
+}
+
+extension DeviceSyncingLibraryManager {
+  func migrateLegacyLibrary(with name: String, at url: URL, then completion: @escaping (Bool) -> Void) {
+    let metadata = MovieLibraryMetadata(name: name)
+    let libraryRecord = LibraryRecord(from: metadata)
+    self.syncManager.sync(libraryRecord.rawRecord, using: self.queueFactory.queue(withScope: .private)) { error in
+      if let error = error {
+        switch error {
+          case .notAuthenticated, .userDeletedZone, .nonRecoverableError:
+            os_log("unable to add library record for migration: %{public}@",
+                   log: DeviceSyncingLibraryManager.logger,
+                   type: .error,
+                   String(describing: error))
+            completion(false)
+          case .conflict, .itemNoLongerExists, .zoneNotFound, .permissionFailure:
+            fatalError("should not occur: \(error)")
+        }
+      } else {
+        self.localData.access(onceLoaded: { data in
+          let library: InternalMovieLibrary
+          if data.libraries[metadata.id] == nil {
+            // libraries were loaded from local cache which does not contains the new one yet
+            library = self.libraryFactory.makeLibrary(with: metadata)
+            data.libraries[metadata.id] = library
+            data.libraryRecords[metadata.id] = libraryRecord
+            self.localData.persist()
+          } else {
+            // libraries have not been cached yet -> all fetched, including the new one
+            library = data.libraries[metadata.id]!
+          }
+          library.migrateMovies(from: url) { success in
+            let changeSet = ChangeSet<CKRecordID, MovieLibrary>(insertions: [library])
+            self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
+            completion(success)
+          }
+        }, whenUnableToLoad: { error in
+          os_log("unable to add library: %{public}@",
+                 log: DeviceSyncingLibraryManager.logger,
+                 type: .error,
+                 String(describing: error))
+          completion(false)
+        })
       }
     }
   }

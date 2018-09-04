@@ -12,14 +12,14 @@ class DefaultShareManager: ShareManager {
   private static let logger = Logging.createLogger(category: "ShareManager")
   private let generalOperationQueue: GeneralOperationQueue
   private let queueFactory: DatabaseOperationQueueFactory
-  private let cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag
+  private let dataInvalidationFlag: LocalDataInvalidationFlag
 
   init(generalOperationQueue: GeneralOperationQueue,
        queueFactory: DatabaseOperationQueueFactory,
-       cacheInvalidationFlag: LocalCloudKitCacheInvalidationFlag = LocalCloudKitCacheInvalidationFlag()) {
+       dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
     self.generalOperationQueue = generalOperationQueue
     self.queueFactory = queueFactory
-    self.cacheInvalidationFlag = cacheInvalidationFlag
+    self.dataInvalidationFlag = dataInvalidationFlag
   }
 
   func saveShare(_ share: CKShare,
@@ -54,7 +54,7 @@ class DefaultShareManager: ShareManager {
         } else if ckerror.code == CKError.Code.notAuthenticated {
           completion(.notAuthenticated)
         } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.cacheInvalidationFlag.set()
+          self.dataInvalidationFlag.set()
           completion(.userDeletedZone)
         } else if ckerror.code == CKError.Code.networkFailure
                   || ckerror.code == CKError.Code.networkUnavailable

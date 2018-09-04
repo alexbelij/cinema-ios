@@ -157,11 +157,17 @@ extension MovieListController {
     let separatorStyle: UITableViewCellSeparatorStyle
     switch listData {
       case .loading:
-        backgroundView = GenericEmptyView(
-            accessory: .activityIndicator,
-            description: .basic(NSLocalizedString("loading", comment: ""))
-        )
+        backgroundView = nil
         separatorStyle = .none
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
+          guard case .loading = self.listData else { return }
+          self.tableView.backgroundView = GenericEmptyView(
+              accessory: .activityIndicator,
+              description: .detailed(title: NSLocalizedString("loading", comment: ""),
+                                     message: NSLocalizedString("thisMayTakeSomeTime", comment: ""))
+          )
+          self.tableView.separatorStyle = .none
+        }
       case let .available(movies):
         if movies.isEmpty {
           backgroundView = GenericEmptyView(

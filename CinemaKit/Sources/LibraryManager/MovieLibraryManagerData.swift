@@ -15,7 +15,7 @@ class MovieLibraryManagerDataObject {
   }
 }
 
-class MovieLibraryManagerData: RecordData<MovieLibraryManagerDataObject, MovieLibraryManagerError> {
+class MovieLibraryManagerData: LazyData<MovieLibraryManagerDataObject, MovieLibraryManagerError> {
   private static let logger = Logging.createLogger(category: "MovieLibraryManagerData")
 
   private let queueFactory: DatabaseOperationQueueFactory
@@ -119,8 +119,12 @@ class MovieLibraryManagerData: RecordData<MovieLibraryManagerDataObject, MovieLi
         if let shareRecord = shareRecordsDict[shareRecordID] {
           currentUserCanModify = shareRecord.currentUserParticipant?.permission == .readWrite
         } else {
-          // TODO libraryRecord has changed
-          fatalError()
+          os_log("found library record without corresponding CKShare -> reloading",
+                 log: MovieLibraryManagerData.logger,
+                 type: .default)
+          clear()
+          fetchLibraryRecords()
+          return
         }
       } else {
         currentUserCanModify = true

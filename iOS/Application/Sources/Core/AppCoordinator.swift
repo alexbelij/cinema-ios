@@ -8,9 +8,10 @@ class AppCoordinator: AutoPresentableCoordinator {
   enum State {
     case launched
     case initializing
-    case showingNotAuthenticatedUI(UIViewController)
+    case settingUp(StartupCoordinator)
+    case notAuthenticated(UIViewController)
     case upAndRunning(AppDependencies, CoreCoordinator)
-    case showingRestartUI(UIViewController)
+    case readyForRestart(UIViewController)
   }
 
   private static let logger = Logging.createLogger(category: "AppCoordinator")
@@ -18,7 +19,6 @@ class AppCoordinator: AutoPresentableCoordinator {
   private let window = UIWindow(frame: UIScreen.main.bounds)
   private var state = State.launched
   private var initializationRound = 0
-  private var importCoordinator: ImportCoordinator?
 
   init(application: UIApplication) {
     self.application = application
@@ -44,9 +44,7 @@ class AppCoordinator: AutoPresentableCoordinator {
       CKContainer.default().accountStatus { status, error in
         switch status {
           case .available:
-            CinemaKitStartupManager(using: self.application).initialize { dependencies in
-              self.loadData(using: dependencies)
-            }
+            self.initializeCinemaKit()
           case .couldNotDetermine, .restricted, .noAccount:
             os_log("account status is not .accepted, error=%{public}@",
                    log: AppCoordinator.logger,
@@ -56,6 +54,40 @@ class AppCoordinator: AutoPresentableCoordinator {
               self.showNotAuthenticatedPage()
             }
         }
+      }
+    }
+  }
+
+  private func initializeCinemaKit() {
+    let migratedLibraryNameFormat = NSLocalizedString("library.migratedNameFormat", comment: "")
+    let migratedLibraryName = String.localizedStringWithFormat(migratedLibraryNameFormat, UIDevice.current.name)
+    CinemaKitStartupManager(using: self.application, migratedLibraryName: migratedLibraryName).initialize { progress in
+      switch progress {
+        case .settingUpCloudEnvironment:
+          DispatchQueue.main.async {
+            let coordinator = StartupCoordinator()
+            coordinator.change(to: .initializingCloud)
+            self.state = .settingUp(coordinator)
+            self.window.rootViewController = coordinator.rootViewController
+          }
+        case let .foundLegacyData(shouldMigrateDecision):
+          DispatchQueue.main.async {
+            guard case let .settingUp(coordinator) = self.state else {
+              os_log("found legacy data but not in setup mode -> aborting migration",
+                     log: AppCoordinator.logger,
+                     type: .error)
+              shouldMigrateDecision(false)
+              return
+            }
+            coordinator.change(to: .foundLegacyData(shouldMigrateDecision))
+          }
+        case .migrationFailed:
+          DispatchQueue.main.async {
+            guard case let .settingUp(coordinator) = self.state else { fatalError("illegal state") }
+            coordinator.change(to: .migratingFailed)
+          }
+        case let .ready(dependencies):
+          self.loadData(using: dependencies)
       }
     }
   }
@@ -96,77 +128,82 @@ class AppCoordinator: AutoPresentableCoordinator {
               fatalError("should not occur: \(error)")
           }
         case let .success(libraries):
-          self.handleFetchedLibraries(libraries, dependencies: dependencies)
+          self.handleFetchedLibraries(libraries, using: dependencies)
       }
     }
   }
 
-  private func handleFetchedLibraries(_ libraries: [MovieLibrary], dependencies: AppDependencies) {
+  private func handleFetchedLibraries(_ libraries: [MovieLibrary], using dependencies: AppDependencies) {
     if libraries.isEmpty {
       os_log("no libraries found -> creating default one", log: AppCoordinator.logger, type: .default)
-      let metadata = MovieLibraryMetadata(name: NSLocalizedString("library.defaultName", comment: ""))
-      dependencies.libraryManager.addLibrary(with: metadata) { result in
-        switch result {
-          case let .failure(error):
-            switch error {
-              case let .globalError(event):
-                switch event {
-                  case .notAuthenticated:
-                    DispatchQueue.main.async {
-                      self.showNotAuthenticatedPage()
-                    }
-                  case .userDeletedZone:
-                    os_log("user has deleted zone -> reinitialize (local data will be removed)",
-                           log: AppCoordinator.logger,
-                           type: .default)
-                    DispatchQueue.main.async {
-                      self.startUp()
-                    }
-                  case .shouldFetchChanges:
-                    fatalError("should not occur: \(error)")
-                }
-              case .nonRecoverableError:
-                fatalError("non-recoverable error during creation of initial library")
-              case .libraryDoesNotExist, .permissionFailure:
-                fatalError("should not occur: \(error)")
-            }
-          case let .success(library):
-            self.finishStartup(with: library, dependencies: dependencies)
-        }
+      makeDefaultLibrary(using: dependencies) { library in
+        dependencies.userDefaults.set(library.metadata.id.recordName, forKey: CoreCoordinator.primaryLibraryKey)
+        self.handleFetchedLibraries([library], using: dependencies)
       }
     } else {
-      self.finishStartup(with: libraries.first!, dependencies: dependencies)
+      let primaryLibrary: MovieLibrary
+      if let libraryID = dependencies.userDefaults.string(forKey: CoreCoordinator.primaryLibraryKey),
+         let library = libraries.first(where: { $0.metadata.id.recordName == libraryID }) {
+        primaryLibrary = library
+      } else {
+        primaryLibrary = libraries.first!
+        dependencies.userDefaults.set(primaryLibrary.metadata.id.recordName, forKey: CoreCoordinator.primaryLibraryKey)
+      }
+      let finishCall = {
+        DispatchQueue.main.async {
+          self.finishStartup(with: primaryLibrary, dependencies: dependencies)
+        }
+      }
+      if case let .settingUp(coordinator) = self.state {
+        coordinator.change(to: .finished(finishCall))
+      } else {
+        finishCall()
+      }
+    }
+  }
+
+  private func makeDefaultLibrary(using dependencies: AppDependencies,
+                                  then completion: @escaping (MovieLibrary) -> Void) {
+    let metadata = MovieLibraryMetadata(name: NSLocalizedString("library.defaultName", comment: ""))
+    dependencies.libraryManager.addLibrary(with: metadata) { result in
+      switch result {
+        case let .failure(error):
+          switch error {
+            case let .globalError(event):
+              switch event {
+                case .notAuthenticated:
+                  DispatchQueue.main.async {
+                    self.showNotAuthenticatedPage()
+                  }
+                case .userDeletedZone:
+                  os_log("user has deleted zone -> reinitialize (local data will be removed)",
+                         log: AppCoordinator.logger,
+                         type: .default)
+                  DispatchQueue.main.async {
+                    self.startUp()
+                  }
+                case .shouldFetchChanges:
+                  fatalError("should not occur: \(error)")
+              }
+            case .nonRecoverableError:
+              fatalError("non-recoverable error during creation of default library")
+            case .libraryDoesNotExist, .permissionFailure:
+              fatalError("should not occur: \(error)")
+          }
+        case let .success(library):
+          completion(library)
+      }
     }
   }
 
   private func finishStartup(with library: MovieLibrary, dependencies: AppDependencies) {
-    DispatchQueue.main.async {
-      let coreCoordinator = CoreCoordinator(for: library, dependencies: dependencies)
-      self.state = .upAndRunning(dependencies, coreCoordinator)
-      os_log("up and running", log: AppCoordinator.logger, type: .default)
-      self.window.rootViewController = coreCoordinator.rootViewController
-      if self.application.applicationState == .active {
-        dependencies.libraryManager.fetchChanges { _ in }
-      }
+    let coreCoordinator = CoreCoordinator(for: library, dependencies: dependencies)
+    self.state = .upAndRunning(dependencies, coreCoordinator)
+    os_log("up and running", log: AppCoordinator.logger, type: .default)
+    self.window.rootViewController = coreCoordinator.rootViewController
+    if self.application.applicationState == .active {
+      dependencies.libraryManager.fetchChanges { _ in }
     }
-  }
-}
-
-// MARK: - Importing from URL
-
-extension AppCoordinator: ImportCoordinatorDelegate {
-  func handleImport(from url: URL) -> Bool {
-    dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
-    guard case let State.upAndRunning(dependencies, coreCoordinator) = state else { return false }
-    importCoordinator = ImportCoordinator(importUrl: url, dependencies: dependencies)
-    importCoordinator!.delegate = self
-    coreCoordinator.rootViewController.present(importCoordinator!.rootViewController, animated: true)
-    return true
-  }
-
-  func importCoordinatorDidFinish(_ coordinator: ImportCoordinator) {
-    coordinator.rootViewController.dismiss(animated: true)
-    self.importCoordinator = nil
   }
 }
 
@@ -216,7 +253,7 @@ extension AppCoordinator {
 extension AppCoordinator {
   private func showNotAuthenticatedPage() {
     dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
-    if case .showingNotAuthenticatedUI = state { return }
+    if case .notAuthenticated = state { return }
     let page = ActionPage.initWith(
         primaryText: NSLocalizedString("iCloud.notAuthenticated.title", comment: ""),
         secondaryText: NSLocalizedString("iCloud.notAuthenticated.subtitle", comment: ""),
@@ -226,13 +263,13 @@ extension AppCoordinator {
       self.initializationRound = 0
       self.startUp()
     }
-    state = .showingNotAuthenticatedUI(page)
+    state = .notAuthenticated(page)
     window.rootViewController = page
   }
 
   private func showRestartUI() {
     dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
-    if case .showingRestartUI = state { return }
+    if case .readyForRestart = state { return }
     let page = ActionPage.initWith(
         primaryText: NSLocalizedString("iCloud.userDeletedZone", comment: ""),
         image: #imageLiteral(resourceName: "CloudDeleted"),
@@ -241,7 +278,7 @@ extension AppCoordinator {
       self.initializationRound = 0
       self.startUp()
     }
-    state = .showingRestartUI(page)
+    state = .readyForRestart(page)
     window.rootViewController = page
   }
 

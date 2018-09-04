@@ -21,13 +21,13 @@ class DeviceSyncingMovieLibrary: InternalMovieLibrary {
   private let databaseOperationQueue: DatabaseOperationQueue
   private let syncManager: SyncManager
   private let tmdbPropertiesProvider: TmdbMoviePropertiesProvider
-  private var localData: RecordData<MovieLibraryDataObject, MovieLibraryError>
+  private var localData: LazyData<MovieLibraryDataObject, MovieLibraryError>
 
   init(databaseOperationQueue: DatabaseOperationQueue,
        syncManager: SyncManager,
        tmdbPropertiesProvider: TmdbMoviePropertiesProvider,
        metadata: MovieLibraryMetadata,
-       data: RecordData<MovieLibraryDataObject, MovieLibraryError>) {
+       data: LazyData<MovieLibraryDataObject, MovieLibraryError>) {
     self.databaseOperationQueue = databaseOperationQueue
     self.syncManager = syncManager
     self.tmdbPropertiesProvider = tmdbPropertiesProvider
@@ -154,9 +154,8 @@ extension DeviceSyncingMovieLibrary {
           case .userDeletedZone:
             completion(.failure(error.asMovieLibraryError))
           case .notAuthenticated, .permissionFailure, .nonRecoverableError:
-            // reset record
-            // TODO check if change tag has changed (serverRecordChanged)
-            data.movies[movie.cloudProperties.id]!.cloudProperties.setCustomFields(in: record)
+            // need to reset record (changed keys)
+            self.localData.requestReload()
             completion(.failure(error.asMovieLibraryError))
           case .zoneNotFound:
             fatalError("should not occur: \(error)")
@@ -316,5 +315,122 @@ extension DeviceSyncingMovieLibrary {
 
   func cleanupForRemoval() {
     localData.clear()
+  }
+}
+
+extension DeviceSyncingMovieLibrary {
+  func migrateMovies(from url: URL, then completion: @escaping (Bool) -> Void) {
+    let data: Data
+    do {
+      data = try Data(contentsOf: url)
+    } catch {
+      os_log("unable to load movies from url: %{public}@",
+             log: DeviceSyncingMovieLibrary.logger,
+             type: .error,
+             String(describing: error))
+      completion(false)
+      return
+    }
+    let legacyMovies = Legacy.deserialize(from: data)
+    os_log("migrating %d movies", log: DeviceSyncingMovieLibrary.logger, type: .info, legacyMovies.count)
+    batchInsert(legacyMovies, then: completion)
+  }
+
+  private func batchInsert(_ legacyMovies: [Legacy.LegacyMovieData],
+                           then completion: @escaping (Bool) -> Void) {
+    if legacyMovies.isEmpty {
+      completion(true)
+      return
+    }
+    let group = DispatchGroup()
+    group.enter()
+    var cloudData: [TmdbIdentifier: (Movie.CloudProperties, MovieRecord)]?
+    DispatchQueue.global(qos: .userInitiated).async {
+      self.prepareCloudData(for: legacyMovies) {
+        cloudData = $0
+        group.leave()
+      }
+    }
+    group.enter()
+    var tmdbData: [TmdbIdentifier: Movie.TmdbProperties]?
+    DispatchQueue.global(qos: .userInitiated).async {
+      self.prepareTmdbData(for: legacyMovies) {
+        tmdbData = $0
+        group.leave()
+      }
+    }
+    group.notify(queue: DispatchQueue.global()) {
+      self.didPrepareForBatchInsertion(legacyMovies, cloudData, tmdbData, completion)
+    }
+  }
+
+  private func prepareCloudData(
+      for legacyMovies: [Legacy.LegacyMovieData],
+      then completion: @escaping ([TmdbIdentifier: (Movie.CloudProperties, MovieRecord)]?) -> Void) {
+    let cloudData: [TmdbIdentifier: (Movie.CloudProperties, MovieRecord)] =
+        Dictionary(uniqueKeysWithValues: legacyMovies.map {
+          let cloudProperties = Movie.CloudProperties(tmdbID: $0.tmdbID,
+                                                      libraryID: self.metadata.id,
+                                                      title: $0.title,
+                                                      subtitle: $0.subtitle,
+                                                      diskType: $0.diskType)
+          let record = MovieRecord(from: cloudProperties)
+          return ($0.tmdbID, (cloudProperties, record))
+        })
+    let rawRecords = Array(cloudData.values.map { $0.1.rawRecord })
+    self.syncManager.syncAll(rawRecords, using: self.databaseOperationQueue) { error in
+      if let error = error {
+        switch error {
+          case .notAuthenticated, .userDeletedZone, .nonRecoverableError:
+            os_log("unable to sync movies: %{public}@",
+                   log: DeviceSyncingMovieLibrary.logger,
+                   type: .error,
+                   String(describing: error))
+            completion(nil)
+          case .conflict, .itemNoLongerExists, .zoneNotFound, .permissionFailure:
+            fatalError("should not occur: \(error)")
+        }
+      } else {
+        completion(cloudData)
+      }
+    }
+  }
+
+  private func prepareTmdbData(for legacyMovies: [Legacy.LegacyMovieData],
+                               then completion: @escaping ([TmdbIdentifier: Movie.TmdbProperties]) -> Void) {
+    let tmdbData: [TmdbIdentifier: Movie.TmdbProperties] = Dictionary(uniqueKeysWithValues: legacyMovies.map { movie in
+      if let data = tmdbPropertiesProvider.tmdbProperties(for: movie.tmdbID) {
+        return (movie.tmdbID, data.1)
+      } else {
+        return (movie.tmdbID, Movie.TmdbProperties())
+      }
+    })
+    completion(tmdbData)
+  }
+
+  private func didPrepareForBatchInsertion(_ legacyMovies: [Legacy.LegacyMovieData],
+                                           _ cloudData: [TmdbIdentifier: (Movie.CloudProperties, MovieRecord)]?,
+                                           _ tmdbData: [TmdbIdentifier: Movie.TmdbProperties]?,
+                                           _ completion: @escaping (Bool) -> Void) {
+    guard let cloudData = cloudData, let tmdbData = tmdbData else {
+      completion(false)
+      return
+    }
+    localData.initializeWithDefaultValue()
+    self.localData.access { data in
+      var changeSet = ChangeSet<TmdbIdentifier, Movie>()
+      for legacyMovie in legacyMovies {
+        let (cloudProperties, record) = cloudData[legacyMovie.tmdbID]!
+        let tmdbProperties = tmdbData[legacyMovie.tmdbID]!
+        let movie = Movie(cloudProperties, tmdbProperties)
+        data.movies[movie.cloudProperties.id] = movie
+        data.movieRecords[movie.cloudProperties.id] = record
+        data.recordIDsByTmdbID[movie.cloudProperties.tmdbID] = record.id
+        changeSet.insertions.append(movie)
+      }
+      self.localData.persist()
+      self.delegates.invoke { $0.library(self, didUpdateMovies: changeSet) }
+      completion(true)
+    }
   }
 }

@@ -54,6 +54,7 @@ public protocol MovieLibrary: class {
 protocol InternalMovieLibrary: MovieLibrary {
   var metadata: MovieLibraryMetadata { get set }
 
+  func migrateMovies(from url: URL, then completion: @escaping (Bool) -> Void)
   func processChanges(_ changes: FetchedChanges)
   func cleanupForRemoval()
 }

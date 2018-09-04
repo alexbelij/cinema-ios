@@ -5,6 +5,7 @@ import os.log
 import UIKit
 
 class CoreCoordinator: CustomPresentableCoordinator {
+  static let primaryLibraryKey = "primaryLibrary"
   private static let logger = Logging.createLogger(category: "CoreCoordinator")
 
   // coordinator stuff
@@ -16,7 +17,12 @@ class CoreCoordinator: CustomPresentableCoordinator {
   private let dependencies: AppDependencies
   private let libraryManager: MovieLibraryManager
   private let notificationCenter: NotificationCenter
-  private var primaryLibrary: MovieLibrary
+  private let userDefaults: UserDefaultsProtocol
+  private var primaryLibrary: MovieLibrary {
+    didSet {
+      dependencies.userDefaults.set(primaryLibrary.metadata.id.recordName, forKey: CoreCoordinator.primaryLibraryKey)
+    }
+  }
   private let tabBarController = UITabBarController()
 
   // child coordinators
@@ -30,6 +36,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
     self.dependencies = dependencies
     self.libraryManager = dependencies.libraryManager
     self.notificationCenter = dependencies.notificationCenter
+    self.userDefaults = dependencies.userDefaults
     self.primaryLibrary = library
     libraryContentNavigationController = UINavigationController()
     libraryContentCoordinator = LibraryContentCoordinator(for: library,
@@ -143,24 +150,60 @@ extension CoreCoordinator: MovieLibraryManagerDelegate {
                       didUpdateLibraries changeSet: ChangeSet<CKRecordID, MovieLibrary>) {
     DispatchQueue.main.async {
       if changeSet.modifications[self.primaryLibrary.metadata.id] != nil {
-        if self.primaryLibrary.metadata.currentUserCanModify && self.searchTmdbCoordinator == nil {
-          self.setTabs(includeSearchTab: true)
-        } else if !self.primaryLibrary.metadata.currentUserCanModify && self.searchTmdbCoordinator != nil {
-          self.setTabs(includeSearchTab: false)
-        }
+        self.updateTabs()
       } else if changeSet.deletions[self.primaryLibrary.metadata.id] != nil {
-        libraryManager.fetchLibraries { result in
-          switch result {
-            case let .failure(error):
-              os_log("unable to switch library since fetchLibraries failed: %{public}@",
-                     log: CoreCoordinator.logger,
-                     type: .default,
-                     String(describing: error))
-              fatalError("unable to switch library")
-            case let .success(libraries):
-              self.switchLibrary(to: libraries.first!)
+        self.switchToDifferentLibrary()
+      }
+    }
+  }
+
+  private func updateTabs() {
+    if self.primaryLibrary.metadata.currentUserCanModify && self.searchTmdbCoordinator == nil {
+      self.setTabs(includeSearchTab: true)
+    } else if !self.primaryLibrary.metadata.currentUserCanModify && self.searchTmdbCoordinator != nil {
+      self.setTabs(includeSearchTab: false)
+    }
+  }
+
+  private func switchToDifferentLibrary() {
+    libraryManager.fetchLibraries { result in
+      switch result {
+        case let .failure(error):
+          os_log("unable to switch library since fetchLibraries failed: %{public}@",
+                 log: CoreCoordinator.logger,
+                 type: .default,
+                 String(describing: error))
+          fatalError("unable to switch library")
+        case let .success(libraries):
+          if libraries.isEmpty {
+            os_log("all libraries have been deleted -> creating default one",
+                   log: CoreCoordinator.logger,
+                   type: .default)
+            self.makeDefaultLibrary { library in
+              self.switchLibrary(to: library)
+            }
+          } else {
+            self.switchLibrary(to: libraries.first!)
           }
-        }
+      }
+    }
+  }
+
+  private func makeDefaultLibrary(then completion: @escaping (MovieLibrary) -> Void) {
+    let metadata = MovieLibraryMetadata(name: NSLocalizedString("library.defaultName", comment: ""))
+    dependencies.libraryManager.addLibrary(with: metadata) { result in
+      switch result {
+        case let .failure(error):
+          switch error {
+            case let .globalError(event):
+              self.notificationCenter.post(event.notification)
+            case .nonRecoverableError:
+              fatalError("non-recoverable error during creation of default library")
+            case .libraryDoesNotExist, .permissionFailure:
+              fatalError("should not occur: \(error)")
+          }
+        case let .success(library):
+          completion(library)
       }
     }
   }

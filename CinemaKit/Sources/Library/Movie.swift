@@ -1,7 +1,7 @@
 import CloudKit
 import Foundation
 
-public struct TmdbIdentifier: RawRepresentable, CustomStringConvertible, Hashable {
+public struct TmdbIdentifier: RawRepresentable, CustomStringConvertible, Hashable, Codable {
   public let rawValue: Int
 
   public init(rawValue: Int) {
@@ -13,7 +13,7 @@ public struct TmdbIdentifier: RawRepresentable, CustomStringConvertible, Hashabl
   }
 }
 
-public struct GenreIdentifier: RawRepresentable, CustomStringConvertible, Hashable {
+public struct GenreIdentifier: RawRepresentable, CustomStringConvertible, Hashable, Codable {
   public let rawValue: Int
 
   public init(rawValue: Int) {
@@ -41,12 +41,13 @@ public struct Movie {
     init(tmdbID: TmdbIdentifier,
          libraryID: CKRecordID,
          title: String,
+         subtitle: String? = nil,
          diskType: DiskType) {
       self.id = CKRecordID(recordName: UUID().uuidString, zoneID: libraryID.zoneID)
       self.tmdbID = tmdbID
       self.libraryID = libraryID
       self.title = title
-      self.subtitle = nil
+      self.subtitle = subtitle
       self.diskType = diskType
     }
 
@@ -69,7 +70,7 @@ public struct Movie {
     }
   }
 
-  struct TmdbProperties {
+  struct TmdbProperties: Codable {
     let runtime: Measurement<UnitDuration>?
     let releaseDate: Date?
     let genreIds: [GenreIdentifier]
@@ -86,6 +87,41 @@ public struct Movie {
       self.genreIds = genreIds
       self.certification = certification
       self.overview = overview
+    }
+
+    init(from decoder: Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      runtime = try container.decodeIfPresent(Double.self, forKey: .runtime)
+                             .map { Measurement(value: $0, unit: .minutes) }
+      releaseDate = try container.decodeIfPresent(Date.self, forKey: .releaseDate)
+      genreIds = try container.decode([GenreIdentifier].self, forKey: .genreIds)
+      certification = try container.decodeIfPresent(String.self, forKey: .certification)
+      overview = try container.decodeIfPresent(String.self, forKey: .overview)
+    }
+
+    func encode(to encoder: Encoder) throws {
+      var container = encoder.container(keyedBy: CodingKeys.self)
+      if let runtime = runtime {
+        try container.encode(runtime.converted(to: .minutes).value, forKey: .runtime)
+      }
+      if let releaseDate = releaseDate {
+        try container.encode(releaseDate, forKey: .releaseDate)
+      }
+      try container.encode(genreIds, forKey: .genreIds)
+      if let certification = certification {
+        try container.encode(certification, forKey: .certification)
+      }
+      if let overview = overview {
+        try container.encode(overview, forKey: .overview)
+      }
+    }
+
+    private enum CodingKeys: String, CodingKey {
+      case runtime
+      case releaseDate
+      case genreIds
+      case certification
+      case overview
     }
   }
 
