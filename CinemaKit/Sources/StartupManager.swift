@@ -35,6 +35,7 @@ public class CinemaKitStartupManager: StartupManager {
   private static let logger = Logging.createLogger(category: "CinemaKitStartupManager")
   private static let deviceSyncZoneCreatedKey = "DeviceSyncZoneCreated"
   private static let appVersionKey = "CFBundleShortVersionString"
+  private static let shouldResetMovieDetailsKey = "ShouldResetMovieDetails"
 
   // directories
   private static let documentsDir = directoryUrl(for: .documentDirectory)
@@ -104,6 +105,9 @@ public class CinemaKitStartupManager: StartupManager {
     if userDefaults.bool(forKey: LocalCloudKitCacheInvalidationFlag.key) {
       os_log("local CloudKit cache was invalidated", log: CinemaKitStartupManager.logger, type: .default)
       resetLocalCloudKitCache()
+    } else if userDefaults.bool(forKey: CinemaKitStartupManager.shouldResetMovieDetailsKey) {
+      os_log("should reset movie details", log: CinemaKitStartupManager.logger, type: .default)
+      resetMovieDetails()
     }
     setUpDirectories()
     setUpDeviceSyncZone()
@@ -135,6 +139,21 @@ public class CinemaKitStartupManager: StartupManager {
       try fileManager.removeItem(at: CinemaKitStartupManager.libraryRecordStoreURL)
       try fileManager.removeItem(at: CinemaKitStartupManager.shareRecordStoreURL)
       try fileManager.removeItem(at: CinemaKitStartupManager.movieRecordsDir)
+    } catch {
+      os_log("unable to remove local data: %{public}@",
+             log: CinemaKitStartupManager.logger,
+             type: .fault,
+             String(describing: error))
+      fatalError("unable to remove local data")
+    }
+    resetMovieDetails()
+  }
+
+  private func resetMovieDetails() {
+    userDefaults.removeObject(forKey: CinemaKitStartupManager.shouldResetMovieDetailsKey)
+    do {
+      let fileManager = FileManager.default
+      try fileManager.removeItem(at: CinemaKitStartupManager.tmdbPropertiesDir)
     } catch {
       os_log("unable to remove local data: %{public}@",
              log: CinemaKitStartupManager.logger,
