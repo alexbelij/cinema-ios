@@ -46,8 +46,9 @@
 "library.migratedNameFormat" = "Filme von %@";
 "library.empty" = "Die Mediathek ist leer.";
 "library.search.placeholder" = "Suchen";
-"libraryList.libraries" = "Mediatheken";
+"libraryList.invitations" = "Einladungen";
 "libraryList.addNewLibrary" = "Neue Mediathek hinzufügen …";
+"libraryList.libraries" = "Mediatheken";
 "librarySettings.howToRemoveSharedLibrary" = "Du kannst diese Mediathek löschen, indem du dich von der Liste der Teilnehmer entfernst.";
 "librarySettings.nameSection.header" = "Name";
 "librarySettings.nameSection.notEmptyMessage" = "Gib mindestens ein Zeichen ein.";

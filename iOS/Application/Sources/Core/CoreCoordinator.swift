@@ -120,17 +120,11 @@ extension CoreCoordinator: LibraryContentCoordinatorDelegate {
                })
              }
     controller.addSheetItem(.settings { _ in
-      self.showLibrarySettings()
-    })
-    self.tabBarController.present(controller, animated: true)
-  }
-
-  func showLibrarySettings() {
-    if libraryListCoordinator == nil {
       self.libraryListCoordinator = LibraryListCoordinator(dependencies: self.dependencies)
       self.libraryListCoordinator!.delegate = self
       self.tabBarController.present(self.libraryListCoordinator!.rootViewController, animated: true)
-    }
+    })
+    self.tabBarController.present(controller, animated: true)
   }
 
   private func switchLibrary(to newLibrary: MovieLibrary) {
@@ -209,6 +203,28 @@ extension CoreCoordinator: MovieLibraryManagerDelegate {
           completion(library)
       }
     }
+  }
+
+  func libraryManager(_ libraryManager: MovieLibraryManager,
+                      willAcceptSharedLibraryWith title: String,
+                      continuation: @escaping () -> Void) {
+    DispatchQueue.main.async {
+      if self.libraryListCoordinator == nil {
+        self.libraryListCoordinator = LibraryListCoordinator(dependencies: self.dependencies)
+        self.libraryListCoordinator!.delegate = self
+        self.tabBarController.present(self.libraryListCoordinator!.rootViewController, animated: true) {
+          self.libraryListCoordinator!.libraryManager(libraryManager,
+                                                      willAcceptSharedLibraryWith: title,
+                                                      continuation: continuation)
+        }
+      }
+    }
+  }
+
+  func libraryManager(_ libraryManager: MovieLibraryManager,
+                      didAcceptSharedLibrary library: MovieLibrary,
+                      with title: String) {
+    switchLibrary(to: library)
   }
 }
 

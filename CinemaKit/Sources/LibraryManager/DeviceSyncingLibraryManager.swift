@@ -402,9 +402,17 @@ extension DeviceSyncingLibraryManager {
         os_log("already accepted share", log: DeviceSyncingLibraryManager.logger, type: .default)
         return
       }
-      self.shareManager.acceptShare(with: shareMetadata) { error in
-        self.acceptShareCompletion(shareMetadata, error)
+      // swiftlint:disable:next force_cast
+      let title = shareMetadata.share[CKShareTitleKey] as! String
+      var didContinue = false
+      let continuation = {
+        if didContinue { return }
+        didContinue = true
+        self.shareManager.acceptShare(with: shareMetadata) { error in
+          self.acceptShareCompletion(shareMetadata, error)
+        }
       }
+      self.delegates.invoke { $0.libraryManager(self, willAcceptSharedLibraryWith: title, continuation: continuation) }
     }, whenUnableToLoad: { error in
       os_log("unable to accept share, because libraries could not be loaded: %{public}@",
              log: DeviceSyncingLibraryManager.logger,
@@ -459,8 +467,9 @@ extension DeviceSyncingLibraryManager {
         data.libraryRecords[libraryRecord.id] = libraryRecord
         data.shareRecords[shareMetadata.share.recordID] = shareMetadata.share
         self.localData.persist()
-        let changeSet = ChangeSet<CKRecordID, MovieLibrary>(insertions: [library])
-        self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
+        // swiftlint:disable:next force_cast
+        let title = shareMetadata.share[CKShareTitleKey] as! String
+        self.delegates.invoke { $0.libraryManager(self, didAcceptSharedLibrary: library, with: title) }
       }
     }
   }

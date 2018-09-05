@@ -316,4 +316,21 @@ extension LibraryListCoordinator: MovieLibraryManagerDelegate {
       }
     }
   }
+
+  func libraryManager(_ libraryManager: MovieLibraryManager,
+                      willAcceptSharedLibraryWith title: String,
+                      continuation: @escaping () -> Void) {
+    DispatchQueue.main.async {
+      self.libraryListController.setInvitation(title)
+      continuation()
+    }
+  }
+
+  func libraryManager(_ libraryManager: MovieLibraryManager,
+                      didAcceptSharedLibrary library: MovieLibrary,
+                      with title: String) {
+    DispatchQueue.main.async {
+      self.libraryListController.replaceInvitation(with: title, by: library.metadata)
+    }
+  }
 }

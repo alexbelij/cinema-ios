@@ -46,8 +46,9 @@
 "library.migratedNameFormat" = "Movies from %@";
 "library.empty" = "The library is empty.";
 "library.search.placeholder" = "Search";
-"libraryList.libraries" = "Libraries";
 "libraryList.addNewLibrary" = "Add New Library…";
+"libraryList.invitations" = "Invitations";
+"libraryList.libraries" = "Libraries";
 "librarySettings.howToRemoveSharedLibrary" = "You can delete this library by removing yourself from the participant list.";
 "librarySettings.nameSection.header" = "Name";
 "librarySettings.nameSection.notEmptyMessage" = "Enter at least one character.";

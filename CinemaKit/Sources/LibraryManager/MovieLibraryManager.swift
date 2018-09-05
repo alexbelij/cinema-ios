@@ -5,6 +5,14 @@ import UIKit
 public protocol MovieLibraryManagerDelegate: class {
   func libraryManager(_ libraryManager: MovieLibraryManager,
                       didUpdateLibraries changeSet: ChangeSet<CKRecordID, MovieLibrary>)
+
+  // sharing
+  func libraryManager(_ libraryManager: MovieLibraryManager,
+                      willAcceptSharedLibraryWith title: String,
+                      continuation: @escaping () -> Void)
+  func libraryManager(_ libraryManager: MovieLibraryManager,
+                      didAcceptSharedLibrary library: MovieLibrary,
+                      with title: String)
 }
 
 public enum CloudSharingControllerParameters {
@@ -31,7 +39,7 @@ public protocol MovieLibraryManager: class {
 
   func fetchChanges(then completion: @escaping (Result<Bool, MovieLibraryManagerError>) -> Void)
 
-  // Sharing
+  // sharing
   func prepareCloudSharingController(
       forLibraryWith metadata: MovieLibraryMetadata,
       then completion: @escaping (Result<CloudSharingControllerParameters, MovieLibraryManagerError>) -> Void)

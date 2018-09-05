@@ -9,6 +9,11 @@ class LibraryListController: UITableViewController {
     case addLibraryAction
   }
 
+  private enum InvitationItem {
+    case waiting(String)
+    case accepted(String)
+  }
+
   private static let sortDescriptor: (LibraryItem, LibraryItem) -> Bool = { item1, item2 in
     switch (item1, item2) {
       case let (.placeholder(metadata1), .placeholder(metadata2)):
@@ -28,6 +33,7 @@ class LibraryListController: UITableViewController {
   var onAddLibraryButtonTap: (() -> Void)?
 
   private var libraryItems = [LibraryItem.addLibraryAction]
+  private var invitationItems: [InvitationItem]?
 }
 
 // MARK: - Setup
@@ -90,14 +96,41 @@ extension LibraryListController {
       }
     }
   }
+
+  func setInvitation(_ title: String) {
+    guard invitationItems == nil else { preconditionFailure("can only handle one invitation") }
+    invitationItems = [.waiting(title)]
+    tableView.insertSections(IndexSet(integer: 1), with: .fade)
+  }
+
+  func replaceInvitation(with title: String, by metadata: MovieLibraryMetadata) {
+    guard invitationItems != nil else { preconditionFailure("no invitation set") }
+    invitationItems![0] = .accepted(metadata.name)
+    let source = IndexPath(row: 0, section: 1)
+    tableView.performBatchUpdates({ self.tableView.reloadRows(at: [source], with: .automatic) },
+                                  completion: { _ in
+                                    self.invitationItems!.removeFirst()
+                                    self.libraryItems.append(.selectLibrary(metadata))
+                                    self.libraryItems.sort(by: LibraryListController.sortDescriptor)
+                                    let destination = IndexPath(row: self.libraryItemIndex(for: metadata)!, section: 0)
+                                    self.tableView.moveRow(at: source, to: destination)
+                                    self.invitationItems = nil
+                                    self.tableView.deleteSections(IndexSet(integer: 1), with: .fade)
+                                  })
+  }
 }
 
 // MARK: - Table View
 
 extension LibraryListController {
+  override func numberOfSections(in tableView: UITableView) -> Int {
+    return invitationItems == nil ? 1 : 2
+  }
+
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     switch section {
       case 0: return libraryItems.count
+      case 1: return invitationItems!.count
       default: fatalError("unexpected section \(section)")
     }
   }
@@ -108,7 +141,7 @@ extension LibraryListController {
         switch libraryItems[indexPath.row] {
           case let .placeholder(metadata):
             let cell: PlaceholderTableCell = tableView.dequeueReusableCell(for: indexPath)
-            cell.configure(for: metadata)
+            cell.configure(with: metadata.name)
             return cell
           case let .selectLibrary(metadata):
             let cell = tableView.dequeueReusableCell(withIdentifier: "ExistingLibraryTableCell", for: indexPath)
@@ -116,6 +149,17 @@ extension LibraryListController {
             return cell
           case .addLibraryAction:
             return tableView.dequeueReusableCell(for: indexPath) as AddNewLibraryTableCell
+        }
+      case 1:
+        switch invitationItems![indexPath.row] {
+          case let .waiting(title):
+            let cell: PlaceholderTableCell = tableView.dequeueReusableCell(for: indexPath)
+            cell.configure(with: title)
+            return cell
+          case let .accepted(title):
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ExistingLibraryTableCell", for: indexPath)
+            cell.textLabel!.text = title
+            return cell
         }
       default:
         fatalError("unexpected section \(indexPath.section)")
@@ -154,6 +198,7 @@ extension LibraryListController {
   override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
     switch section {
       case 0: return NSLocalizedString("libraryList.libraries", comment: "")
+      case 1: return NSLocalizedString("libraryList.invitations", comment: "")
       default: fatalError("unexpected section \(section)")
     }
   }
@@ -171,8 +216,8 @@ class PlaceholderTableCell: UITableViewCell {
   @IBOutlet private weak var label: UILabel!
   @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
 
-  func configure(for metadata: MovieLibraryMetadata) {
-    label.text = metadata.name
+  func configure(with title: String) {
+    label.text = title
     activityIndicator.startAnimating()
   }
 }
