@@ -5,11 +5,16 @@ import MobileCoreServices
 import os.log
 import UIKit
 
+protocol LibraryListCoordinatorDelegate: class {
+  func libraryListCoordinatorDidFinish(_ coordinator: LibraryListCoordinator)
+}
+
 class LibraryListCoordinator: NSObject, CustomPresentableCoordinator {
   private static let logger = Logging.createLogger(category: "LibraryListCoordinator")
   var rootViewController: UIViewController {
     return navigationController
   }
+  weak var delegate: LibraryListCoordinatorDelegate?
   private let dependencies: AppDependencies
   private let libraryManager: MovieLibraryManager
   private let notificationCenter: NotificationCenter
@@ -72,7 +77,7 @@ extension LibraryListCoordinator {
 
 extension LibraryListCoordinator {
   private func libraryListControllerDidTabDoneButton() {
-    self.navigationController.dismiss(animated: true)
+    delegate?.libraryListCoordinatorDidFinish(self)
   }
 
   private func libraryListControllerDidSelect(_ metadata: MovieLibraryMetadata) {

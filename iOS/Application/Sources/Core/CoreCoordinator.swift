@@ -30,7 +30,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
   private let libraryContentCoordinator: LibraryContentCoordinator
   private let genreListCoordinator: GenreListCoordinator
   private var searchTmdbCoordinator: SearchTmdbCoordinator?
-  private var librarySettingsCoordinator: LibraryListCoordinator?
+  private var libraryListCoordinator: LibraryListCoordinator?
 
   init(for library: MovieLibrary, dependencies: AppDependencies) {
     self.dependencies = dependencies
@@ -126,8 +126,11 @@ extension CoreCoordinator: LibraryContentCoordinatorDelegate {
   }
 
   func showLibrarySettings() {
-    self.librarySettingsCoordinator = LibraryListCoordinator(dependencies: self.dependencies)
-    self.tabBarController.present(self.librarySettingsCoordinator!.rootViewController, animated: true)
+    if libraryListCoordinator == nil {
+      self.libraryListCoordinator = LibraryListCoordinator(dependencies: self.dependencies)
+      self.libraryListCoordinator!.delegate = self
+      self.tabBarController.present(self.libraryListCoordinator!.rootViewController, animated: true)
+    }
   }
 
   private func switchLibrary(to newLibrary: MovieLibrary) {
@@ -205,6 +208,15 @@ extension CoreCoordinator: MovieLibraryManagerDelegate {
         case let .success(library):
           completion(library)
       }
+    }
+  }
+}
+
+extension CoreCoordinator: LibraryListCoordinatorDelegate {
+  func libraryListCoordinatorDidFinish(_ coordinator: LibraryListCoordinator) {
+    DispatchQueue.main.async {
+      coordinator.rootViewController.dismiss(animated: true)
+      self.libraryListCoordinator = nil
     }
   }
 }
