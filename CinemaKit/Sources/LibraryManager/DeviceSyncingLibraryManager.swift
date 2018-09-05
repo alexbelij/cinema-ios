@@ -248,7 +248,8 @@ extension DeviceSyncingLibraryManager {
     for zoneID in deletedSharedZoneIDs {
       for removedLibrary in data.libraries.values.filter({ $0.metadata.id.zoneID == zoneID }) {
         let removedLibrary = data.libraries.removeValue(forKey: removedLibrary.metadata.id)!
-        data.libraryRecords.removeValue(forKey: removedLibrary.metadata.id)
+        let record = data.libraryRecords.removeValue(forKey: removedLibrary.metadata.id)!
+        data.shareRecords.removeValue(forKey: record.shareID!)
         removedLibrary.cleanupForRemoval()
         changeSet.deletions[removedLibrary.metadata.id] = removedLibrary
       }
