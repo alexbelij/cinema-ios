@@ -397,9 +397,20 @@ extension DeviceSyncingLibraryManager {
   }
 
   func acceptCloudKitShare(with shareMetadata: CKShareMetadata) {
-    shareManager.acceptShare(with: shareMetadata) { error in
-      self.acceptShareCompletion(shareMetadata, error)
-    }
+    localData.access(onceLoaded: { data in
+      guard data.libraries[shareMetadata.rootRecordID] == nil else {
+        os_log("already accepted share", log: DeviceSyncingLibraryManager.logger, type: .default)
+        return
+      }
+      self.shareManager.acceptShare(with: shareMetadata) { error in
+        self.acceptShareCompletion(shareMetadata, error)
+      }
+    }, whenUnableToLoad: { error in
+      os_log("unable to accept share, because libraries could not be loaded: %{public}@",
+             log: DeviceSyncingLibraryManager.logger,
+             type: .error,
+             String(describing: error))
+    })
   }
 
   private func acceptShareCompletion(_ shareMetadata: CKShareMetadata, _ error: CloudKitError?) {
@@ -416,21 +427,10 @@ extension DeviceSyncingLibraryManager {
           fatalError("should not occur: \(error)")
       }
     } else {
-      localData.access(onceLoaded: { data in
-        guard data.libraries[shareMetadata.rootRecordID] == nil else {
-          os_log("already fetched shared library", log: DeviceSyncingLibraryManager.logger, type: .default)
-          return
-        }
-        self.fetchManager.fetchRecord(with: shareMetadata.rootRecordID,
-                                      using: self.queueFactory.queue(withScope: .shared)) { rootRecord, error in
-          self.fetchRootRecordCompletion(shareMetadata, rootRecord, error)
-        }
-      }, whenUnableToLoad: { error in
-        os_log("accepted share, but could not load libraries: %{public}@",
-               log: DeviceSyncingLibraryManager.logger,
-               type: .error,
-               String(describing: error))
-      })
+      self.fetchManager.fetchRecord(with: shareMetadata.rootRecordID,
+                                    using: self.queueFactory.queue(withScope: .shared)) { rootRecord, error in
+        self.fetchRootRecordCompletion(shareMetadata, rootRecord, error)
+      }
     }
   }
 
