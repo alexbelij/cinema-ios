@@ -247,8 +247,9 @@ extension DeviceSyncingLibraryManager {
                data: MovieLibraryManagerDataObject) {
     for zoneID in deletedSharedZoneIDs {
       for removedLibrary in data.libraries.values.filter({ $0.metadata.id.zoneID == zoneID }) {
-        data.libraries.removeValue(forKey: removedLibrary.metadata.id)
+        let removedLibrary = data.libraries.removeValue(forKey: removedLibrary.metadata.id)!
         data.libraryRecords.removeValue(forKey: removedLibrary.metadata.id)
+        removedLibrary.cleanupForRemoval()
         changeSet.deletions[removedLibrary.metadata.id] = removedLibrary
       }
     }
@@ -301,6 +302,7 @@ extension DeviceSyncingLibraryManager {
         where recordType == LibraryRecord.recordType && data.libraries[recordID] != nil {
       let removedLibrary = data.libraries.removeValue(forKey: recordID)!
       data.libraryRecords.removeValue(forKey: recordID)
+      removedLibrary.cleanupForRemoval()
       changeSet.deletions[removedLibrary.metadata.id] = removedLibrary
     }
     for (recordID, recordType) in deletedRecordIDsAndTypes where recordType == "cloudkit.share" {
