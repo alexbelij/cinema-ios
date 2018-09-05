@@ -193,30 +193,23 @@ extension DeviceSyncingLibraryManager {
 // MARK: - apply changes
 
 extension DeviceSyncingLibraryManager {
-  func fetchChanges(then completion: @escaping (UIBackgroundFetchResult) -> Void) {
+  func fetchChanges(then completion: @escaping (Result<Bool, MovieLibraryManagerError>) -> Void) {
     self.changesManager.fetchChanges { changes, error in
       if let error = error {
         switch error {
           case .userDeletedZone:
-            // shouldCancelAllActions is not set to true, because otherwise
-            // the controller level never gets an .userDeletedZone error
-            os_log("unable to fetch changes: userDeletedZone", log: DeviceSyncingLibraryManager.logger, type: .error)
-            completion(.failed)
+            completion(.failure(.globalError(.userDeletedZone)))
           case .notAuthenticated, .nonRecoverableError:
-            os_log("unable to fetch changes: %{public}@",
-                   log: DeviceSyncingLibraryManager.logger,
-                   type: .error,
-                   String(describing: error))
-            completion(.failed)
+            completion(.failure(error.asMovieLibraryManagerError))
           case .conflict, .itemNoLongerExists, .zoneNotFound, .permissionFailure:
             fatalError("should not occur: \(error)")
         }
       } else if let changes = changes {
         if changes.hasChanges {
           self.processChanges(changes)
-          completion(.newData)
+          completion(.success(true))
         } else {
-          completion(.noData)
+          completion(.success(false))
         }
       }
     }

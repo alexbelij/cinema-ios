@@ -29,7 +29,7 @@ public protocol MovieLibraryManager: class {
                      then completion: @escaping (Result<MovieLibrary, MovieLibraryManagerError>) -> Void)
   func removeLibrary(with id: CKRecordID, then completion: @escaping (Result<Void, MovieLibraryManagerError>) -> Void)
 
-  func fetchChanges(then completion: @escaping (UIBackgroundFetchResult) -> Void)
+  func fetchChanges(then completion: @escaping (Result<Bool, MovieLibraryManagerError>) -> Void)
 
   // Sharing
   func prepareCloudSharingController(

@@ -272,7 +272,20 @@ extension LibraryListCoordinator: UICloudSharingControllerDelegate {
   }
 
   func cloudSharingControllerDidSaveShare(_ csc: UICloudSharingController) {
-    libraryManager.fetchChanges { _ in }
+    libraryManager.fetchChanges { result in
+      if case let .failure(error) = result {
+        switch error {
+          case let .globalError(event):
+            self.notificationCenter.post(event.notification)
+          case .nonRecoverableError:
+            os_log("unable to fetch changes after sharing controller did save share",
+                   log: LibraryListCoordinator.logger,
+                   type: .error)
+          case .permissionFailure, .libraryDoesNotExist:
+            fatalError("should not occur: \(error)")
+        }
+      }
+    }
   }
 }
 

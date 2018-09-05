@@ -202,7 +202,30 @@ class AppCoordinator: AutoPresentableCoordinator {
     os_log("up and running", log: AppCoordinator.logger, type: .default)
     self.window.rootViewController = coreCoordinator.rootViewController
     if self.application.applicationState == .active {
-      dependencies.libraryManager.fetchChanges { _ in }
+      fetchChanges(with: dependencies.libraryManager) { _ in }
+    }
+  }
+
+  private func fetchChanges(with libraryManager: MovieLibraryManager,
+                            then completion: @escaping (UIBackgroundFetchResult) -> Void) {
+    libraryManager.fetchChanges { result in
+      switch result {
+        case let .failure(error):
+          switch error {
+            case let .globalError(event):
+              self.handleApplicationEvent(event)
+            case .nonRecoverableError:
+              os_log("unable to fetch changes: %{public}@",
+                     log: AppCoordinator.logger,
+                     type: .error,
+                     String(describing: error))
+            case .permissionFailure, .libraryDoesNotExist:
+              fatalError("should not occur: \(error)")
+          }
+          completion(.failed)
+        case let .success(newData):
+          completion(newData ? .newData : .noData)
+      }
     }
   }
 }
@@ -212,7 +235,7 @@ extension AppCoordinator {
                                 fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
     dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
     guard case let State.upAndRunning(dependencies, _) = state else { return completionHandler(.noData) }
-    dependencies.libraryManager.fetchChanges(then: completionHandler)
+    fetchChanges(with: dependencies.libraryManager) { completionHandler($0) }
   }
 
   func acceptCloudKitShare(with shareMetadata: CKShareMetadata) {
@@ -227,25 +250,32 @@ extension AppCoordinator {
   func applicationDidBecomeActive() {
     dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
     guard case let State.upAndRunning(dependencies, _) = state else { return }
-    dependencies.libraryManager.fetchChanges { _ in }
+    fetchChanges(with: dependencies.libraryManager) { _ in }
   }
 
   @objc
   private func applicationWideEventDidOccur(_ notification: Notification) {
     // swiftlint:disable:next force_cast
     let event = notification.userInfo![ApplicationWideEvent.userInfoKey] as! ApplicationWideEvent
+    handleApplicationEvent(event)
+  }
+
+  private func handleApplicationEvent(_ event: ApplicationWideEvent) {
     switch event {
       case .notAuthenticated:
+        os_log("user is not authenticated", log: AppCoordinator.logger, type: .default)
         DispatchQueue.main.async {
           self.showNotAuthenticatedPage()
         }
       case .userDeletedZone:
+        os_log("user deleted zone", log: AppCoordinator.logger, type: .default)
         DispatchQueue.main.async {
           self.showRestartUI()
         }
       case .shouldFetchChanges:
         guard case let .upAndRunning(dependencies, _) = state else { return }
-        dependencies.libraryManager.fetchChanges { _ in }
+        os_log("local data is outdated -> fetch changes", log: AppCoordinator.logger, type: .default)
+        fetchChanges(with: dependencies.libraryManager) { _ in }
     }
   }
 }
