@@ -86,7 +86,6 @@ class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
   }
 
   private func makeData(_ movieRecords: [MovieRecord], _ tmdbProperties: [TmdbIdentifier: Movie.TmdbProperties]) {
-    let start = DispatchTime.now().uptimeNanoseconds
     if movieRecords.count != tmdbProperties.count {
       os_log("some data is missing: %d movieRecords and %d tmdbProperties",
              log: MovieLibraryData.logger,
@@ -125,8 +124,6 @@ class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
              duplicates.count)
       syncManager.delete(duplicates, using: databaseOperationQueue)
     }
-    let end = DispatchTime.now().uptimeNanoseconds
-    print("loading data took \((end - start) / 1_000_000) ms")
     completeLoading(with: MovieLibraryDataObject(movies: moviesDict,
                                                  movieRecords: movieRecordsDict,
                                                  recordIDsByTmdbID: recordIDsByTmdbIDDict))
