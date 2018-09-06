@@ -53,7 +53,7 @@ public class CinemaKitStartupManager: StartupManager {
   private static let legacyLibraryDataFileURL141 = documentsDir.appendingPathComponent("cinema.data")
 
   private lazy var previousVersion: AppVersion? = {
-    if let versionString = UserDefaults.standard.string(forKey: CinemaKitStartupManager.appVersionKey) {
+    if let versionString = userDefaults.string(forKey: CinemaKitStartupManager.appVersionKey) {
       return AppVersion(versionString)
     } else if FileManager.default.fileExists(atPath: CinemaKitStartupManager.legacyLibraryDataFileURL141.path) {
       return "1.4.1"
@@ -126,7 +126,7 @@ public class CinemaKitStartupManager: StartupManager {
   }
 
   private func markCurrentVersion() {
-    UserDefaults.standard.set(currentVersion.description, forKey: CinemaKitStartupManager.appVersionKey)
+    userDefaults.set(currentVersion.description, forKey: CinemaKitStartupManager.appVersionKey)
   }
 
   private func resetLocalData() {
