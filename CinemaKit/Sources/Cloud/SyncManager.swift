@@ -155,7 +155,7 @@ class DefaultSyncManager: SyncManager {
           os_log("<syncAll> partial error: %{public}@",
                  log: DefaultSyncManager.logger,
                  type: .error,
-                 ckerror.partialErrorsByItemID!.description)
+                 String(describing: ckerror.partialErrorsByItemID))
           completion(.nonRecoverableError)
         } else if ckerror.code == CKError.Code.networkFailure
                   || ckerror.code == CKError.Code.networkUnavailable

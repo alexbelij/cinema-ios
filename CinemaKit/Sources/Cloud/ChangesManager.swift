@@ -83,7 +83,7 @@ class DefaultChangesManager: ChangesManager {
     os_log("creating fetch database changes operation for %{public}@ database",
            log: DefaultChangesManager.logger,
            type: .default,
-           scope.description)
+           String(describing: scope))
     let previousChangeToken = serverChangeTokenStore.get(for: scope)
     let operation = CKFetchDatabaseChangesOperation(previousServerChangeToken: previousChangeToken)
 
@@ -130,7 +130,7 @@ class DefaultChangesManager: ChangesManager {
                type: .debug,
                changedZoneIDs.count,
                deletedZoneIDs.count,
-               scope.description)
+               String(describing: scope))
         completion((changedZoneIDs, deletedZoneIDs), nil)
       }
     }
