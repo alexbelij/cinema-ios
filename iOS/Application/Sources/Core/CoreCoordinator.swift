@@ -5,7 +5,7 @@ import os.log
 import UIKit
 
 class CoreCoordinator: CustomPresentableCoordinator {
-  static let primaryLibraryKey = "primaryLibrary"
+  static let primaryLibraryKey = UserDefaultsKey<String>("primaryLibrary")
   private static let logger = Logging.createLogger(category: "CoreCoordinator")
 
   // coordinator stuff
@@ -20,7 +20,7 @@ class CoreCoordinator: CustomPresentableCoordinator {
   private let userDefaults: UserDefaultsProtocol
   private var primaryLibrary: MovieLibrary {
     didSet {
-      dependencies.userDefaults.set(primaryLibrary.metadata.id.recordName, forKey: CoreCoordinator.primaryLibraryKey)
+      dependencies.userDefaults.set(primaryLibrary.metadata.id.recordName, for: CoreCoordinator.primaryLibraryKey)
     }
   }
   private let tabBarController = UITabBarController()

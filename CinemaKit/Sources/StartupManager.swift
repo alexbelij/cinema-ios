@@ -4,7 +4,8 @@ import os.log
 import UIKit
 
 struct LocalDataInvalidationFlag {
-  fileprivate static let key = "ShouldResetLocalData"
+  fileprivate static let key = UserDefaultsKey<Bool>("ShouldResetLocalData")
+
   private let userDefaults: UserDefaultsProtocol
 
   init(userDefaults: UserDefaultsProtocol = UserDefaults.standard) {
@@ -12,11 +13,11 @@ struct LocalDataInvalidationFlag {
   }
 
   var isSet: Bool {
-    return userDefaults.bool(forKey: LocalDataInvalidationFlag.key)
+    return userDefaults.get(for: LocalDataInvalidationFlag.key)
   }
 
   func set() {
-    userDefaults.set(true, forKey: LocalDataInvalidationFlag.key)
+    userDefaults.set(true, for: LocalDataInvalidationFlag.key)
   }
 }
 
@@ -33,9 +34,9 @@ public enum StartupProgress {
 
 public class CinemaKitStartupManager: StartupManager {
   private static let logger = Logging.createLogger(category: "CinemaKitStartupManager")
-  private static let deviceSyncZoneCreatedKey = "DeviceSyncZoneCreated"
-  private static let appVersionKey = "CFBundleShortVersionString"
-  private static let shouldResetMovieDetailsKey = "ShouldResetMovieDetails"
+  private static let deviceSyncZoneCreatedKey = UserDefaultsKey<Bool>("DeviceSyncZoneCreated")
+  private static let appVersionKey = UserDefaultsKey<String>("CFBundleShortVersionString")
+  private static let shouldResetMovieDetailsKey = UserDefaultsKey<Bool>("ShouldResetMovieDetails")
 
   // directories
   private static let documentsDir = directoryUrl(for: .documentDirectory)
@@ -53,7 +54,7 @@ public class CinemaKitStartupManager: StartupManager {
   private static let legacyLibraryDataFileURL141 = documentsDir.appendingPathComponent("cinema.data")
 
   private lazy var previousVersion: AppVersion? = {
-    if let versionString = userDefaults.string(forKey: CinemaKitStartupManager.appVersionKey) {
+    if let versionString = userDefaults.get(for: CinemaKitStartupManager.appVersionKey) {
       return AppVersion(versionString)
     } else if FileManager.default.fileExists(atPath: CinemaKitStartupManager.legacyLibraryDataFileURL141.path) {
       return "1.4.1"
@@ -64,8 +65,9 @@ public class CinemaKitStartupManager: StartupManager {
     }
   }()
   private lazy var currentVersion: AppVersion = {
+    let key = CinemaKitStartupManager.appVersionKey.rawKey
     // swiftlint:disable:next force_cast
-    let versionString = Bundle.main.object(forInfoDictionaryKey: CinemaKitStartupManager.appVersionKey) as! String
+    let versionString = Bundle.main.object(forInfoDictionaryKey: key) as! String
     return AppVersion(versionString)
   }()
 
@@ -102,10 +104,10 @@ public class CinemaKitStartupManager: StartupManager {
       os_log("app has never been launched before", log: CinemaKitStartupManager.logger, type: .info)
       markCurrentVersion()
     }
-    if userDefaults.bool(forKey: LocalDataInvalidationFlag.key) {
+    if userDefaults.get(for: LocalDataInvalidationFlag.key) {
       os_log("should reset local data", log: CinemaKitStartupManager.logger, type: .default)
       resetLocalData()
-    } else if userDefaults.bool(forKey: CinemaKitStartupManager.shouldResetMovieDetailsKey) {
+    } else if userDefaults.get(for: CinemaKitStartupManager.shouldResetMovieDetailsKey) {
       os_log("should reset movie details", log: CinemaKitStartupManager.logger, type: .default)
       resetMovieDetails()
     }
@@ -126,12 +128,12 @@ public class CinemaKitStartupManager: StartupManager {
   }
 
   private func markCurrentVersion() {
-    userDefaults.set(currentVersion.description, forKey: CinemaKitStartupManager.appVersionKey)
+    userDefaults.set(currentVersion.description, for: CinemaKitStartupManager.appVersionKey)
   }
 
   private func resetLocalData() {
-    userDefaults.removeObject(forKey: LocalDataInvalidationFlag.key)
-    userDefaults.removeObject(forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
+    userDefaults.removeValue(for: LocalDataInvalidationFlag.key)
+    userDefaults.removeValue(for: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
     do {
       let fileManager = FileManager.default
       try fileManager.removeItem(at: FileBasedSubscriptionStore.fileURL)
@@ -150,7 +152,7 @@ public class CinemaKitStartupManager: StartupManager {
   }
 
   private func resetMovieDetails() {
-    userDefaults.removeObject(forKey: CinemaKitStartupManager.shouldResetMovieDetailsKey)
+    userDefaults.removeValue(for: CinemaKitStartupManager.shouldResetMovieDetailsKey)
     do {
       let fileManager = FileManager.default
       try fileManager.removeItem(at: CinemaKitStartupManager.tmdbPropertiesDir)
@@ -201,7 +203,7 @@ public class CinemaKitStartupManager: StartupManager {
   private func setUpDeviceSyncZone(using queue: DatabaseOperationQueue,
                                    retryCount: Int,
                                    then completion: @escaping (CloudKitError?) -> Void) {
-    if userDefaults.bool(forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey) {
+    if userDefaults.get(for: CinemaKitStartupManager.deviceSyncZoneCreatedKey) {
       completion(nil)
       return
     }
@@ -245,7 +247,7 @@ public class CinemaKitStartupManager: StartupManager {
         }
       } else {
         os_log("device sync zone is set up", log: CinemaKitStartupManager.logger, type: .info)
-        self.userDefaults.set(true, forKey: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
+        self.userDefaults.set(true, for: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
         completion(nil)
       }
     }

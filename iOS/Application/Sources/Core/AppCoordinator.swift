@@ -137,17 +137,17 @@ class AppCoordinator: AutoPresentableCoordinator {
     if libraries.isEmpty {
       os_log("no libraries found -> creating default one", log: AppCoordinator.logger, type: .default)
       makeDefaultLibrary(using: dependencies) { library in
-        dependencies.userDefaults.set(library.metadata.id.recordName, forKey: CoreCoordinator.primaryLibraryKey)
+        dependencies.userDefaults.set(library.metadata.id.recordName, for: CoreCoordinator.primaryLibraryKey)
         self.handleFetchedLibraries([library], using: dependencies)
       }
     } else {
       let primaryLibrary: MovieLibrary
-      if let libraryID = dependencies.userDefaults.string(forKey: CoreCoordinator.primaryLibraryKey),
+      if let libraryID = dependencies.userDefaults.get(for: CoreCoordinator.primaryLibraryKey),
          let library = libraries.first(where: { $0.metadata.id.recordName == libraryID }) {
         primaryLibrary = library
       } else {
         primaryLibrary = libraries.first!
-        dependencies.userDefaults.set(primaryLibrary.metadata.id.recordName, forKey: CoreCoordinator.primaryLibraryKey)
+        dependencies.userDefaults.set(primaryLibrary.metadata.id.recordName, for: CoreCoordinator.primaryLibraryKey)
       }
       let finishCall = {
         DispatchQueue.main.async {
