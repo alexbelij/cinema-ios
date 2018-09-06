@@ -18,18 +18,18 @@ class DeviceSyncingMovieLibrary: InternalMovieLibrary {
     }
   }
   let delegates: MulticastDelegate<MovieLibraryDelegate> = MulticastDelegate()
-  private let syncManager: SyncManager
-  private let tmdbPropertiesProvider: TmdbMoviePropertiesProvider
   private var localData: LazyData<MovieLibraryDataObject, MovieLibraryError>
+  private let tmdbPropertiesProvider: TmdbMoviePropertiesProvider
+  private let syncManager: SyncManager
 
-  init(syncManager: SyncManager,
+  init(metadata: MovieLibraryMetadata,
+       data: LazyData<MovieLibraryDataObject, MovieLibraryError>,
        tmdbPropertiesProvider: TmdbMoviePropertiesProvider,
-       metadata: MovieLibraryMetadata,
-       data: LazyData<MovieLibraryDataObject, MovieLibraryError>) {
-    self.syncManager = syncManager
-    self.tmdbPropertiesProvider = tmdbPropertiesProvider
+       syncManager: SyncManager) {
     self.metadata = metadata
     self.localData = data
+    self.tmdbPropertiesProvider = tmdbPropertiesProvider
+    self.syncManager = syncManager
   }
 }
 

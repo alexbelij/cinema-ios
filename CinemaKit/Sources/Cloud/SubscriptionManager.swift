@@ -7,7 +7,10 @@ protocol SubscriptionManager {
   func subscribeForChanges(then completion: @escaping (CloudKitError?) -> Void)
 }
 
-private extension CloudTarget {
+enum SubscriptionTarget: String, Codable {
+  case deviceSyncZone
+  case sharedDatabase
+
   var subscriptionID: String {
     switch self {
       case .deviceSyncZone: return "DeviceSyncZoneSubscriptionID"
@@ -75,13 +78,13 @@ class DefaultSubscriptionManager: SubscriptionManager {
     }
   }
 
-  private func subscribeForChanges(for target: CloudTarget,
+  private func subscribeForChanges(for target: SubscriptionTarget,
                                    then completion: @escaping (CloudKitError?) -> Void) {
     if subscriptionStore.hasSubscribedTo(target) {
       completion(nil)
       return
     }
-    fetchAllSubscriptions(withScope: target.scope, retryCount: defaultRetryCount) { subscriptions, error in
+    fetchAllSubscriptions(in: target.scope, retryCount: defaultRetryCount) { subscriptions, error in
       if let error = error {
         os_log("already subscribed to %{public}@ (local)",
                log: DefaultSubscriptionManager.logger,
@@ -117,7 +120,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
   }
 
   private func fetchAllSubscriptions(
-      withScope scope: CKDatabaseScope,
+      in scope: CKDatabaseScope,
       retryCount: Int,
       then completion: @escaping ([String: CKSubscription]?, CloudKitError?) -> Void) {
     let operation = CKFetchSubscriptionsOperation.fetchAllSubscriptionsOperation()
@@ -137,7 +140,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
                  type: .default,
                  retryAfter)
           DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
-            self.fetchAllSubscriptions(withScope: scope, retryCount: retryCount - 1, then: completion)
+            self.fetchAllSubscriptions(in: scope, retryCount: retryCount - 1, then: completion)
           }
         } else if ckerror.code == CKError.Code.notAuthenticated {
           completion(nil, .notAuthenticated)

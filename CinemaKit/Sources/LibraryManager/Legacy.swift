@@ -9,14 +9,12 @@ enum Legacy {
   }
 
   static func deserialize(from data: Data) -> [LegacyMovieData] {
-    let array: [[String: Any]]
     let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
-    if unarchiver.containsValue(forKey: "payload") {
-      // swiftlint:disable:next force_cast
-      array = unarchiver.decodeObject(forKey: "payload") as! [[String: Any]]
-    } else {
-      array = NSKeyedUnarchiver.unarchiveObject(with: data) as! [[String: Any]]
-    }
+    // swiftlint:disable force_cast
+    let array = unarchiver.containsValue(forKey: "payload")
+        ? unarchiver.decodeObject(forKey: "payload") as! [[String: Any]]
+        : NSKeyedUnarchiver.unarchiveObject(with: data) as! [[String: Any]]
+    // swiftlint:enable force_cast
     unarchiver.finishDecoding()
     var movies = [LegacyMovieData]()
     for dict in array {

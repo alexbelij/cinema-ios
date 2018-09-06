@@ -387,10 +387,10 @@ private class DefaultMovieLibraryFactory: MovieLibraryFactory {
                                 libraryID: metadata.id,
                                 movieRecordStore: movieRecordStore,
                                 tmdbPropertiesStore: tmdbPropertiesStore)
-    return DeviceSyncingMovieLibrary(syncManager: syncManager,
+    return DeviceSyncingMovieLibrary(metadata: metadata,
+                                     data: data,
                                      tmdbPropertiesProvider: tmdbWrapper,
-                                     metadata: metadata,
-                                     data: data)
+                                     syncManager: syncManager)
   }
 }
 
