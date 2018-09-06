@@ -17,20 +17,23 @@ protocol ChangesManager {
 
 class DefaultChangesManager: ChangesManager {
   private static let logger = Logging.createLogger(category: "ChangesManager")
-  private let queueFactory: DatabaseOperationQueueFactory
+  private let privateDatabaseOperationQueue: DatabaseOperationQueue
+  private let sharedDatabaseOperationQueue: DatabaseOperationQueue
   private let serverChangeTokenStore: ServerChangeTokenStore
   private let dataInvalidationFlag: LocalDataInvalidationFlag
 
-  init(queueFactory: DatabaseOperationQueueFactory,
+  init(privateDatabaseOperationQueue: DatabaseOperationQueue,
+       sharedDatabaseOperationQueue: DatabaseOperationQueue,
        serverChangeTokenStore: ServerChangeTokenStore = FileBasedServerChangeTokenStore(),
        dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
-    self.queueFactory = queueFactory
+    self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
+    self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.serverChangeTokenStore = serverChangeTokenStore
     self.dataInvalidationFlag = dataInvalidationFlag
   }
 
   func fetchChanges(then completion: @escaping (FetchedChanges?, CloudKitError?) -> Void) {
-    fetchChangesInDatabase(withScope: .shared, retryCount: defaultRetryCount) { changes, error in
+    fetchChangesInSharedDatabase(retryCount: defaultRetryCount) { changes, error in
       if let error = error {
         completion(nil, error)
       } else if let (changedZoneIDs, deletedZoneIDs) = changes {
@@ -41,7 +44,7 @@ class DefaultChangesManager: ChangesManager {
         if !changedZoneIDs.isEmpty {
           group.enter()
           self.fetchChangesInZones(withIDs: changedZoneIDs,
-                                   using: self.queueFactory.queue(withScope: .shared)) { changes, error in
+                                   using: self.sharedDatabaseOperationQueue) { changes, error in
             if let error = error {
               errors.append(error)
             } else if let changes = changes {
@@ -53,7 +56,7 @@ class DefaultChangesManager: ChangesManager {
         }
         group.enter()
         self.fetchChangesInZones(withIDs: [deviceSyncZoneID],
-                                 using: self.queueFactory.queue(withScope: .private)) { changes, error in
+                                 using: self.privateDatabaseOperationQueue) { changes, error in
           if let error = error {
             errors.append(error)
           } else if let changes = changes {
@@ -76,15 +79,13 @@ class DefaultChangesManager: ChangesManager {
     }
   }
 
-  private func fetchChangesInDatabase(
-      withScope scope: CKDatabaseScope,
+  private func fetchChangesInSharedDatabase(
       retryCount: Int,
       then completion: @escaping (([CKRecordZoneID], [CKRecordZoneID])?, CloudKitError?) -> Void) {
-    os_log("creating fetch database changes operation for %{public}@ database",
+    os_log("creating fetch database changes operation for shared database",
            log: DefaultChangesManager.logger,
-           type: .default,
-           String(describing: scope))
-    let previousChangeToken = serverChangeTokenStore.get(for: scope)
+           type: .default)
+    let previousChangeToken = serverChangeTokenStore.get(for: .shared)
     let operation = CKFetchDatabaseChangesOperation(previousServerChangeToken: previousChangeToken)
 
     // collect changes and deletions
@@ -123,18 +124,17 @@ class DefaultChangesManager: ChangesManager {
         }
       } else {
         if let newChangeToken = newChangeToken, newChangeToken != previousChangeToken {
-          self.serverChangeTokenStore.set(newChangeToken, for: scope)
+          self.serverChangeTokenStore.set(newChangeToken, for: .shared)
         }
-        os_log("fetched %d changed and %d deleted zones in %{public}@ database",
+        os_log("fetched %d changed and %d deleted zones in shared database",
                log: DefaultChangesManager.logger,
                type: .debug,
                changedZoneIDs.count,
-               deletedZoneIDs.count,
-               String(describing: scope))
+               deletedZoneIDs.count)
         completion((changedZoneIDs, deletedZoneIDs), nil)
       }
     }
-    queueFactory.queue(withScope: scope).add(operation)
+    sharedDatabaseOperationQueue.add(operation)
   }
 
   private func fetchChangesInZones(

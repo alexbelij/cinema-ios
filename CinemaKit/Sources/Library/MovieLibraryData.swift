@@ -18,7 +18,7 @@ class MovieLibraryDataObject {
 class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
   private static let logger = Logging.createLogger(category: "MovieLibraryData")
 
-  private let databaseOperationQueue: DatabaseOperationQueue
+  private let databaseScope: CKDatabaseScope
   private let fetchManager: FetchManager
   private let syncManager: SyncManager
   private let tmdbPropertiesProvider: TmdbMoviePropertiesProvider
@@ -26,14 +26,14 @@ class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
   private let movieRecordStore: PersistentRecordStore
   private let tmdbPropertiesStore: TmdbPropertiesStore
 
-  init(databaseOperationQueue: DatabaseOperationQueue,
+  init(databaseScope: CKDatabaseScope,
        fetchManager: FetchManager,
        syncManager: SyncManager,
        tmdbPropertiesProvider: TmdbMoviePropertiesProvider,
        libraryID: CKRecordID,
        movieRecordStore: PersistentRecordStore,
        tmdbPropertiesStore: TmdbPropertiesStore) {
-    self.databaseOperationQueue = databaseOperationQueue
+    self.databaseScope = databaseScope
     self.fetchManager = fetchManager
     self.syncManager = syncManager
     self.tmdbPropertiesProvider = tmdbPropertiesProvider
@@ -122,7 +122,7 @@ class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
              log: MovieLibraryData.logger,
              type: .default,
              duplicates.count)
-      syncManager.delete(duplicates, using: databaseOperationQueue)
+      syncManager.delete(duplicates, in: databaseScope)
     }
     completeLoading(with: MovieLibraryDataObject(movies: moviesDict,
                                                  movieRecords: movieRecordsDict,
@@ -151,7 +151,7 @@ extension MovieLibraryData {
     fetchManager.fetch(MovieRecord.self,
                        matching: MovieRecord.queryPredicate(forMoviesInLibraryWithID: libraryID),
                        inZoneWithID: libraryID.zoneID,
-                       using: databaseOperationQueue) { records, error in
+                       in: databaseScope) { records, error in
       if let error = error {
         switch error {
           case .userDeletedZone:

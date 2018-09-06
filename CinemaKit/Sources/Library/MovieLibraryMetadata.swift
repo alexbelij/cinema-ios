@@ -34,3 +34,9 @@ public struct MovieLibraryMetadata: DeviceSyncable {
     record.name = name
   }
 }
+
+extension MovieLibraryMetadata {
+  var databaseScope: CKDatabaseScope {
+    return isCurrentUserOwner ? .private : .shared
+  }
+}

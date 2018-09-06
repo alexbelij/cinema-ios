@@ -18,17 +18,14 @@ class DeviceSyncingMovieLibrary: InternalMovieLibrary {
     }
   }
   let delegates: MulticastDelegate<MovieLibraryDelegate> = MulticastDelegate()
-  private let databaseOperationQueue: DatabaseOperationQueue
   private let syncManager: SyncManager
   private let tmdbPropertiesProvider: TmdbMoviePropertiesProvider
   private var localData: LazyData<MovieLibraryDataObject, MovieLibraryError>
 
-  init(databaseOperationQueue: DatabaseOperationQueue,
-       syncManager: SyncManager,
+  init(syncManager: SyncManager,
        tmdbPropertiesProvider: TmdbMoviePropertiesProvider,
        metadata: MovieLibraryMetadata,
        data: LazyData<MovieLibraryDataObject, MovieLibraryError>) {
-    self.databaseOperationQueue = databaseOperationQueue
     self.syncManager = syncManager
     self.tmdbPropertiesProvider = tmdbPropertiesProvider
     self.metadata = metadata
@@ -72,7 +69,7 @@ extension DeviceSyncingMovieLibrary {
                                                   title: title,
                                                   diskType: diskType)
       let record = MovieRecord(from: cloudProperties)
-      self.syncManager.sync(record.rawRecord, using: self.databaseOperationQueue) { error in
+      self.syncManager.sync(record.rawRecord, in: self.metadata.databaseScope) { error in
         let movie = Movie(cloudProperties, tmdbProperties)
         self.addSyncCompletion(movie, record, error, completion)
       }
@@ -98,7 +95,7 @@ extension DeviceSyncingMovieLibrary {
           os_log("aborting explicit adding, because movie has already been added via changes -> deleting duplicate",
                  log: DeviceSyncingMovieLibrary.logger,
                  type: .default)
-          self.syncManager.delete([record.id], using: self.databaseOperationQueue)
+          self.syncManager.delete([record.id], in: self.metadata.databaseScope)
           completion(.success(data.movies[existingMovieRecordID]!))
         } else {
           data.movies[movie.cloudProperties.id] = movie
@@ -121,7 +118,7 @@ extension DeviceSyncingMovieLibrary {
         return
       }
       movie.cloudProperties.setCustomFields(in: record)
-      self.syncManager.sync(record.rawRecord, using: self.databaseOperationQueue) { error in
+      self.syncManager.sync(record.rawRecord, in: self.metadata.databaseScope) { error in
         self.updateSyncCompletion(movie, record, error, completion)
       }
     }, whenUnableToLoad: { error in
@@ -177,7 +174,7 @@ extension DeviceSyncingMovieLibrary {
         return
       }
       let movie = data.movies[recordID]!
-      self.syncManager.delete(data.movieRecords[recordID]!.rawRecord, using: self.databaseOperationQueue) { error in
+      self.syncManager.delete(data.movieRecords[recordID]!.rawRecord, in: self.metadata.databaseScope) { error in
         self.removeSyncCompletion(movie, error, completion)
       }
     }, whenUnableToLoad: { error in
@@ -228,7 +225,7 @@ extension DeviceSyncingMovieLibrary {
                log: DeviceSyncingMovieLibrary.logger,
                type: .default,
                duplicates.count)
-        self.syncManager.delete(duplicates, using: self.databaseOperationQueue)
+        self.syncManager.delete(duplicates, in: self.metadata.databaseScope)
       }
       if changeSet.hasPublicChanges || changeSet.hasInternalChanges {
         self.localData.persist()
@@ -378,7 +375,7 @@ extension DeviceSyncingMovieLibrary {
           return ($0.tmdbID, (cloudProperties, record))
         })
     let rawRecords = Array(cloudData.values.map { $0.1.rawRecord })
-    self.syncManager.syncAll(rawRecords, using: self.databaseOperationQueue) { error in
+    self.syncManager.syncAll(rawRecords, in: metadata.databaseScope) { error in
       if let error = error {
         switch error {
           case .notAuthenticated, .userDeletedZone, .nonRecoverableError:

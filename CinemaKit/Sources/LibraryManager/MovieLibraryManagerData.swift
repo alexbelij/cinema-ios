@@ -18,18 +18,15 @@ class MovieLibraryManagerDataObject {
 class MovieLibraryManagerData: LazyData<MovieLibraryManagerDataObject, MovieLibraryManagerError> {
   private static let logger = Logging.createLogger(category: "MovieLibraryManagerData")
 
-  private let queueFactory: DatabaseOperationQueueFactory
   private let fetchManager: FetchManager
   private let libraryFactory: MovieLibraryFactory
   private let libraryRecordStore: PersistentRecordStore
   private let shareRecordStore: PersistentRecordStore
 
-  init(queueFactory: DatabaseOperationQueueFactory,
-       fetchManager: FetchManager,
+  init(fetchManager: FetchManager,
        libraryFactory: MovieLibraryFactory,
        libraryRecordStore: PersistentRecordStore,
        shareRecordStore: PersistentRecordStore) {
-    self.queueFactory = queueFactory
     self.fetchManager = fetchManager
     self.libraryFactory = libraryFactory
     self.libraryRecordStore = libraryRecordStore
@@ -156,9 +153,7 @@ class MovieLibraryManagerData: LazyData<MovieLibraryManagerDataObject, MovieLibr
 extension MovieLibraryManagerData {
   private func fetchPrivateLibraryRecords(
       then completion: @escaping (Result<[LibraryRecord], MovieLibraryManagerError>) -> Void) {
-    fetchManager.fetch(LibraryRecord.self,
-                       inZoneWithID: deviceSyncZoneID,
-                       using: queueFactory.queue(withScope: .private)) { records, error in
+    fetchManager.fetch(LibraryRecord.self, inZoneWithID: deviceSyncZoneID, in: .private) { records, error in
       if let error = error {
         switch error {
           case .userDeletedZone:
@@ -178,7 +173,7 @@ extension MovieLibraryManagerData {
 
   private func fetchSharedZones(
       then completion: @escaping (Result<[LibraryRecord], MovieLibraryManagerError>) -> Void) {
-    fetchManager.fetchZones(using: queueFactory.queue(withScope: .shared)) { zones, error in
+    fetchManager.fetchZones(in: .shared) { zones, error in
       if let error = error {
         switch error {
           case .notAuthenticated:
@@ -207,9 +202,7 @@ extension MovieLibraryManagerData {
     var errors = [MovieLibraryManagerError]()
     for zoneID in zoneIDs {
       group.enter()
-      fetchManager.fetch(LibraryRecord.self,
-                         inZoneWithID: zoneID,
-                         using: queueFactory.queue(withScope: .shared)) { records, error in
+      fetchManager.fetch(LibraryRecord.self, inZoneWithID: zoneID, in: .shared) { records, error in
         if let error = error {
           switch error {
             case .zoneNotFound:
@@ -249,7 +242,7 @@ extension MovieLibraryManagerData {
       let scope = shareID.zoneID.ownerName == CKCurrentUserDefaultName
           ? CKDatabaseScope.private
           : CKDatabaseScope.shared
-      fetchManager.fetchRecord(with: shareID, using: queueFactory.queue(withScope: scope)) { rawRecord, error in
+      fetchManager.fetchRecord(with: shareID, in: scope) { rawRecord, error in
         if let error = error {
           switch error {
             case .zoneNotFound:

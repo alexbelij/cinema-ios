@@ -39,17 +39,31 @@ private extension CloudTarget {
 
 class DefaultSubscriptionManager: SubscriptionManager {
   private static let logger = Logging.createLogger(category: "SubscriptionManager")
-  private let queueFactory: DatabaseOperationQueueFactory
+  private let privateDatabaseOperationQueue: DatabaseOperationQueue
+  private let sharedDatabaseOperationQueue: DatabaseOperationQueue
   private let subscriptionStore: SubscriptionStore
   private let dataInvalidationFlag: LocalDataInvalidationFlag
 
-  init(queueFactory: DatabaseOperationQueueFactory,
+  init(privateDatabaseOperationQueue: DatabaseOperationQueue,
+       sharedDatabaseOperationQueue: DatabaseOperationQueue,
        subscriptionStore: SubscriptionStore = FileBasedSubscriptionStore(),
        dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
-    self.queueFactory = queueFactory
+    self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
+    self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.subscriptionStore = subscriptionStore
     self.dataInvalidationFlag = dataInvalidationFlag
   }
+
+  private func databaseOperationQueue(for scope: CKDatabaseScope) -> DatabaseOperationQueue {
+  switch scope {
+    case .private:
+      return privateDatabaseOperationQueue
+    case .shared:
+      return sharedDatabaseOperationQueue
+    case .public:
+      fatalError("can not subscribe to public database")
+  }
+}
 
   func subscribeForChanges(then completion: @escaping (CloudKitError?) -> Void) {
     subscribeForChanges(for: .deviceSyncZone) { error in
@@ -77,7 +91,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
       } else if let subscriptions = subscriptions {
         if subscriptions[target.subscriptionID] == nil {
           self.saveSubscription(target.makeSubscription(),
-                                using: self.queueFactory.queue(withScope: target.scope),
+                                in: target.scope,
                                 retryCount: defaultRetryCount) { error in
             if let error = error {
               completion(error)
@@ -144,11 +158,11 @@ class DefaultSubscriptionManager: SubscriptionManager {
         completion(subscriptions, nil)
       }
     }
-    queueFactory.queue(withScope: scope).add(operation)
+    databaseOperationQueue(for: scope).add(operation)
   }
 
   private func saveSubscription(_ subscription: CKSubscription,
-                                using queue: DatabaseOperationQueue,
+                                in scope: CKDatabaseScope,
                                 retryCount: Int,
                                 then completion: @escaping (CloudKitError?) -> Void) {
     let operation = CKModifySubscriptionsOperation(subscriptionsToSave: [subscription],
@@ -169,7 +183,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
                  type: .default,
                  retryAfter)
           DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
-            self.saveSubscription(subscription, using: queue, retryCount: retryCount - 1, then: completion)
+            self.saveSubscription(subscription, in: scope, retryCount: retryCount - 1, then: completion)
           }
         } else if ckerror.code == CKError.Code.notAuthenticated {
           completion(.notAuthenticated)
@@ -193,6 +207,6 @@ class DefaultSubscriptionManager: SubscriptionManager {
         completion(nil)
       }
     }
-    queue.add(operation)
+    databaseOperationQueue(for: scope).add(operation)
   }
 }

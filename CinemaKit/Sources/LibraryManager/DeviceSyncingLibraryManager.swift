@@ -13,7 +13,6 @@ class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
 
   let delegates = MulticastDelegate<MovieLibraryManagerDelegate>()
   private let container: CKContainer
-  private let queueFactory: DatabaseOperationQueueFactory
   private let fetchManager: FetchManager
   private let syncManager: SyncManager
   private let changesManager: ChangesManager
@@ -23,7 +22,6 @@ class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
   private let dataInvalidationFlag: LocalDataInvalidationFlag
 
   init(container: CKContainer,
-       queueFactory: DatabaseOperationQueueFactory,
        fetchManager: FetchManager,
        syncManager: SyncManager,
        changesManager: ChangesManager,
@@ -32,7 +30,6 @@ class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
        data: LazyData<MovieLibraryManagerDataObject, MovieLibraryManagerError>,
        dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
     self.container = container
-    self.queueFactory = queueFactory
     self.fetchManager = fetchManager
     self.syncManager = syncManager
     self.changesManager = changesManager
@@ -57,7 +54,7 @@ extension DeviceSyncingLibraryManager {
   func addLibrary(with metadata: MovieLibraryMetadata,
                   then completion: @escaping (Result<MovieLibrary, MovieLibraryManagerError>) -> Void) {
     let record = LibraryRecord(from: metadata)
-    self.syncManager.sync(record.rawRecord, using: self.queueFactory.queue(withScope: .private)) { error in
+    syncManager.sync(record.rawRecord, in: metadata.databaseScope) { error in
       self.addCompletion(metadata, record, error, completion)
     }
   }
@@ -94,9 +91,7 @@ extension DeviceSyncingLibraryManager {
         return
       }
       metadata.setCustomFields(in: record)
-      let scope = metadata.isCurrentUserOwner ? CKDatabaseScope.private : CKDatabaseScope.shared
-      let queue = self.queueFactory.queue(withScope: scope)
-      self.syncManager.sync(record.rawRecord, using: queue) { error in
+      self.syncManager.sync(record.rawRecord, in: metadata.databaseScope) { error in
         self.updateCompletion(metadata, record, error, completion)
       }
     }, whenUnableToLoad: { error in
@@ -154,9 +149,7 @@ extension DeviceSyncingLibraryManager {
         return
       }
       let library = data.libraries[id]!
-      let scope = data.libraries[id]!.metadata.isCurrentUserOwner ? CKDatabaseScope.private : CKDatabaseScope.shared
-      let queue = self.queueFactory.queue(withScope: scope)
-      self.syncManager.delete(record.rawRecord, using: queue) { error in
+      self.syncManager.delete(record.rawRecord, in: data.libraries[id]!.metadata.databaseScope) { error in
         self.removeCompletion(library, error, completion)
       }
     }, whenUnableToLoad: { error in
@@ -435,8 +428,7 @@ extension DeviceSyncingLibraryManager {
           fatalError("should not occur: \(error)")
       }
     } else {
-      self.fetchManager.fetchRecord(with: shareMetadata.rootRecordID,
-                                    using: self.queueFactory.queue(withScope: .shared)) { rootRecord, error in
+      self.fetchManager.fetchRecord(with: shareMetadata.rootRecordID, in: .shared) { rootRecord, error in
         self.fetchRootRecordCompletion(shareMetadata, rootRecord, error)
       }
     }
@@ -484,8 +476,7 @@ extension DeviceSyncingLibraryManager: CloudSharingControllerCallback {
       if library.metadata.isCurrentUserOwner {
         data.shareRecords.removeValue(forKey: library.metadata.shareRecordID!)
         library.metadata.shareRecordID = nil
-        self.fetchManager.fetchRecord(with: library.metadata.id,
-                                      using: self.queueFactory.queue(withScope: .private)) { rawRecord, error in
+        self.fetchManager.fetchRecord(with: library.metadata.id, in: .private) { rawRecord, error in
           if let error = error {
             switch error {
               case .nonRecoverableError:
@@ -526,7 +517,7 @@ extension DeviceSyncingLibraryManager {
   func migrateLegacyLibrary(with name: String, at url: URL, then completion: @escaping (Bool) -> Void) {
     let metadata = MovieLibraryMetadata(name: name)
     let libraryRecord = LibraryRecord(from: metadata)
-    self.syncManager.sync(libraryRecord.rawRecord, using: self.queueFactory.queue(withScope: .private)) { error in
+    self.syncManager.sync(libraryRecord.rawRecord, in: .private) { error in
       if let error = error {
         switch error {
           case .notAuthenticated, .userDeletedZone, .nonRecoverableError:

@@ -2,29 +2,29 @@ import CloudKit
 import os.log
 
 protocol FetchManager {
-  func fetchZones(using queue: DatabaseOperationQueue,
+  func fetchZones(in scope: CKDatabaseScope,
                   then completion: @escaping ([CKRecordZoneID: CKRecordZone]?, CloudKitError?) -> Void)
   func fetch<CustomRecordType>(_ type: CustomRecordType.Type,
                                matching predicate: NSPredicate,
                                inZoneWithID zoneID: CKRecordZoneID,
-                               using queue: DatabaseOperationQueue,
+                               in scope: CKDatabaseScope,
                                then completion: @escaping ([CustomRecordType]?, CloudKitError?) -> Void)
       where CustomRecordType: RecordType
   func fetchRecord(with recordID: CKRecordID,
-                   using queue: DatabaseOperationQueue,
+                   in scope: CKDatabaseScope,
                    then completion: @escaping (CKRecord?, CloudKitError?) -> Void)
 }
 
 extension FetchManager {
   func fetch<CustomRecordType>(_ type: CustomRecordType.Type,
                                inZoneWithID zoneID: CKRecordZoneID,
-                               using queue: DatabaseOperationQueue,
+                               in scope: CKDatabaseScope,
                                then completion: @escaping ([CustomRecordType]?, CloudKitError?) -> Void)
       where CustomRecordType: RecordType {
     fetch(type,
           matching: NSPredicate(value: true),
           inZoneWithID: zoneID,
-          using: queue,
+          in: scope,
           then: completion)
   }
 }
@@ -32,18 +32,35 @@ extension FetchManager {
 class DefaultFetchManager: FetchManager {
   private static let logger = Logging.createLogger(category: "FetchManager")
 
+  private let privateDatabaseOperationQueue: DatabaseOperationQueue
+  private let sharedDatabaseOperationQueue: DatabaseOperationQueue
   private let dataInvalidationFlag: LocalDataInvalidationFlag
 
-  init(dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
+  init(privateDatabaseOperationQueue: DatabaseOperationQueue,
+       sharedDatabaseOperationQueue: DatabaseOperationQueue,
+       dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
+    self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
+    self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.dataInvalidationFlag = dataInvalidationFlag
   }
 
-  func fetchZones(using queue: DatabaseOperationQueue,
-                  then completion: @escaping ([CKRecordZoneID: CKRecordZone]?, CloudKitError?) -> Void) {
-    self.fetchZones(using: queue, retryCount: defaultRetryCount, then: completion)
+  private func databaseOperationQueue(for scope: CKDatabaseScope) -> DatabaseOperationQueue {
+    switch scope {
+      case .private:
+        return privateDatabaseOperationQueue
+      case .shared:
+        return sharedDatabaseOperationQueue
+      case .public:
+        fatalError("can not fetch from public database")
+    }
   }
 
-  private func fetchZones(using queue: DatabaseOperationQueue,
+  func fetchZones(in scope: CKDatabaseScope,
+                  then completion: @escaping ([CKRecordZoneID: CKRecordZone]?, CloudKitError?) -> Void) {
+    self.fetchZones(in: scope, retryCount: defaultRetryCount, then: completion)
+  }
+
+  private func fetchZones(in scope: CKDatabaseScope,
                           retryCount: Int,
                           then completion: @escaping ([CKRecordZoneID: CKRecordZone]?, CloudKitError?) -> Void) {
     let operation = CKFetchRecordZonesOperation.fetchAllRecordZonesOperation()
@@ -60,7 +77,7 @@ class DefaultFetchManager: FetchManager {
         if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
           os_log("retry fetchZones after %.1f seconds", log: DefaultFetchManager.logger, type: .default, retryAfter)
           DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
-            self.fetchZones(using: queue, retryCount: retryCount - 1, then: completion)
+            self.fetchZones(in: scope, retryCount: retryCount - 1, then: completion)
           }
         } else if ckerror.code == CKError.Code.notAuthenticated {
           completion(nil, .notAuthenticated)
@@ -85,13 +102,13 @@ class DefaultFetchManager: FetchManager {
         completion(zones, nil)
       }
     }
-    queue.add(operation)
+    databaseOperationQueue(for: scope).add(operation)
   }
 
   func fetch<CustomRecordType>(_ type: CustomRecordType.Type,
                                matching predicate: NSPredicate = NSPredicate(value: true),
                                inZoneWithID zoneID: CKRecordZoneID,
-                               using queue: DatabaseOperationQueue,
+                               in scope: CKDatabaseScope,
                                then completion: @escaping ([CustomRecordType]?, CloudKitError?) -> Void)
       where CustomRecordType: RecordType {
     os_log("creating query operation for %{public}@",
@@ -102,7 +119,7 @@ class DefaultFetchManager: FetchManager {
     fetch(with: CKQueryOperation(query: query),
           inZoneWithID: zoneID,
           into: [],
-          using: queue,
+          in: scope,
           retryCount: defaultRetryCount) { records, error in
       if let error = error {
         completion(nil, error)
@@ -115,7 +132,7 @@ class DefaultFetchManager: FetchManager {
   private func fetch(with operation: CKQueryOperation,
                      inZoneWithID zoneID: CKRecordZoneID,
                      into accumulator: [CKRecord],
-                     using queue: DatabaseOperationQueue,
+                     in scope: CKDatabaseScope,
                      retryCount: Int,
                      then completion: @escaping ([CKRecord]?, CloudKitError?) -> Void) {
     operation.zoneID = zoneID
@@ -137,7 +154,7 @@ class DefaultFetchManager: FetchManager {
             self.fetch(with: operation,
                        inZoneWithID: zoneID,
                        into: accumulator,
-                       using: queue,
+                       in: scope,
                        retryCount: retryCount - 1,
                        then: completion)
           }
@@ -171,7 +188,7 @@ class DefaultFetchManager: FetchManager {
         self.fetch(with: nextOperation,
                    inZoneWithID: zoneID,
                    into: accumulator + fetchedRecords,
-                   using: queue,
+                   in: scope,
                    retryCount: defaultRetryCount,
                    then: completion)
       } else {
@@ -182,17 +199,17 @@ class DefaultFetchManager: FetchManager {
         completion(accumulator + fetchedRecords, nil)
       }
     }
-    queue.add(operation)
+    databaseOperationQueue(for: scope).add(operation)
   }
 
   func fetchRecord(with recordID: CKRecordID,
-                   using queue: DatabaseOperationQueue,
+                   in scope: CKDatabaseScope,
                    then completion: @escaping (CKRecord?, CloudKitError?) -> Void) {
-    fetchRecord(with: recordID, using: queue, retryCount: defaultRetryCount, then: completion)
+    fetchRecord(with: recordID, in: scope, retryCount: defaultRetryCount, then: completion)
   }
 
   private func fetchRecord(with recordID: CKRecordID,
-                           using queue: DatabaseOperationQueue,
+                           in scope: CKDatabaseScope,
                            retryCount: Int,
                            then completion: @escaping (CKRecord?, CloudKitError?) -> Void) {
     let operation = CKFetchRecordsOperation(recordIDs: [recordID])
@@ -213,7 +230,7 @@ class DefaultFetchManager: FetchManager {
                  retryAfter)
           DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
             self.fetchRecord(with: recordID,
-                             using: queue,
+                             in: scope,
                              retryCount: retryCount - 1,
                              then: completion)
           }
@@ -242,6 +259,6 @@ class DefaultFetchManager: FetchManager {
         fatalError("both records and error were nil")
       }
     }
-    queue.add(operation)
+    databaseOperationQueue(for: scope).add(operation)
   }
 }

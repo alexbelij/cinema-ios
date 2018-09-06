@@ -11,14 +11,14 @@ protocol ShareManager {
 class DefaultShareManager: ShareManager {
   private static let logger = Logging.createLogger(category: "ShareManager")
   private let generalOperationQueue: GeneralOperationQueue
-  private let queueFactory: DatabaseOperationQueueFactory
+  private let privateDatabaseOperationQueue: DatabaseOperationQueue
   private let dataInvalidationFlag: LocalDataInvalidationFlag
 
   init(generalOperationQueue: GeneralOperationQueue,
-       queueFactory: DatabaseOperationQueueFactory,
+       privateDatabaseOperationQueue: DatabaseOperationQueue,
        dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
     self.generalOperationQueue = generalOperationQueue
-    self.queueFactory = queueFactory
+    self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.dataInvalidationFlag = dataInvalidationFlag
   }
 
@@ -73,7 +73,7 @@ class DefaultShareManager: ShareManager {
         completion(nil)
       }
     }
-    queueFactory.queue(withScope: .private).add(operation)
+    privateDatabaseOperationQueue.add(operation)
   }
 
   func acceptShare(with metadata: CKShareMetadata, then completion: @escaping (CloudKitError?) -> Void) {
