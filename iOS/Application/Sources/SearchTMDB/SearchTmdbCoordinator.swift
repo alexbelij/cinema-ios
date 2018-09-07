@@ -96,7 +96,7 @@ extension SearchTmdbCoordinator: SearchTmdbControllerDelegate {
     switch result {
       case let .failure(error):
         switch error {
-          case .detailsFetchError:
+          case .tmdbDetailsCouldNotBeFetched:
             fatalError("not implemented")
           case let .globalError(event):
             notificationCenter.post(event.notification)

@@ -107,7 +107,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
             DispatchQueue.main.async {
               self.movieListController.listData = .unavailable
             }
-          case .detailsFetchError, .movieDoesNotExist, .permissionFailure:
+          case .tmdbDetailsCouldNotBeFetched, .movieDoesNotExist, .permissionFailure:
             fatalError("should not occur")
         }
       case let .success(movies):
@@ -191,7 +191,7 @@ extension LibraryContentCoordinator: EditMovieCoordinatorDelegate {
         }
       case .nonRecoverableError:
         coordinator.rootViewController.presentErrorAlert()
-      case .detailsFetchError, .movieDoesNotExist:
+      case .tmdbDetailsCouldNotBeFetched, .movieDoesNotExist:
         fatalError("should not occur: \(error)")
     }
   }

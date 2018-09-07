@@ -61,7 +61,7 @@ extension DeviceSyncingMovieLibrary {
         return
       }
       guard let (title, tmdbProperties) = self.tmdbPropertiesProvider.tmdbProperties(for: tmdbID) else {
-        completion(.failure(.detailsFetchError))
+        completion(.failure(.tmdbDetailsCouldNotBeFetched))
         return
       }
       let cloudProperties = Movie.CloudProperties(tmdbID: tmdbID,

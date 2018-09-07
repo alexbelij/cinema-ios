@@ -7,7 +7,7 @@ public protocol MovieLibraryDelegate: class {
 }
 
 public enum MovieLibraryError: Error {
-  case detailsFetchError
+  case tmdbDetailsCouldNotBeFetched
   case globalError(ApplicationWideEvent)
   case nonRecoverableError
   case movieDoesNotExist
