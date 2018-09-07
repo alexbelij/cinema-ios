@@ -288,7 +288,7 @@ public class CinemaKitStartupManager: StartupManager {
     let libraryFactory = DefaultMovieLibraryFactory(fetchManager: fetchManager,
                                                     syncManager: syncManager,
                                                     tmdbWrapper: movieDb)
-    let data = MovieLibraryManagerData(
+    let modelController = MovieLibraryManagerModelController(
         fetchManager: fetchManager,
         libraryFactory: libraryFactory,
         libraryRecordStore: FileBasedRecordStore(fileURL: CinemaKitStartupManager.libraryRecordStoreURL),
@@ -302,7 +302,7 @@ public class CinemaKitStartupManager: StartupManager {
         shareManager: DefaultShareManager(generalOperationQueue: container,
                                           privateDatabaseOperationQueue: container.database(with: .private)),
         libraryFactory: libraryFactory,
-        data: data)
+        modelController: modelController)
     let dependencies = AppDependencies(libraryManager: libraryManager,
                                        movieDb: movieDb,
                                        notificationCenter: NotificationCenter.default,
@@ -380,15 +380,15 @@ private class DefaultMovieLibraryFactory: MovieLibraryFactory {
         fileURL: CinemaKitStartupManager.movieRecordsDir.appendingPathComponent("\(metadata.id.recordName).plist"))
     let tmdbPropertiesStore = FileBasedTmdbPropertiesStore(
         fileURL: CinemaKitStartupManager.tmdbPropertiesDir.appendingPathComponent("\(metadata.id.recordName).json"))
-    let data = MovieLibraryData(databaseScope: metadata.databaseScope,
-                                fetchManager: fetchManager,
-                                syncManager: syncManager,
-                                tmdbPropertiesProvider: tmdbWrapper,
-                                libraryID: metadata.id,
-                                movieRecordStore: movieRecordStore,
-                                tmdbPropertiesStore: tmdbPropertiesStore)
+    let modelController = MovieLibraryModelController(databaseScope: metadata.databaseScope,
+                                                      fetchManager: fetchManager,
+                                                      syncManager: syncManager,
+                                                      tmdbPropertiesProvider: tmdbWrapper,
+                                                      libraryID: metadata.id,
+                                                      movieRecordStore: movieRecordStore,
+                                                      tmdbPropertiesStore: tmdbPropertiesStore)
     return DeviceSyncingMovieLibrary(metadata: metadata,
-                                     data: data,
+                                     modelController: modelController,
                                      tmdbPropertiesProvider: tmdbWrapper,
                                      syncManager: syncManager)
   }

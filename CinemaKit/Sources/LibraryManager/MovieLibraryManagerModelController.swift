@@ -1,7 +1,7 @@
 import CloudKit
 import os.log
 
-class MovieLibraryManagerDataObject {
+class MovieLibraryManagerModel {
   var libraries: [CKRecordID: InternalMovieLibrary]
   var libraryRecords: [CKRecordID: LibraryRecord]
   var shareRecords: [CKRecordID: CKShare]
@@ -15,8 +15,10 @@ class MovieLibraryManagerDataObject {
   }
 }
 
-class MovieLibraryManagerData: LazyData<MovieLibraryManagerDataObject, MovieLibraryManagerError> {
-  private static let logger = Logging.createLogger(category: "MovieLibraryManagerData")
+// swiftlint:disable:next colon
+class MovieLibraryManagerModelController:
+    ThreadSafeModelController<MovieLibraryManagerModel, MovieLibraryManagerError> {
+  private static let logger = Logging.createLogger(category: "MovieLibraryManagerModelController")
 
   private let fetchManager: FetchManager
   private let libraryFactory: MovieLibraryFactory
@@ -31,17 +33,17 @@ class MovieLibraryManagerData: LazyData<MovieLibraryManagerDataObject, MovieLibr
     self.libraryFactory = libraryFactory
     self.libraryRecordStore = libraryRecordStore
     self.shareRecordStore = shareRecordStore
-    super.init(label: "de.martinbauer.cinema.MovieLibraryManagerData")
+    super.init(label: "de.martinbauer.cinema.MovieLibraryManagerModelController")
   }
 
-  override func loadData() {
+  override func loadModel() {
     if let rawLibraryRecords = libraryRecordStore.loadRecords(),
        let rawShareRecords = shareRecordStore.loadRecords(asCKShare: true) {
-      os_log("loaded records from stores", log: MovieLibraryManagerData.logger, type: .debug)
+      os_log("loaded records from stores", log: MovieLibraryManagerModelController.logger, type: .debug)
       // swiftlint:disable:next force_cast
-      makeData(rawLibraryRecords.map { LibraryRecord($0) }, rawShareRecords.map { $0 as! CKShare })
+      makeModel(rawLibraryRecords.map { LibraryRecord($0) }, rawShareRecords.map { $0 as! CKShare })
     } else {
-      os_log("loading records from cloud", log: MovieLibraryManagerData.logger, type: .debug)
+      os_log("loading records from cloud", log: MovieLibraryManagerModelController.logger, type: .debug)
       fetchLibraryRecords()
     }
   }
@@ -72,13 +74,13 @@ class MovieLibraryManagerData: LazyData<MovieLibraryManagerDataObject, MovieLibr
       let allLibraryRecords = privateLibraryRecords + sharedLibraryRecords
       let libraryRecordsWithShareID = allLibraryRecords.filter { $0.shareID != nil }
       if libraryRecordsWithShareID.isEmpty {
-        os_log("saving fetched records to stores", log: MovieLibraryManagerData.logger, type: .debug)
+        os_log("saving fetched records to stores", log: MovieLibraryManagerModelController.logger, type: .debug)
         libraryRecordStore.save(allLibraryRecords)
         shareRecordStore.save([])
-        makeData(allLibraryRecords, [])
+        makeModel(allLibraryRecords, [])
       } else {
         os_log("there are %d shared libraries -> loading share records",
-               log: MovieLibraryManagerData.logger,
+               log: MovieLibraryManagerModelController.logger,
                type: .debug,
                libraryRecordsWithShareID.count)
         fetchShareRecords(for: libraryRecordsWithShareID) { result in
@@ -98,14 +100,14 @@ class MovieLibraryManagerData: LazyData<MovieLibraryManagerDataObject, MovieLibr
       case let .failure(error):
         abortLoading(with: error)
       case let .success(shareRecords):
-        os_log("saving fetched records to stores", log: MovieLibraryManagerData.logger, type: .debug)
+        os_log("saving fetched records to stores", log: MovieLibraryManagerModelController.logger, type: .debug)
         libraryRecordStore.save(libraryRecords)
         shareRecordStore.save(shareRecords)
-        makeData(libraryRecords, shareRecords)
+        makeModel(libraryRecords, shareRecords)
     }
   }
 
-  private func makeData(_ libraryRecords: [LibraryRecord], _ shareRecords: [CKShare]) {
+  private func makeModel(_ libraryRecords: [LibraryRecord], _ shareRecords: [CKShare]) {
     let minimumCapacity = libraryRecords.count
     var librariesDict: [CKRecordID: InternalMovieLibrary] = Dictionary(minimumCapacity: minimumCapacity)
     var libraryRecordsDict: [CKRecordID: LibraryRecord] = Dictionary(minimumCapacity: minimumCapacity)
@@ -117,7 +119,7 @@ class MovieLibraryManagerData: LazyData<MovieLibraryManagerDataObject, MovieLibr
           currentUserCanModify = shareRecord.currentUserParticipant?.permission == .readWrite
         } else {
           os_log("found library record without corresponding CKShare -> reloading",
-                 log: MovieLibraryManagerData.logger,
+                 log: MovieLibraryManagerModelController.logger,
                  type: .default)
           clear()
           fetchLibraryRecords()
@@ -130,19 +132,19 @@ class MovieLibraryManagerData: LazyData<MovieLibraryManagerDataObject, MovieLibr
       librariesDict[libraryRecord.id] = libraryFactory.makeLibrary(with: metadata)
       libraryRecordsDict[libraryRecord.id] = libraryRecord
     }
-    completeLoading(with: MovieLibraryManagerDataObject(libraries: librariesDict,
-                                                        libraryRecords: libraryRecordsDict,
-                                                        shareRecords: shareRecordsDict))
+    completeLoading(with: MovieLibraryManagerModel(libraries: librariesDict,
+                                                   libraryRecords: libraryRecordsDict,
+                                                   shareRecords: shareRecordsDict))
   }
 
-  override func persist(_ data: MovieLibraryManagerDataObject) {
-    os_log("saving records to stores", log: MovieLibraryManagerData.logger, type: .debug)
-    libraryRecordStore.save(Array(data.libraryRecords.values))
-    shareRecordStore.save(Array(data.shareRecords.values))
+  override func persist(_ model: MovieLibraryManagerModel) {
+    os_log("saving records to stores", log: MovieLibraryManagerModelController.logger, type: .debug)
+    libraryRecordStore.save(Array(model.libraryRecords.values))
+    shareRecordStore.save(Array(model.shareRecords.values))
   }
 
   override func clear() {
-    os_log("removing stores", log: MovieLibraryManagerData.logger, type: .debug)
+    os_log("removing stores", log: MovieLibraryManagerModelController.logger, type: .debug)
     libraryRecordStore.clear()
     shareRecordStore.clear()
   }
@@ -150,7 +152,7 @@ class MovieLibraryManagerData: LazyData<MovieLibraryManagerDataObject, MovieLibr
 
 // MARK: - Fetching Libraries From Cloud
 
-extension MovieLibraryManagerData {
+extension MovieLibraryManagerModelController {
   private func fetchPrivateLibraryRecords(
       then completion: @escaping (Result<[LibraryRecord], MovieLibraryManagerError>) -> Void) {
     fetchManager.fetch(LibraryRecord.self, inZoneWithID: deviceSyncZoneID, in: .private) { records, error in
