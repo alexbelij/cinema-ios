@@ -18,16 +18,17 @@ class DeviceSyncingMovieLibrary: InternalMovieLibrary {
     }
   }
   let delegates: MulticastDelegate<MovieLibraryDelegate> = MulticastDelegate()
-  private var modelController: ThreadSafeModelController<MovieLibraryModel, MovieLibraryError>
+  private var modelController: AnyModelController<MovieLibraryModel, MovieLibraryError>
   private let tmdbPropertiesProvider: TmdbMoviePropertiesProvider
   private let syncManager: SyncManager
 
-  init(metadata: MovieLibraryMetadata,
-       modelController: ThreadSafeModelController<MovieLibraryModel, MovieLibraryError>,
-       tmdbPropertiesProvider: TmdbMoviePropertiesProvider,
-       syncManager: SyncManager) {
+  init<Controller: ModelController>(metadata: MovieLibraryMetadata,
+                                    modelController: Controller,
+                                    tmdbPropertiesProvider: TmdbMoviePropertiesProvider,
+                                    syncManager: SyncManager)
+      where Controller.ModelType == MovieLibraryModel, Controller.ErrorType == MovieLibraryError {
     self.metadata = metadata
-    self.modelController = modelController
+    self.modelController = AnyModelController(modelController)
     self.tmdbPropertiesProvider = tmdbPropertiesProvider
     self.syncManager = syncManager
   }

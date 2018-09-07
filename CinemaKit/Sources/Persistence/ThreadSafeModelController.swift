@@ -1,6 +1,6 @@
 import Dispatch
 
-class ThreadSafeModelController<ModelType, ErrorType> {
+class ThreadSafeModelController<ModelType, ErrorType>: ModelController {
   private let queue: DispatchQueue
   private var suspendedCalls = [((ModelType) -> Void, (ErrorType) -> Void)]()
   private var isLoading = false
@@ -10,7 +10,7 @@ class ThreadSafeModelController<ModelType, ErrorType> {
     queue = DispatchQueue(label: label)
   }
 
-  func initializeWithDefaultValue() {
+  final func initializeWithDefaultValue() {
     queue.async {
       guard self.model == nil else { fatalError("model has already been initialized") }
       self.model = self.makeWithDefaultValue()
@@ -21,8 +21,8 @@ class ThreadSafeModelController<ModelType, ErrorType> {
     fatalError("must be overridden")
   }
 
-  func access(onceLoaded modelHandler: @escaping (ModelType) -> Void,
-              whenUnableToLoad errorHandler: @escaping (ErrorType) -> Void) {
+  final func access(onceLoaded modelHandler: @escaping (ModelType) -> Void,
+                    whenUnableToLoad errorHandler: @escaping (ErrorType) -> Void) {
     queue.async {
       if let model = self.model {
         modelHandler(model)
@@ -36,7 +36,7 @@ class ThreadSafeModelController<ModelType, ErrorType> {
     }
   }
 
-  func access(_ modelHandler: @escaping (ModelType) -> Void) {
+  final func access(_ modelHandler: @escaping (ModelType) -> Void) {
     queue.async {
       if let model = self.model {
         modelHandler(model)
@@ -50,13 +50,13 @@ class ThreadSafeModelController<ModelType, ErrorType> {
     fatalError("must be overridden")
   }
 
-  func abortLoading(with error: ErrorType) {
+  final func abortLoading(with error: ErrorType) {
     queue.async {
       self.finishLoading(model: nil, error: error)
     }
   }
 
-  func completeLoading(with model: ModelType) {
+  final func completeLoading(with model: ModelType) {
     queue.async {
       self.finishLoading(model: model, error: nil)
     }
@@ -78,13 +78,12 @@ class ThreadSafeModelController<ModelType, ErrorType> {
     suspendedCalls.removeAll()
   }
 
-  func requestReload() {
-    queue.async {
-      self.model = nil
-    }
+  final func requestReload() {
+    dispatchPrecondition(condition: DispatchPredicate.onQueue(queue))
+    model = nil
   }
 
-  func persist() {
+  final func persist() {
     dispatchPrecondition(condition: DispatchPredicate.onQueue(queue))
     if let model = self.model {
       persist(model)
@@ -95,7 +94,13 @@ class ThreadSafeModelController<ModelType, ErrorType> {
     fatalError("must be overridden")
   }
 
-  func clear() {
+  final func clear() {
+    dispatchPrecondition(condition: DispatchPredicate.onQueue(queue))
+    model = nil
+    removePersistedModel()
+  }
+
+  func removePersistedModel() {
     fatalError("must be overridden")
   }
 }

@@ -140,7 +140,7 @@ class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, 
     tmdbPropertiesStore.save(tmdbProperties)
   }
 
-  override func clear() {
+  override func removePersistedModel() {
     os_log("removing store", log: MovieLibraryModelController.logger, type: .debug)
     movieRecordStore.clear()
     tmdbPropertiesStore.clear()

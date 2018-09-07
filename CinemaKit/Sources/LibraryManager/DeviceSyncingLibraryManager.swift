@@ -18,24 +18,25 @@ class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
   private let changesManager: ChangesManager
   private let shareManager: ShareManager
   private let libraryFactory: MovieLibraryFactory
-  private let modelController: ThreadSafeModelController<MovieLibraryManagerModel, MovieLibraryManagerError>
+  private var modelController: AnyModelController<MovieLibraryManagerModel, MovieLibraryManagerError>
   private let dataInvalidationFlag: LocalDataInvalidationFlag
 
-  init(container: CKContainer,
-       fetchManager: FetchManager,
-       syncManager: SyncManager,
-       changesManager: ChangesManager,
-       shareManager: ShareManager,
-       libraryFactory: MovieLibraryFactory,
-       modelController: ThreadSafeModelController<MovieLibraryManagerModel, MovieLibraryManagerError>,
-       dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
+  init<Controller: ModelController>(container: CKContainer,
+                                    fetchManager: FetchManager,
+                                    syncManager: SyncManager,
+                                    changesManager: ChangesManager,
+                                    shareManager: ShareManager,
+                                    libraryFactory: MovieLibraryFactory,
+                                    modelController: Controller,
+                                    dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag())
+      where Controller.ModelType == MovieLibraryManagerModel, Controller.ErrorType == MovieLibraryManagerError {
     self.container = container
     self.fetchManager = fetchManager
     self.syncManager = syncManager
     self.changesManager = changesManager
     self.shareManager = shareManager
     self.libraryFactory = libraryFactory
-    self.modelController = modelController
+    self.modelController = AnyModelController(modelController)
     self.dataInvalidationFlag = dataInvalidationFlag
   }
 }

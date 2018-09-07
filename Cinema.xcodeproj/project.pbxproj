@@ -14,6 +14,7 @@
 		816BF1D51BE680D66C74F73B /* MovieLibraryModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF8076C7D477837A55D4D /* MovieLibraryModelController.swift */; };
 		816BF2540CD2AF462FA4CA7C /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF2DB9CBD6D603F273231 /* Result.swift */; };
 		816BF27248DA284CF882E556 /* ChangesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFAFF0BF261F33F6F6158 /* ChangesManager.swift */; };
+		816BF2E3EDE2200B4977F330 /* ModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF39D756B87E54D10E758 /* ModelController.swift */; };
 		816BF32B4EBBB178DC70FA0C /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF465F46F0045D7B2CAD3 /* UserDefaults.swift */; };
 		816BF39541854A73C99478F1 /* ThreadSafeModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF337C1C387B6E159CA70 /* ThreadSafeModelController.swift */; };
 		816BF3EA01D5239D884B8EDB /* LibrarySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF6419B90D268ECB087A8 /* LibrarySheet.swift */; };
@@ -148,6 +149,7 @@
 		816BF2612290416EB1BFCA59 /* MovieDbClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieDbClient.swift; sourceTree = "<group>"; };
 		816BF2DB9CBD6D603F273231 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		816BF337C1C387B6E159CA70 /* ThreadSafeModelController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadSafeModelController.swift; sourceTree = "<group>"; };
+		816BF39D756B87E54D10E758 /* ModelController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelController.swift; sourceTree = "<group>"; };
 		816BF465F46F0045D7B2CAD3 /* UserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		816BF530E641C52408287FAF /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		816BF5BD7B80EE7F92F43A89 /* PersistentRecordStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersistentRecordStore.swift; sourceTree = "<group>"; };
@@ -272,6 +274,7 @@
 		816BF0D02582F9B8DDE7B600 /* Persistence */ = {
 			isa = PBXGroup;
 			children = (
+				816BF39D756B87E54D10E758 /* ModelController.swift */,
 				816BF337C1C387B6E159CA70 /* ThreadSafeModelController.swift */,
 				816BF5BD7B80EE7F92F43A89 /* PersistentRecordStore.swift */,
 				CBBA793E213D50EC008D84E5 /* TmdbPropertiesStore.swift */,
@@ -835,6 +838,7 @@
 				816BF5B03430D75DD4D08973 /* MovieLibraryManagerModelController.swift in Sources */,
 				816BF4E3B50A7125D116F4A2 /* PersistentRecordStore.swift in Sources */,
 				816BF9D296F00F62EF9F83B8 /* Legacy.swift in Sources */,
+				816BF2E3EDE2200B4977F330 /* ModelController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

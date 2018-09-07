@@ -143,7 +143,7 @@ class MovieLibraryManagerModelController:
     shareRecordStore.save(Array(model.shareRecords.values))
   }
 
-  override func clear() {
+  override func removePersistedModel() {
     os_log("removing stores", log: MovieLibraryManagerModelController.logger, type: .debug)
     libraryRecordStore.clear()
     shareRecordStore.clear()
