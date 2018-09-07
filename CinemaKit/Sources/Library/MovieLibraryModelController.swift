@@ -13,6 +13,38 @@ class MovieLibraryModel {
     self.movieRecords = movieRecords
     self.recordIDsByTmdbID = recordIDsByTmdbID
   }
+
+  var allMovies: [Movie] {
+    return Array(movies.values)
+  }
+
+  func movie(for tmdbID: TmdbIdentifier) -> Movie? {
+    guard let recordID = recordIDsByTmdbID[tmdbID] else { return nil }
+    return movies[recordID]
+  }
+
+  func record(for movie: Movie) -> MovieRecord? {
+    return movieRecords[movie.id]
+  }
+
+  func add(_ movie: Movie, with record: MovieRecord) {
+    movies[movie.id] = movie
+    movieRecords[movie.id] = record
+    recordIDsByTmdbID[movie.tmdbID] = movie.id
+  }
+
+  func update(_ movie: Movie, and record: MovieRecord) {
+    movies[movie.id] = movie
+    movieRecords[movie.id] = record
+  }
+
+  @discardableResult
+  func remove(_ recordID: CKRecordID) -> Movie? {
+    guard let movie = movies.removeValue(forKey: recordID) else { return nil }
+    movieRecords.removeValue(forKey: recordID)
+    recordIDsByTmdbID.removeValue(forKey: movie.tmdbID)
+    return movie
+  }
 }
 
 class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, MovieLibraryError> {

@@ -39,7 +39,7 @@ class DeviceSyncingMovieLibrary: InternalMovieLibrary {
 extension DeviceSyncingMovieLibrary {
   func fetchMovies(then completion: @escaping (Result<[Movie], MovieLibraryError>) -> Void) {
     modelController.access(onceLoaded: { model in
-      completion(.success(Array(model.movies.values)))
+      completion(.success(Array(model.allMovies)))
     }, whenUnableToLoad: { error in
       completion(.failure(error))
     })
@@ -47,7 +47,7 @@ extension DeviceSyncingMovieLibrary {
 
   func fetchMovies(for id: GenreIdentifier, then completion: @escaping (Result<[Movie], MovieLibraryError>) -> Void) {
     modelController.access(onceLoaded: { model in
-      completion(.success(Array(model.movies.values.filter { $0.genreIds.contains(id) })))
+      completion(.success(Array(model.allMovies.filter { $0.genreIds.contains(id) })))
     }, whenUnableToLoad: { error in
       completion(.failure(error))
     })
@@ -57,8 +57,8 @@ extension DeviceSyncingMovieLibrary {
                 diskType: DiskType,
                 then completion: @escaping (Result<Movie, MovieLibraryError>) -> Void) {
     modelController.access(onceLoaded: { model in
-      if let recordID = model.recordIDsByTmdbID[tmdbID] {
-        completion(.success(model.movies[recordID]!))
+      if let existingMovie = model.movie(for: tmdbID) {
+        completion(.success(existingMovie))
         return
       }
       guard let (title, tmdbProperties) = self.tmdbPropertiesProvider.tmdbProperties(for: tmdbID) else {
@@ -69,18 +69,18 @@ extension DeviceSyncingMovieLibrary {
                                                   libraryID: self.metadata.id,
                                                   title: title,
                                                   diskType: diskType)
-      let record = MovieRecord(from: cloudProperties)
-      self.syncManager.sync(record.rawRecord, in: self.metadata.databaseScope) { error in
-        let movie = Movie(cloudProperties, tmdbProperties)
-        self.addSyncCompletion(movie, record, error, completion)
+      let newRecord = MovieRecord(from: cloudProperties)
+      self.syncManager.sync(newRecord.rawRecord, in: self.metadata.databaseScope) { error in
+        let newMovie = Movie(cloudProperties, tmdbProperties)
+        self.addSyncCompletion(newMovie, newRecord, error, completion)
       }
     }, whenUnableToLoad: { error in
       completion(.failure(error))
     })
   }
 
-  private func addSyncCompletion(_ movie: Movie,
-                                 _ record: MovieRecord,
+  private func addSyncCompletion(_ newMovie: Movie,
+                                 _ newRecord: MovieRecord,
                                  _ error: CloudKitError?,
                                  _ completion: @escaping (Result<Movie, MovieLibraryError>) -> Void) {
     if let error = error {
@@ -92,20 +92,18 @@ extension DeviceSyncingMovieLibrary {
       }
     } else {
       modelController.access { model in
-        if let existingMovieRecordID = model.recordIDsByTmdbID[movie.tmdbID] {
+        if let existingMovie = model.movie(for: newMovie.tmdbID) {
           os_log("aborting explicit adding, because movie has already been added via changes -> deleting duplicate",
                  log: DeviceSyncingMovieLibrary.logger,
                  type: .default)
-          self.syncManager.delete([record.id], in: self.metadata.databaseScope)
-          completion(.success(model.movies[existingMovieRecordID]!))
+          self.syncManager.delete([newRecord.id], in: self.metadata.databaseScope)
+          completion(.success(existingMovie))
         } else {
-          model.movies[movie.cloudProperties.id] = movie
-          model.movieRecords[movie.cloudProperties.id] = record
-          model.recordIDsByTmdbID[movie.cloudProperties.tmdbID] = record.id
+          model.add(newMovie, with: newRecord)
           self.modelController.persist()
-          let changeSet = ChangeSet<TmdbIdentifier, Movie>(insertions: [movie])
+          let changeSet = ChangeSet<TmdbIdentifier, Movie>(insertions: [newMovie])
           self.delegates.invoke { $0.library(self, didUpdateMovies: changeSet) }
-          completion(.success(movie))
+          completion(.success(newMovie))
         }
       }
     }
@@ -114,7 +112,7 @@ extension DeviceSyncingMovieLibrary {
   func update(_ movie: Movie, then completion: @escaping (Result<Movie, MovieLibraryError>) -> Void) {
     precondition(movie.cloudProperties.libraryID == metadata.id)
     modelController.access(onceLoaded: { model in
-      guard let record = model.movieRecords[movie.cloudProperties.id] else {
+      guard let record = model.record(for: movie) else {
         completion(.failure(.movieDoesNotExist))
         return
       }
@@ -136,17 +134,14 @@ extension DeviceSyncingMovieLibrary {
         switch error {
           case let .conflict(serverRecord):
             MovieRecord.copyCustomFields(from: record.rawRecord, to: serverRecord)
-            model.movieRecords[movie.cloudProperties.id] = MovieRecord(serverRecord)
+            model.update(movie, and: MovieRecord(serverRecord))
             os_log("resolved movie record conflict", log: DeviceSyncingMovieLibrary.logger, type: .default)
             self.update(movie, then: completion)
           case .itemNoLongerExists:
-            if model.movies.removeValue(forKey: movie.cloudProperties.id) != nil {
-              model.movieRecords.removeValue(forKey: movie.cloudProperties.id)
+            if let movie = model.remove(movie.id) {
+              self.modelController.persist()
               let changeSet = ChangeSet<TmdbIdentifier, Movie>(deletions: [movie.tmdbID: movie])
               self.delegates.invoke { $0.library(self, didUpdateMovies: changeSet) }
-            } else {
-              // item has already been removed via changes
-              assert(model.movieRecords[movie.cloudProperties.id] == nil)
             }
             completion(.failure(.movieDoesNotExist))
           case .userDeletedZone:
@@ -159,7 +154,7 @@ extension DeviceSyncingMovieLibrary {
             fatalError("should not occur: \(error)")
         }
       } else {
-        model.movies[movie.cloudProperties.id] = movie
+        model.update(movie, and: record)
         self.modelController.persist()
         let changeSet = ChangeSet<TmdbIdentifier, Movie>(modifications: [movie.tmdbID: movie])
         self.delegates.invoke { $0.library(self, didUpdateMovies: changeSet) }
@@ -170,12 +165,11 @@ extension DeviceSyncingMovieLibrary {
 
   func removeMovie(with tmdbID: TmdbIdentifier, then completion: @escaping (Result<Void, MovieLibraryError>) -> Void) {
     modelController.access(onceLoaded: { model in
-      guard let recordID = model.recordIDsByTmdbID[tmdbID] else {
+      guard let movie = model.movie(for: tmdbID) else {
         completion(.success(()))
         return
       }
-      let movie = model.movies[recordID]!
-      self.syncManager.delete(model.movieRecords[recordID]!.rawRecord, in: self.metadata.databaseScope) { error in
+      self.syncManager.delete(model.record(for: movie)!.rawRecord, in: self.metadata.databaseScope) { error in
         self.removeSyncCompletion(movie, error, completion)
       }
     }, whenUnableToLoad: { error in
@@ -186,23 +180,27 @@ extension DeviceSyncingMovieLibrary {
   private func removeSyncCompletion(_ movie: Movie,
                                     _ error: CloudKitError?,
                                     _ completion: @escaping (Result<Void, MovieLibraryError>) -> Void) {
-    if let error = error {
-      switch error {
-        case .itemNoLongerExists:
-          completion(.success(()))
-        case .notAuthenticated, .userDeletedZone, .permissionFailure, .nonRecoverableError:
-          completion(.failure(error.asMovieLibraryError))
-        case .conflict, .zoneNotFound:
-          fatalError("should not occur: \(error)")
-      }
-    } else {
-      modelController.access { model in
-        model.movies.removeValue(forKey: movie.cloudProperties.id)
-        model.movieRecords.removeValue(forKey: movie.cloudProperties.id)
-        model.recordIDsByTmdbID.removeValue(forKey: movie.tmdbID)
-        self.modelController.persist()
-        let changeSet = ChangeSet<TmdbIdentifier, Movie>(deletions: [movie.tmdbID: movie])
-        self.delegates.invoke { $0.library(self, didUpdateMovies: changeSet) }
+    modelController.access { model in
+      if let error = error {
+        switch error {
+          case .itemNoLongerExists:
+            if model.remove(movie.id) != nil {
+              self.modelController.persist()
+              let changeSet = ChangeSet<TmdbIdentifier, Movie>(deletions: [movie.tmdbID: movie])
+              self.delegates.invoke { $0.library(self, didUpdateMovies: changeSet) }
+            }
+            completion(.success(()))
+          case .notAuthenticated, .userDeletedZone, .permissionFailure, .nonRecoverableError:
+            completion(.failure(error.asMovieLibraryError))
+          case .conflict, .zoneNotFound:
+            fatalError("should not occur: \(error)")
+        }
+      } else {
+        if model.remove(movie.id) != nil {
+          self.modelController.persist()
+          let changeSet = ChangeSet<TmdbIdentifier, Movie>(deletions: [movie.tmdbID: movie])
+          self.delegates.invoke { $0.library(self, didUpdateMovies: changeSet) }
+        }
         completion(.success(()))
       }
     }
@@ -215,18 +213,22 @@ extension DeviceSyncingMovieLibrary {
   func processChanges(_ changes: FetchedChanges) {
     modelController.access(onceLoaded: { model in
       var changeSet = ChangeSet<TmdbIdentifier, Movie>()
-      let duplicates = self.process(changedRecords: changes.changedRecords,
-                                    changeSet: &changeSet,
-                                    model: model)
-      self.process(deletedRecordIDsAndTypes: changes.deletedRecordIDsAndTypes,
-                   changeSet: &changeSet,
-                   model: model)
-      if !duplicates.isEmpty {
-        os_log("found %d duplicates while processing changes -> deleting",
-               log: DeviceSyncingMovieLibrary.logger,
-               type: .default,
-               duplicates.count)
-        self.syncManager.delete(duplicates, in: self.metadata.databaseScope)
+      if !changes.changedRecords.isEmpty {
+        let duplicates = self.process(changedRecords: changes.changedRecords,
+                                      changeSet: &changeSet,
+                                      model: model)
+        if !duplicates.isEmpty {
+          os_log("found %d duplicates while processing changes -> deleting",
+                 log: DeviceSyncingMovieLibrary.logger,
+                 type: .default,
+                 duplicates.count)
+          self.syncManager.delete(duplicates, in: self.metadata.databaseScope)
+        }
+      }
+      if !changes.deletedRecordIDsAndTypes.isEmpty {
+        self.process(deletedRecordIDsAndTypes: changes.deletedRecordIDsAndTypes,
+                     changeSet: &changeSet,
+                     model: model)
       }
       if changeSet.hasPublicChanges || changeSet.hasInternalChanges {
         self.modelController.persist()
@@ -252,34 +254,29 @@ extension DeviceSyncingMovieLibrary {
       let cloudProperties = Movie.CloudProperties(from: movieRecord)
 
       // check if a movie with this tmdb identifier already exists locally
-      if let existingRecordID = model.recordIDsByTmdbID[cloudProperties.tmdbID] {
-        if existingRecordID == movieRecord.id { // the underlying record changed
-          model.movieRecords[movieRecord.id] = movieRecord
-          if model.movies[existingRecordID]!.cloudProperties != cloudProperties { // this is a public change
-            model.movies[existingRecordID]!.cloudProperties = cloudProperties
-            changeSet.modifications[cloudProperties.tmdbID] = model.movies[cloudProperties.id]
-          } else {
+      if let existingMovie = model.movie(for: cloudProperties.tmdbID) {
+        if existingMovie.id == movieRecord.id { // the underlying record changed
+          let updatedMovie = Movie(cloudProperties, existingMovie.tmdbProperties)
+          model.update(updatedMovie, and: movieRecord)
+          if existingMovie.cloudProperties == cloudProperties {
             changeSet.hasInternalChanges = true
+          } else {
+            changeSet.modifications[existingMovie.tmdbID] = updatedMovie
           }
         } else { // found a new duplicate
-          let existingRecord = model.movieRecords[existingRecordID]!
+          let existingRecord = model.record(for: existingMovie)!
           if existingRecord.rawRecord.creationDate! <= movieRecord.rawRecord.creationDate! {
             duplicates.append(movieRecord.id)
           } else {
             duplicates.append(existingRecord.id)
-            model.movies.removeValue(forKey: existingRecordID)
-            model.movieRecords.removeValue(forKey: existingRecordID)
-            let tmdbProperties: Movie.TmdbProperties
-            if let (_, fetched) = self.tmdbPropertiesProvider.tmdbProperties(for: cloudProperties.tmdbID) {
-              tmdbProperties = fetched
+            model.remove(existingMovie.id)
+            let olderMovie = Movie(cloudProperties, existingMovie.tmdbProperties)
+            model.add(olderMovie, with: movieRecord)
+            if existingMovie.cloudProperties == cloudProperties {
+              changeSet.hasInternalChanges = true
             } else {
-              tmdbProperties = Movie.TmdbProperties()
+              changeSet.modifications[existingMovie.tmdbID] = olderMovie
             }
-            let movie = Movie(cloudProperties, tmdbProperties)
-            model.movies[movieRecord.id] = movie
-            model.movieRecords[movieRecord.id] = movieRecord
-            model.recordIDsByTmdbID[cloudProperties.tmdbID] = movieRecord.id
-            changeSet.modifications[cloudProperties.tmdbID] = movie
           }
         }
       } else {
@@ -289,11 +286,9 @@ extension DeviceSyncingMovieLibrary {
         } else {
           tmdbProperties = Movie.TmdbProperties()
         }
-        let movie = Movie(cloudProperties, tmdbProperties)
-        model.movies[movieRecord.id] = movie
-        model.movieRecords[movieRecord.id] = movieRecord
-        model.recordIDsByTmdbID[cloudProperties.tmdbID] = movieRecord.id
-        changeSet.insertions.append(movie)
+        let newMovie = Movie(cloudProperties, tmdbProperties)
+        model.add(newMovie, with: movieRecord)
+        changeSet.insertions.append(newMovie)
       }
     }
     return duplicates
@@ -302,12 +297,10 @@ extension DeviceSyncingMovieLibrary {
   private func process(deletedRecordIDsAndTypes: [(CKRecordID, String)],
                        changeSet: inout ChangeSet<TmdbIdentifier, Movie>,
                        model: MovieLibraryModel) {
-    for (recordID, recordType) in deletedRecordIDsAndTypes
-        where recordType == MovieRecord.recordType && model.movies[recordID] != nil {
-      let movie = model.movies.removeValue(forKey: recordID)!
-      model.movieRecords.removeValue(forKey: recordID)
-      model.recordIDsByTmdbID.removeValue(forKey: movie.tmdbID)
-      changeSet.deletions[movie.tmdbID] = movie
+    for (recordID, recordType) in deletedRecordIDsAndTypes where recordType == MovieRecord.recordType {
+      if let movie = model.remove(recordID) {
+        changeSet.deletions[movie.tmdbID] = movie
+      }
     }
   }
 
@@ -421,9 +414,7 @@ extension DeviceSyncingMovieLibrary {
         let (cloudProperties, record) = cloudData[legacyMovie.tmdbID]!
         let tmdbProperties = tmdbData[legacyMovie.tmdbID]!
         let movie = Movie(cloudProperties, tmdbProperties)
-        model.movies[movie.cloudProperties.id] = movie
-        model.movieRecords[movie.cloudProperties.id] = record
-        model.recordIDsByTmdbID[movie.cloudProperties.tmdbID] = record.id
+        model.add(movie, with: record)
         changeSet.insertions.append(movie)
       }
       self.modelController.persist()
