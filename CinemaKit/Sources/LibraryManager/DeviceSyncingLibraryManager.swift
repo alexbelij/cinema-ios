@@ -275,7 +275,7 @@ extension DeviceSyncingLibraryManager {
                        changeSet: inout ChangeSet<CKRecordID, MovieLibrary>,
                        model: MovieLibraryManagerModel) -> [CKShare] {
     let libraryRecords = changedRecords.filter { $0.recordType == LibraryRecord.recordType }.map { LibraryRecord($0) }
-    var shares = Dictionary(uniqueKeysWithValues: changedRecords.filter { $0.recordType == "cloudkit.share" }
+    var shares = Dictionary(uniqueKeysWithValues: changedRecords.filter { $0.recordType == CKShare.recordType }
                                                                 // swiftlint:disable:next force_cast
                                                                 .map { ($0.recordID, $0 as! CKShare) })
     for record in libraryRecords {
