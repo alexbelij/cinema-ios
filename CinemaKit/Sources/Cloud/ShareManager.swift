@@ -18,7 +18,7 @@ class DefaultShareManager: ShareManager {
 
   init(generalOperationQueue: GeneralOperationQueue,
        privateDatabaseOperationQueue: DatabaseOperationQueue,
-       dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
+       dataInvalidationFlag: LocalDataInvalidationFlag) {
     self.generalOperationQueue = generalOperationQueue
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.dataInvalidationFlag = dataInvalidationFlag

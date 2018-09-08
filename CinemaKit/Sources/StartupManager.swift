@@ -8,7 +8,7 @@ struct LocalDataInvalidationFlag {
 
   private let userDefaults: UserDefaultsProtocol
 
-  init(userDefaults: UserDefaultsProtocol = UserDefaults.standard) {
+  init(userDefaults: UserDefaultsProtocol) {
     self.userDefaults = userDefaults
   }
 
@@ -257,7 +257,8 @@ public class CinemaKitStartupManager: StartupManager {
   private func setUpSubscriptions() {
     let subscriptionManager = DefaultSubscriptionManager(
         privateDatabaseOperationQueue: container.database(with: .private),
-        sharedDatabaseOperationQueue: container.database(with: .shared))
+        sharedDatabaseOperationQueue: container.database(with: .shared),
+        dataInvalidationFlag: LocalDataInvalidationFlag(userDefaults: userDefaults))
     subscriptionManager.subscribeForChanges { error in
       if let error = error {
         os_log("unable to subscribe for changes: %{public}@",
@@ -281,10 +282,13 @@ public class CinemaKitStartupManager: StartupManager {
     let movieDb = TMDBSwiftWrapper(language: language, country: country)
 
     // Library Manager
+    let dataInvalidationFlag = LocalDataInvalidationFlag(userDefaults: userDefaults)
     let syncManager = DefaultSyncManager(privateDatabaseOperationQueue: container.database(with: .private),
-                                         sharedDatabaseOperationQueue: container.database(with: .shared))
+                                         sharedDatabaseOperationQueue: container.database(with: .shared),
+                                         dataInvalidationFlag: dataInvalidationFlag)
     let fetchManager = DefaultFetchManager(privateDatabaseOperationQueue: container.database(with: .private),
-                                           sharedDatabaseOperationQueue: container.database(with: .shared))
+                                           sharedDatabaseOperationQueue: container.database(with: .shared),
+                                           dataInvalidationFlag: dataInvalidationFlag)
     let libraryFactory = DefaultMovieLibraryFactory(fetchManager: fetchManager,
                                                     syncManager: syncManager,
                                                     tmdbWrapper: movieDb)
@@ -298,11 +302,14 @@ public class CinemaKitStartupManager: StartupManager {
         fetchManager: fetchManager,
         syncManager: syncManager,
         changesManager: DefaultChangesManager(privateDatabaseOperationQueue: container.database(with: .private),
-                                              sharedDatabaseOperationQueue: container.database(with: .shared)),
+                                              sharedDatabaseOperationQueue: container.database(with: .shared),
+                                              dataInvalidationFlag: dataInvalidationFlag),
         shareManager: DefaultShareManager(generalOperationQueue: container,
-                                          privateDatabaseOperationQueue: container.database(with: .private)),
+                                          privateDatabaseOperationQueue: container.database(with: .private),
+                                          dataInvalidationFlag: dataInvalidationFlag),
         libraryFactory: libraryFactory,
-        modelController: modelController)
+        modelController: modelController,
+        dataInvalidationFlag: dataInvalidationFlag)
     let dependencies = AppDependencies(libraryManager: libraryManager,
                                        movieDb: movieDb,
                                        notificationCenter: NotificationCenter.default,

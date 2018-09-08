@@ -38,7 +38,7 @@ class DefaultFetchManager: FetchManager {
 
   init(privateDatabaseOperationQueue: DatabaseOperationQueue,
        sharedDatabaseOperationQueue: DatabaseOperationQueue,
-       dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
+       dataInvalidationFlag: LocalDataInvalidationFlag) {
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.dataInvalidationFlag = dataInvalidationFlag

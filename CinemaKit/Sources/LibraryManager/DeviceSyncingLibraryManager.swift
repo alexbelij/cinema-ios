@@ -28,7 +28,7 @@ class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
                                     shareManager: ShareManager,
                                     libraryFactory: MovieLibraryFactory,
                                     modelController: Controller,
-                                    dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag())
+                                    dataInvalidationFlag: LocalDataInvalidationFlag)
       where Controller.ModelType == MovieLibraryManagerModel, Controller.ErrorType == MovieLibraryManagerError {
     self.container = container
     self.fetchManager = fetchManager

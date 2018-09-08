@@ -25,7 +25,7 @@ class DefaultChangesManager: ChangesManager {
   init(privateDatabaseOperationQueue: DatabaseOperationQueue,
        sharedDatabaseOperationQueue: DatabaseOperationQueue,
        serverChangeTokenStore: ServerChangeTokenStore = FileBasedServerChangeTokenStore(),
-       dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
+       dataInvalidationFlag: LocalDataInvalidationFlag) {
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.serverChangeTokenStore = serverChangeTokenStore

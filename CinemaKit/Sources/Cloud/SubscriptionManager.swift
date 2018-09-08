@@ -50,7 +50,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
   init(privateDatabaseOperationQueue: DatabaseOperationQueue,
        sharedDatabaseOperationQueue: DatabaseOperationQueue,
        subscriptionStore: SubscriptionStore = FileBasedSubscriptionStore(),
-       dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
+       dataInvalidationFlag: LocalDataInvalidationFlag) {
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.subscriptionStore = subscriptionStore
