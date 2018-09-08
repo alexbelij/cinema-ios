@@ -121,6 +121,7 @@ extension DeviceSyncingLibraryManager {
             self.updateLibrary(with: metadata, then: completion)
           case .itemNoLongerExists:
             if let library = model.remove(metadata.id) {
+              self.modelController.persist()
               let changeSet = ChangeSet<CKRecordID, MovieLibrary>(deletions: [metadata.id: library])
               self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
             }
