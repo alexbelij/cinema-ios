@@ -4,6 +4,7 @@ import os.log
 class MovieLibraryManagerModel {
   var libraries: [CKRecordID: InternalMovieLibrary]
   var libraryRecords: [CKRecordID: LibraryRecord]
+  var libraryRecordIDByShareRecordID: [CKRecordID: CKRecordID]
   var shareRecords: [CKRecordID: CKShare]
 
   init(libraries: [CKRecordID: InternalMovieLibrary],
@@ -11,7 +12,101 @@ class MovieLibraryManagerModel {
        shareRecords: [CKRecordID: CKShare]) {
     self.libraries = libraries
     self.libraryRecords = libraryRecords
+    self.libraryRecordIDByShareRecordID = Dictionary(minimumCapacity: libraryRecords.count)
+    for (libraryID, libraryRecord) in libraryRecords {
+      if let shareID = libraryRecord.shareID, shareRecords[shareID] != nil {
+        libraryRecordIDByShareRecordID[shareID] = libraryID
+      }
+    }
     self.shareRecords = shareRecords
+  }
+
+  var allLibraries: [InternalMovieLibrary] {
+    return Array(libraries.values)
+  }
+
+  func library(withShareRecordID recordID: CKRecordID) -> InternalMovieLibrary? {
+    guard let libraryID = libraryRecordIDByShareRecordID[recordID] else { return nil }
+    return libraries[libraryID]
+  }
+
+  func library(for recordID: CKRecordID) -> InternalMovieLibrary? {
+    return libraries[recordID]
+  }
+
+  func record(for recordID: CKRecordID) -> LibraryRecord? {
+    return libraryRecords[recordID]
+  }
+
+  func share(for metadata: MovieLibraryMetadata) -> CKShare? {
+    guard let shareRecordID = metadata.shareRecordID else { preconditionFailure("library is not shared") }
+    return shareRecords[shareRecordID]
+  }
+
+  func add(_ library: InternalMovieLibrary, with record: LibraryRecord, _ share: CKShare? = nil) {
+    precondition(libraries[record.id] == nil, "library already exists")
+    libraries[record.id] = library
+    libraryRecords[record.id] = record
+    if let share = share {
+      shareRecords[share.recordID] = share
+    }
+  }
+
+  func setShare(_ share: CKShare?, with record: LibraryRecord) {
+    guard let existingRecord = libraryRecords[record.id],
+          let library = libraries[record.id] else {
+      preconditionFailure("library does not exist")
+    }
+    let newMetadata: MovieLibraryMetadata
+    if let share = share {
+      precondition(share.recordID == record.shareID)
+      shareRecords[share.recordID] = share
+      newMetadata = MovieLibraryMetadata(from: record, share)
+    } else {
+      guard let shareRecordID = existingRecord.shareID else { preconditionFailure("record was not shared") }
+      shareRecords.removeValue(forKey: shareRecordID)
+      newMetadata = MovieLibraryMetadata(from: record)
+    }
+    libraryRecords[record.id] = record
+    library.metadata = newMetadata
+  }
+
+  func update(_ record: LibraryRecord) {
+    guard let existingRecord = libraryRecords[record.id],
+          let library = libraries[record.id] else { preconditionFailure("library does not exist") }
+    libraryRecords[record.id] = record
+    let newMetadata: MovieLibraryMetadata
+    if let shareRecordID = record.shareID, let share = shareRecords[shareRecordID] {
+      precondition(existingRecord.shareID == shareRecordID)
+      newMetadata = MovieLibraryMetadata(from: record, share)
+    } else {
+      newMetadata = MovieLibraryMetadata(from: record)
+      if let shareRecordID = existingRecord.shareID {
+        shareRecords.removeValue(forKey: shareRecordID)
+      }
+    }
+    library.metadata = newMetadata
+  }
+
+  func updateShare(_ share: CKShare) -> InternalMovieLibrary {
+    guard let library = self.library(withShareRecordID: share.recordID),
+          let record = libraryRecords[library.metadata.id] else {
+      preconditionFailure("library with given share does not exist")
+    }
+    shareRecords[share.recordID] = share
+    library.metadata = MovieLibraryMetadata(from: record, share)
+    return library
+  }
+
+  @discardableResult
+  func remove(_ recordID: CKRecordID) -> InternalMovieLibrary? {
+    guard let library = libraries.removeValue(forKey: recordID) else { return nil }
+    libraryRecords.removeValue(forKey: recordID)
+    if let shareRecordID = library.metadata.shareRecordID {
+      shareRecords.removeValue(forKey: shareRecordID)
+    }
+    library.cleanupForRemoval()
+    return library
   }
 }
 
@@ -113,22 +208,13 @@ class MovieLibraryManagerModelController:
     var libraryRecordsDict: [CKRecordID: LibraryRecord] = Dictionary(minimumCapacity: minimumCapacity)
     let shareRecordsDict = Dictionary(uniqueKeysWithValues: shareRecords.map { ($0.recordID, $0) })
     for libraryRecord in libraryRecords {
-      let currentUserCanModify: Bool
-      if let shareRecordID = libraryRecord.shareID {
-        if let shareRecord = shareRecordsDict[shareRecordID] {
-          currentUserCanModify = shareRecord.currentUserParticipant?.permission == .readWrite
-        } else {
-          os_log("found library record without corresponding CKShare -> reloading",
-                 log: MovieLibraryManagerModelController.logger,
-                 type: .default)
-          clear()
-          fetchLibraryRecords()
-          return
-        }
+      let metadata: MovieLibraryMetadata
+      if let shareRecordID = libraryRecord.shareID,
+         let shareRecord = shareRecordsDict[shareRecordID] {
+        metadata = MovieLibraryMetadata(from: libraryRecord, shareRecord)
       } else {
-        currentUserCanModify = true
+        metadata = MovieLibraryMetadata(from: libraryRecord)
       }
-      let metadata = MovieLibraryMetadata(from: libraryRecord, currentUserCanModify: currentUserCanModify)
       librariesDict[libraryRecord.id] = libraryFactory.makeLibrary(with: metadata)
       libraryRecordsDict[libraryRecord.id] = libraryRecord
     }

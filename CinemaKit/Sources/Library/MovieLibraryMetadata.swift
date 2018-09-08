@@ -6,11 +6,16 @@ public struct MovieLibraryMetadata: DeviceSyncable {
   public internal(set) var shareRecordID: CKRecordID?
   public internal(set) var currentUserCanModify: Bool
 
-  init(from record: LibraryRecord, currentUserCanModify: Bool) {
+  init(from record: LibraryRecord, _ share: CKShare? = nil) {
     self.id = record.id
     self.name = record.name
     self.shareRecordID = record.shareID
-    self.currentUserCanModify = currentUserCanModify
+    if let share = share {
+      precondition(record.shareID == share.recordID)
+      self.currentUserCanModify = share.currentUserParticipant?.permission == .readWrite
+    } else {
+      self.currentUserCanModify = true
+    }
   }
 
   public init(name: String) {
