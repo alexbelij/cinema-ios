@@ -79,14 +79,16 @@ class ThreadSafeModelController<ModelType, ErrorType>: ModelController {
   }
 
   final func requestReload() {
-    dispatchPrecondition(condition: DispatchPredicate.onQueue(queue))
-    model = nil
+    queue.async {
+      self.model = nil
+    }
   }
 
   final func persist() {
-    dispatchPrecondition(condition: DispatchPredicate.onQueue(queue))
-    if let model = self.model {
-      persist(model)
+    queue.async {
+      if let model = self.model {
+        self.persist(model)
+      }
     }
   }
 
@@ -95,9 +97,10 @@ class ThreadSafeModelController<ModelType, ErrorType>: ModelController {
   }
 
   final func clear() {
-    dispatchPrecondition(condition: DispatchPredicate.onQueue(queue))
-    model = nil
-    removePersistedModel()
+    queue.async {
+      self.model = nil
+      self.removePersistedModel()
+    }
   }
 
   func removePersistedModel() {
