@@ -88,14 +88,13 @@ class MovieLibraryManagerModel {
     library.metadata = newMetadata
   }
 
-  func updateShare(_ share: CKShare) -> InternalMovieLibrary {
+  func updateShare(_ share: CKShare) {
     guard let library = self.library(withShareRecordID: share.recordID),
           let record = libraryRecords[library.metadata.id] else {
       preconditionFailure("library with given share does not exist")
     }
     shareRecords[share.recordID] = share
     library.metadata = MovieLibraryMetadata(from: record, share)
-    return library
   }
 
   @discardableResult

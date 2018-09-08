@@ -207,10 +207,15 @@ extension DeviceSyncingLibraryManager {
       self.process(deletedSharedZoneIDs: changes.deletedSharedZoneIDs,
                    changeSet: &changeSet,
                    model: model)
-      self.process(changedRecords: changes.changedRecords, changeSet: &changeSet, model: model)
+      let sharesToFetchMetadata = self.process(changedRecords: changes.changedRecords,
+                                               changeSet: &changeSet,
+                                               model: model)
       self.process(deletedRecordIDsAndTypes: changes.deletedRecordIDsAndTypes,
                    changeSet: &changeSet,
                    model: model)
+      if !sharesToFetchMetadata.isEmpty {
+        self.fetchLibraries(for: sharesToFetchMetadata)
+      }
       if changeSet.hasPublicChanges || changeSet.hasInternalChanges {
         self.modelController.persist()
       }
@@ -226,6 +231,36 @@ extension DeviceSyncingLibraryManager {
     })
   }
 
+  private func fetchLibraries(for shares: [CKShare]) {
+    shareManager.fetchShareMetadata(for: shares) { shareMetadatas, error in
+      if let error = error {
+        switch error {
+          case .notAuthenticated, .nonRecoverableError:
+            os_log("unable to fetch share metadata %{public}@",
+                   log: DeviceSyncingLibraryManager.logger,
+                   type: .error,
+                   String(describing: error))
+            self.dataInvalidationFlag.set()
+          case .conflict, .userDeletedZone, .permissionFailure, .zoneNotFound, .itemNoLongerExists:
+            fatalError("should not occur: \(error)")
+        }
+      } else if let shareMetadatas = shareMetadatas {
+        self.modelController.access { model in
+          for shareMetadata in shareMetadatas {
+            let libraryRecord = LibraryRecord(shareMetadata.rootRecord!)
+            let metadata = MovieLibraryMetadata(from: libraryRecord, shareMetadata.share)
+            let library = self.libraryFactory.makeLibrary(with: metadata)
+            model.add(library, with: libraryRecord, shareMetadata.share)
+            // swiftlint:disable:next force_cast
+            let title = shareMetadata.share[CKShareTitleKey] as! String
+            self.delegates.invoke { $0.libraryManager(self, didAcceptSharedLibrary: library, with: title) }
+          }
+          self.modelController.persist()
+        }
+      }
+    }
+  }
+
   func process(deletedSharedZoneIDs: [CKRecordZoneID],
                changeSet: inout ChangeSet<CKRecordID, MovieLibrary>,
                model: MovieLibraryManagerModel) {
@@ -239,7 +274,7 @@ extension DeviceSyncingLibraryManager {
 
   private func process(changedRecords: [CKRecord],
                        changeSet: inout ChangeSet<CKRecordID, MovieLibrary>,
-                       model: MovieLibraryManagerModel) {
+                       model: MovieLibraryManagerModel) -> [CKShare] {
     let libraryRecords = changedRecords.filter { $0.recordType == LibraryRecord.recordType }.map { LibraryRecord($0) }
     var shares = Dictionary(uniqueKeysWithValues: changedRecords.filter { $0.recordType == "cloudkit.share" }
                                                                 // swiftlint:disable:next force_cast
@@ -271,10 +306,16 @@ extension DeviceSyncingLibraryManager {
         changeSet.insertions.append(newLibrary)
       }
     }
+    var sharesToFetchMetadata = [CKShare]()
     for (_, share) in shares {
-      let library = model.updateShare(share)
-      changeSet.modifications[library.metadata.id] = library
+      if let library = model.library(withShareRecordID: share.recordID) {
+        model.updateShare(share)
+        changeSet.modifications[library.metadata.id] = library
+      } else {
+        sharesToFetchMetadata.append(share)
+      }
     }
+    return sharesToFetchMetadata
   }
 
   private func process(deletedRecordIDsAndTypes: [(CKRecordID, String)],
