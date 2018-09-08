@@ -106,8 +106,6 @@ class DefaultShareManager: ShareManager {
           }
         } else if ckerror.code == CKError.Code.notAuthenticated {
           completion(.notAuthenticated)
-        } else if ckerror.code == CKError.Code.invalidArguments {
-          os_log("owner tried to accept share -> ignore", log: DefaultShareManager.logger, type: .default)
         } else if ckerror.code == CKError.Code.unknownItem {
           completion(.itemNoLongerExists)
         } else if ckerror.code == CKError.Code.networkFailure

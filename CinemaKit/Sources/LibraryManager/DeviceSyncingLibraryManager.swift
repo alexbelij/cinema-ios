@@ -370,6 +370,10 @@ extension DeviceSyncingLibraryManager {
 
   func acceptCloudKitShare(with shareMetadata: CKShareMetadata) {
     modelController.access(onceLoaded: { model in
+      if shareMetadata.rootRecordID.zoneID == deviceSyncZoneID {
+        os_log("owner tries to accepted share", log: DeviceSyncingLibraryManager.logger, type: .default)
+        return
+      }
       guard model.library(for: shareMetadata.rootRecordID) == nil else {
         os_log("already accepted share", log: DeviceSyncingLibraryManager.logger, type: .default)
         return
