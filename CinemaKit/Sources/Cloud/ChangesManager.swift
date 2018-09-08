@@ -195,8 +195,7 @@ class DefaultChangesManager: ChangesManager {
         }
         if ckerror.code == CKError.Code.notAuthenticated {
           completion(nil, .notAuthenticated)
-        }
-        if ckerror.code == CKError.Code.networkFailure
+        } else if ckerror.code == CKError.Code.networkFailure
            || ckerror.code == CKError.Code.networkUnavailable
            || ckerror.code == CKError.Code.requestRateLimited
            || ckerror.code == CKError.Code.serviceUnavailable

@@ -130,6 +130,10 @@ class MovieLibraryManagerModelController:
     super.init(label: "de.martinbauer.cinema.MovieLibraryManagerModelController")
   }
 
+  override func makeWithDefaultValue() -> MovieLibraryManagerModel {
+    fatalError("not supported")
+  }
+
   override func loadModel() {
     if let rawLibraryRecords = libraryRecordStore.loadRecords(),
        let rawShareRecords = shareRecordStore.loadRecords(asCKShare: true) {

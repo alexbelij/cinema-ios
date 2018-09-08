@@ -183,9 +183,7 @@ extension DeviceSyncingLibraryManager {
     self.changesManager.fetchChanges { changes, error in
       if let error = error {
         switch error {
-          case .userDeletedZone:
-            completion(.failure(.globalError(.userDeletedZone)))
-          case .notAuthenticated, .nonRecoverableError:
+          case .notAuthenticated, .userDeletedZone, .nonRecoverableError:
             completion(.failure(error.asMovieLibraryManagerError))
           case .conflict, .itemNoLongerExists, .zoneNotFound, .permissionFailure:
             fatalError("should not occur: \(error)")
@@ -261,11 +259,12 @@ extension DeviceSyncingLibraryManager {
     }
   }
 
-  func process(deletedSharedZoneIDs: [CKRecordZoneID],
-               changeSet: inout ChangeSet<CKRecordID, MovieLibrary>,
-               model: MovieLibraryManagerModel) {
+  private func process(deletedSharedZoneIDs: [CKRecordZoneID],
+                       changeSet: inout ChangeSet<CKRecordID, MovieLibrary>,
+                       model: MovieLibraryManagerModel) {
     for zoneID in deletedSharedZoneIDs {
-      for library in model.allLibraries.filter({ $0.metadata.id.zoneID == zoneID }) {
+      let deletedLibraries = model.allLibraries.filter { $0.metadata.id.zoneID == zoneID }
+      for library in deletedLibraries {
         model.remove(library.metadata.id)
         changeSet.deletions[library.metadata.id] = library
       }
@@ -526,6 +525,8 @@ extension DeviceSyncingLibraryManager: CloudSharingControllerCallback {
     }
   }
 }
+
+// MARK: - migration
 
 extension DeviceSyncingLibraryManager {
   func migrateLegacyLibrary(with name: String, at url: URL, then completion: @escaping (Bool) -> Void) {
