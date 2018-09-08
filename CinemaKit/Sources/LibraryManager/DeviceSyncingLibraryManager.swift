@@ -58,10 +58,14 @@ extension DeviceSyncingLibraryManager {
 
   func addLibrary(with metadata: MovieLibraryMetadata,
                   then completion: @escaping (Result<MovieLibrary, MovieLibraryManagerError>) -> Void) {
-    let record = LibraryRecord(from: metadata)
-    syncManager.sync(record.rawRecord, in: metadata.databaseScope) { error in
-      self.addCompletion(metadata, record, error, completion)
-    }
+    modelController.access(onceLoaded: { _ in
+      let record = LibraryRecord(from: metadata)
+      self.syncManager.sync(record.rawRecord, in: metadata.databaseScope) { error in
+        self.addCompletion(metadata, record, error, completion)
+      }
+    }, whenUnableToLoad: { error in
+      completion(.failure(error))
+    })
   }
 
   private func addCompletion(_ metadata: MovieLibraryMetadata,
