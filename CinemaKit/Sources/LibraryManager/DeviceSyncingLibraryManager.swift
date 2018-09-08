@@ -163,17 +163,22 @@ extension DeviceSyncingLibraryManager {
   private func removeCompletion(_ library: InternalMovieLibrary,
                                 _ error: CloudKitError?,
                                 _ completion: @escaping (Result<Void, MovieLibraryManagerError>) -> Void) {
-    if let error = error {
-      switch error {
-        case .itemNoLongerExists:
-          completion(.success(()))
-        case .notAuthenticated, .userDeletedZone, .permissionFailure, .nonRecoverableError:
-          completion(.failure(error.asMovieLibraryManagerError))
-        case .conflict, .zoneNotFound:
-          fatalError("should not occur: \(error)")
-      }
-    } else {
-      modelController.access { model in
+    modelController.access { model in
+      if let error = error {
+        switch error {
+          case .itemNoLongerExists:
+            if model.remove(library.metadata.id) != nil {
+              self.modelController.persist()
+              let changeSet = ChangeSet<CKRecordID, MovieLibrary>(deletions: [library.metadata.id: library])
+              self.delegates.invoke { $0.libraryManager(self, didUpdateLibraries: changeSet) }
+            }
+            completion(.success(()))
+          case .notAuthenticated, .userDeletedZone, .permissionFailure, .nonRecoverableError:
+            completion(.failure(error.asMovieLibraryManagerError))
+          case .conflict, .zoneNotFound:
+            fatalError("should not occur: \(error)")
+        }
+      } else {
         model.remove(library.metadata.id)
         self.modelController.persist()
         let changeSet = ChangeSet<CKRecordID, MovieLibrary>(deletions: [library.metadata.id: library])
