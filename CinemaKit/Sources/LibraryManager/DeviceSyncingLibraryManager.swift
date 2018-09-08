@@ -240,6 +240,7 @@ extension DeviceSyncingLibraryManager {
              log: DeviceSyncingLibraryManager.logger,
              type: .error,
              String(describing: error))
+      self.dataInvalidationFlag.set()
     })
   }
 
