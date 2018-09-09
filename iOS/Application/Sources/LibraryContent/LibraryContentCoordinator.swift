@@ -193,9 +193,12 @@ extension LibraryContentCoordinator: EditMovieCoordinatorDelegate {
       case .permissionFailure:
         DispatchQueue.main.async {
           coordinator.rootViewController.presentPermissionFailureAlert {
-            self.notificationCenter.post(ApplicationWideEvent.shouldFetchChanges.notification)
+            coordinator.rootViewController.dismiss(animated: true) {
+              self.editMovieCoordinator = nil
+            }
           }
         }
+        self.notificationCenter.post(ApplicationWideEvent.shouldFetchChanges.notification)
       case .nonRecoverableError:
         coordinator.rootViewController.presentErrorAlert()
       case .tmdbDetailsCouldNotBeFetched, .movieDoesNotExist:
@@ -229,8 +232,14 @@ extension LibraryContentCoordinator: MovieLibraryDelegate {
         } else if !library.metadata.currentUserCanModify &&
                   self.movieDetailsCoordinator!.rootViewController.navigationItem.rightBarButtonItem != nil {
           self.movieDetailsCoordinator!.rootViewController.navigationItem.rightBarButtonItem = nil
-          self.editMovieCoordinator?.rootViewController.dismiss(animated: true) {
-            self.editMovieCoordinator = nil
+          if let editMovieCoordinator = self.editMovieCoordinator {
+            if editMovieCoordinator.rootViewController.presentedViewController == nil {
+              editMovieCoordinator.rootViewController.dismiss(animated: true) {
+                self.editMovieCoordinator = nil
+              }
+            } else {
+              // alert dismisses editMovieCoordinator
+            }
           }
         }
       }
