@@ -44,7 +44,6 @@ class MovieLibraryManagerModel {
   }
 
   func add(_ library: InternalMovieLibrary, with record: LibraryRecord, _ share: CKShare? = nil) {
-    precondition(libraries[record.id] == nil, "library already exists")
     libraries[record.id] = library
     libraryRecords[record.id] = record
     if let share = share {
