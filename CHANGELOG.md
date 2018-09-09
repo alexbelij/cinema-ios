@@ -2,6 +2,37 @@
 
 All notable changes to the project will be documented in this file.
 
+## v2.0 - 2018-09-09
+
+### Added
+- support for multiple libraries
+- libraries and movies are synced across devices via iCloud
+- libraries can be shared
+- settings bundle
+
+### Changed
+- new project structure
+- new app icon
+- updated icons (vector graphics)
+- larger cells in table views
+- library search and TMDB search use same results controller
+- TMDB search is throttled
+- updated details ui
+- details without content are hidden
+- smaller cache for popular movie posters
+- faster library edits due to new data structure
+- adding movies does not block screen
+- all table view/collection views use prefetching
+- live update for text fields which must not be empty
+
+### Removed
+- support for imports (use sharing instead)
+
+### Fixed
+- genre list can be refreshed if empty
+- movie details for popular movies is cached
+- posters are not displayed in some cases
+
 ## v.1.4.1 - 2018-01-05
 
 ### Added

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Search Tmdb Controller-->
+        <scene sceneID="Irz-nF-inq">
+            <objects>
+                <viewController storyboardIdentifier="SearchTmdbController" id="lEX-SM-kxr" customClass="SearchTmdbController" customModule="iOS_Application" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Hfw-gI-ZTd">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jef-Gw-Vln">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                            </containerView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="jef-Gw-Vln" firstAttribute="leading" secondItem="N8M-nd-gMO" secondAttribute="leading" id="7Xh-xM-GaD"/>
+                            <constraint firstItem="jef-Gw-Vln" firstAttribute="top" secondItem="Hfw-gI-ZTd" secondAttribute="top" id="Pe9-Ze-i1M"/>
+                            <constraint firstAttribute="bottom" secondItem="jef-Gw-Vln" secondAttribute="bottom" id="QFD-Ah-hMQ"/>
+                            <constraint firstItem="N8M-nd-gMO" firstAttribute="trailing" secondItem="jef-Gw-Vln" secondAttribute="trailing" id="mEB-k2-jHh"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="N8M-nd-gMO"/>
+                    </view>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
+                    <connections>
+                        <outlet property="containerView" destination="jef-Gw-Vln" id="9tl-5w-wk5"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="cTT-Yk-ZSf" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1852" y="-880.20989505247383"/>
+        </scene>
+    </scenes>
+</document>
