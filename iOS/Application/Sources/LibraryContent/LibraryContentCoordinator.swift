@@ -74,6 +74,13 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     library.delegates.add(self)
     updateTitle()
     movieListController.listData = .loading
+    if let editMovieCoordinator = editMovieCoordinator {
+      editMovieCoordinator.rootViewController.dismiss(animated: true) {
+        self.navigationController.popToRootViewController(animated: true)
+      }
+    } else if movieDetailsCoordinator != nil {
+      navigationController.popToRootViewController(animated: true)
+    }
     DispatchQueue.global(qos: .default).async {
       self.fetchListData()
     }
