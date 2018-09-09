@@ -36,7 +36,7 @@
 "genre.tvMovie" = "TV-Film";
 "genre.war" = "Kriegsfilm";
 "genre.western" = "Western";
-"genres" = "Genres";
+"genres" = "Genre";
 "iCloud.notAuthenticated.subtitle" = "Bitte aktiviere iCloud für Cinema, damit du von all deinen Geräten auf deine Filme zugreifen kannst.";
 "iCloud.notAuthenticated.title" = "iCloud erforderlich";
 "iCloud.userDeletedZone" = "Deine Filme wurden aus iCloud gelöscht.";

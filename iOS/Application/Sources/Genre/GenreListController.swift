@@ -59,6 +59,7 @@ extension GenreListController {
   override func viewDidLoad() {
     super.viewDidLoad()
     tableView.prefetchDataSource = self
+    title = NSLocalizedString("genres", comment: "")
     reload()
   }
 }
