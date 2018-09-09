@@ -1,7 +1,7 @@
 import CloudKit
 import os.log
 
-class MovieLibraryDataObject {
+class MovieLibraryModel {
   var movies: [CKRecordID: Movie]
   var movieRecords: [CKRecordID: MovieRecord]
   var recordIDsByTmdbID: [TmdbIdentifier: CKRecordID]
@@ -13,12 +13,44 @@ class MovieLibraryDataObject {
     self.movieRecords = movieRecords
     self.recordIDsByTmdbID = recordIDsByTmdbID
   }
+
+  var allMovies: [Movie] {
+    return Array(movies.values)
+  }
+
+  func movie(for tmdbID: TmdbIdentifier) -> Movie? {
+    guard let recordID = recordIDsByTmdbID[tmdbID] else { return nil }
+    return movies[recordID]
+  }
+
+  func record(for movie: Movie) -> MovieRecord? {
+    return movieRecords[movie.id]
+  }
+
+  func add(_ movie: Movie, with record: MovieRecord) {
+    movies[movie.id] = movie
+    movieRecords[movie.id] = record
+    recordIDsByTmdbID[movie.tmdbID] = movie.id
+  }
+
+  func update(_ movie: Movie, and record: MovieRecord) {
+    movies[movie.id] = movie
+    movieRecords[movie.id] = record
+  }
+
+  @discardableResult
+  func remove(_ recordID: CKRecordID) -> Movie? {
+    guard let movie = movies.removeValue(forKey: recordID) else { return nil }
+    movieRecords.removeValue(forKey: recordID)
+    recordIDsByTmdbID.removeValue(forKey: movie.tmdbID)
+    return movie
+  }
 }
 
-class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
-  private static let logger = Logging.createLogger(category: "MovieLibraryData")
+class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, MovieLibraryError> {
+  private static let logger = Logging.createLogger(category: "MovieLibraryModelController")
 
-  private let databaseOperationQueue: DatabaseOperationQueue
+  private let databaseScope: CKDatabaseScope
   private let fetchManager: FetchManager
   private let syncManager: SyncManager
   private let tmdbPropertiesProvider: TmdbMoviePropertiesProvider
@@ -26,43 +58,46 @@ class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
   private let movieRecordStore: PersistentRecordStore
   private let tmdbPropertiesStore: TmdbPropertiesStore
 
-  init(databaseOperationQueue: DatabaseOperationQueue,
+  init(databaseScope: CKDatabaseScope,
        fetchManager: FetchManager,
        syncManager: SyncManager,
        tmdbPropertiesProvider: TmdbMoviePropertiesProvider,
        libraryID: CKRecordID,
        movieRecordStore: PersistentRecordStore,
        tmdbPropertiesStore: TmdbPropertiesStore) {
-    self.databaseOperationQueue = databaseOperationQueue
+    self.databaseScope = databaseScope
     self.fetchManager = fetchManager
     self.syncManager = syncManager
     self.tmdbPropertiesProvider = tmdbPropertiesProvider
     self.libraryID = libraryID
     self.movieRecordStore = movieRecordStore
     self.tmdbPropertiesStore = tmdbPropertiesStore
-    super.init(label: "de.martinbauer.cinema.MovieLibraryData")
+    super.init(label: "de.martinbauer.cinema.MovieLibraryModelController")
   }
 
-  override func makeWithDefaultValue() -> MovieLibraryDataObject {
-    return MovieLibraryDataObject(movies: [:], movieRecords: [:], recordIDsByTmdbID: [:])
+  override func makeWithDefaultValue() -> MovieLibraryModel {
+    return MovieLibraryModel(movies: [:], movieRecords: [:], recordIDsByTmdbID: [:])
   }
 
-  override func loadData() {
+  override func loadModel() {
     if let rawMovieRecords = movieRecordStore.loadRecords() {
       let movieRecords = rawMovieRecords.map { MovieRecord($0) }
       if let tmdbProperties = tmdbPropertiesStore.load() {
-        os_log("loaded records from store", log: MovieLibraryData.logger, type: .debug)
-        makeData(rawMovieRecords.map { MovieRecord($0) }, tmdbProperties)
+        os_log("loaded records from store", log: MovieLibraryModelController.logger, type: .debug)
+        makeModel(rawMovieRecords.map { MovieRecord($0) }, tmdbProperties)
       } else {
-        os_log("fetching %d tmdb properties", log: MovieLibraryData.logger, type: .debug, rawMovieRecords.count)
+        os_log("fetching %d tmdb properties",
+               log: MovieLibraryModelController.logger,
+               type: .debug,
+               rawMovieRecords.count)
         self.fetchTmdbProperties(for: movieRecords) { tmdbProperties in
-          os_log("saving fetched tmdb properties store", log: MovieLibraryData.logger, type: .debug)
+          os_log("saving fetched tmdb properties store", log: MovieLibraryModelController.logger, type: .debug)
           self.tmdbPropertiesStore.save(tmdbProperties)
-          self.makeData(movieRecords, tmdbProperties)
+          self.makeModel(movieRecords, tmdbProperties)
         }
       }
     } else {
-      os_log("loading records from cloud", log: MovieLibraryData.logger, type: .debug)
+      os_log("loading records from cloud", log: MovieLibraryModelController.logger, type: .debug)
       fetchMoviesFromCloud { result in
         self.didFetchMovieRecords(result)
       }
@@ -74,21 +109,21 @@ class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
       case let .failure(error):
         abortLoading(with: error)
       case let .success(movieRecords):
-        os_log("saving fetched records to store", log: MovieLibraryData.logger, type: .debug)
+        os_log("saving fetched records to store", log: MovieLibraryModelController.logger, type: .debug)
         movieRecordStore.save(movieRecords)
-        os_log("fetching %d tmdb properties", log: MovieLibraryData.logger, type: .debug, movieRecords.count)
+        os_log("fetching %d tmdb properties", log: MovieLibraryModelController.logger, type: .debug, movieRecords.count)
         self.fetchTmdbProperties(for: movieRecords) { tmdbProperties in
-          os_log("saving fetched tmdb properties store", log: MovieLibraryData.logger, type: .debug)
+          os_log("saving fetched tmdb properties store", log: MovieLibraryModelController.logger, type: .debug)
           self.tmdbPropertiesStore.save(tmdbProperties)
-          self.makeData(movieRecords, tmdbProperties)
+          self.makeModel(movieRecords, tmdbProperties)
         }
     }
   }
 
-  private func makeData(_ movieRecords: [MovieRecord], _ tmdbProperties: [TmdbIdentifier: Movie.TmdbProperties]) {
+  private func makeModel(_ movieRecords: [MovieRecord], _ tmdbProperties: [TmdbIdentifier: Movie.TmdbProperties]) {
     if movieRecords.count != tmdbProperties.count {
       os_log("some data is missing: %d movieRecords and %d tmdbProperties",
-             log: MovieLibraryData.logger,
+             log: MovieLibraryModelController.logger,
              type: .error,
              movieRecords.count,
              tmdbProperties.count)
@@ -119,26 +154,26 @@ class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
     }
     if !duplicates.isEmpty {
       os_log("found %d duplicates while loading -> deleting",
-             log: MovieLibraryData.logger,
+             log: MovieLibraryModelController.logger,
              type: .default,
              duplicates.count)
-      syncManager.delete(duplicates, using: databaseOperationQueue)
+      syncManager.delete(duplicates, in: databaseScope)
     }
-    completeLoading(with: MovieLibraryDataObject(movies: moviesDict,
-                                                 movieRecords: movieRecordsDict,
-                                                 recordIDsByTmdbID: recordIDsByTmdbIDDict))
+    completeLoading(with: MovieLibraryModel(movies: moviesDict,
+                                            movieRecords: movieRecordsDict,
+                                            recordIDsByTmdbID: recordIDsByTmdbIDDict))
   }
 
-  override func persist(_ data: MovieLibraryDataObject) {
-    os_log("saving records to store", log: MovieLibraryData.logger, type: .debug)
-    movieRecordStore.save(Array(data.movieRecords.values))
-    os_log("saving tmdb properties to store", log: MovieLibraryData.logger, type: .debug)
-    let tmdbProperties = Dictionary(uniqueKeysWithValues: data.movies.values.map { ($0.tmdbID, $0.tmdbProperties) })
+  override func persist(_ model: MovieLibraryModel) {
+    os_log("saving records to store", log: MovieLibraryModelController.logger, type: .debug)
+    movieRecordStore.save(Array(model.movieRecords.values))
+    os_log("saving tmdb properties to store", log: MovieLibraryModelController.logger, type: .debug)
+    let tmdbProperties = Dictionary(uniqueKeysWithValues: model.movies.values.map { ($0.tmdbID, $0.tmdbProperties) })
     tmdbPropertiesStore.save(tmdbProperties)
   }
 
-  override func clear() {
-    os_log("removing store", log: MovieLibraryData.logger, type: .debug)
+  override func removePersistedModel() {
+    os_log("removing store", log: MovieLibraryModelController.logger, type: .debug)
     movieRecordStore.clear()
     tmdbPropertiesStore.clear()
   }
@@ -146,12 +181,12 @@ class MovieLibraryData: LazyData<MovieLibraryDataObject, MovieLibraryError> {
 
 // MARK: - Fetching Movies From Cloud
 
-extension MovieLibraryData {
+extension MovieLibraryModelController {
   private func fetchMoviesFromCloud(then completion: @escaping (Result<[MovieRecord], MovieLibraryError>) -> Void) {
     fetchManager.fetch(MovieRecord.self,
                        matching: MovieRecord.queryPredicate(forMoviesInLibraryWithID: libraryID),
                        inZoneWithID: libraryID.zoneID,
-                       using: databaseOperationQueue) { records, error in
+                       in: databaseScope) { records, error in
       if let error = error {
         switch error {
           case .userDeletedZone:

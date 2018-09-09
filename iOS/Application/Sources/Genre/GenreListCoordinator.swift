@@ -61,7 +61,7 @@ class GenreListCoordinator: CustomPresentableCoordinator {
               DispatchQueue.main.async {
                 self.genreListController.listData = .unavailable
               }
-            case .detailsFetchError, .movieDoesNotExist, .permissionFailure:
+            case .tmdbDetailsCouldNotBeFetched, .movieDoesNotExist, .permissionFailure:
               fatalError("should not occur: \(error)")
           }
         case let .success(movies):

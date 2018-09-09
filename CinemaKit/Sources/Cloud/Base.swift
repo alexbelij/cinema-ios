@@ -54,16 +54,6 @@ protocol DatabaseOperationQueue {
 extension CKDatabase: DatabaseOperationQueue {
 }
 
-protocol DatabaseOperationQueueFactory {
-  func queue(withScope scope: CKDatabaseScope) -> DatabaseOperationQueue
-}
-
-extension CKContainer: DatabaseOperationQueueFactory {
-  func queue(withScope scope: CKDatabaseScope) -> DatabaseOperationQueue {
-    return database(with: scope)
-  }
-}
-
 extension Error {
   func singlePartialError(forKey key: Any) -> Error {
     guard let ckerror = self as? CKError else { return self }

@@ -6,15 +6,24 @@ public struct MovieLibraryMetadata: DeviceSyncable {
   public internal(set) var shareRecordID: CKRecordID?
   public internal(set) var currentUserCanModify: Bool
 
-  init(from record: LibraryRecord, currentUserCanModify: Bool) {
+  init(from record: LibraryRecord, _ share: CKShare? = nil) {
     self.id = record.id
     self.name = record.name
     self.shareRecordID = record.shareID
-    self.currentUserCanModify = currentUserCanModify
+    if let share = share {
+      precondition(record.shareID == share.recordID)
+      self.currentUserCanModify = share.currentUserParticipant?.permission == .readWrite
+    } else {
+      self.currentUserCanModify = true
+    }
   }
 
   public init(name: String) {
-    self.id = CKRecordID(recordName: UUID().uuidString, zoneID: deviceSyncZoneID)
+    self.init(id: CKRecordID(recordName: UUID().uuidString, zoneID: deviceSyncZoneID), name: name)
+  }
+
+  init(id: CKRecordID, name: String) {
+    self.id = id
     self.name = name
     self.shareRecordID = nil
     self.currentUserCanModify = true
@@ -32,5 +41,11 @@ public struct MovieLibraryMetadata: DeviceSyncable {
   func setCustomFields(in record: LibraryRecord) {
     precondition(record.id == id)
     record.name = name
+  }
+}
+
+extension MovieLibraryMetadata {
+  var databaseScope: CKDatabaseScope {
+    return isCurrentUserOwner ? .private : .shared
   }
 }

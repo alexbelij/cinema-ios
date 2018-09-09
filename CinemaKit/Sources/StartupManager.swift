@@ -8,7 +8,7 @@ struct LocalDataInvalidationFlag {
 
   private let userDefaults: UserDefaultsProtocol
 
-  init(userDefaults: UserDefaultsProtocol = UserDefaults.standard) {
+  init(userDefaults: UserDefaultsProtocol) {
     self.userDefaults = userDefaults
   }
 
@@ -187,7 +187,7 @@ public class CinemaKitStartupManager: StartupManager {
   }
 
   private func setUpDeviceSyncZone() {
-    setUpDeviceSyncZone(using: container.queue(withScope: .private), retryCount: defaultRetryCount) { error in
+    setUpDeviceSyncZone(using: container.database(with: .private), retryCount: defaultRetryCount) { error in
       if let error = error {
         os_log("unable to setup deviceSyncZone: %{public}@",
                log: CinemaKitStartupManager.logger,
@@ -255,7 +255,10 @@ public class CinemaKitStartupManager: StartupManager {
   }
 
   private func setUpSubscriptions() {
-    let subscriptionManager = DefaultSubscriptionManager(queueFactory: container)
+    let subscriptionManager = DefaultSubscriptionManager(
+        privateDatabaseOperationQueue: container.database(with: .private),
+        sharedDatabaseOperationQueue: container.database(with: .shared),
+        dataInvalidationFlag: LocalDataInvalidationFlag(userDefaults: userDefaults))
     subscriptionManager.subscribeForChanges { error in
       if let error = error {
         os_log("unable to subscribe for changes: %{public}@",
@@ -279,27 +282,34 @@ public class CinemaKitStartupManager: StartupManager {
     let movieDb = TMDBSwiftWrapper(language: language, country: country)
 
     // Library Manager
-    let syncManager = DefaultSyncManager()
-    let fetchManager = DefaultFetchManager()
-    let libraryFactory = DefaultMovieLibraryFactory(queueFactory: container,
-                                                    fetchManager: fetchManager,
+    let dataInvalidationFlag = LocalDataInvalidationFlag(userDefaults: userDefaults)
+    let syncManager = DefaultSyncManager(privateDatabaseOperationQueue: container.database(with: .private),
+                                         sharedDatabaseOperationQueue: container.database(with: .shared),
+                                         dataInvalidationFlag: dataInvalidationFlag)
+    let fetchManager = DefaultFetchManager(privateDatabaseOperationQueue: container.database(with: .private),
+                                           sharedDatabaseOperationQueue: container.database(with: .shared),
+                                           dataInvalidationFlag: dataInvalidationFlag)
+    let libraryFactory = DefaultMovieLibraryFactory(fetchManager: fetchManager,
                                                     syncManager: syncManager,
                                                     tmdbWrapper: movieDb)
-    let data = MovieLibraryManagerData(
-        queueFactory: container,
+    let modelController = MovieLibraryManagerModelController(
         fetchManager: fetchManager,
         libraryFactory: libraryFactory,
         libraryRecordStore: FileBasedRecordStore(fileURL: CinemaKitStartupManager.libraryRecordStoreURL),
         shareRecordStore: FileBasedRecordStore(fileURL: CinemaKitStartupManager.shareRecordStoreURL))
     let libraryManager = DeviceSyncingLibraryManager(
-        container: container,
-        queueFactory: container,
+        containerProvider: DefaultCKContainerProvider(with: container),
         fetchManager: fetchManager,
         syncManager: syncManager,
-        changesManager: DefaultChangesManager(queueFactory: container),
-        shareManager: DefaultShareManager(generalOperationQueue: container, queueFactory: container),
+        changesManager: DefaultChangesManager(privateDatabaseOperationQueue: container.database(with: .private),
+                                              sharedDatabaseOperationQueue: container.database(with: .shared),
+                                              dataInvalidationFlag: dataInvalidationFlag),
+        shareManager: DefaultShareManager(generalOperationQueue: container,
+                                          privateDatabaseOperationQueue: container.database(with: .private),
+                                          dataInvalidationFlag: dataInvalidationFlag),
         libraryFactory: libraryFactory,
-        data: data)
+        modelController: modelController,
+        dataInvalidationFlag: dataInvalidationFlag)
     let dependencies = AppDependencies(libraryManager: libraryManager,
                                        movieDb: movieDb,
                                        notificationCenter: NotificationCenter.default,
@@ -359,41 +369,43 @@ public class CinemaKitStartupManager: StartupManager {
   }
 }
 
+private struct DefaultCKContainerProvider: CKContainerProvider {
+  let container: CKContainer
+
+  init(with container: CKContainer) {
+    self.container = container
+  }
+}
+
 private class DefaultMovieLibraryFactory: MovieLibraryFactory {
-  private let queueFactory: DatabaseOperationQueueFactory
   private let fetchManager: FetchManager
   private let syncManager: SyncManager
   private let tmdbWrapper: TMDBSwiftWrapper
 
-  init(queueFactory: DatabaseOperationQueueFactory,
-       fetchManager: FetchManager,
+  init(fetchManager: FetchManager,
        syncManager: SyncManager,
        tmdbWrapper: TMDBSwiftWrapper) {
-    self.queueFactory = queueFactory
     self.fetchManager = fetchManager
     self.syncManager = syncManager
     self.tmdbWrapper = tmdbWrapper
   }
 
   func makeLibrary(with metadata: MovieLibraryMetadata) -> InternalMovieLibrary {
-    let scope = metadata.isCurrentUserOwner ? CKDatabaseScope.private : CKDatabaseScope.shared
-    let databaseOperationQueue = queueFactory.queue(withScope: scope)
     let movieRecordStore = FileBasedRecordStore(
         fileURL: CinemaKitStartupManager.movieRecordsDir.appendingPathComponent("\(metadata.id.recordName).plist"))
     let tmdbPropertiesStore = FileBasedTmdbPropertiesStore(
         fileURL: CinemaKitStartupManager.tmdbPropertiesDir.appendingPathComponent("\(metadata.id.recordName).json"))
-    let data = MovieLibraryData(databaseOperationQueue: databaseOperationQueue,
-                                fetchManager: fetchManager,
-                                syncManager: syncManager,
-                                tmdbPropertiesProvider: tmdbWrapper,
-                                libraryID: metadata.id,
-                                movieRecordStore: movieRecordStore,
-                                tmdbPropertiesStore: tmdbPropertiesStore)
-    return DeviceSyncingMovieLibrary(databaseOperationQueue: databaseOperationQueue,
-                                     syncManager: syncManager,
+    let modelController = MovieLibraryModelController(databaseScope: metadata.databaseScope,
+                                                      fetchManager: fetchManager,
+                                                      syncManager: syncManager,
+                                                      tmdbPropertiesProvider: tmdbWrapper,
+                                                      libraryID: metadata.id,
+                                                      movieRecordStore: movieRecordStore,
+                                                      tmdbPropertiesStore: tmdbPropertiesStore)
+    return DeviceSyncingMovieLibrary(metadata: metadata,
+                                     modelController: modelController,
                                      tmdbPropertiesProvider: tmdbWrapper,
-                                     metadata: metadata,
-                                     data: data)
+                                     syncManager: syncManager)
   }
 }
 

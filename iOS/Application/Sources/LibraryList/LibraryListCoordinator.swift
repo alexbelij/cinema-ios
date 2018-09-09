@@ -20,6 +20,7 @@ class LibraryListCoordinator: NSObject, CustomPresentableCoordinator {
   private let notificationCenter: NotificationCenter
   private var libraryMetadataForCloudSharingController: MovieLibraryMetadata?
   private var sharingCallback: CloudSharingControllerCallback?
+  private var pendingInvitations = Set<String>()
 
   // managed controller
   private let navigationController: UINavigationController
@@ -321,6 +322,7 @@ extension LibraryListCoordinator: MovieLibraryManagerDelegate {
                       willAcceptSharedLibraryWith title: String,
                       continuation: @escaping () -> Void) {
     DispatchQueue.main.async {
+      self.pendingInvitations.insert(title)
       self.libraryListController.setInvitation(title)
       continuation()
     }
@@ -330,7 +332,12 @@ extension LibraryListCoordinator: MovieLibraryManagerDelegate {
                       didAcceptSharedLibrary library: MovieLibrary,
                       with title: String) {
     DispatchQueue.main.async {
-      self.libraryListController.replaceInvitation(with: title, by: library.metadata)
+      if self.pendingInvitations.contains(title) {
+        self.pendingInvitations.remove(title)
+        self.libraryListController.replaceInvitation(with: title, by: library.metadata)
+      } else {
+        self.libraryListController.showLibrary(with: library.metadata)
+      }
     }
   }
 }

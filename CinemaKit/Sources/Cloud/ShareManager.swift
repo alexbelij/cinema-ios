@@ -6,19 +6,21 @@ protocol ShareManager {
                  with rootRecord: CKRecord,
                  then completion: @escaping (CloudKitError?) -> Void)
   func acceptShare(with metadata: CKShareMetadata, then completion: @escaping (CloudKitError?) -> Void)
+  func fetchShareMetadata(for shares: [CKShare],
+                          then completion: @escaping ([CKShareMetadata]?, CloudKitError?) -> Void)
 }
 
 class DefaultShareManager: ShareManager {
   private static let logger = Logging.createLogger(category: "ShareManager")
   private let generalOperationQueue: GeneralOperationQueue
-  private let queueFactory: DatabaseOperationQueueFactory
+  private let privateDatabaseOperationQueue: DatabaseOperationQueue
   private let dataInvalidationFlag: LocalDataInvalidationFlag
 
   init(generalOperationQueue: GeneralOperationQueue,
-       queueFactory: DatabaseOperationQueueFactory,
-       dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag()) {
+       privateDatabaseOperationQueue: DatabaseOperationQueue,
+       dataInvalidationFlag: LocalDataInvalidationFlag) {
     self.generalOperationQueue = generalOperationQueue
-    self.queueFactory = queueFactory
+    self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.dataInvalidationFlag = dataInvalidationFlag
   }
 
@@ -73,7 +75,7 @@ class DefaultShareManager: ShareManager {
         completion(nil)
       }
     }
-    queueFactory.queue(withScope: .private).add(operation)
+    privateDatabaseOperationQueue.add(operation)
   }
 
   func acceptShare(with metadata: CKShareMetadata, then completion: @escaping (CloudKitError?) -> Void) {
@@ -106,8 +108,6 @@ class DefaultShareManager: ShareManager {
           }
         } else if ckerror.code == CKError.Code.notAuthenticated {
           completion(.notAuthenticated)
-        } else if ckerror.code == CKError.Code.invalidArguments {
-          os_log("owner tried to accept share -> ignore", log: DefaultShareManager.logger, type: .default)
         } else if ckerror.code == CKError.Code.unknownItem {
           completion(.itemNoLongerExists)
         } else if ckerror.code == CKError.Code.networkFailure
@@ -125,6 +125,63 @@ class DefaultShareManager: ShareManager {
         }
       } else {
         completion(nil)
+      }
+    }
+    generalOperationQueue.add(operation)
+  }
+
+  func fetchShareMetadata(for shares: [CKShare],
+                          then completion: @escaping ([CKShareMetadata]?, CloudKitError?) -> Void) {
+    fetchShareMetadata(for: shares, retryCount: defaultRetryCount, then: completion)
+  }
+
+  func fetchShareMetadata(for shares: [CKShare],
+                          retryCount: Int,
+                          then completion: @escaping ([CKShareMetadata]?, CloudKitError?) -> Void) {
+    let operation = CKFetchShareMetadataOperation(shareURLs: shares.compactMap { $0.url })
+    operation.shouldFetchRootRecord = true
+
+    var shareMetadatas = [CKShareMetadata]()
+    var unhandledErrorOccurred = false
+    operation.perShareMetadataBlock = { _, shareMetadata, error in
+      if let error = error {
+        guard let ckerror = error as? CKError else { return }
+        if ckerror.code != CKError.Code.unknownItem {
+          unhandledErrorOccurred = true
+        }
+      } else if let shareMetadata = shareMetadata {
+        shareMetadatas.append(shareMetadata)
+      }
+    }
+    operation.fetchShareMetadataCompletionBlock = { error in
+      if let error = error {
+        guard let ckerror = error as? CKError else {
+          os_log("<fetchShareMetadata> unhandled error: %{public}@",
+                 log: DefaultShareManager.logger,
+                 type: .error,
+                 String(describing: error))
+          completion(nil, .nonRecoverableError)
+          return
+        }
+        if ckerror.code == CKError.Code.notAuthenticated {
+          completion(nil, .notAuthenticated)
+        } else if ckerror.code == CKError.Code.networkFailure
+           || ckerror.code == CKError.Code.networkUnavailable
+           || ckerror.code == CKError.Code.requestRateLimited
+           || ckerror.code == CKError.Code.serviceUnavailable
+           || ckerror.code == CKError.Code.zoneBusy {
+          completion(nil, .nonRecoverableError)
+        } else if ckerror.code == CKError.Code.partialFailure && !unhandledErrorOccurred {
+          completion(shareMetadatas, nil)
+        } else {
+          os_log("<fetchShareMetadata> unhandled CKError: %{public}@",
+                 log: DefaultShareManager.logger,
+                 type: .error,
+                 String(describing: ckerror))
+          completion(nil, .nonRecoverableError)
+        }
+      } else {
+        completion(shareMetadatas, nil)
       }
     }
     generalOperationQueue.add(operation)

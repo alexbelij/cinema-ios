@@ -74,6 +74,13 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     library.delegates.add(self)
     updateTitle()
     movieListController.listData = .loading
+    if let editMovieCoordinator = editMovieCoordinator {
+      editMovieCoordinator.rootViewController.dismiss(animated: true) {
+        self.navigationController.popToRootViewController(animated: true)
+      }
+    } else if movieDetailsCoordinator != nil {
+      navigationController.popToRootViewController(animated: true)
+    }
     DispatchQueue.global(qos: .default).async {
       self.fetchListData()
     }
@@ -107,7 +114,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
             DispatchQueue.main.async {
               self.movieListController.listData = .unavailable
             }
-          case .detailsFetchError, .movieDoesNotExist, .permissionFailure:
+          case .tmdbDetailsCouldNotBeFetched, .movieDoesNotExist, .permissionFailure:
             fatalError("should not occur")
         }
       case let .success(movies):
@@ -186,12 +193,15 @@ extension LibraryContentCoordinator: EditMovieCoordinatorDelegate {
       case .permissionFailure:
         DispatchQueue.main.async {
           coordinator.rootViewController.presentPermissionFailureAlert {
-            self.notificationCenter.post(ApplicationWideEvent.shouldFetchChanges.notification)
+            coordinator.rootViewController.dismiss(animated: true) {
+              self.editMovieCoordinator = nil
+            }
           }
         }
+        self.notificationCenter.post(ApplicationWideEvent.shouldFetchChanges.notification)
       case .nonRecoverableError:
         coordinator.rootViewController.presentErrorAlert()
-      case .detailsFetchError, .movieDoesNotExist:
+      case .tmdbDetailsCouldNotBeFetched, .movieDoesNotExist:
         fatalError("should not occur: \(error)")
     }
   }
@@ -222,8 +232,14 @@ extension LibraryContentCoordinator: MovieLibraryDelegate {
         } else if !library.metadata.currentUserCanModify &&
                   self.movieDetailsCoordinator!.rootViewController.navigationItem.rightBarButtonItem != nil {
           self.movieDetailsCoordinator!.rootViewController.navigationItem.rightBarButtonItem = nil
-          self.editMovieCoordinator?.rootViewController.dismiss(animated: true) {
-            self.editMovieCoordinator = nil
+          if let editMovieCoordinator = self.editMovieCoordinator {
+            if editMovieCoordinator.rootViewController.presentedViewController == nil {
+              editMovieCoordinator.rootViewController.dismiss(animated: true) {
+                self.editMovieCoordinator = nil
+              }
+            } else {
+              // alert dismisses editMovieCoordinator
+            }
           }
         }
       }

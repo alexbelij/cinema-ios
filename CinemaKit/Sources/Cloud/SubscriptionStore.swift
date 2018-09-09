@@ -2,8 +2,8 @@ import CloudKit
 import os.log
 
 protocol SubscriptionStore {
-  func hasSubscribedTo(_ target: CloudTarget) -> Bool
-  func setHasSubscribedTo(_ target: CloudTarget)
+  func hasSubscribedTo(_ target: SubscriptionTarget) -> Bool
+  func setHasSubscribedTo(_ target: SubscriptionTarget)
 }
 
 class FileBasedSubscriptionStore: SubscriptionStore {
@@ -12,14 +12,14 @@ class FileBasedSubscriptionStore: SubscriptionStore {
       .appendingPathComponent("Subscriptions.plist")
   private static let logger = Logging.createLogger(category: "SubscriptionStore")
 
-  private var targets: Set<CloudTarget>
+  private var targets: Set<SubscriptionTarget>
 
   init() {
     if FileManager.default.fileExists(atPath: FileBasedSubscriptionStore.fileURL.path) {
       do {
         let data = try Data(contentsOf: FileBasedSubscriptionStore.fileURL)
         let decoder = PropertyListDecoder()
-        targets = Set(try decoder.decode([CloudTarget].self, from: data))
+        targets = Set(try decoder.decode([SubscriptionTarget].self, from: data))
       } catch {
         os_log("unable to load data: %{public}@",
                log: FileBasedSubscriptionStore.logger,
@@ -32,11 +32,11 @@ class FileBasedSubscriptionStore: SubscriptionStore {
     }
   }
 
-  func hasSubscribedTo(_ target: CloudTarget) -> Bool {
+  func hasSubscribedTo(_ target: SubscriptionTarget) -> Bool {
     return targets.contains(target)
   }
 
-  func setHasSubscribedTo(_ target: CloudTarget) {
+  func setHasSubscribedTo(_ target: SubscriptionTarget) {
     targets.insert(target)
     writeToDisk()
   }
