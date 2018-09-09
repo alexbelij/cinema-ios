@@ -8,11 +8,15 @@ protocol MovieLibraryFactory {
   func makeLibrary(with metadata: MovieLibraryMetadata) -> InternalMovieLibrary
 }
 
+protocol CKContainerProvider {
+  var container: CKContainer { get }
+}
+
 class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
   private static let logger = Logging.createLogger(category: "LibraryManager")
 
   let delegates = MulticastDelegate<MovieLibraryManagerDelegate>()
-  private let container: CKContainer
+  private let containerProvider: CKContainerProvider
   private let fetchManager: FetchManager
   private let syncManager: SyncManager
   private let changesManager: ChangesManager
@@ -21,7 +25,7 @@ class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
   private var modelController: AnyModelController<MovieLibraryManagerModel, MovieLibraryManagerError>
   private let dataInvalidationFlag: LocalDataInvalidationFlag
 
-  init<Controller: ModelController>(container: CKContainer,
+  init<Controller: ModelController>(containerProvider: CKContainerProvider,
                                     fetchManager: FetchManager,
                                     syncManager: SyncManager,
                                     changesManager: ChangesManager,
@@ -30,7 +34,7 @@ class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
                                     modelController: Controller,
                                     dataInvalidationFlag: LocalDataInvalidationFlag)
       where Controller.ModelType == MovieLibraryManagerModel, Controller.ErrorType == MovieLibraryManagerError {
-    self.container = container
+    self.containerProvider = containerProvider
     self.fetchManager = fetchManager
     self.syncManager = syncManager
     self.changesManager = changesManager
@@ -343,7 +347,7 @@ extension DeviceSyncingLibraryManager {
         guard let share = model.share(for: metadata) else {
           fatalError("share should have been already fetched")
         }
-        completion(.success(.hasBeenShared(share, self.container, self)))
+        completion(.success(.hasBeenShared(share, self.containerProvider.container, self)))
       } else {
         let preparationHandler = { sharingCompletion in
           self.prepareShare(for: library) { result in
@@ -351,7 +355,7 @@ extension DeviceSyncingLibraryManager {
               case let .failure(error):
                 sharingCompletion(nil, nil, error)
               case let .success(share):
-                sharingCompletion(share, self.container, nil)
+                sharingCompletion(share, self.containerProvider.container, nil)
             }
           }
         } as (@escaping (CKShare?, CKContainer?, Error?) -> Void) -> Void

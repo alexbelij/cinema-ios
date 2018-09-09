@@ -298,7 +298,7 @@ public class CinemaKitStartupManager: StartupManager {
         libraryRecordStore: FileBasedRecordStore(fileURL: CinemaKitStartupManager.libraryRecordStoreURL),
         shareRecordStore: FileBasedRecordStore(fileURL: CinemaKitStartupManager.shareRecordStoreURL))
     let libraryManager = DeviceSyncingLibraryManager(
-        container: container,
+        containerProvider: DefaultCKContainerProvider(with: container),
         fetchManager: fetchManager,
         syncManager: syncManager,
         changesManager: DefaultChangesManager(privateDatabaseOperationQueue: container.database(with: .private),
@@ -366,6 +366,14 @@ public class CinemaKitStartupManager: StartupManager {
   private func finishStartup(_ dependencies: AppDependencies) {
     os_log("finished initializing CinemaKit", log: CinemaKitStartupManager.logger, type: .default)
     self.progressHandler!(StartupProgress.ready(dependencies))
+  }
+}
+
+private struct DefaultCKContainerProvider: CKContainerProvider {
+  let container: CKContainer
+
+  init(with container: CKContainer) {
+    self.container = container
   }
 }
 

@@ -19,7 +19,11 @@ public struct MovieLibraryMetadata: DeviceSyncable {
   }
 
   public init(name: String) {
-    self.id = CKRecordID(recordName: UUID().uuidString, zoneID: deviceSyncZoneID)
+    self.init(id: CKRecordID(recordName: UUID().uuidString, zoneID: deviceSyncZoneID), name: name)
+  }
+
+  init(id: CKRecordID, name: String) {
+    self.id = id
     self.name = name
     self.shareRecordID = nil
     self.currentUserCanModify = true

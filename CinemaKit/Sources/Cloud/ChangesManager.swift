@@ -6,6 +6,14 @@ struct FetchedChanges {
   let changedRecords: [CKRecord]
   let deletedRecordIDsAndTypes: [(CKRecordID, String)]
 
+  init(deletedSharedZoneIDs: [CKRecordZoneID] = [],
+       changedRecords: [CKRecord] = [],
+       deletedRecordIDsAndTypes: [(CKRecordID, String)] = []) {
+    self.deletedSharedZoneIDs = deletedSharedZoneIDs
+    self.changedRecords = changedRecords
+    self.deletedRecordIDsAndTypes = deletedRecordIDsAndTypes
+  }
+
   var hasChanges: Bool {
     return !(deletedSharedZoneIDs.isEmpty && changedRecords.isEmpty && deletedRecordIDsAndTypes.isEmpty)
   }
