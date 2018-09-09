@@ -49,6 +49,7 @@
 		CB1A15DD2061347E003BD8D0 /* MovieDbClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF2612290416EB1BFCA59 /* MovieDbClient.swift */; };
 		CB1A15DE2061347E003BD8D0 /* TMDBSwiftCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF09753AED0716E1BBC94 /* TMDBSwiftCache.swift */; };
 		CB1A15DF2061347E003BD8D0 /* TMDBSwiftWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFC9CFD7B36183A006B9A /* TMDBSwiftWrapper.swift */; };
+		CB34AF0C2141482A0088A6C5 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB34AEF5214148290088A6C5 /* Helpers.swift */; };
 		CB370C1F1FFD08270034BB2F /* PageCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB370C1E1FFD08270034BB2F /* PageCoordinator.swift */; };
 		CB4C40631FF2A63F00A6C32B /* SearchTmdbCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4C40621FF2A63F00A6C32B /* SearchTmdbCoordinator.swift */; };
 		CB5EF37D212FFF3700B33DEF /* MovieRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5EF37C212FFF3700B33DEF /* MovieRecord.swift */; };
@@ -56,6 +57,26 @@
 		CB65D7AC1F8A108200457386 /* DimmingPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB65D7AA1F8A103000457386 /* DimmingPresentationController.swift */; };
 		CB65D7AD1F8A108A00457386 /* ArrayTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB65D7A91F8A103000457386 /* ArrayTableController.swift */; };
 		CB6F1A0E211083AF009239BD /* ExternalMovieViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB6F1A0C2110836F009239BD /* ExternalMovieViewModel.swift */; };
+		CB76F8262144FF7F002E6A92 /* UserDefaultsMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8032144FF0F002E6A92 /* UserDefaultsMock.swift */; };
+		CB76F8272144FF7F002E6A92 /* DatabaseOperationQueueMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8072144FF0F002E6A92 /* DatabaseOperationQueueMock.swift */; };
+		CB76F8282144FF7F002E6A92 /* OperationStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8082144FF0F002E6A92 /* OperationStubs.swift */; };
+		CB76F8292144FF7F002E6A92 /* FetchManagerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8092144FF0F002E6A92 /* FetchManagerMock.swift */; };
+		CB76F82A2144FF7F002E6A92 /* SyncManagerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8052144FF0F002E6A92 /* SyncManagerMock.swift */; };
+		CB76F82B2144FF7F002E6A92 /* ChangesManagerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F7FE2144FF0F002E6A92 /* ChangesManagerMock.swift */; };
+		CB76F82C2144FF7F002E6A92 /* ShareManagerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F7FC2144FF0F002E6A92 /* ShareManagerMock.swift */; };
+		CB76F82D2144FF7F002E6A92 /* MovieBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8012144FF0F002E6A92 /* MovieBuilder.swift */; };
+		CB76F82E2144FF7F002E6A92 /* DeviceSyncingMovieLibraryHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8062144FF0F002E6A92 /* DeviceSyncingMovieLibraryHelpers.swift */; };
+		CB76F82F2144FF7F002E6A92 /* MovieLibraryModelControllerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F7FD2144FF0F002E6A92 /* MovieLibraryModelControllerMock.swift */; };
+		CB76F8302144FF7F002E6A92 /* TmdbMoviePropertiesProviderMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8042144FF0F002E6A92 /* TmdbMoviePropertiesProviderMock.swift */; };
+		CB76F8312144FF7F002E6A92 /* DeviceSyncingLibraryManagerHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8002144FF0F002E6A92 /* DeviceSyncingLibraryManagerHelpers.swift */; };
+		CB76F8322144FF7F002E6A92 /* MovieLibraryManagerModelControllerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F7FF2144FF0F002E6A92 /* MovieLibraryManagerModelControllerMock.swift */; };
+		CB76F8332144FF7F002E6A92 /* MovieLibraryMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8022144FF0F002E6A92 /* MovieLibraryMock.swift */; };
+		CB76F8342144FF85002E6A92 /* DeviceSyncingLibraryManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8202144FF60002E6A92 /* DeviceSyncingLibraryManagerTests.swift */; };
+		CB76F8352144FF85002E6A92 /* DeviceSyncingLibraryManagerFailureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8222144FF60002E6A92 /* DeviceSyncingLibraryManagerFailureTests.swift */; };
+		CB76F8362144FF85002E6A92 /* DeviceSyncingLibraryManagerChangesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8212144FF60002E6A92 /* DeviceSyncingLibraryManagerChangesTests.swift */; };
+		CB76F8372144FF8B002E6A92 /* DeviceSyncingLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F81B2144FF4F002E6A92 /* DeviceSyncingLibraryTests.swift */; };
+		CB76F8382144FF8B002E6A92 /* DeviceSyncingLibraryFailureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F81A2144FF4F002E6A92 /* DeviceSyncingLibraryFailureTests.swift */; };
+		CB76F8392144FF8B002E6A92 /* DeviceSyncingLibraryChangesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8192144FF4F002E6A92 /* DeviceSyncingLibraryChangesTests.swift */; };
 		CB797D372120289F00F59618 /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */; };
 		CB7F273421240789006EC6A5 /* AppVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFC85BEEA3CBEDD260D8E /* AppVersion.swift */; };
 		CB7F273721244616006EC6A5 /* Base.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB7F273621244616006EC6A5 /* Base.swift */; };
@@ -192,6 +213,7 @@
 		CB1A15C92061322D003BD8D0 /* CinemaKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CinemaKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB1A15CB2061322D003BD8D0 /* CinemaKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CinemaKit.h; sourceTree = "<group>"; };
 		CB1A15CC2061322D003BD8D0 /* CinemaKit-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CinemaKit-Info.plist"; sourceTree = "<group>"; };
+		CB34AEF5214148290088A6C5 /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		CB370C1E1FFD08270034BB2F /* PageCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PageCoordinator.swift; sourceTree = "<group>"; };
 		CB4C40621FF2A63F00A6C32B /* SearchTmdbCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTmdbCoordinator.swift; sourceTree = "<group>"; };
 		CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
@@ -200,6 +222,26 @@
 		CB65D7A91F8A103000457386 /* ArrayTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayTableController.swift; sourceTree = "<group>"; };
 		CB65D7AA1F8A103000457386 /* DimmingPresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DimmingPresentationController.swift; sourceTree = "<group>"; };
 		CB6F1A0C2110836F009239BD /* ExternalMovieViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalMovieViewModel.swift; sourceTree = "<group>"; };
+		CB76F7FC2144FF0F002E6A92 /* ShareManagerMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShareManagerMock.swift; sourceTree = "<group>"; };
+		CB76F7FD2144FF0F002E6A92 /* MovieLibraryModelControllerMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieLibraryModelControllerMock.swift; sourceTree = "<group>"; };
+		CB76F7FE2144FF0F002E6A92 /* ChangesManagerMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangesManagerMock.swift; sourceTree = "<group>"; };
+		CB76F7FF2144FF0F002E6A92 /* MovieLibraryManagerModelControllerMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieLibraryManagerModelControllerMock.swift; sourceTree = "<group>"; };
+		CB76F8002144FF0F002E6A92 /* DeviceSyncingLibraryManagerHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSyncingLibraryManagerHelpers.swift; sourceTree = "<group>"; };
+		CB76F8012144FF0F002E6A92 /* MovieBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieBuilder.swift; sourceTree = "<group>"; };
+		CB76F8022144FF0F002E6A92 /* MovieLibraryMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieLibraryMock.swift; sourceTree = "<group>"; };
+		CB76F8032144FF0F002E6A92 /* UserDefaultsMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDefaultsMock.swift; sourceTree = "<group>"; };
+		CB76F8042144FF0F002E6A92 /* TmdbMoviePropertiesProviderMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TmdbMoviePropertiesProviderMock.swift; sourceTree = "<group>"; };
+		CB76F8052144FF0F002E6A92 /* SyncManagerMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SyncManagerMock.swift; sourceTree = "<group>"; };
+		CB76F8062144FF0F002E6A92 /* DeviceSyncingMovieLibraryHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSyncingMovieLibraryHelpers.swift; sourceTree = "<group>"; };
+		CB76F8072144FF0F002E6A92 /* DatabaseOperationQueueMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatabaseOperationQueueMock.swift; sourceTree = "<group>"; };
+		CB76F8082144FF0F002E6A92 /* OperationStubs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OperationStubs.swift; sourceTree = "<group>"; };
+		CB76F8092144FF0F002E6A92 /* FetchManagerMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FetchManagerMock.swift; sourceTree = "<group>"; };
+		CB76F8192144FF4F002E6A92 /* DeviceSyncingLibraryChangesTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSyncingLibraryChangesTests.swift; sourceTree = "<group>"; };
+		CB76F81A2144FF4F002E6A92 /* DeviceSyncingLibraryFailureTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSyncingLibraryFailureTests.swift; sourceTree = "<group>"; };
+		CB76F81B2144FF4F002E6A92 /* DeviceSyncingLibraryTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSyncingLibraryTests.swift; sourceTree = "<group>"; };
+		CB76F8202144FF60002E6A92 /* DeviceSyncingLibraryManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSyncingLibraryManagerTests.swift; sourceTree = "<group>"; };
+		CB76F8212144FF60002E6A92 /* DeviceSyncingLibraryManagerChangesTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSyncingLibraryManagerChangesTests.swift; sourceTree = "<group>"; };
+		CB76F8222144FF60002E6A92 /* DeviceSyncingLibraryManagerFailureTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSyncingLibraryManagerFailureTests.swift; sourceTree = "<group>"; };
 		CB7F273621244616006EC6A5 /* Base.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Base.swift; sourceTree = "<group>"; };
 		CB7F27392125820B006EC6A5 /* SubscriptionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		CB7F273A2125820B006EC6A5 /* SubscriptionStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionStore.swift; sourceTree = "<group>"; };
@@ -427,6 +469,47 @@
 			path = "Action Sheet";
 			sourceTree = "<group>";
 		};
+		CB76F7FB2144FF0F002E6A92 /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				CB76F8032144FF0F002E6A92 /* UserDefaultsMock.swift */,
+				CB76F8072144FF0F002E6A92 /* DatabaseOperationQueueMock.swift */,
+				CB76F8082144FF0F002E6A92 /* OperationStubs.swift */,
+				CB76F8092144FF0F002E6A92 /* FetchManagerMock.swift */,
+				CB76F8052144FF0F002E6A92 /* SyncManagerMock.swift */,
+				CB76F7FE2144FF0F002E6A92 /* ChangesManagerMock.swift */,
+				CB76F7FC2144FF0F002E6A92 /* ShareManagerMock.swift */,
+				CB76F8012144FF0F002E6A92 /* MovieBuilder.swift */,
+				CB76F8062144FF0F002E6A92 /* DeviceSyncingMovieLibraryHelpers.swift */,
+				CB76F7FD2144FF0F002E6A92 /* MovieLibraryModelControllerMock.swift */,
+				CB76F8042144FF0F002E6A92 /* TmdbMoviePropertiesProviderMock.swift */,
+				CB76F8002144FF0F002E6A92 /* DeviceSyncingLibraryManagerHelpers.swift */,
+				CB76F7FF2144FF0F002E6A92 /* MovieLibraryManagerModelControllerMock.swift */,
+				CB76F8022144FF0F002E6A92 /* MovieLibraryMock.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
+		CB76F8182144FF4F002E6A92 /* MovieLibrary */ = {
+			isa = PBXGroup;
+			children = (
+				CB76F81B2144FF4F002E6A92 /* DeviceSyncingLibraryTests.swift */,
+				CB76F81A2144FF4F002E6A92 /* DeviceSyncingLibraryFailureTests.swift */,
+				CB76F8192144FF4F002E6A92 /* DeviceSyncingLibraryChangesTests.swift */,
+			);
+			path = MovieLibrary;
+			sourceTree = "<group>";
+		};
+		CB76F81F2144FF60002E6A92 /* MovieLibraryManager */ = {
+			isa = PBXGroup;
+			children = (
+				CB76F8202144FF60002E6A92 /* DeviceSyncingLibraryManagerTests.swift */,
+				CB76F8222144FF60002E6A92 /* DeviceSyncingLibraryManagerFailureTests.swift */,
+				CB76F8212144FF60002E6A92 /* DeviceSyncingLibraryManagerChangesTests.swift */,
+			);
+			path = MovieLibraryManager;
+			sourceTree = "<group>";
+		};
 		CB797D642120ACDB00F59618 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
@@ -574,6 +657,10 @@
 		CBD00F9E21414341009DA4E9 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				CB34AEF5214148290088A6C5 /* Helpers.swift */,
+				CB76F7FB2144FF0F002E6A92 /* Mocks */,
+				CB76F8182144FF4F002E6A92 /* MovieLibrary */,
+				CB76F81F2144FF60002E6A92 /* MovieLibraryManager */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -1000,6 +1087,27 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB76F8262144FF7F002E6A92 /* UserDefaultsMock.swift in Sources */,
+				CB76F8302144FF7F002E6A92 /* TmdbMoviePropertiesProviderMock.swift in Sources */,
+				CB76F8322144FF7F002E6A92 /* MovieLibraryManagerModelControllerMock.swift in Sources */,
+				CB76F82C2144FF7F002E6A92 /* ShareManagerMock.swift in Sources */,
+				CB76F8282144FF7F002E6A92 /* OperationStubs.swift in Sources */,
+				CB76F82B2144FF7F002E6A92 /* ChangesManagerMock.swift in Sources */,
+				CB76F8392144FF8B002E6A92 /* DeviceSyncingLibraryChangesTests.swift in Sources */,
+				CB76F8312144FF7F002E6A92 /* DeviceSyncingLibraryManagerHelpers.swift in Sources */,
+				CB76F82E2144FF7F002E6A92 /* DeviceSyncingMovieLibraryHelpers.swift in Sources */,
+				CB76F82A2144FF7F002E6A92 /* SyncManagerMock.swift in Sources */,
+				CB76F8362144FF85002E6A92 /* DeviceSyncingLibraryManagerChangesTests.swift in Sources */,
+				CB76F8292144FF7F002E6A92 /* FetchManagerMock.swift in Sources */,
+				CB76F82F2144FF7F002E6A92 /* MovieLibraryModelControllerMock.swift in Sources */,
+				CB76F8382144FF8B002E6A92 /* DeviceSyncingLibraryFailureTests.swift in Sources */,
+				CB76F8272144FF7F002E6A92 /* DatabaseOperationQueueMock.swift in Sources */,
+				CB34AF0C2141482A0088A6C5 /* Helpers.swift in Sources */,
+				CB76F82D2144FF7F002E6A92 /* MovieBuilder.swift in Sources */,
+				CB76F8332144FF7F002E6A92 /* MovieLibraryMock.swift in Sources */,
+				CB76F8352144FF85002E6A92 /* DeviceSyncingLibraryManagerFailureTests.swift in Sources */,
+				CB76F8342144FF85002E6A92 /* DeviceSyncingLibraryManagerTests.swift in Sources */,
+				CB76F8372144FF8B002E6A92 /* DeviceSyncingLibraryTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
