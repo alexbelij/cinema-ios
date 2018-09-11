@@ -319,12 +319,10 @@ extension LibraryListCoordinator: MovieLibraryManagerDelegate {
   }
 
   func libraryManager(_ libraryManager: MovieLibraryManager,
-                      willAcceptSharedLibraryWith title: String,
-                      continuation: @escaping () -> Void) {
+                      willAcceptSharedLibraryWith title: String) {
     DispatchQueue.main.async {
       self.pendingInvitations.insert(title)
       self.libraryListController.setInvitation(title)
-      continuation()
     }
   }
 

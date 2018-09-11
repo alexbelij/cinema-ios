@@ -433,17 +433,11 @@ extension DeviceSyncingLibraryManager {
         os_log("already accepted share", log: DeviceSyncingLibraryManager.logger, type: .default)
         return
       }
-      // swiftlint:disable:next force_cast
-      let title = shareMetadata.share[CKShareTitleKey] as! String
-      var didContinue = false
-      let continuation = {
-        if didContinue { return }
-        didContinue = true
-        self.shareManager.acceptShare(with: shareMetadata) { error in
-          self.acceptShareCompletion(shareMetadata, error)
-        }
+      let title = shareMetadata.title!
+      self.delegates.invoke { $0.libraryManager(self, willAcceptSharedLibraryWith: title) }
+      self.shareManager.acceptShare(with: shareMetadata) { error in
+        self.acceptShareCompletion(shareMetadata, error)
       }
-      self.delegates.invoke { $0.libraryManager(self, willAcceptSharedLibraryWith: title, continuation: continuation) }
     }, whenUnableToLoad: { error in
       os_log("unable to accept share, because libraries could not be loaded: %{public}@",
              log: DeviceSyncingLibraryManager.logger,
@@ -494,8 +488,7 @@ extension DeviceSyncingLibraryManager {
         let library = self.libraryFactory.makeLibrary(with: metadata)
         model.add(library, with: libraryRecord, shareMetadata.share)
         self.modelController.persist()
-        // swiftlint:disable:next force_cast
-        let title = shareMetadata.share[CKShareTitleKey] as! String
+        let title = shareMetadata.title!
         self.delegates.invoke { $0.libraryManager(self, didAcceptSharedLibrary: library, with: title) }
       }
     }

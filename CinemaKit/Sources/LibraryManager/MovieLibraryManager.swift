@@ -7,9 +7,7 @@ public protocol MovieLibraryManagerDelegate: class {
                       didUpdateLibraries changeSet: ChangeSet<CKRecordID, MovieLibrary>)
 
   // sharing
-  func libraryManager(_ libraryManager: MovieLibraryManager,
-                      willAcceptSharedLibraryWith title: String,
-                      continuation: @escaping () -> Void)
+  func libraryManager(_ libraryManager: MovieLibraryManager, willAcceptSharedLibraryWith title: String)
   func libraryManager(_ libraryManager: MovieLibraryManager,
                       didAcceptSharedLibrary library: MovieLibrary,
                       with title: String)
