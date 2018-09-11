@@ -9,6 +9,9 @@ public protocol MovieLibraryManagerDelegate: class {
   // sharing
   func libraryManager(_ libraryManager: MovieLibraryManager, willAcceptSharedLibraryWith title: String)
   func libraryManager(_ libraryManager: MovieLibraryManager,
+                      didFailToAcceptSharedLibraryWith title: String,
+                      reason: AcceptShareFailureReason)
+  func libraryManager(_ libraryManager: MovieLibraryManager,
                       didAcceptSharedLibrary library: MovieLibrary,
                       with title: String)
 }
@@ -49,6 +52,12 @@ public enum MovieLibraryManagerError: Error {
   case nonRecoverableError
   case libraryDoesNotExist
   case permissionFailure
+}
+
+public enum AcceptShareFailureReason {
+  case alreadyAccepted
+  case currentUserIsOwner
+  case error
 }
 
 protocol InternalMovieLibraryManager: MovieLibraryManager {

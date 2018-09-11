@@ -49,16 +49,18 @@ extension UITableView {
 
 extension UIViewController {
   func presentErrorAlert() {
-    let alert = UIAlertController(title: NSLocalizedString("error.genericError", comment: ""),
-                                  message: NSLocalizedString("error.tryAgain", comment: ""),
-                                  preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default))
-    present(alert, animated: true)
+    presentAlert(title: NSLocalizedString("error.genericError", comment: ""),
+                 message: NSLocalizedString("error.tryAgain", comment: "")) {
+    }
   }
 
   func presentPermissionFailureAlert(handler: @escaping () -> Void) {
-    let alert = UIAlertController(title: NSLocalizedString("error.permissionFailure", comment: ""),
-                                  message: nil,
+    presentAlert(title: NSLocalizedString("error.permissionFailure", comment: ""), handler: handler)
+  }
+
+  func presentAlert(title: String, message: String? = nil, handler: @escaping () -> Void) {
+    let alert = UIAlertController(title: title,
+                                  message: message,
                                   preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default) { _ in
       handler()

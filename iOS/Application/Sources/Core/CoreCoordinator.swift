@@ -222,6 +222,11 @@ extension CoreCoordinator: MovieLibraryManagerDelegate {
   }
 
   func libraryManager(_ libraryManager: MovieLibraryManager,
+                      didFailToAcceptSharedLibraryWith title: String,
+                      reason: AcceptShareFailureReason) {
+  }
+
+  func libraryManager(_ libraryManager: MovieLibraryManager,
                       willAcceptSharedLibraryWith title: String) {
   }
 

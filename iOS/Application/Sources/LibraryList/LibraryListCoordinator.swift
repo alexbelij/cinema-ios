@@ -319,6 +319,30 @@ extension LibraryListCoordinator: MovieLibraryManagerDelegate {
   }
 
   func libraryManager(_ libraryManager: MovieLibraryManager,
+                      didFailToAcceptSharedLibraryWith title: String,
+                      reason: AcceptShareFailureReason) {
+    DispatchQueue.main.async {
+      switch reason {
+        case .currentUserIsOwner:
+          self.rootViewController.presentAlert(
+              title: NSLocalizedString("share.acceptingFailed.currentUserIsOwner", comment: "")) {}
+        case .alreadyAccepted:
+          self.rootViewController.presentAlert(
+              title: NSLocalizedString("share.acceptingFailed.alreadyAccepted", comment: "")) {}
+        case .error:
+          self.rootViewController.presentAlert(
+              title: NSLocalizedString("share.acceptingFailed.error", comment: ""),
+              message: NSLocalizedString("error.tryAgain", comment: "")) {
+            if self.pendingInvitations.contains(title) {
+              self.pendingInvitations.remove(title)
+              self.libraryListController.removeInvitation(with: title)
+            }
+          }
+      }
+    }
+  }
+
+  func libraryManager(_ libraryManager: MovieLibraryManager,
                       willAcceptSharedLibraryWith title: String) {
     DispatchQueue.main.async {
       self.pendingInvitations.insert(title)

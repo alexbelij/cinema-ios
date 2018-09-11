@@ -424,16 +424,20 @@ extension DeviceSyncingLibraryManager {
   }
 
   func acceptCloudKitShare(with shareMetadata: CKShareMetadata) {
+    let title = shareMetadata.title!
     modelController.access(onceLoaded: { model in
       if shareMetadata.rootRecordID.zoneID == deviceSyncZoneID {
-        os_log("owner tries to accepted share", log: DeviceSyncingLibraryManager.logger, type: .default)
+        self.delegates.invoke {
+          $0.libraryManager(self, didFailToAcceptSharedLibraryWith: title, reason: .currentUserIsOwner)
+        }
         return
       }
       guard model.library(for: shareMetadata.rootRecordID) == nil else {
-        os_log("already accepted share", log: DeviceSyncingLibraryManager.logger, type: .default)
+        self.delegates.invoke {
+          $0.libraryManager(self, didFailToAcceptSharedLibraryWith: title, reason: .alreadyAccepted)
+        }
         return
       }
-      let title = shareMetadata.title!
       self.delegates.invoke { $0.libraryManager(self, willAcceptSharedLibraryWith: title) }
       self.shareManager.acceptShare(with: shareMetadata) { error in
         self.acceptShareCompletion(shareMetadata, error)
@@ -443,11 +447,18 @@ extension DeviceSyncingLibraryManager {
              log: DeviceSyncingLibraryManager.logger,
              type: .error,
              String(describing: error))
+      self.delegates.invoke {
+        $0.libraryManager(self, didFailToAcceptSharedLibraryWith: title, reason: .error)
+      }
     })
   }
 
   private func acceptShareCompletion(_ shareMetadata: CKShareMetadata, _ error: CloudKitError?) {
     if let error = error {
+      let title = shareMetadata.title!
+      self.delegates.invoke {
+        $0.libraryManager(self, didFailToAcceptSharedLibraryWith: title, reason: .error)
+      }
       switch error {
         case .itemNoLongerExists:
           os_log("owner stopped sharing", log: DeviceSyncingLibraryManager.logger, type: .default)
@@ -469,7 +480,11 @@ extension DeviceSyncingLibraryManager {
   private func fetchRootRecordCompletion(_ shareMetadata: CKShareMetadata,
                                          _ rootRecord: CKRecord?,
                                          _ error: CloudKitError?) {
+    let title = shareMetadata.title!
     if let error = error {
+      self.delegates.invoke {
+        $0.libraryManager(self, didFailToAcceptSharedLibraryWith: title, reason: .error)
+      }
       switch error {
         case .zoneNotFound, .itemNoLongerExists:
           os_log("owner stopped sharing record", log: DeviceSyncingLibraryManager.logger, type: .default)
@@ -488,7 +503,6 @@ extension DeviceSyncingLibraryManager {
         let library = self.libraryFactory.makeLibrary(with: metadata)
         model.add(library, with: libraryRecord, shareMetadata.share)
         self.modelController.persist()
-        let title = shareMetadata.title!
         self.delegates.invoke { $0.libraryManager(self, didAcceptSharedLibrary: library, with: title) }
       }
     }
