@@ -5,9 +5,9 @@ protocol ShareManager {
   func saveShare(_ share: CKShare,
                  with rootRecord: CKRecord,
                  then completion: @escaping (CloudKitError?) -> Void)
-  func acceptShare(with metadata: CKShareMetadata, then completion: @escaping (CloudKitError?) -> Void)
+  func acceptShare(with metadata: CKShareMetadataProtocol, then completion: @escaping (CloudKitError?) -> Void)
   func fetchShareMetadata(for shares: [CKShare],
-                          then completion: @escaping ([CKShareMetadata]?, CloudKitError?) -> Void)
+                          then completion: @escaping ([CKShareMetadataProtocol]?, CloudKitError?) -> Void)
 }
 
 class DefaultShareManager: ShareManager {
@@ -78,8 +78,8 @@ class DefaultShareManager: ShareManager {
     privateDatabaseOperationQueue.add(operation)
   }
 
-  func acceptShare(with metadata: CKShareMetadata, then completion: @escaping (CloudKitError?) -> Void) {
-    acceptShare(with: metadata, retryCount: defaultRetryCount, then: completion)
+  func acceptShare(with metadata: CKShareMetadataProtocol, then completion: @escaping (CloudKitError?) -> Void) {
+    acceptShare(with: metadata.asCKShareMetadata(), retryCount: defaultRetryCount, then: completion)
   }
 
   private func acceptShare(with metadata: CKShareMetadata,
@@ -131,13 +131,13 @@ class DefaultShareManager: ShareManager {
   }
 
   func fetchShareMetadata(for shares: [CKShare],
-                          then completion: @escaping ([CKShareMetadata]?, CloudKitError?) -> Void) {
+                          then completion: @escaping ([CKShareMetadataProtocol]?, CloudKitError?) -> Void) {
     fetchShareMetadata(for: shares, retryCount: defaultRetryCount, then: completion)
   }
 
   func fetchShareMetadata(for shares: [CKShare],
                           retryCount: Int,
-                          then completion: @escaping ([CKShareMetadata]?, CloudKitError?) -> Void) {
+                          then completion: @escaping ([CKShareMetadataProtocol]?, CloudKitError?) -> Void) {
     let operation = CKFetchShareMetadataOperation(shareURLs: shares.compactMap { $0.url })
     operation.shouldFetchRootRecord = true
 

@@ -423,7 +423,7 @@ extension DeviceSyncingLibraryManager {
     }
   }
 
-  func acceptCloudKitShare(with shareMetadata: CKShareMetadata,
+  func acceptCloudKitShare(with shareMetadata: CKShareMetadataProtocol,
                            then completion: @escaping (Result<AcceptShareResult, MovieLibraryManagerError>) -> Void) {
     let title = shareMetadata.title!
     modelController.access(onceLoaded: { model in
@@ -465,7 +465,7 @@ extension DeviceSyncingLibraryManager {
   }
 
   private func acceptShareCompletion(
-      _ shareMetadata: CKShareMetadata,
+      _ shareMetadata: CKShareMetadataProtocol,
       _ error: CloudKitError?,
       _ completion: @escaping (Result<AcceptShareResult, MovieLibraryManagerError>) -> Void) {
     if let error = error {
@@ -486,7 +486,7 @@ extension DeviceSyncingLibraryManager {
   }
 
   private func fetchRootRecordCompletion(
-      _ shareMetadata: CKShareMetadata,
+      _ shareMetadata: CKShareMetadataProtocol,
       _ rootRecord: CKRecord?,
       _ error: CloudKitError?,
       _ completion: @escaping (Result<AcceptShareResult, MovieLibraryManagerError>) -> Void) {

@@ -9,7 +9,7 @@ extension CKShare {
   static let recordType = "cloudkit.share"
 }
 
-extension CKShareMetadata {
+extension CKShareMetadataProtocol {
   var title: String? {
     return share[CKShareTitleKey] as? String
   }

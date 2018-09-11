@@ -66,7 +66,7 @@ enum AcceptShareResult {
 }
 
 protocol InternalMovieLibraryManager: MovieLibraryManager {
-  func acceptCloudKitShare(with shareMetadata: CKShareMetadata,
+  func acceptCloudKitShare(with shareMetadata: CKShareMetadataProtocol,
                            then completion: @escaping (Result<AcceptShareResult, MovieLibraryManagerError>) -> Void)
   func migrateLegacyLibrary(with name: String, at url: URL, then completion: @escaping (Bool) -> Void)
 }

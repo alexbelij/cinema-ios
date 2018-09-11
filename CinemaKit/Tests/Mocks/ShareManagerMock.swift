@@ -6,12 +6,12 @@ class ShareManagerMock: ShareManager {
     fatalError("not implemented")
   }
 
-  func acceptShare(with metadata: CKShareMetadata, then completion: @escaping (CloudKitError?) -> Void) {
+  func acceptShare(with metadata: CKShareMetadataProtocol, then completion: @escaping (CloudKitError?) -> Void) {
     fatalError("not implemented")
   }
 
   func fetchShareMetadata(for shares: [CKShare],
-                          then completion: @escaping ([CKShareMetadata]?, CloudKitError?) -> Void) {
+                          then completion: @escaping ([CKShareMetadataProtocol]?, CloudKitError?) -> Void) {
     fatalError("not implemented")
   }
 }
