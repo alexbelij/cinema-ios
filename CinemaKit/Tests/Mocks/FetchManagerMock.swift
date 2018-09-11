@@ -16,9 +16,16 @@ class FetchManagerMock: FetchManager {
     fatalError("not implemented")
   }
 
+  private var fetchRecordHandlers = [() -> (CKRecord?, CloudKitError?)]()
+
+  func whenFetchRecord(_ handler: @escaping () -> (CKRecord?, CloudKitError?)) {
+    fetchRecordHandlers.append(handler)
+  }
+
   func fetchRecord(with recordID: CKRecordID,
                    in scope: CKDatabaseScope,
                    then completion: @escaping (CKRecord?, CloudKitError?) -> Void) {
-    fatalError("not implemented")
+    let tuple = fetchRecordHandlers.removeFirst()()
+    completion(tuple.0, tuple.1)
   }
 }

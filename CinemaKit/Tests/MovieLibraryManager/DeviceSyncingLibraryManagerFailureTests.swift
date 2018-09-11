@@ -224,4 +224,72 @@ class DeviceSyncingLibraryManagerFailureTests: XCTestCase {
     XCTAssertTrue(result.isFailure)
     assertNonRecoverableError(result.error)
   }
+
+  func testAcceptShareButUnableToLoad() {
+    let (_, sharedLibraryRecord, share) = SampleData.library(sharedBy: "User1")
+    let libraryManager = DeviceSyncingLibraryManager.makeForTesting(
+        modelController: MovieLibraryManagerModelControllerMock.fail(with: .nonRecoverableError)
+    )
+    let shareMetadata = CKShareMetadataMock(share: share, rootRecordID: sharedLibraryRecord.id)
+
+    var result: Result<AcceptShareResult, MovieLibraryManagerError>!
+    let expectation = self.expectation(description: "accept completion")
+    libraryManager.acceptCloudKitShare(with: shareMetadata) {
+      result = $0
+      expectation.fulfill()
+    }
+    waitForExpectations(timeout: 0.1)
+
+    XCTAssertTrue(result.isFailure)
+    assertNonRecoverableError(result.error)
+  }
+
+  func testAcceptShareButAcceptingFailed() {
+    let (_, sharedLibraryRecord, share) = SampleData.library(sharedBy: "User1")
+    let modelController = MovieLibraryManagerModelControllerMock.load([])
+    let shareManager = ShareManagerMock()
+    shareManager.whenAcceptShare { CloudKitError.nonRecoverableError }
+    let libraryManager = DeviceSyncingLibraryManager.makeForTesting(
+        modelController: modelController,
+        shareManager: shareManager
+    )
+    let shareMetadata = CKShareMetadataMock(share: share, rootRecordID: sharedLibraryRecord.id)
+
+    var result: Result<AcceptShareResult, MovieLibraryManagerError>!
+    let expectation = self.expectation(description: "accept completion")
+    libraryManager.acceptCloudKitShare(with: shareMetadata) {
+      result = $0
+      expectation.fulfill()
+    }
+    waitForExpectations(timeout: 0.1)
+
+    XCTAssertTrue(result.isFailure)
+    assertNonRecoverableError(result.error)
+  }
+
+  func testAcceptShareButFetchingRootRecordFailed() {
+    let (_, sharedLibraryRecord, share) = SampleData.library(sharedBy: "User1")
+    let modelController = MovieLibraryManagerModelControllerMock.load([])
+    let fetchManager = FetchManagerMock()
+    fetchManager.whenFetchRecord { (nil, CloudKitError.nonRecoverableError) }
+    let shareManager = ShareManagerMock()
+    shareManager.whenAcceptShare { nil }
+    let libraryManager = DeviceSyncingLibraryManager.makeForTesting(
+        modelController: modelController,
+        fetchManager: fetchManager,
+        shareManager: shareManager
+    )
+    let shareMetadata = CKShareMetadataMock(share: share, rootRecordID: sharedLibraryRecord.id)
+
+    var result: Result<AcceptShareResult, MovieLibraryManagerError>!
+    let expectation = self.expectation(description: "accept completion")
+    libraryManager.acceptCloudKitShare(with: shareMetadata) {
+      result = $0
+      expectation.fulfill()
+    }
+    waitForExpectations(timeout: 0.1)
+
+    XCTAssertTrue(result.isFailure)
+    assertNonRecoverableError(result.error)
+  }
 }
