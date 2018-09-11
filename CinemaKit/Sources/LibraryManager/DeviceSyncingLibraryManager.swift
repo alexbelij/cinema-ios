@@ -423,24 +423,34 @@ extension DeviceSyncingLibraryManager {
     }
   }
 
-  func acceptCloudKitShare(with shareMetadata: CKShareMetadata) {
+  func acceptCloudKitShare(with shareMetadata: CKShareMetadata,
+                           then completion: @escaping (Result<AcceptShareResult, MovieLibraryManagerError>) -> Void) {
     let title = shareMetadata.title!
     modelController.access(onceLoaded: { model in
       if shareMetadata.rootRecordID.zoneID == deviceSyncZoneID {
         self.delegates.invoke {
           $0.libraryManager(self, didFailToAcceptSharedLibraryWith: title, reason: .currentUserIsOwner)
         }
+        completion(.success(.aborted(.currentUserIsOwner)))
         return
       }
       guard model.library(for: shareMetadata.rootRecordID) == nil else {
         self.delegates.invoke {
           $0.libraryManager(self, didFailToAcceptSharedLibraryWith: title, reason: .alreadyAccepted)
         }
+        completion(.success(.aborted(.alreadyAccepted)))
         return
       }
       self.delegates.invoke { $0.libraryManager(self, willAcceptSharedLibraryWith: title) }
       self.shareManager.acceptShare(with: shareMetadata) { error in
-        self.acceptShareCompletion(shareMetadata, error)
+        self.acceptShareCompletion(shareMetadata, error) { result in
+          if result.isFailure {
+            self.delegates.invoke {
+              $0.libraryManager(self, didFailToAcceptSharedLibraryWith: title, reason: .error)
+            }
+          }
+          completion(result)
+        }
       }
     }, whenUnableToLoad: { error in
       os_log("unable to accept share, because libraries could not be loaded: %{public}@",
@@ -450,49 +460,47 @@ extension DeviceSyncingLibraryManager {
       self.delegates.invoke {
         $0.libraryManager(self, didFailToAcceptSharedLibraryWith: title, reason: .error)
       }
+      completion(.failure(error))
     })
   }
 
-  private func acceptShareCompletion(_ shareMetadata: CKShareMetadata, _ error: CloudKitError?) {
+  private func acceptShareCompletion(
+      _ shareMetadata: CKShareMetadata,
+      _ error: CloudKitError?,
+      _ completion: @escaping (Result<AcceptShareResult, MovieLibraryManagerError>) -> Void) {
     if let error = error {
-      let title = shareMetadata.title!
-      self.delegates.invoke {
-        $0.libraryManager(self, didFailToAcceptSharedLibraryWith: title, reason: .error)
-      }
       switch error {
         case .itemNoLongerExists:
           os_log("owner stopped sharing", log: DeviceSyncingLibraryManager.logger, type: .default)
-        case .notAuthenticated, .zoneNotFound, .userDeletedZone, .nonRecoverableError:
-          os_log("unable to accept share %{public}@",
-                 log: DeviceSyncingLibraryManager.logger,
-                 type: .error,
-                 String(describing: error))
-        case .conflict, .permissionFailure:
+          completion(.failure(.libraryDoesNotExist))
+        case .notAuthenticated, .userDeletedZone, .nonRecoverableError:
+          completion(.failure(error.asMovieLibraryManagerError))
+        case .conflict, .permissionFailure, .zoneNotFound:
           fatalError("should not occur: \(error)")
       }
     } else {
       self.fetchManager.fetchRecord(with: shareMetadata.rootRecordID, in: .shared) { rootRecord, error in
-        self.fetchRootRecordCompletion(shareMetadata, rootRecord, error)
+        self.fetchRootRecordCompletion(shareMetadata, rootRecord, error, completion)
       }
     }
   }
 
-  private func fetchRootRecordCompletion(_ shareMetadata: CKShareMetadata,
-                                         _ rootRecord: CKRecord?,
-                                         _ error: CloudKitError?) {
-    let title = shareMetadata.title!
+  private func fetchRootRecordCompletion(
+      _ shareMetadata: CKShareMetadata,
+      _ rootRecord: CKRecord?,
+      _ error: CloudKitError?,
+      _ completion: @escaping (Result<AcceptShareResult, MovieLibraryManagerError>) -> Void) {
     if let error = error {
-      self.delegates.invoke {
-        $0.libraryManager(self, didFailToAcceptSharedLibraryWith: title, reason: .error)
-      }
       switch error {
         case .zoneNotFound, .itemNoLongerExists:
           os_log("owner stopped sharing record", log: DeviceSyncingLibraryManager.logger, type: .default)
+          completion(.failure(.libraryDoesNotExist))
         case .notAuthenticated, .nonRecoverableError:
           os_log("unable to fetch shared record %{public}@",
                  log: DeviceSyncingLibraryManager.logger,
                  type: .error,
                  String(describing: error))
+          completion(.failure(error.asMovieLibraryManagerError))
         case .conflict, .userDeletedZone, .permissionFailure:
           fatalError("should not occur: \(error)")
       }
@@ -503,7 +511,9 @@ extension DeviceSyncingLibraryManager {
         let library = self.libraryFactory.makeLibrary(with: metadata)
         model.add(library, with: libraryRecord, shareMetadata.share)
         self.modelController.persist()
+        let title = shareMetadata.title!
         self.delegates.invoke { $0.libraryManager(self, didAcceptSharedLibrary: library, with: title) }
+        completion(.success(.accepted))
       }
     }
   }

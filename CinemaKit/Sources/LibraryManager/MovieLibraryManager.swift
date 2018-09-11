@@ -60,8 +60,21 @@ public enum AcceptShareFailureReason {
   case error
 }
 
+enum AcceptShareResult {
+  case accepted
+  case aborted(AcceptShareFailureReason)
+}
+
 protocol InternalMovieLibraryManager: MovieLibraryManager {
+  func acceptCloudKitShare(with shareMetadata: CKShareMetadata,
+                           then completion: @escaping (Result<AcceptShareResult, MovieLibraryManagerError>) -> Void)
   func migrateLegacyLibrary(with name: String, at url: URL, then completion: @escaping (Bool) -> Void)
+}
+
+extension InternalMovieLibraryManager {
+  func acceptCloudKitShare(with shareMetadata: CKShareMetadata) {
+    acceptCloudKitShare(with: shareMetadata) { _ in }
+  }
 }
 
 extension CloudKitError {
