@@ -254,6 +254,9 @@ extension LibraryListCoordinator: UICloudSharingControllerDelegate {
            log: LibraryListCoordinator.logger,
            type: .error,
            String(describing: error))
+    DispatchQueue.main.async {
+      self.rootViewController.presentErrorAlert()
+    }
   }
 
   func itemTitle(for csc: UICloudSharingController) -> String? {
