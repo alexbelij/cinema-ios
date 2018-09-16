@@ -91,15 +91,18 @@ class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, 
 
   private func loadMovieRecords(whenLoaded: @escaping ([MovieRecord]) -> Void) {
     if let rawMovieRecords = movieRecordStore.loadRecords() {
-      os_log("loaded records from store", log: MovieLibraryModelController.logger, type: .debug)
+      os_log("loaded movie records from store", log: MovieLibraryModelController.logger, type: .debug)
       let movieRecords = rawMovieRecords.map { MovieRecord($0) }
       whenLoaded(movieRecords)
     } else {
-      os_log("loading records from cloud", log: MovieLibraryModelController.logger, type: .debug)
+      os_log("need to fetch movie records", log: MovieLibraryModelController.logger, type: .debug)
       fetchMovieRecords { movieRecordsResult in
         switch movieRecordsResult {
           case let .success(movieRecords):
-            os_log("saving fetched records to store", log: MovieLibraryModelController.logger, type: .debug)
+            os_log("fetched %d movie records",
+                   log: MovieLibraryModelController.logger,
+                   type: .debug,
+                   movieRecords.count)
             self.movieRecordStore.save(movieRecords)
             whenLoaded(movieRecords)
           case let .failure(error):
@@ -115,17 +118,25 @@ class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, 
       os_log("loaded tmdb properties from store", log: MovieLibraryModelController.logger, type: .debug)
       whenLoaded(tmdbProperties)
     } else {
-      os_log("fetching %d tmdb properties", log: MovieLibraryModelController.logger, type: .debug, movieRecords.count)
+      os_log("need to fetch tmdb properties for %d movies",
+             log: MovieLibraryModelController.logger,
+             type: .debug,
+             movieRecords.count)
       var tmdbProperties = [TmdbIdentifier: Movie.TmdbProperties]()
+      var unavailablePropertiesCount = 0
       for movie in movieRecords {
         let tmdbID = TmdbIdentifier(rawValue: movie.tmdbID)
         if let (_, fetched) = self.tmdbPropertiesProvider.tmdbProperties(for: tmdbID) {
           tmdbProperties[tmdbID] = fetched
         } else {
+          unavailablePropertiesCount += 1
           tmdbProperties[tmdbID] = Movie.TmdbProperties()
         }
       }
-      os_log("saving fetched tmdb properties store", log: MovieLibraryModelController.logger, type: .debug)
+      os_log("fetched tmdb properties (%d unavailable)",
+             log: MovieLibraryModelController.logger,
+             type: .debug,
+             unavailablePropertiesCount)
       self.tmdbPropertiesStore.save(tmdbProperties)
       whenLoaded(tmdbProperties)
     }
@@ -178,7 +189,7 @@ class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, 
   }
 
   override func persist(_ model: MovieLibraryModel) {
-    os_log("saving records to store", log: MovieLibraryModelController.logger, type: .debug)
+    os_log("saving movie records to store", log: MovieLibraryModelController.logger, type: .debug)
     movieRecordStore.save(Array(model.movieRecords.values))
     os_log("saving tmdb properties to store", log: MovieLibraryModelController.logger, type: .debug)
     let tmdbProperties = Dictionary(uniqueKeysWithValues: model.movies.values.map { ($0.tmdbID, $0.tmdbProperties) })
@@ -186,8 +197,9 @@ class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, 
   }
 
   override func removePersistedModel() {
-    os_log("removing store", log: MovieLibraryModelController.logger, type: .debug)
+    os_log("removing movie records", log: MovieLibraryModelController.logger, type: .debug)
     movieRecordStore.clear()
+    os_log("removing tmdb properties", log: MovieLibraryModelController.logger, type: .debug)
     tmdbPropertiesStore.clear()
   }
 }

@@ -22,7 +22,7 @@ class FileBasedTmdbPropertiesStore: TmdbPropertiesStore {
       let decoder = JSONDecoder()
       return try decoder.decode([TmdbIdentifier: Movie.TmdbProperties].self, from: urlData)
     } catch {
-      os_log("cache is corrupt: %{public}@",
+      os_log("data corrupted: %{public}@",
              log: FileBasedTmdbPropertiesStore.logger,
              type: .error,
              String(describing: error))
@@ -38,7 +38,7 @@ class FileBasedTmdbPropertiesStore: TmdbPropertiesStore {
       let encodedData = try encoder.encode(properties)
       try encodedData.write(to: fileURL)
     } catch {
-      os_log("error saving records: %{public}@",
+      os_log("unable to save: %{public}@",
              log: FileBasedTmdbPropertiesStore.logger,
              type: .error,
              String(describing: error))

@@ -145,16 +145,19 @@ class MovieLibraryManagerModelController:
 
   private func loadLibraryRecords(whenLoaded: @escaping ([LibraryRecord]) -> Void) {
     if let rawLibraryRecords = libraryRecordStore.loadRecords() {
-      os_log("loaded records from stores", log: MovieLibraryManagerModelController.logger, type: .debug)
+      os_log("loaded library records from store", log: MovieLibraryManagerModelController.logger, type: .debug)
       let libraryRecords = rawLibraryRecords.map { LibraryRecord($0) }
       whenLoaded(libraryRecords)
     } else {
-      os_log("loading records from cloud", log: MovieLibraryManagerModelController.logger, type: .debug)
+      os_log("need to fetch library records", log: MovieLibraryManagerModelController.logger, type: .debug)
       fetchLibraryRecords { privateLibraryRecordsResult, sharedLibraryRecordsResult in
         switch (privateLibraryRecordsResult, sharedLibraryRecordsResult) {
           case let (.success(privateLibraryRecords), .success(sharedLibraryRecords)):
             let allLibraryRecords: [LibraryRecord] = privateLibraryRecords + sharedLibraryRecords
-            os_log("saving fetched records to stores", log: MovieLibraryManagerModelController.logger, type: .debug)
+            os_log("fetched %d library records",
+                   log: MovieLibraryManagerModelController.logger,
+                   type: .debug,
+                   allLibraryRecords.count)
             self.libraryRecordStore.save(allLibraryRecords)
             whenLoaded(allLibraryRecords)
           case let (.failure(error), _), let (_, .failure(error)):
@@ -192,13 +195,16 @@ class MovieLibraryManagerModelController:
       let shareRecords = rawShareRecords.map { $0 as! CKShare }
       whenLoaded(shareRecords)
     } else {
+      os_log("need to fetch share records", log: MovieLibraryManagerModelController.logger, type: .debug)
       let libraryRecordsWithShareID = libraryRecords.filter { $0.shareID != nil }
       if libraryRecordsWithShareID.isEmpty {
-        os_log("saving fetched records to stores", log: MovieLibraryManagerModelController.logger, type: .debug)
+        os_log("skip fetching since there are no shared library record",
+               log: MovieLibraryManagerModelController.logger,
+               type: .debug)
         shareRecordStore.save([])
         whenLoaded([])
       } else {
-        os_log("there are %d shared libraries -> loading share records",
+        os_log("fetching %d share records",
                log: MovieLibraryManagerModelController.logger,
                type: .debug,
                libraryRecordsWithShareID.count)
@@ -207,7 +213,10 @@ class MovieLibraryManagerModelController:
             case let .failure(error):
               self.abortLoading(with: error)
             case let .success(shareRecords):
-              os_log("saving fetched records to stores", log: MovieLibraryManagerModelController.logger, type: .debug)
+              os_log("fetched %d share records",
+                     log: MovieLibraryManagerModelController.logger,
+                     type: .debug,
+                     shareRecords.count)
               self.shareRecordStore.save(shareRecords)
               whenLoaded(shareRecords)
           }
@@ -240,14 +249,16 @@ class MovieLibraryManagerModelController:
   }
 
   override func persist(_ model: MovieLibraryManagerModel) {
-    os_log("saving records to stores", log: MovieLibraryManagerModelController.logger, type: .debug)
+    os_log("saving library records to store", log: MovieLibraryManagerModelController.logger, type: .debug)
     libraryRecordStore.save(Array(model.libraryRecords.values))
+    os_log("saving share records to store", log: MovieLibraryManagerModelController.logger, type: .debug)
     shareRecordStore.save(Array(model.shareRecords.values))
   }
 
   override func removePersistedModel() {
-    os_log("removing stores", log: MovieLibraryManagerModelController.logger, type: .debug)
+    os_log("removing library records", log: MovieLibraryManagerModelController.logger, type: .debug)
     libraryRecordStore.clear()
+    os_log("removing share records", log: MovieLibraryManagerModelController.logger, type: .debug)
     shareRecordStore.clear()
   }
 }
