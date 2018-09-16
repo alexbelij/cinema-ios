@@ -8,3 +8,9 @@ func directoryUrl(for directory: FileManager.SearchPathDirectory) -> URL {
 extension CKShare {
   static let recordType = "cloudkit.share"
 }
+
+extension CKShareMetadataProtocol {
+  var title: String? {
+    return share[CKShareTitleKey] as? String
+  }
+}

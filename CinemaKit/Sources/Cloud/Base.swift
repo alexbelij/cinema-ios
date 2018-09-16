@@ -54,6 +54,20 @@ protocol DatabaseOperationQueue {
 extension CKDatabase: DatabaseOperationQueue {
 }
 
+protocol CKShareMetadataProtocol {
+  var share: CKShare { get }
+  var rootRecordID: CKRecordID { get }
+  var rootRecord: CKRecord? { get }
+
+  func asCKShareMetadata() -> CKShareMetadata
+}
+
+extension CKShareMetadata: CKShareMetadataProtocol {
+  func asCKShareMetadata() -> CKShareMetadata {
+    return self
+  }
+}
+
 extension Error {
   func singlePartialError(forKey key: Any) -> Error {
     guard let ckerror = self as? CKError else { return self }

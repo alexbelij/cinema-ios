@@ -142,6 +142,22 @@ extension CoreCoordinator: LibraryContentCoordinatorDelegate {
   }
 }
 
+extension CoreCoordinator {
+  func prepareForAcceptingCloudKitShare(then completion: @escaping () -> Void) {
+    DispatchQueue.main.async {
+      if self.libraryListCoordinator == nil {
+        self.libraryListCoordinator = LibraryListCoordinator(dependencies: self.dependencies)
+        self.libraryListCoordinator!.delegate = self
+        self.tabBarController.present(self.libraryListCoordinator!.rootViewController, animated: true) {
+          completion()
+        }
+      } else {
+        completion()
+      }
+    }
+  }
+}
+
 extension CoreCoordinator: MovieLibraryManagerDelegate {
   func libraryManager(_ libraryManager: MovieLibraryManager,
                       didUpdateLibraries changeSet: ChangeSet<CKRecordID, MovieLibrary>) {
@@ -206,19 +222,12 @@ extension CoreCoordinator: MovieLibraryManagerDelegate {
   }
 
   func libraryManager(_ libraryManager: MovieLibraryManager,
-                      willAcceptSharedLibraryWith title: String,
-                      continuation: @escaping () -> Void) {
-    DispatchQueue.main.async {
-      if self.libraryListCoordinator == nil {
-        self.libraryListCoordinator = LibraryListCoordinator(dependencies: self.dependencies)
-        self.libraryListCoordinator!.delegate = self
-        self.tabBarController.present(self.libraryListCoordinator!.rootViewController, animated: true) {
-          self.libraryListCoordinator!.libraryManager(libraryManager,
-                                                      willAcceptSharedLibraryWith: title,
-                                                      continuation: continuation)
-        }
-      }
-    }
+                      didFailToAcceptSharedLibraryWith title: String,
+                      reason: AcceptShareFailureReason) {
+  }
+
+  func libraryManager(_ libraryManager: MovieLibraryManager,
+                      willAcceptSharedLibraryWith title: String) {
   }
 
   func libraryManager(_ libraryManager: MovieLibraryManager,

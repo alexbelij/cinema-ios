@@ -354,4 +354,57 @@ class DeviceSyncingLibraryManagerChangesTests: XCTestCase {
     XCTAssertEqual(modelController.model!.shareRecords.count, 1)
     XCTAssertTrue(modelController.didCallPersist)
   }
+
+  func testFetchChangesWhenUserDidNotAcceptShareLocally() {
+    let (_, sharedLibraryRecord, share) = SampleData.librarySharedByDefaultUser()
+    let modelController = MovieLibraryManagerModelControllerMock.load([])
+    let shareManager = ShareManagerMock()
+    shareManager.whenFetchShareMetadata {
+      ([CKShareMetadataMock(share: share, rootRecord: sharedLibraryRecord.rawRecord)], nil)
+    }
+    let changes = FetchedChanges(changedRecords: [share])
+    let libraryManager = DeviceSyncingLibraryManager.makeForTesting(
+        modelController: modelController,
+        changesManager: ChangesManagerMock.fetch(changes),
+        shareManager: shareManager
+    )
+
+    var result: Result<Bool, MovieLibraryManagerError>!
+    let expectation = self.expectation(description: "fetch changes completion")
+    libraryManager.fetchChanges {
+      result = $0
+      expectation.fulfill()
+    }
+    waitForExpectations(timeout: 0.1)
+
+    XCTAssertTrue(result.isSuccess)
+    XCTAssertTrue(result.value!)
+    XCTAssertEqual(modelController.model!.libraries.count, 1)
+    XCTAssertEqual(modelController.model!.shareRecords.count, 1)
+    XCTAssertTrue(modelController.didCallPersist)
+  }
+
+  func testFetchChangesWhenUserDidNotAcceptShareLocallyButFetchFails() {
+    let (_, _, share) = SampleData.librarySharedByDefaultUser()
+    let modelController = MovieLibraryManagerModelControllerMock.load([])
+    let shareManager = ShareManagerMock()
+    shareManager.whenFetchShareMetadata { (nil, CloudKitError.nonRecoverableError) }
+    let changes = FetchedChanges(changedRecords: [share])
+    let userDefaults = UserDefaultsMock()
+    let dataInvalidationFlag = LocalDataInvalidationFlag(userDefaults: userDefaults)
+    let libraryManager = DeviceSyncingLibraryManager.makeForTesting(
+        modelController: modelController,
+        changesManager: ChangesManagerMock.fetch(changes),
+        shareManager: shareManager,
+        dataInvalidationFlag: dataInvalidationFlag
+    )
+
+    let expectation = self.expectation(description: "fetch changes completion")
+    libraryManager.fetchChanges { _ in
+      expectation.fulfill()
+    }
+    waitForExpectations(timeout: 0.1)
+
+    XCTAssertTrue(dataInvalidationFlag.isSet)
+  }
 }
