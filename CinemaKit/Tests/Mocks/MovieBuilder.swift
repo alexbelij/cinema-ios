@@ -3,7 +3,7 @@ import CloudKit
 
 enum MovieBuilder {
   static func makeMovie(tmdbID: Int,
-                        inLibraryWithID libraryID: CKRecordID,
+                        inLibraryWithID libraryID: CKRecord.ID,
                         title: String = "Movie",
                         genreId: Int = 1) -> Movie {
     let cloudProperties = Movie.CloudProperties(tmdbID: TmdbIdentifier(rawValue: tmdbID),

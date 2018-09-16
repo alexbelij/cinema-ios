@@ -2,14 +2,14 @@ import CloudKit
 import os.log
 
 class MovieLibraryManagerModel {
-  var libraries: [CKRecordID: InternalMovieLibrary]
-  var libraryRecords: [CKRecordID: LibraryRecord]
-  var libraryRecordIDByShareRecordID: [CKRecordID: CKRecordID]
-  var shareRecords: [CKRecordID: CKShare]
+  var libraries: [CKRecord.ID: InternalMovieLibrary]
+  var libraryRecords: [CKRecord.ID: LibraryRecord]
+  var libraryRecordIDByShareRecordID: [CKRecord.ID: CKRecord.ID]
+  var shareRecords: [CKRecord.ID: CKShare]
 
-  init(libraries: [CKRecordID: InternalMovieLibrary],
-       libraryRecords: [CKRecordID: LibraryRecord],
-       shareRecords: [CKRecordID: CKShare]) {
+  init(libraries: [CKRecord.ID: InternalMovieLibrary],
+       libraryRecords: [CKRecord.ID: LibraryRecord],
+       shareRecords: [CKRecord.ID: CKShare]) {
     self.libraries = libraries
     self.libraryRecords = libraryRecords
     self.libraryRecordIDByShareRecordID = Dictionary(minimumCapacity: libraryRecords.count)
@@ -25,16 +25,16 @@ class MovieLibraryManagerModel {
     return Array(libraries.values)
   }
 
-  func library(withShareRecordID recordID: CKRecordID) -> InternalMovieLibrary? {
+  func library(withShareRecordID recordID: CKRecord.ID) -> InternalMovieLibrary? {
     guard let libraryID = libraryRecordIDByShareRecordID[recordID] else { return nil }
     return libraries[libraryID]
   }
 
-  func library(for recordID: CKRecordID) -> InternalMovieLibrary? {
+  func library(for recordID: CKRecord.ID) -> InternalMovieLibrary? {
     return libraries[recordID]
   }
 
-  func record(for recordID: CKRecordID) -> LibraryRecord? {
+  func record(for recordID: CKRecord.ID) -> LibraryRecord? {
     return libraryRecords[recordID]
   }
 
@@ -97,7 +97,7 @@ class MovieLibraryManagerModel {
   }
 
   @discardableResult
-  func remove(_ recordID: CKRecordID) -> InternalMovieLibrary? {
+  func remove(_ recordID: CKRecord.ID) -> InternalMovieLibrary? {
     guard let library = libraries.removeValue(forKey: recordID) else { return nil }
     libraryRecords.removeValue(forKey: recordID)
     if let shareRecordID = library.metadata.shareRecordID {
@@ -245,8 +245,8 @@ class MovieLibraryManagerModelController:
                          _ shareRecords: [CKShare],
                          whenLoaded: @escaping (MovieLibraryManagerModel) -> Void) {
     let minimumCapacity = libraryRecords.count
-    var librariesDict: [CKRecordID: InternalMovieLibrary] = Dictionary(minimumCapacity: minimumCapacity)
-    var libraryRecordsDict: [CKRecordID: LibraryRecord] = Dictionary(minimumCapacity: minimumCapacity)
+    var librariesDict: [CKRecord.ID: InternalMovieLibrary] = Dictionary(minimumCapacity: minimumCapacity)
+    var libraryRecordsDict: [CKRecord.ID: LibraryRecord] = Dictionary(minimumCapacity: minimumCapacity)
     let shareRecordsDict = Dictionary(uniqueKeysWithValues: shareRecords.map { ($0.recordID, $0) })
     for libraryRecord in libraryRecords {
       let metadata: MovieLibraryMetadata
@@ -326,7 +326,7 @@ extension MovieLibraryManagerModelController {
   }
 
   private func fetchSharedLibraryRecords(
-      in zoneIDs: [CKRecordZoneID],
+      in zoneIDs: [CKRecordZone.ID],
       then completion: @escaping (Result<[LibraryRecord], MovieLibraryManagerError>) -> Void) {
     let group = DispatchGroup()
     var metadataRecords = [LibraryRecord]()
@@ -371,8 +371,8 @@ extension MovieLibraryManagerModelController {
       group.enter()
       guard let shareID = record.shareID else { fatalError("record is not shared") }
       let scope = shareID.zoneID.ownerName == CKCurrentUserDefaultName
-          ? CKDatabaseScope.private
-          : CKDatabaseScope.shared
+          ? CKDatabase.Scope.private
+          : CKDatabase.Scope.shared
       fetchManager.fetchRecord(with: shareID, in: scope) { rawRecord, error in
         if let error = error {
           switch error {

@@ -4,6 +4,9 @@ All notable changes to the project will be documented in this file.
 
 ## v2.0.1 - 2018-09-16
 
+### Added
+- support for iOS 12
+
 ### Fixed
 - long loading times when library has many movies (100+)
 - unknown state when accepting share fails

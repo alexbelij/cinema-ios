@@ -2,20 +2,20 @@ import CloudKit
 import os.log
 
 protocol ServerChangeTokenStore {
-  func get(for scope: CKDatabaseScope) -> CKServerChangeToken?
-  func set(_ token: CKServerChangeToken?, for scope: CKDatabaseScope)
+  func get(for scope: CKDatabase.Scope) -> CKServerChangeToken?
+  func set(_ token: CKServerChangeToken?, for scope: CKDatabase.Scope)
 
-  func get(for zoneID: CKRecordZoneID) -> CKServerChangeToken?
-  func set(_ token: CKServerChangeToken?, for zoneID: CKRecordZoneID)
+  func get(for zoneID: CKRecordZone.ID) -> CKServerChangeToken?
+  func set(_ token: CKServerChangeToken?, for zoneID: CKRecordZone.ID)
 }
 
-private extension CKRecordZoneID {
+private extension CKRecordZone.ID {
   var serverChangeTokenKey: String {
     return "\(ownerName)|\(zoneName)"
   }
 }
 
-private extension CKDatabaseScope {
+private extension CKDatabase.Scope {
   var serverChangeTokenKey: String {
     switch self {
       case .shared: return "SharedDatabase"
@@ -50,19 +50,19 @@ class FileBasedServerChangeTokenStore: ServerChangeTokenStore {
     }
   }
 
-  func get(for scope: CKDatabaseScope) -> CKServerChangeToken? {
+  func get(for scope: CKDatabase.Scope) -> CKServerChangeToken? {
     return get(for: scope.serverChangeTokenKey)
   }
 
-  func set(_ token: CKServerChangeToken?, for scope: CKDatabaseScope) {
+  func set(_ token: CKServerChangeToken?, for scope: CKDatabase.Scope) {
     set(token, for: scope.serverChangeTokenKey)
   }
 
-  func get(for zoneID: CKRecordZoneID) -> CKServerChangeToken? {
+  func get(for zoneID: CKRecordZone.ID) -> CKServerChangeToken? {
     return get(for: zoneID.serverChangeTokenKey)
   }
 
-  func set(_ token: CKServerChangeToken?, for zoneID: CKRecordZoneID) {
+  func set(_ token: CKServerChangeToken?, for zoneID: CKRecordZone.ID) {
     set(token, for: zoneID.serverChangeTokenKey)
   }
 

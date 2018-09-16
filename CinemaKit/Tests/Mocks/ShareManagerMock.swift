@@ -31,10 +31,10 @@ class ShareManagerMock: ShareManager {
 
 struct CKShareMetadataMock: CKShareMetadataProtocol {
   let share: CKShare
-  let rootRecordID: CKRecordID
+  let rootRecordID: CKRecord.ID
   let rootRecord: CKRecord?
 
-  init(share: CKShare, rootRecordID: CKRecordID) {
+  init(share: CKShare, rootRecordID: CKRecord.ID) {
     self.share = share
     self.rootRecordID = rootRecordID
     self.rootRecord = nil
@@ -46,7 +46,7 @@ struct CKShareMetadataMock: CKShareMetadataProtocol {
     self.rootRecord = rootRecord
   }
 
-  func asCKShareMetadata() -> CKShareMetadata {
-    fatalError("mock can not be expressed as CKShareMetadata")
+  func asCKShareMetadata() -> CKShare.Metadata {
+    fatalError("mock can not be expressed as CKShare.Metadata")
   }
 }

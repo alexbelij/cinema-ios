@@ -2,13 +2,13 @@ import CloudKit
 import os.log
 
 class MovieLibraryModel {
-  var movies: [CKRecordID: Movie]
-  var movieRecords: [CKRecordID: MovieRecord]
-  var recordIDsByTmdbID: [TmdbIdentifier: CKRecordID]
+  var movies: [CKRecord.ID: Movie]
+  var movieRecords: [CKRecord.ID: MovieRecord]
+  var recordIDsByTmdbID: [TmdbIdentifier: CKRecord.ID]
 
-  init(movies: [CKRecordID: Movie],
-       movieRecords: [CKRecordID: MovieRecord],
-       recordIDsByTmdbID: [TmdbIdentifier: CKRecordID]) {
+  init(movies: [CKRecord.ID: Movie],
+       movieRecords: [CKRecord.ID: MovieRecord],
+       recordIDsByTmdbID: [TmdbIdentifier: CKRecord.ID]) {
     self.movies = movies
     self.movieRecords = movieRecords
     self.recordIDsByTmdbID = recordIDsByTmdbID
@@ -39,7 +39,7 @@ class MovieLibraryModel {
   }
 
   @discardableResult
-  func remove(_ recordID: CKRecordID) -> Movie? {
+  func remove(_ recordID: CKRecord.ID) -> Movie? {
     guard let movie = movies.removeValue(forKey: recordID) else { return nil }
     movieRecords.removeValue(forKey: recordID)
     recordIDsByTmdbID.removeValue(forKey: movie.tmdbID)
@@ -50,19 +50,19 @@ class MovieLibraryModel {
 class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, MovieLibraryError> {
   private static let logger = Logging.createLogger(category: "MovieLibraryModelController")
 
-  private let databaseScope: CKDatabaseScope
+  private let databaseScope: CKDatabase.Scope
   private let fetchManager: FetchManager
   private let syncManager: SyncManager
   private let tmdbPropertiesProvider: TmdbMoviePropertiesProvider
-  private let libraryID: CKRecordID
+  private let libraryID: CKRecord.ID
   private let movieRecordStore: PersistentRecordStore
   private let tmdbPropertiesStore: TmdbPropertiesStore
 
-  init(databaseScope: CKDatabaseScope,
+  init(databaseScope: CKDatabase.Scope,
        fetchManager: FetchManager,
        syncManager: SyncManager,
        tmdbPropertiesProvider: TmdbMoviePropertiesProvider,
-       libraryID: CKRecordID,
+       libraryID: CKRecord.ID,
        movieRecordStore: PersistentRecordStore,
        tmdbPropertiesStore: TmdbPropertiesStore) {
     self.databaseScope = databaseScope
@@ -160,10 +160,10 @@ class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, 
              tmdbProperties.count)
     }
     let minimumCapacity = movieRecords.count
-    var moviesDict: [CKRecordID: Movie] = Dictionary(minimumCapacity: minimumCapacity)
-    var movieRecordsDict: [CKRecordID: MovieRecord] = Dictionary(minimumCapacity: minimumCapacity)
-    var recordIDsByTmdbIDDict: [TmdbIdentifier: CKRecordID] = Dictionary(minimumCapacity: minimumCapacity)
-    var duplicates = [CKRecordID]()
+    var moviesDict: [CKRecord.ID: Movie] = Dictionary(minimumCapacity: minimumCapacity)
+    var movieRecordsDict: [CKRecord.ID: MovieRecord] = Dictionary(minimumCapacity: minimumCapacity)
+    var recordIDsByTmdbIDDict: [TmdbIdentifier: CKRecord.ID] = Dictionary(minimumCapacity: minimumCapacity)
+    var duplicates = [CKRecord.ID]()
     for movieRecord in movieRecords {
       let cloudProperties = Movie.CloudProperties(from: movieRecord)
       if let existingRecordID = recordIDsByTmdbIDDict[cloudProperties.tmdbID] {

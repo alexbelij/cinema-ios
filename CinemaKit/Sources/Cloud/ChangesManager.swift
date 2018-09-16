@@ -2,13 +2,13 @@ import CloudKit
 import os.log
 
 struct FetchedChanges {
-  let deletedSharedZoneIDs: [CKRecordZoneID]
+  let deletedSharedZoneIDs: [CKRecordZone.ID]
   let changedRecords: [CKRecord]
-  let deletedRecordIDsAndTypes: [(CKRecordID, String)]
+  let deletedRecordIDsAndTypes: [(CKRecord.ID, CKRecord.RecordType)]
 
-  init(deletedSharedZoneIDs: [CKRecordZoneID] = [],
+  init(deletedSharedZoneIDs: [CKRecordZone.ID] = [],
        changedRecords: [CKRecord] = [],
-       deletedRecordIDsAndTypes: [(CKRecordID, String)] = []) {
+       deletedRecordIDsAndTypes: [(CKRecord.ID, CKRecord.RecordType)] = []) {
     self.deletedSharedZoneIDs = deletedSharedZoneIDs
     self.changedRecords = changedRecords
     self.deletedRecordIDsAndTypes = deletedRecordIDsAndTypes
@@ -46,7 +46,7 @@ class DefaultChangesManager: ChangesManager {
         completion(nil, error)
       } else if let (changedZoneIDs, deletedZoneIDs) = changes {
         var changedRecords = [CKRecord]()
-        var deletedRecordIDsAndTypes = [(CKRecordID, String)]()
+        var deletedRecordIDsAndTypes = [(CKRecord.ID, CKRecord.RecordType)]()
         var errors = [CloudKitError]()
         let group = DispatchGroup()
         if !changedZoneIDs.isEmpty {
@@ -89,7 +89,7 @@ class DefaultChangesManager: ChangesManager {
 
   private func fetchChangesInSharedDatabase(
       retryCount: Int,
-      then completion: @escaping (([CKRecordZoneID], [CKRecordZoneID])?, CloudKitError?) -> Void) {
+      then completion: @escaping (([CKRecordZone.ID], [CKRecordZone.ID])?, CloudKitError?) -> Void) {
     os_log("creating fetch database changes operation for shared database",
            log: DefaultChangesManager.logger,
            type: .default)
@@ -97,9 +97,9 @@ class DefaultChangesManager: ChangesManager {
     let operation = CKFetchDatabaseChangesOperation(previousServerChangeToken: previousChangeToken)
 
     // collect changes and deletions
-    var changedZoneIDs = [CKRecordZoneID]()
+    var changedZoneIDs = [CKRecordZone.ID]()
     operation.recordZoneWithIDChangedBlock = { zoneID in changedZoneIDs.append(zoneID) }
-    var deletedZoneIDs = [CKRecordZoneID]()
+    var deletedZoneIDs = [CKRecordZone.ID]()
     operation.recordZoneWithIDWasDeletedBlock = { zoneID in deletedZoneIDs.append(zoneID) }
 
     // handle result
@@ -146,28 +146,28 @@ class DefaultChangesManager: ChangesManager {
   }
 
   private func fetchChangesInZones(
-      withIDs zoneIDs: [CKRecordZoneID],
+      withIDs zoneIDs: [CKRecordZone.ID],
       using queue: DatabaseOperationQueue,
-      then completion: @escaping (([CKRecord], [(CKRecordID, String)])?, CloudKitError?) -> Void) {
+      then completion: @escaping (([CKRecord], [(CKRecord.ID, CKRecord.RecordType)])?, CloudKitError?) -> Void) {
     os_log("creating fetch record zone changes operation for [%@]",
            log: DefaultChangesManager.logger,
            type: .default,
            zoneIDs.map { $0.logDescription }.joined(separator: ", "))
     let options = Dictionary(uniqueKeysWithValues: zoneIDs.map { zoneID in
-      let fetchOptions = CKFetchRecordZoneChangesOptions()
+      let fetchOptions = CKFetchRecordZoneChangesOperation.ZoneOptions()
       fetchOptions.previousServerChangeToken = serverChangeTokenStore.get(for: zoneID)
       return (zoneID, fetchOptions)
-    }) as [CKRecordZoneID: CKFetchRecordZoneChangesOptions]
+    }) as [CKRecordZone.ID: CKFetchRecordZoneChangesOperation.ZoneOptions]
     let operation = CKFetchRecordZoneChangesOperation(recordZoneIDs: zoneIDs, optionsByRecordZoneID: options)
 
     // collect changes and deletions
     var changedRecords = [CKRecord]()
     operation.recordChangedBlock = { changedRecords.append($0) }
-    var deletedRecordIDsAndTypes = [(CKRecordID, String)]()
+    var deletedRecordIDsAndTypes = [(CKRecord.ID, CKRecord.RecordType)]()
     operation.recordWithIDWasDeletedBlock = { deletedRecordIDsAndTypes.append(($0, $1)) }
 
     // handle result
-    var newChangeTokens = [CKRecordZoneID: CKServerChangeToken]()
+    var newChangeTokens = [CKRecordZone.ID: CKServerChangeToken]()
     operation.recordZoneFetchCompletionBlock = { zoneID, newChangeToken, _, _, error in
       if let error = error {
         guard let ckerror = error as? CKError else { return }
@@ -227,7 +227,7 @@ class DefaultChangesManager: ChangesManager {
   }
 }
 
-extension CKDatabaseScope: CustomStringConvertible {
+extension CKDatabase.Scope: CustomStringConvertible {
   public var description: String {
     switch self {
       case .public: return "public"
@@ -237,7 +237,7 @@ extension CKDatabaseScope: CustomStringConvertible {
   }
 }
 
-extension CKRecordZoneID {
+extension CKRecordZone.ID {
   var logDescription: String {
     return "<\(ownerName),\(zoneName)>"
   }

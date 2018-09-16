@@ -1,9 +1,9 @@
 import CloudKit
 
 public struct MovieLibraryMetadata: DeviceSyncable {
-  public let id: CKRecordID
+  public let id: CKRecord.ID
   public var name: String
-  public internal(set) var shareRecordID: CKRecordID?
+  public internal(set) var shareRecordID: CKRecord.ID?
   public internal(set) var currentUserCanModify: Bool
 
   init(from record: LibraryRecord, _ share: CKShare? = nil) {
@@ -19,10 +19,10 @@ public struct MovieLibraryMetadata: DeviceSyncable {
   }
 
   public init(name: String) {
-    self.init(id: CKRecordID(recordName: UUID().uuidString, zoneID: deviceSyncZoneID), name: name)
+    self.init(id: CKRecord.ID(recordName: UUID().uuidString, zoneID: deviceSyncZoneID), name: name)
   }
 
-  init(id: CKRecordID, name: String) {
+  init(id: CKRecord.ID, name: String) {
     self.id = id
     self.name = name
     self.shareRecordID = nil
@@ -45,7 +45,7 @@ public struct MovieLibraryMetadata: DeviceSyncable {
 }
 
 extension MovieLibraryMetadata {
-  var databaseScope: CKDatabaseScope {
+  var databaseScope: CKDatabase.Scope {
     return isCurrentUserOwner ? .private : .shared
   }
 }

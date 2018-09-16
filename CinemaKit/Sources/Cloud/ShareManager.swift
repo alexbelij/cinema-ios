@@ -82,7 +82,7 @@ class DefaultShareManager: ShareManager {
     acceptShare(with: metadata.asCKShareMetadata(), retryCount: defaultRetryCount, then: completion)
   }
 
-  private func acceptShare(with metadata: CKShareMetadata,
+  private func acceptShare(with metadata: CKShare.Metadata,
                            retryCount: Int,
                            then completion: @escaping (CloudKitError?) -> Void) {
     let operation = CKAcceptSharesOperation(shareMetadatas: [metadata])
@@ -141,7 +141,7 @@ class DefaultShareManager: ShareManager {
     let operation = CKFetchShareMetadataOperation(shareURLs: shares.compactMap { $0.url })
     operation.shouldFetchRootRecord = true
 
-    var shareMetadatas = [CKShareMetadata]()
+    var shareMetadatas = [CKShare.Metadata]()
     var unhandledErrorOccurred = false
     operation.perShareMetadataBlock = { _, shareMetadata, error in
       if let error = error {

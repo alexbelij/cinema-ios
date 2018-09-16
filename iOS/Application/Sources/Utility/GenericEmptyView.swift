@@ -62,7 +62,7 @@ class GenericEmptyView: UIView {
         imageView.contentMode = .scaleAspectFit
         stackView.addArrangedSubview(imageView)
       case .activityIndicator:
-        let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        let indicatorView = UIActivityIndicatorView(style: .gray)
         indicatorView.startAnimating()
         stackView.addArrangedSubview(indicatorView)
     }

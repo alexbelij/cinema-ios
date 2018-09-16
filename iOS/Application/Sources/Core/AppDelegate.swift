@@ -6,7 +6,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   private var appCoordinator: AppCoordinator!
 
   func application(_ application: UIApplication,
-                   didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     appCoordinator = AppCoordinator(application: application)
     appCoordinator.presentRootViewController()
     return true
@@ -23,7 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   func application(_ application: UIApplication,
-                   userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShareMetadata) {
+                   userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShare.Metadata) {
     appCoordinator.acceptCloudKitShare(with: cloudKitShareMetadata)
   }
 }

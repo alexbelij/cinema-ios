@@ -191,7 +191,7 @@ extension EditMovieController {
         UIView.animate(withDuration: 0.1) { () -> Void in
           self.navigationItem.leftBarButtonItem!.isEnabled = false
         }
-        let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        let activityIndicator = UIActivityIndicatorView(style: .gray)
         navigationItem.setRightBarButton(UIBarButtonItem(customView: activityIndicator), animated: true)
         activityIndicator.startAnimating()
       case .deleted:

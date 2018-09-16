@@ -139,16 +139,16 @@ class ModifySubscriptionsStub: ModifyOperationStub<CKModifySubscriptionsOperatio
   }
 }
 
-class ModifyRecordZonesStub: ModifyOperationStub<CKModifyRecordZonesOperation, [CKRecordZone], [CKRecordZoneID]> {
-  override func process(_ call: ([CKRecordZone]?, [CKRecordZoneID]?) -> ([CKRecordZone]?, [CKRecordZoneID]?, Error?),
+class ModifyRecordZonesStub: ModifyOperationStub<CKModifyRecordZonesOperation, [CKRecordZone], [CKRecordZone.ID]> {
+  override func process(_ call: ([CKRecordZone]?, [CKRecordZone.ID]?) -> ([CKRecordZone]?, [CKRecordZone.ID]?, Error?),
                         with operation: CKModifyRecordZonesOperation) {
     let result = call(operation.recordZonesToSave, operation.recordZoneIDsToDelete)
     operation.modifyRecordZonesCompletionBlock!(result.0, result.1, result.2)
   }
 }
 
-class ModifyRecordsStub: ModifyOperationStub<CKModifyRecordsOperation, [CKRecord], [CKRecordID]> {
-  override func process(_ call: ([CKRecord]?, [CKRecordID]?) -> ([CKRecord]?, [CKRecordID]?, Error?),
+class ModifyRecordsStub: ModifyOperationStub<CKModifyRecordsOperation, [CKRecord], [CKRecord.ID]> {
+  override func process(_ call: ([CKRecord]?, [CKRecord.ID]?) -> ([CKRecord]?, [CKRecord.ID]?, Error?),
                         with operation: CKModifyRecordsOperation) {
     guard operation.perRecordProgressBlock == nil else {
       fatalError("mocking perRecordProgressBlock is not implemented")

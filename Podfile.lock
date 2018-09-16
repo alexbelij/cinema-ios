@@ -1,10 +1,10 @@
 PODS:
   - Cache (5.1.0)
-  - TMDBSwift (0.5.0)
+  - TMDBSwift (0.5.1)
 
 DEPENDENCIES:
   - Cache (= 5.1.0)
-  - TMDBSwift (= 0.5.0)
+  - TMDBSwift (= 0.5.1)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -13,8 +13,8 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   Cache: 7737c595aae7d94c7c0feca2c887288624e3b07e
-  TMDBSwift: de07a8ef9946a905e9b145c7ce602e8a934937ab
+  TMDBSwift: 9220f3dcee23372c05b92f8c111f5f4c37185aee
 
-PODFILE CHECKSUM: d6449dbb07b99ec28c51453999f4294a30456f45
+PODFILE CHECKSUM: e8a8cb7a352114fb61c3089ec66d3e8646fd2dcd
 
 COCOAPODS: 1.5.3

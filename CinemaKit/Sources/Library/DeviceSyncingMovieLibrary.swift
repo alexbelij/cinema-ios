@@ -246,8 +246,8 @@ extension DeviceSyncingMovieLibrary {
 
   private func process(changedRecords: [CKRecord],
                        changeSet: inout ChangeSet<TmdbIdentifier, Movie>,
-                       model: MovieLibraryModel) -> [CKRecordID] {
-    var duplicates = [CKRecordID]()
+                       model: MovieLibraryModel) -> [CKRecord.ID] {
+    var duplicates = [CKRecord.ID]()
     for rawRecord in changedRecords where rawRecord.recordType == MovieRecord.recordType {
       let movieRecord = MovieRecord(rawRecord)
       guard movieRecord.library.recordID == metadata.id else { continue }
@@ -294,7 +294,7 @@ extension DeviceSyncingMovieLibrary {
     return duplicates
   }
 
-  private func process(deletedRecordIDsAndTypes: [(CKRecordID, String)],
+  private func process(deletedRecordIDsAndTypes: [(CKRecord.ID, CKRecord.RecordType)],
                        changeSet: inout ChangeSet<TmdbIdentifier, Movie>,
                        model: MovieLibraryModel) {
     for (recordID, recordType) in deletedRecordIDsAndTypes where recordType == MovieRecord.recordType {

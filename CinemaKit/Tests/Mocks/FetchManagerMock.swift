@@ -2,16 +2,16 @@
 import CloudKit
 
 class FetchManagerMock: FetchManager {
-  func fetchZones(in scope: CKDatabaseScope,
-                  then completion: @escaping ([CKRecordZoneID: CKRecordZone]?, CloudKitError?) -> Void) {
+  func fetchZones(in scope: CKDatabase.Scope,
+                  then completion: @escaping ([CKRecordZone.ID: CKRecordZone]?, CloudKitError?) -> Void) {
     fatalError("not implemented")
   }
 
   func fetch<CustomRecordType>(
       _ type: CustomRecordType.Type,
       matching predicate: NSPredicate,
-      inZoneWithID zoneID: CKRecordZoneID,
-      in scope: CKDatabaseScope,
+      inZoneWithID zoneID: CKRecordZone.ID,
+      in scope: CKDatabase.Scope,
       then completion: @escaping ([CustomRecordType]?, CloudKitError?) -> Void) where CustomRecordType: RecordType {
     fatalError("not implemented")
   }
@@ -22,8 +22,8 @@ class FetchManagerMock: FetchManager {
     fetchRecordHandlers.append(handler)
   }
 
-  func fetchRecord(with recordID: CKRecordID,
-                   in scope: CKDatabaseScope,
+  func fetchRecord(with recordID: CKRecord.ID,
+                   in scope: CKDatabase.Scope,
                    then completion: @escaping (CKRecord?, CloudKitError?) -> Void) {
     let tuple = fetchRecordHandlers.removeFirst()()
     completion(tuple.0, tuple.1)

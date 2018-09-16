@@ -3,7 +3,7 @@ import CloudKit
 protocol DeviceSyncable: Equatable {
   associatedtype CustomRecordType: RecordType
 
-  var id: CKRecordID { get }
+  var id: CKRecord.ID { get }
 
   // conforming types should have an initializer of the form
   // init(from record: CustomRecordType, <custom properties>...)
@@ -12,7 +12,7 @@ protocol DeviceSyncable: Equatable {
 }
 
 protocol RecordType: class {
-  static var recordType: String { get }
+  static var recordType: CKRecord.RecordType { get }
 
   static func copyCustomFields(from source: CKRecord, to target: CKRecord)
 
@@ -22,7 +22,7 @@ protocol RecordType: class {
 }
 
 extension RecordType {
-  init(recordID: CKRecordID) {
+  init(recordID: CKRecord.ID) {
     self.init(CKRecord(recordType: Self.recordType, recordID: recordID))
   }
 
@@ -31,11 +31,11 @@ extension RecordType {
     element.setCustomFields(in: self)
   }
 
-  var id: CKRecordID {
+  var id: CKRecord.ID {
     return rawRecord.recordID
   }
 
-  var shareID: CKRecordID? {
+  var shareID: CKRecord.ID? {
     return rawRecord.share?.recordID
   }
 }
@@ -56,14 +56,14 @@ extension CKDatabase: DatabaseOperationQueue {
 
 protocol CKShareMetadataProtocol {
   var share: CKShare { get }
-  var rootRecordID: CKRecordID { get }
+  var rootRecordID: CKRecord.ID { get }
   var rootRecord: CKRecord? { get }
 
-  func asCKShareMetadata() -> CKShareMetadata
+  func asCKShareMetadata() -> CKShare.Metadata
 }
 
-extension CKShareMetadata: CKShareMetadataProtocol {
-  func asCKShareMetadata() -> CKShareMetadata {
+extension CKShare.Metadata: CKShareMetadataProtocol {
+  func asCKShareMetadata() -> CKShare.Metadata {
     return self
   }
 }

@@ -1,7 +1,7 @@
 import CloudKit
 
 class MovieRecord: RecordType {
-  static let recordType: String = "Movies"
+  static let recordType: CKRecord.RecordType = "Movies"
 
   static func copyCustomFields(from source: CKRecord, to target: CKRecord) {
     target["tmdbID"] = source["tmdbID"]
@@ -20,7 +20,7 @@ class MovieRecord: RecordType {
       return rawRecord[#function] as! Int
     }
     set {
-      rawRecord[#function] = newValue as CKRecordValue
+      rawRecord[#function] = newValue
     }
   }
   var title: String {
@@ -28,7 +28,7 @@ class MovieRecord: RecordType {
       return rawRecord[#function] as! String
     }
     set {
-      rawRecord[#function] = newValue as CKRecordValue
+      rawRecord[#function] = newValue
     }
   }
   var subtitle: String? {
@@ -36,7 +36,7 @@ class MovieRecord: RecordType {
       return rawRecord[#function] as? String
     }
     set {
-      rawRecord[#function] = newValue as CKRecordValue?
+      rawRecord[#function] = newValue
     }
   }
   var diskType: String {
@@ -44,12 +44,12 @@ class MovieRecord: RecordType {
       return rawRecord[#function] as! String
     }
     set {
-      rawRecord[#function] = newValue as CKRecordValue
+      rawRecord[#function] = newValue
     }
   }
-  var library: CKReference {
+  var library: CKRecord.Reference {
     get {
-      return rawRecord[#function] as! CKReference
+      return rawRecord[#function] as! CKRecord.Reference
     }
     set {
       rawRecord[#function] = newValue
@@ -65,8 +65,8 @@ class MovieRecord: RecordType {
 }
 
 extension MovieRecord {
-  static func queryPredicate(forMoviesInLibraryWithID id: CKRecordID) -> NSPredicate {
-    let reference = CKReference(recordID: id, action: .deleteSelf)
+  static func queryPredicate(forMoviesInLibraryWithID id: CKRecord.ID) -> NSPredicate {
+    let reference = CKRecord.Reference(recordID: id, action: .deleteSelf)
     return NSPredicate(format: "library == %@", reference)
   }
 }
