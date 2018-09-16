@@ -134,9 +134,15 @@ class MovieLibraryManagerModelController:
   }
 
   override func loadModel() {
+    let start = DispatchTime.now().uptimeNanoseconds
     loadLibraryRecords { libraryRecords in
       self.loadShareRecords(for: libraryRecords) { shareRecords in
         self.makeModel(with: libraryRecords, shareRecords) { model in
+          let delta = (DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
+          os_log("loading MovieLibraryManagerModel took %d ms",
+                 log: MovieLibraryManagerModelController.logger,
+                 type: .debug,
+                 delta)
           self.completeLoading(with: model)
         }
       }
@@ -144,8 +150,13 @@ class MovieLibraryManagerModelController:
   }
 
   private func loadLibraryRecords(whenLoaded: @escaping ([LibraryRecord]) -> Void) {
+    let start = DispatchTime.now().uptimeNanoseconds
     if let rawLibraryRecords = libraryRecordStore.loadRecords() {
-      os_log("loaded library records from store", log: MovieLibraryManagerModelController.logger, type: .debug)
+      let delta = (DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
+      os_log("loaded library records from store (%d ms)",
+             log: MovieLibraryManagerModelController.logger,
+             type: .debug,
+             delta)
       let libraryRecords = rawLibraryRecords.map { LibraryRecord($0) }
       whenLoaded(libraryRecords)
     } else {
@@ -189,8 +200,13 @@ class MovieLibraryManagerModelController:
   }
 
   private func loadShareRecords(for libraryRecords: [LibraryRecord], whenLoaded: @escaping ([CKShare]) -> Void) {
+    let start = DispatchTime.now().uptimeNanoseconds
     if let rawShareRecords = shareRecordStore.loadRecords(asCKShare: true) {
-      os_log("loaded share records from store", log: MovieLibraryManagerModelController.logger, type: .debug)
+      let delta = (DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
+      os_log("loaded share records from store (%d ms)",
+             log: MovieLibraryManagerModelController.logger,
+             type: .debug,
+             delta)
       // swiftlint:disable:next force_cast
       let shareRecords = rawShareRecords.map { $0 as! CKShare }
       whenLoaded(shareRecords)

@@ -80,9 +80,12 @@ class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, 
   }
 
   override func loadModel() {
+    let start = DispatchTime.now().uptimeNanoseconds
     loadMovieRecords { movieRecords in
       self.loadTmdbProperties(for: movieRecords) { tmdbProperties in
         self.makeModel(with: movieRecords, tmdbProperties) { model in
+          let delta = (DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
+          os_log("loading MovieLibraryModel took %d ms", log: MovieLibraryModelController.logger, type: .debug, delta)
           self.completeLoading(with: model)
         }
       }
@@ -90,8 +93,10 @@ class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, 
   }
 
   private func loadMovieRecords(whenLoaded: @escaping ([MovieRecord]) -> Void) {
+    let start = DispatchTime.now().uptimeNanoseconds
     if let rawMovieRecords = movieRecordStore.loadRecords() {
-      os_log("loaded movie records from store", log: MovieLibraryModelController.logger, type: .debug)
+      let delta = (DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
+      os_log("loaded movie records from store (%d ms)", log: MovieLibraryModelController.logger, type: .debug, delta)
       let movieRecords = rawMovieRecords.map { MovieRecord($0) }
       whenLoaded(movieRecords)
     } else {
@@ -114,8 +119,10 @@ class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, 
 
   private func loadTmdbProperties(for movieRecords: [MovieRecord],
                                   whenLoaded: @escaping ([TmdbIdentifier: Movie.TmdbProperties]) -> Void) {
+    let start = DispatchTime.now().uptimeNanoseconds
     if let tmdbProperties = tmdbPropertiesStore.load() {
-      os_log("loaded tmdb properties from store", log: MovieLibraryModelController.logger, type: .debug)
+      let delta = (DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
+      os_log("loaded tmdb properties from store (%d ms)", log: MovieLibraryModelController.logger, type: .debug, delta)
       whenLoaded(tmdbProperties)
     } else {
       os_log("need to fetch tmdb properties for %d movies",
