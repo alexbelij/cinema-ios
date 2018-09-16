@@ -80,47 +80,60 @@ class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, 
   }
 
   override func loadModel() {
-    if let rawMovieRecords = movieRecordStore.loadRecords() {
-      let movieRecords = rawMovieRecords.map { MovieRecord($0) }
-      if let tmdbProperties = tmdbPropertiesStore.load() {
-        os_log("loaded records from store", log: MovieLibraryModelController.logger, type: .debug)
-        makeModel(rawMovieRecords.map { MovieRecord($0) }, tmdbProperties)
-      } else {
-        os_log("fetching %d tmdb properties",
-               log: MovieLibraryModelController.logger,
-               type: .debug,
-               rawMovieRecords.count)
-        self.fetchTmdbProperties(for: movieRecords) { tmdbProperties in
-          os_log("saving fetched tmdb properties store", log: MovieLibraryModelController.logger, type: .debug)
-          self.tmdbPropertiesStore.save(tmdbProperties)
-          self.makeModel(movieRecords, tmdbProperties)
+    loadMovieRecords { movieRecords in
+      self.loadTmdbProperties(for: movieRecords) { tmdbProperties in
+        self.makeModel(with: movieRecords, tmdbProperties) { model in
+          self.completeLoading(with: model)
         }
       }
+    }
+  }
+
+  private func loadMovieRecords(whenLoaded: @escaping ([MovieRecord]) -> Void) {
+    if let rawMovieRecords = movieRecordStore.loadRecords() {
+      os_log("loaded records from store", log: MovieLibraryModelController.logger, type: .debug)
+      let movieRecords = rawMovieRecords.map { MovieRecord($0) }
+      whenLoaded(movieRecords)
     } else {
       os_log("loading records from cloud", log: MovieLibraryModelController.logger, type: .debug)
-      fetchMoviesFromCloud { result in
-        self.didFetchMovieRecords(result)
+      fetchMovieRecords { movieRecordsResult in
+        switch movieRecordsResult {
+          case let .success(movieRecords):
+            os_log("saving fetched records to store", log: MovieLibraryModelController.logger, type: .debug)
+            self.movieRecordStore.save(movieRecords)
+            whenLoaded(movieRecords)
+          case let .failure(error):
+            self.abortLoading(with: error)
+        }
       }
     }
   }
 
-  private func didFetchMovieRecords(_ movieRecordsResult: Result<[MovieRecord], MovieLibraryError>) {
-    switch movieRecordsResult {
-      case let .failure(error):
-        abortLoading(with: error)
-      case let .success(movieRecords):
-        os_log("saving fetched records to store", log: MovieLibraryModelController.logger, type: .debug)
-        movieRecordStore.save(movieRecords)
-        os_log("fetching %d tmdb properties", log: MovieLibraryModelController.logger, type: .debug, movieRecords.count)
-        self.fetchTmdbProperties(for: movieRecords) { tmdbProperties in
-          os_log("saving fetched tmdb properties store", log: MovieLibraryModelController.logger, type: .debug)
-          self.tmdbPropertiesStore.save(tmdbProperties)
-          self.makeModel(movieRecords, tmdbProperties)
+  private func loadTmdbProperties(for movieRecords: [MovieRecord],
+                                  whenLoaded: @escaping ([TmdbIdentifier: Movie.TmdbProperties]) -> Void) {
+    if let tmdbProperties = tmdbPropertiesStore.load() {
+      os_log("loaded tmdb properties from store", log: MovieLibraryModelController.logger, type: .debug)
+      whenLoaded(tmdbProperties)
+    } else {
+      os_log("fetching %d tmdb properties", log: MovieLibraryModelController.logger, type: .debug, movieRecords.count)
+      var tmdbProperties = [TmdbIdentifier: Movie.TmdbProperties]()
+      for movie in movieRecords {
+        let tmdbID = TmdbIdentifier(rawValue: movie.tmdbID)
+        if let (_, fetched) = self.tmdbPropertiesProvider.tmdbProperties(for: tmdbID) {
+          tmdbProperties[tmdbID] = fetched
+        } else {
+          tmdbProperties[tmdbID] = Movie.TmdbProperties()
         }
+      }
+      os_log("saving fetched tmdb properties store", log: MovieLibraryModelController.logger, type: .debug)
+      self.tmdbPropertiesStore.save(tmdbProperties)
+      whenLoaded(tmdbProperties)
     }
   }
 
-  private func makeModel(_ movieRecords: [MovieRecord], _ tmdbProperties: [TmdbIdentifier: Movie.TmdbProperties]) {
+  private func makeModel(with movieRecords: [MovieRecord],
+                         _ tmdbProperties: [TmdbIdentifier: Movie.TmdbProperties],
+                         whenLoaded: @escaping (MovieLibraryModel) -> Void) {
     if movieRecords.count != tmdbProperties.count {
       os_log("some data is missing: %d movieRecords and %d tmdbProperties",
              log: MovieLibraryModelController.logger,
@@ -159,9 +172,9 @@ class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, 
              duplicates.count)
       syncManager.delete(duplicates, in: databaseScope)
     }
-    completeLoading(with: MovieLibraryModel(movies: moviesDict,
-                                            movieRecords: movieRecordsDict,
-                                            recordIDsByTmdbID: recordIDsByTmdbIDDict))
+    whenLoaded(MovieLibraryModel(movies: moviesDict,
+                                 movieRecords: movieRecordsDict,
+                                 recordIDsByTmdbID: recordIDsByTmdbIDDict))
   }
 
   override func persist(_ model: MovieLibraryModel) {
@@ -179,10 +192,10 @@ class MovieLibraryModelController: ThreadSafeModelController<MovieLibraryModel, 
   }
 }
 
-// MARK: - Fetching Movies From Cloud
+// MARK: - Fetching From Cloud
 
 extension MovieLibraryModelController {
-  private func fetchMoviesFromCloud(then completion: @escaping (Result<[MovieRecord], MovieLibraryError>) -> Void) {
+  private func fetchMovieRecords(then completion: @escaping (Result<[MovieRecord], MovieLibraryError>) -> Void) {
     fetchManager.fetch(MovieRecord.self,
                        matching: MovieRecord.queryPredicate(forMoviesInLibraryWithID: libraryID),
                        inZoneWithID: libraryID.zoneID,
@@ -201,22 +214,6 @@ extension MovieLibraryModelController {
       } else if let records = records {
         completion(.success(records))
       }
-    }
-  }
-
-  private func fetchTmdbProperties(for movieRecords: [MovieRecord],
-                                   then completion: @escaping ([TmdbIdentifier: Movie.TmdbProperties]) -> Void) {
-    DispatchQueue.global(qos: .userInitiated).async {
-      var properties = [TmdbIdentifier: Movie.TmdbProperties]()
-      for movie in movieRecords {
-        let tmdbID = TmdbIdentifier(rawValue: movie.tmdbID)
-        if let (_, fetched) = self.tmdbPropertiesProvider.tmdbProperties(for: tmdbID) {
-          properties[tmdbID] = fetched
-        } else {
-          properties[tmdbID] = Movie.TmdbProperties()
-        }
-      }
-      completion(properties)
     }
   }
 }
