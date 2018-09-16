@@ -118,6 +118,12 @@ extension LibraryListController {
                                     self.tableView.deleteSections(IndexSet(integer: 1), with: .fade)
                                   })
   }
+
+  func removeInvitation(with title: String) {
+    guard invitationItems != nil else { preconditionFailure("no invitation set") }
+    self.invitationItems = nil
+    self.tableView.deleteSections(IndexSet(integer: 1), with: .fade)
+  }
 }
 
 // MARK: - Table View

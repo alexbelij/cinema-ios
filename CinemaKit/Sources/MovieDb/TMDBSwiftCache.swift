@@ -39,11 +39,11 @@ class StandardTMDBSwiftCache: TMDBSwiftCache {
     }
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(clearExpiredData),
-                                           name: .UIApplicationDidReceiveMemoryWarning,
+                                           name: UIApplication.didReceiveMemoryWarningNotification,
                                            object: nil)
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(clearExpiredData),
-                                           name: .UIApplicationWillTerminate,
+                                           name: UIApplication.willTerminateNotification,
                                            object: nil)
   }
 

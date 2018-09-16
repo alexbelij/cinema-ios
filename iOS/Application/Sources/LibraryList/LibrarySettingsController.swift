@@ -66,7 +66,7 @@ extension LibrarySettingsController {
     super.viewWillDisappear(animated)
     view.endEditing(true)
     commitMetadataEdits()
-    if isMovingFromParentViewController {
+    if isMovingFromParent {
       onDisappear?()
     }
   }

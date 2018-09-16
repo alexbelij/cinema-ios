@@ -31,19 +31,19 @@ public enum DiskType: String {
 
 public struct Movie {
   struct CloudProperties: DeviceSyncable {
-    let id: CKRecordID
+    let id: CKRecord.ID
     let tmdbID: TmdbIdentifier
-    let libraryID: CKRecordID
+    let libraryID: CKRecord.ID
     var title: String
     var subtitle: String?
     let diskType: DiskType
 
     init(tmdbID: TmdbIdentifier,
-         libraryID: CKRecordID,
+         libraryID: CKRecord.ID,
          title: String,
          subtitle: String? = nil,
          diskType: DiskType) {
-      self.id = CKRecordID(recordName: UUID().uuidString, zoneID: libraryID.zoneID)
+      self.id = CKRecord.ID(recordName: UUID().uuidString, zoneID: libraryID.zoneID)
       self.tmdbID = tmdbID
       self.libraryID = libraryID
       self.title = title
@@ -63,7 +63,7 @@ public struct Movie {
     func setCustomFields(in record: MovieRecord) {
       precondition(record.id == id)
       record.tmdbID = tmdbID.rawValue
-      record.library = CKReference(recordID: libraryID, action: .deleteSelf)
+      record.library = CKRecord.Reference(recordID: libraryID, action: .deleteSelf)
       record.title = title
       record.subtitle = subtitle
       record.diskType = diskType.rawValue
@@ -128,7 +128,7 @@ public struct Movie {
   var cloudProperties: CloudProperties
   let tmdbProperties: TmdbProperties
 
-  var id: CKRecordID {
+  var id: CKRecord.ID {
     return cloudProperties.id
   }
   public var tmdbID: TmdbIdentifier {

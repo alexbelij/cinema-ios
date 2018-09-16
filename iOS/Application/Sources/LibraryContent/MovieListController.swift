@@ -115,7 +115,7 @@ extension MovieListController {
 
   override func viewDidDisappear(_ animated: Bool) {
     super.viewDidDisappear(animated)
-    if isMovingFromParentViewController {
+    if isMovingFromParent {
       self.delegate?.movieListControllerDidDismiss(self)
     }
   }
@@ -154,7 +154,7 @@ extension MovieListController {
 
   private func configureBackgroundView() {
     let backgroundView: GenericEmptyView?
-    let separatorStyle: UITableViewCellSeparatorStyle
+    let separatorStyle: UITableViewCell.SeparatorStyle
     switch listData {
       case .loading:
         backgroundView = nil
@@ -234,13 +234,13 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
     guard let viewModel = self.viewModel, !viewModel.isEmpty else { return nil }
     guard let titles = viewModel.sectionIndexTitles else { return nil }
-    return [UITableViewIndexSearch] + titles
+    return [UITableView.indexSearch] + titles
   }
 
   override func tableView(_ tableView: UITableView,
                           sectionForSectionIndexTitle title: String,
                           at index: Int) -> Int {
-    guard title != UITableViewIndexSearch else { return -1 }
+    guard title != UITableView.indexSearch else { return -1 }
     return viewModel.sectionForSectionIndexTitle(title, at: index - 1)
   }
 

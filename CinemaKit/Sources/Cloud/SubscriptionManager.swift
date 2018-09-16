@@ -26,13 +26,13 @@ enum SubscriptionTarget: String, Codable {
       case .sharedDatabase:
         subscription = CKDatabaseSubscription(subscriptionID: subscriptionID)
     }
-    let notificationInfo = CKNotificationInfo()
+    let notificationInfo = CKSubscription.NotificationInfo()
     notificationInfo.shouldSendContentAvailable = true
     subscription.notificationInfo = notificationInfo
     return subscription
   }
 
-  var scope: CKDatabaseScope {
+  var scope: CKDatabase.Scope {
     switch self {
       case .deviceSyncZone: return .private
       case .sharedDatabase: return .shared
@@ -57,7 +57,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
     self.dataInvalidationFlag = dataInvalidationFlag
   }
 
-  private func databaseOperationQueue(for scope: CKDatabaseScope) -> DatabaseOperationQueue {
+  private func databaseOperationQueue(for scope: CKDatabase.Scope) -> DatabaseOperationQueue {
   switch scope {
     case .private:
       return privateDatabaseOperationQueue
@@ -120,7 +120,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
   }
 
   private func fetchAllSubscriptions(
-      in scope: CKDatabaseScope,
+      in scope: CKDatabase.Scope,
       retryCount: Int,
       then completion: @escaping ([String: CKSubscription]?, CloudKitError?) -> Void) {
     let operation = CKFetchSubscriptionsOperation.fetchAllSubscriptionsOperation()
@@ -165,7 +165,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
   }
 
   private func saveSubscription(_ subscription: CKSubscription,
-                                in scope: CKDatabaseScope,
+                                in scope: CKDatabase.Scope,
                                 retryCount: Int,
                                 then completion: @escaping (CloudKitError?) -> Void) {
     let operation = CKModifySubscriptionsOperation(subscriptionsToSave: [subscription],

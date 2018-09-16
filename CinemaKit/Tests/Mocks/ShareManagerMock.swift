@@ -6,12 +6,47 @@ class ShareManagerMock: ShareManager {
     fatalError("not implemented")
   }
 
-  func acceptShare(with metadata: CKShareMetadata, then completion: @escaping (CloudKitError?) -> Void) {
-    fatalError("not implemented")
+  private var acceptShareHandlers = [() -> CloudKitError?]()
+
+  func whenAcceptShare(_ handler: @escaping () -> CloudKitError?) {
+    acceptShareHandlers.append(handler)
+  }
+
+  func acceptShare(with metadata: CKShareMetadataProtocol, then completion: @escaping (CloudKitError?) -> Void) {
+    completion(acceptShareHandlers.removeFirst()())
+  }
+
+  private var fetchShareMetadataHandlers = [() -> ([CKShareMetadataProtocol]?, CloudKitError?)]()
+
+  func whenFetchShareMetadata(_ handler: @escaping () -> ([CKShareMetadataProtocol]?, CloudKitError?)) {
+    fetchShareMetadataHandlers.append(handler)
   }
 
   func fetchShareMetadata(for shares: [CKShare],
-                          then completion: @escaping ([CKShareMetadata]?, CloudKitError?) -> Void) {
-    fatalError("not implemented")
+                          then completion: @escaping ([CKShareMetadataProtocol]?, CloudKitError?) -> Void) {
+    let tuple = fetchShareMetadataHandlers.removeFirst()()
+    completion(tuple.0, tuple.1)
+  }
+}
+
+struct CKShareMetadataMock: CKShareMetadataProtocol {
+  let share: CKShare
+  let rootRecordID: CKRecord.ID
+  let rootRecord: CKRecord?
+
+  init(share: CKShare, rootRecordID: CKRecord.ID) {
+    self.share = share
+    self.rootRecordID = rootRecordID
+    self.rootRecord = nil
+  }
+
+  init(share: CKShare, rootRecord: CKRecord) {
+    self.share = share
+    self.rootRecordID = rootRecord.recordID
+    self.rootRecord = rootRecord
+  }
+
+  func asCKShareMetadata() -> CKShare.Metadata {
+    fatalError("mock can not be expressed as CKShare.Metadata")
   }
 }

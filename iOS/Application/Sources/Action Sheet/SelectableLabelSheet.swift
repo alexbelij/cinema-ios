@@ -2,7 +2,7 @@ import UIKit
 
 struct SelectableLabelSheetItem: SheetItemProtocol {
   let title: String
-  let accessoryType: UITableViewCellAccessoryType
+  let accessoryType: UITableViewCell.AccessoryType
   let groupingStyle: SheetItemGroupingStyle
   let handler: ((SelectableLabelSheetItem) -> Void)?
 
@@ -25,7 +25,7 @@ class SelectableLabelCell: UITableViewCell {
     label.textColor = tintColor
   }
 
-  func configure(labelText: String, accessoryType: UITableViewCellAccessoryType = .none) {
+  func configure(labelText: String, accessoryType: UITableViewCell.AccessoryType = .none) {
     label.text = labelText
     self.accessoryType = accessoryType
   }

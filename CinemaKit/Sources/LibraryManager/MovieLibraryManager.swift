@@ -4,12 +4,13 @@ import UIKit
 
 public protocol MovieLibraryManagerDelegate: class {
   func libraryManager(_ libraryManager: MovieLibraryManager,
-                      didUpdateLibraries changeSet: ChangeSet<CKRecordID, MovieLibrary>)
+                      didUpdateLibraries changeSet: ChangeSet<CKRecord.ID, MovieLibrary>)
 
   // sharing
+  func libraryManager(_ libraryManager: MovieLibraryManager, willAcceptSharedLibraryWith title: String)
   func libraryManager(_ libraryManager: MovieLibraryManager,
-                      willAcceptSharedLibraryWith title: String,
-                      continuation: @escaping () -> Void)
+                      didFailToAcceptSharedLibraryWith title: String,
+                      reason: AcceptShareFailureReason)
   func libraryManager(_ libraryManager: MovieLibraryManager,
                       didAcceptSharedLibrary library: MovieLibrary,
                       with title: String)
@@ -35,7 +36,7 @@ public protocol MovieLibraryManager: class {
                   then completion: @escaping (Result<MovieLibrary, MovieLibraryManagerError>) -> Void)
   func updateLibrary(with metadata: MovieLibraryMetadata,
                      then completion: @escaping (Result<MovieLibrary, MovieLibraryManagerError>) -> Void)
-  func removeLibrary(with id: CKRecordID, then completion: @escaping (Result<Void, MovieLibraryManagerError>) -> Void)
+  func removeLibrary(with id: CKRecord.ID, then completion: @escaping (Result<Void, MovieLibraryManagerError>) -> Void)
 
   func fetchChanges(then completion: @escaping (Result<Bool, MovieLibraryManagerError>) -> Void)
 
@@ -43,7 +44,7 @@ public protocol MovieLibraryManager: class {
   func prepareCloudSharingController(
       forLibraryWith metadata: MovieLibraryMetadata,
       then completion: @escaping (Result<CloudSharingControllerParameters, MovieLibraryManagerError>) -> Void)
-  func acceptCloudKitShare(with shareMetadata: CKShareMetadata)
+  func acceptCloudKitShare(with shareMetadata: CKShare.Metadata)
 }
 
 public enum MovieLibraryManagerError: Error {
@@ -53,8 +54,27 @@ public enum MovieLibraryManagerError: Error {
   case permissionFailure
 }
 
+public enum AcceptShareFailureReason {
+  case alreadyAccepted
+  case currentUserIsOwner
+  case error
+}
+
+enum AcceptShareResult {
+  case accepted
+  case aborted(AcceptShareFailureReason)
+}
+
 protocol InternalMovieLibraryManager: MovieLibraryManager {
+  func acceptCloudKitShare(with shareMetadata: CKShareMetadataProtocol,
+                           then completion: @escaping (Result<AcceptShareResult, MovieLibraryManagerError>) -> Void)
   func migrateLegacyLibrary(with name: String, at url: URL, then completion: @escaping (Bool) -> Void)
+}
+
+extension InternalMovieLibraryManager {
+  func acceptCloudKitShare(with shareMetadata: CKShare.Metadata) {
+    acceptCloudKitShare(with: shareMetadata) { _ in }
+  }
 }
 
 extension CloudKitError {

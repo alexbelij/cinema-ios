@@ -2,14 +2,14 @@ import CloudKit
 import os.log
 
 class MovieLibraryManagerModel {
-  var libraries: [CKRecordID: InternalMovieLibrary]
-  var libraryRecords: [CKRecordID: LibraryRecord]
-  var libraryRecordIDByShareRecordID: [CKRecordID: CKRecordID]
-  var shareRecords: [CKRecordID: CKShare]
+  var libraries: [CKRecord.ID: InternalMovieLibrary]
+  var libraryRecords: [CKRecord.ID: LibraryRecord]
+  var libraryRecordIDByShareRecordID: [CKRecord.ID: CKRecord.ID]
+  var shareRecords: [CKRecord.ID: CKShare]
 
-  init(libraries: [CKRecordID: InternalMovieLibrary],
-       libraryRecords: [CKRecordID: LibraryRecord],
-       shareRecords: [CKRecordID: CKShare]) {
+  init(libraries: [CKRecord.ID: InternalMovieLibrary],
+       libraryRecords: [CKRecord.ID: LibraryRecord],
+       shareRecords: [CKRecord.ID: CKShare]) {
     self.libraries = libraries
     self.libraryRecords = libraryRecords
     self.libraryRecordIDByShareRecordID = Dictionary(minimumCapacity: libraryRecords.count)
@@ -25,16 +25,16 @@ class MovieLibraryManagerModel {
     return Array(libraries.values)
   }
 
-  func library(withShareRecordID recordID: CKRecordID) -> InternalMovieLibrary? {
+  func library(withShareRecordID recordID: CKRecord.ID) -> InternalMovieLibrary? {
     guard let libraryID = libraryRecordIDByShareRecordID[recordID] else { return nil }
     return libraries[libraryID]
   }
 
-  func library(for recordID: CKRecordID) -> InternalMovieLibrary? {
+  func library(for recordID: CKRecord.ID) -> InternalMovieLibrary? {
     return libraries[recordID]
   }
 
-  func record(for recordID: CKRecordID) -> LibraryRecord? {
+  func record(for recordID: CKRecord.ID) -> LibraryRecord? {
     return libraryRecords[recordID]
   }
 
@@ -97,7 +97,7 @@ class MovieLibraryManagerModel {
   }
 
   @discardableResult
-  func remove(_ recordID: CKRecordID) -> InternalMovieLibrary? {
+  func remove(_ recordID: CKRecord.ID) -> InternalMovieLibrary? {
     guard let library = libraries.removeValue(forKey: recordID) else { return nil }
     libraryRecords.removeValue(forKey: recordID)
     if let shareRecordID = library.metadata.shareRecordID {
@@ -134,18 +134,53 @@ class MovieLibraryManagerModelController:
   }
 
   override func loadModel() {
-    if let rawLibraryRecords = libraryRecordStore.loadRecords(),
-       let rawShareRecords = shareRecordStore.loadRecords(asCKShare: true) {
-      os_log("loaded records from stores", log: MovieLibraryManagerModelController.logger, type: .debug)
-      // swiftlint:disable:next force_cast
-      makeModel(rawLibraryRecords.map { LibraryRecord($0) }, rawShareRecords.map { $0 as! CKShare })
-    } else {
-      os_log("loading records from cloud", log: MovieLibraryManagerModelController.logger, type: .debug)
-      fetchLibraryRecords()
+    let start = DispatchTime.now().uptimeNanoseconds
+    loadLibraryRecords { libraryRecords in
+      self.loadShareRecords(for: libraryRecords) { shareRecords in
+        self.makeModel(with: libraryRecords, shareRecords) { model in
+          let delta = (DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
+          os_log("loading MovieLibraryManagerModel took %d ms",
+                 log: MovieLibraryManagerModelController.logger,
+                 type: .debug,
+                 delta)
+          self.completeLoading(with: model)
+        }
+      }
     }
   }
 
-  private func fetchLibraryRecords() {
+  private func loadLibraryRecords(whenLoaded: @escaping ([LibraryRecord]) -> Void) {
+    let start = DispatchTime.now().uptimeNanoseconds
+    if let rawLibraryRecords = libraryRecordStore.loadRecords() {
+      let delta = (DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
+      os_log("loaded library records from store (%d ms)",
+             log: MovieLibraryManagerModelController.logger,
+             type: .debug,
+             delta)
+      let libraryRecords = rawLibraryRecords.map { LibraryRecord($0) }
+      whenLoaded(libraryRecords)
+    } else {
+      os_log("need to fetch library records", log: MovieLibraryManagerModelController.logger, type: .debug)
+      fetchLibraryRecords { privateLibraryRecordsResult, sharedLibraryRecordsResult in
+        switch (privateLibraryRecordsResult, sharedLibraryRecordsResult) {
+          case let (.success(privateLibraryRecords), .success(sharedLibraryRecords)):
+            let allLibraryRecords: [LibraryRecord] = privateLibraryRecords + sharedLibraryRecords
+            os_log("fetched %d library records",
+                   log: MovieLibraryManagerModelController.logger,
+                   type: .debug,
+                   allLibraryRecords.count)
+            self.libraryRecordStore.save(allLibraryRecords)
+            whenLoaded(allLibraryRecords)
+          case let (.failure(error), _), let (_, .failure(error)):
+            self.abortLoading(with: error)
+        }
+      }
+    }
+  }
+
+  private func fetchLibraryRecords(
+      then completion: @escaping (Result<[LibraryRecord], MovieLibraryManagerError>,
+                                  Result<[LibraryRecord], MovieLibraryManagerError>) -> Void) {
     let group = DispatchGroup()
     group.enter()
     var privateLibraries: Result<[LibraryRecord], MovieLibraryManagerError>!
@@ -160,54 +195,58 @@ class MovieLibraryManagerModelController:
       group.leave()
     }
     group.notify(queue: DispatchQueue.global()) {
-      self.didFetchLibraryRecords(privateLibraries, sharedLibraries)
+      completion(privateLibraries, sharedLibraries)
     }
   }
 
-  private func didFetchLibraryRecords(_ privateLibrariesResult: Result<[LibraryRecord], MovieLibraryManagerError>,
-                                      _ sharedLibrariesResult: Result<[LibraryRecord], MovieLibraryManagerError>) {
-    if case let .success(privateLibraryRecords) = privateLibrariesResult,
-       case let .success(sharedLibraryRecords) = sharedLibrariesResult {
-      let allLibraryRecords = privateLibraryRecords + sharedLibraryRecords
-      let libraryRecordsWithShareID = allLibraryRecords.filter { $0.shareID != nil }
+  private func loadShareRecords(for libraryRecords: [LibraryRecord], whenLoaded: @escaping ([CKShare]) -> Void) {
+    let start = DispatchTime.now().uptimeNanoseconds
+    if let rawShareRecords = shareRecordStore.loadRecords(asCKShare: true) {
+      let delta = (DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
+      os_log("loaded share records from store (%d ms)",
+             log: MovieLibraryManagerModelController.logger,
+             type: .debug,
+             delta)
+      // swiftlint:disable:next force_cast
+      let shareRecords = rawShareRecords.map { $0 as! CKShare }
+      whenLoaded(shareRecords)
+    } else {
+      os_log("need to fetch share records", log: MovieLibraryManagerModelController.logger, type: .debug)
+      let libraryRecordsWithShareID = libraryRecords.filter { $0.shareID != nil }
       if libraryRecordsWithShareID.isEmpty {
-        os_log("saving fetched records to stores", log: MovieLibraryManagerModelController.logger, type: .debug)
-        libraryRecordStore.save(allLibraryRecords)
+        os_log("skip fetching since there are no shared library record",
+               log: MovieLibraryManagerModelController.logger,
+               type: .debug)
         shareRecordStore.save([])
-        makeModel(allLibraryRecords, [])
+        whenLoaded([])
       } else {
-        os_log("there are %d shared libraries -> loading share records",
+        os_log("fetching %d share records",
                log: MovieLibraryManagerModelController.logger,
                type: .debug,
                libraryRecordsWithShareID.count)
-        fetchShareRecords(for: libraryRecordsWithShareID) { result in
-          self.didFetchShareRecords(result, allLibraryRecords)
+        fetchShareRecords(for: libraryRecordsWithShareID) { shareRecordsResult in
+          switch shareRecordsResult {
+            case let .failure(error):
+              self.abortLoading(with: error)
+            case let .success(shareRecords):
+              os_log("fetched %d share records",
+                     log: MovieLibraryManagerModelController.logger,
+                     type: .debug,
+                     shareRecords.count)
+              self.shareRecordStore.save(shareRecords)
+              whenLoaded(shareRecords)
+          }
         }
       }
-    } else if case let .failure(error) = privateLibrariesResult {
-      abortLoading(with: error)
-    } else if case let .failure(error) = sharedLibrariesResult {
-      abortLoading(with: error)
     }
   }
 
-  private func didFetchShareRecords(_ shareRecordsResult: Result<[CKShare], MovieLibraryManagerError>,
-                                    _ libraryRecords: [LibraryRecord]) {
-    switch shareRecordsResult {
-      case let .failure(error):
-        abortLoading(with: error)
-      case let .success(shareRecords):
-        os_log("saving fetched records to stores", log: MovieLibraryManagerModelController.logger, type: .debug)
-        libraryRecordStore.save(libraryRecords)
-        shareRecordStore.save(shareRecords)
-        makeModel(libraryRecords, shareRecords)
-    }
-  }
-
-  private func makeModel(_ libraryRecords: [LibraryRecord], _ shareRecords: [CKShare]) {
+  private func makeModel(with libraryRecords: [LibraryRecord],
+                         _ shareRecords: [CKShare],
+                         whenLoaded: @escaping (MovieLibraryManagerModel) -> Void) {
     let minimumCapacity = libraryRecords.count
-    var librariesDict: [CKRecordID: InternalMovieLibrary] = Dictionary(minimumCapacity: minimumCapacity)
-    var libraryRecordsDict: [CKRecordID: LibraryRecord] = Dictionary(minimumCapacity: minimumCapacity)
+    var librariesDict: [CKRecord.ID: InternalMovieLibrary] = Dictionary(minimumCapacity: minimumCapacity)
+    var libraryRecordsDict: [CKRecord.ID: LibraryRecord] = Dictionary(minimumCapacity: minimumCapacity)
     let shareRecordsDict = Dictionary(uniqueKeysWithValues: shareRecords.map { ($0.recordID, $0) })
     for libraryRecord in libraryRecords {
       let metadata: MovieLibraryMetadata
@@ -220,25 +259,27 @@ class MovieLibraryManagerModelController:
       librariesDict[libraryRecord.id] = libraryFactory.makeLibrary(with: metadata)
       libraryRecordsDict[libraryRecord.id] = libraryRecord
     }
-    completeLoading(with: MovieLibraryManagerModel(libraries: librariesDict,
-                                                   libraryRecords: libraryRecordsDict,
-                                                   shareRecords: shareRecordsDict))
+    whenLoaded(MovieLibraryManagerModel(libraries: librariesDict,
+                                        libraryRecords: libraryRecordsDict,
+                                        shareRecords: shareRecordsDict))
   }
 
   override func persist(_ model: MovieLibraryManagerModel) {
-    os_log("saving records to stores", log: MovieLibraryManagerModelController.logger, type: .debug)
+    os_log("saving library records to store", log: MovieLibraryManagerModelController.logger, type: .debug)
     libraryRecordStore.save(Array(model.libraryRecords.values))
+    os_log("saving share records to store", log: MovieLibraryManagerModelController.logger, type: .debug)
     shareRecordStore.save(Array(model.shareRecords.values))
   }
 
   override func removePersistedModel() {
-    os_log("removing stores", log: MovieLibraryManagerModelController.logger, type: .debug)
+    os_log("removing library records", log: MovieLibraryManagerModelController.logger, type: .debug)
     libraryRecordStore.clear()
+    os_log("removing share records", log: MovieLibraryManagerModelController.logger, type: .debug)
     shareRecordStore.clear()
   }
 }
 
-// MARK: - Fetching Libraries From Cloud
+// MARK: - Fetching From Cloud
 
 extension MovieLibraryManagerModelController {
   private func fetchPrivateLibraryRecords(
@@ -285,7 +326,7 @@ extension MovieLibraryManagerModelController {
   }
 
   private func fetchSharedLibraryRecords(
-      in zoneIDs: [CKRecordZoneID],
+      in zoneIDs: [CKRecordZone.ID],
       then completion: @escaping (Result<[LibraryRecord], MovieLibraryManagerError>) -> Void) {
     let group = DispatchGroup()
     var metadataRecords = [LibraryRecord]()
@@ -330,8 +371,8 @@ extension MovieLibraryManagerModelController {
       group.enter()
       guard let shareID = record.shareID else { fatalError("record is not shared") }
       let scope = shareID.zoneID.ownerName == CKCurrentUserDefaultName
-          ? CKDatabaseScope.private
-          : CKDatabaseScope.shared
+          ? CKDatabase.Scope.private
+          : CKDatabase.Scope.shared
       fetchManager.fetchRecord(with: shareID, in: scope) { rawRecord, error in
         if let error = error {
           switch error {

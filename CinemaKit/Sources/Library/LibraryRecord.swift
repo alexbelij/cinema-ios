@@ -1,7 +1,7 @@
 import CloudKit
 
 class LibraryRecord: RecordType {
-  static let recordType: String = "Libraries"
+  static let recordType: CKRecord.RecordType = "Libraries"
 
   static func copyCustomFields(from source: CKRecord, to target: CKRecord) {
     target["name"] = source["name"]
@@ -16,7 +16,7 @@ class LibraryRecord: RecordType {
       return rawRecord[#function] as! String
     }
     set {
-      rawRecord[#function] = newValue as CKRecordValue
+      rawRecord[#function] = newValue
     }
   }
 

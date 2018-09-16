@@ -46,7 +46,7 @@ class FileBasedRecordStore: PersistentRecordStore {
         return record
       }
     } catch {
-      os_log("cache is corrupt: %{public}@", log: FileBasedRecordStore.logger, type: .error, String(describing: error))
+      os_log("data corrupted: %{public}@", log: FileBasedRecordStore.logger, type: .error, String(describing: error))
       clear()
       return nil
     }
@@ -66,7 +66,7 @@ class FileBasedRecordStore: PersistentRecordStore {
       let encodedData = try encoder.encode(data)
       try encodedData.write(to: fileURL)
     } catch {
-      os_log("error saving records: %{public}@",
+      os_log("unable to save: %{public}@",
              log: FileBasedRecordStore.logger,
              type: .error,
              String(describing: error))

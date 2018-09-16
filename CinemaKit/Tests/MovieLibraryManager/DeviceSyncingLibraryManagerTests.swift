@@ -195,4 +195,86 @@ class DeviceSyncingLibraryManagerTests: XCTestCase {
     XCTAssertTrue(modelController.model!.libraries.isEmpty)
     XCTAssertFalse(modelController.didCallPersist)
   }
+
+  func testAcceptShareRejectsUsersShare() {
+    let (_, sharedLibraryRecord, share) = SampleData.librarySharedByDefaultUser()
+    let modelController = MovieLibraryManagerModelControllerMock.load([])
+    let libraryManager = DeviceSyncingLibraryManager.makeForTesting(
+        modelController: modelController
+    )
+    let shareMetadata = CKShareMetadataMock(share: share, rootRecordID: sharedLibraryRecord.id)
+
+    var result: Result<AcceptShareResult, MovieLibraryManagerError>!
+    let expectation = self.expectation(description: "accept completion")
+    libraryManager.acceptCloudKitShare(with: shareMetadata) {
+      result = $0
+      expectation.fulfill()
+    }
+    waitForExpectations(timeout: 0.1)
+
+    XCTAssertTrue(result.isSuccess)
+    switch result.value! {
+      case .aborted(.currentUserIsOwner): break
+      default: XCTFail("\(result.value!) is not \(AcceptShareResult.aborted(.currentUserIsOwner))")
+    }
+    XCTAssertTrue(modelController.model!.libraries.isEmpty)
+    XCTAssertFalse(modelController.didCallPersist)
+  }
+
+  func testAcceptShareRejectsAlreadyAcceptedShare() {
+    let (_, sharedLibraryRecord, share) = SampleData.library(sharedBy: "User1")
+    let library = MovieLibraryMock(metadata: MovieLibraryMetadata(from: sharedLibraryRecord))
+    let modelController = MovieLibraryManagerModelControllerMock.load([library], [sharedLibraryRecord], [share])
+    let libraryManager = DeviceSyncingLibraryManager.makeForTesting(
+        modelController: modelController
+    )
+    let shareMetadata = CKShareMetadataMock(share: share, rootRecordID: sharedLibraryRecord.id)
+
+    var result: Result<AcceptShareResult, MovieLibraryManagerError>!
+    let expectation = self.expectation(description: "accept completion")
+    libraryManager.acceptCloudKitShare(with: shareMetadata) {
+      result = $0
+      expectation.fulfill()
+    }
+    waitForExpectations(timeout: 0.1)
+
+    XCTAssertTrue(result.isSuccess)
+    switch result.value! {
+      case .aborted(.alreadyAccepted): break
+      default: XCTFail("\(result.value!) is not \(AcceptShareResult.aborted(.alreadyAccepted))")
+    }
+    XCTAssertEqual(modelController.model!.libraries.count, 1)
+    XCTAssertFalse(modelController.didCallPersist)
+  }
+
+  func testAcceptShare() {
+    let (_, sharedLibraryRecord, share) = SampleData.library(sharedBy: "User1")
+    let modelController = MovieLibraryManagerModelControllerMock.load([])
+    let fetchManager = FetchManagerMock()
+    fetchManager.whenFetchRecord { (sharedLibraryRecord.rawRecord, nil) }
+    let shareManager = ShareManagerMock()
+    shareManager.whenAcceptShare { nil }
+    let libraryManager = DeviceSyncingLibraryManager.makeForTesting(
+        modelController: modelController,
+        fetchManager: fetchManager,
+        shareManager: shareManager
+    )
+    let shareMetadata = CKShareMetadataMock(share: share, rootRecordID: sharedLibraryRecord.id)
+
+    var result: Result<AcceptShareResult, MovieLibraryManagerError>!
+    let expectation = self.expectation(description: "accept completion")
+    libraryManager.acceptCloudKitShare(with: shareMetadata) {
+      result = $0
+      expectation.fulfill()
+    }
+    waitForExpectations(timeout: 0.1)
+
+    XCTAssertTrue(result.isSuccess)
+    switch result.value! {
+      case .accepted: break
+      default: XCTFail("\(result.value!) is not \(AcceptShareResult.accepted)")
+    }
+    XCTAssertEqual(modelController.model!.libraries.count, 1)
+    XCTAssertTrue(modelController.didCallPersist)
+  }
 }

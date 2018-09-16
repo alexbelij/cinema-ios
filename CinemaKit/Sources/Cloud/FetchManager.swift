@@ -2,23 +2,23 @@ import CloudKit
 import os.log
 
 protocol FetchManager {
-  func fetchZones(in scope: CKDatabaseScope,
-                  then completion: @escaping ([CKRecordZoneID: CKRecordZone]?, CloudKitError?) -> Void)
+  func fetchZones(in scope: CKDatabase.Scope,
+                  then completion: @escaping ([CKRecordZone.ID: CKRecordZone]?, CloudKitError?) -> Void)
   func fetch<CustomRecordType>(_ type: CustomRecordType.Type,
                                matching predicate: NSPredicate,
-                               inZoneWithID zoneID: CKRecordZoneID,
-                               in scope: CKDatabaseScope,
+                               inZoneWithID zoneID: CKRecordZone.ID,
+                               in scope: CKDatabase.Scope,
                                then completion: @escaping ([CustomRecordType]?, CloudKitError?) -> Void)
       where CustomRecordType: RecordType
-  func fetchRecord(with recordID: CKRecordID,
-                   in scope: CKDatabaseScope,
+  func fetchRecord(with recordID: CKRecord.ID,
+                   in scope: CKDatabase.Scope,
                    then completion: @escaping (CKRecord?, CloudKitError?) -> Void)
 }
 
 extension FetchManager {
   func fetch<CustomRecordType>(_ type: CustomRecordType.Type,
-                               inZoneWithID zoneID: CKRecordZoneID,
-                               in scope: CKDatabaseScope,
+                               inZoneWithID zoneID: CKRecordZone.ID,
+                               in scope: CKDatabase.Scope,
                                then completion: @escaping ([CustomRecordType]?, CloudKitError?) -> Void)
       where CustomRecordType: RecordType {
     fetch(type,
@@ -44,7 +44,7 @@ class DefaultFetchManager: FetchManager {
     self.dataInvalidationFlag = dataInvalidationFlag
   }
 
-  private func databaseOperationQueue(for scope: CKDatabaseScope) -> DatabaseOperationQueue {
+  private func databaseOperationQueue(for scope: CKDatabase.Scope) -> DatabaseOperationQueue {
     switch scope {
       case .private:
         return privateDatabaseOperationQueue
@@ -55,14 +55,14 @@ class DefaultFetchManager: FetchManager {
     }
   }
 
-  func fetchZones(in scope: CKDatabaseScope,
-                  then completion: @escaping ([CKRecordZoneID: CKRecordZone]?, CloudKitError?) -> Void) {
+  func fetchZones(in scope: CKDatabase.Scope,
+                  then completion: @escaping ([CKRecordZone.ID: CKRecordZone]?, CloudKitError?) -> Void) {
     self.fetchZones(in: scope, retryCount: defaultRetryCount, then: completion)
   }
 
-  private func fetchZones(in scope: CKDatabaseScope,
+  private func fetchZones(in scope: CKDatabase.Scope,
                           retryCount: Int,
-                          then completion: @escaping ([CKRecordZoneID: CKRecordZone]?, CloudKitError?) -> Void) {
+                          then completion: @escaping ([CKRecordZone.ID: CKRecordZone]?, CloudKitError?) -> Void) {
     let operation = CKFetchRecordZonesOperation.fetchAllRecordZonesOperation()
     operation.fetchRecordZonesCompletionBlock = { zones, error in
       if let error = error {
@@ -107,8 +107,8 @@ class DefaultFetchManager: FetchManager {
 
   func fetch<CustomRecordType>(_ type: CustomRecordType.Type,
                                matching predicate: NSPredicate = NSPredicate(value: true),
-                               inZoneWithID zoneID: CKRecordZoneID,
-                               in scope: CKDatabaseScope,
+                               inZoneWithID zoneID: CKRecordZone.ID,
+                               in scope: CKDatabase.Scope,
                                then completion: @escaping ([CustomRecordType]?, CloudKitError?) -> Void)
       where CustomRecordType: RecordType {
     os_log("creating query operation for %{public}@",
@@ -130,9 +130,9 @@ class DefaultFetchManager: FetchManager {
   }
 
   private func fetch(with operation: CKQueryOperation,
-                     inZoneWithID zoneID: CKRecordZoneID,
+                     inZoneWithID zoneID: CKRecordZone.ID,
                      into accumulator: [CKRecord],
-                     in scope: CKDatabaseScope,
+                     in scope: CKDatabase.Scope,
                      retryCount: Int,
                      then completion: @escaping ([CKRecord]?, CloudKitError?) -> Void) {
     operation.zoneID = zoneID
@@ -202,14 +202,14 @@ class DefaultFetchManager: FetchManager {
     databaseOperationQueue(for: scope).add(operation)
   }
 
-  func fetchRecord(with recordID: CKRecordID,
-                   in scope: CKDatabaseScope,
+  func fetchRecord(with recordID: CKRecord.ID,
+                   in scope: CKDatabase.Scope,
                    then completion: @escaping (CKRecord?, CloudKitError?) -> Void) {
     fetchRecord(with: recordID, in: scope, retryCount: defaultRetryCount, then: completion)
   }
 
-  private func fetchRecord(with recordID: CKRecordID,
-                           in scope: CKDatabaseScope,
+  private func fetchRecord(with recordID: CKRecord.ID,
+                           in scope: CKDatabase.Scope,
                            retryCount: Int,
                            then completion: @escaping (CKRecord?, CloudKitError?) -> Void) {
     let operation = CKFetchRecordsOperation(recordIDs: [recordID])

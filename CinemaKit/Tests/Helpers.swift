@@ -2,8 +2,8 @@
 import CloudKit
 import XCTest
 
-func makeRecordID() -> CKRecordID {
-  return CKRecordID(recordName: UUID().uuidString, zoneID: deviceSyncZoneID)
+func makeRecordID() -> CKRecord.ID {
+  return CKRecord.ID(recordName: UUID().uuidString, zoneID: deviceSyncZoneID)
 }
 
 final class SampleData {
@@ -15,16 +15,16 @@ final class SampleData {
   }
 
   static func library(sharedBy ownerName: String) -> (LibraryRecord, LibraryRecord, CKShare) {
-    return library(sharedInZoneWith: CKRecordZoneID(zoneName: deviceSyncZoneID.zoneName, ownerName: ownerName))
+    return library(sharedInZoneWith: CKRecordZone.ID(zoneName: deviceSyncZoneID.zoneName, ownerName: ownerName))
   }
 
-  private static func library(sharedInZoneWith zoneID: CKRecordZoneID) -> (LibraryRecord, LibraryRecord, CKShare) {
-    let libraryID = CKRecordID(recordName: UUID().uuidString, zoneID: zoneID)
+  private static func library(sharedInZoneWith zoneID: CKRecordZone.ID) -> (LibraryRecord, LibraryRecord, CKShare) {
+    let libraryID = CKRecord.ID(recordName: UUID().uuidString, zoneID: zoneID)
     let privateLibraryRecord = LibraryRecord(from: MovieLibraryMetadata(id: libraryID, name: libraryID.recordName))
     let sharedRecord = privateLibraryRecord.rawRecord.copy() as! CKRecord
-    let share = CKShare(rootRecord: sharedRecord, shareID: CKRecordID(recordName: UUID().uuidString, zoneID: zoneID))
-    share[CKShareTitleKey] = "Title" as CKRecordValue
-    share[CKShareTypeKey] = "Type" as CKRecordValue
+    let share = CKShare(rootRecord: sharedRecord, shareID: CKRecord.ID(recordName: UUID().uuidString, zoneID: zoneID))
+    share[CKShare.SystemFieldKey.title] = "Title"
+    share[CKShare.SystemFieldKey.shareType] = "Type"
     return (privateLibraryRecord, LibraryRecord(sharedRecord), share)
   }
 }

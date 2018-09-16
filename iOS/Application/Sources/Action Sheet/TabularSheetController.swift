@@ -226,7 +226,7 @@ public extension TabularSheetCellConfiguration {
 class CancelCell: UITableViewCell {
   fileprivate let label: UILabel
 
-  override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     label = UILabel()
     super.init(style: style, reuseIdentifier: reuseIdentifier)
     self.contentView.addSubview(label)

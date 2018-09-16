@@ -78,6 +78,9 @@
 "setup.uploading" = "Hochladen";
 "setup.uploadMovies" = "Filme hochladen";
 "setup.uploadMovies.secondaryText" = "Deine Filme werden in iCloud übertragen.";
+"share.acceptingFailed.alreadyAccepted" = "Du hast diese Einladung bereits akzeptiert";
+"share.acceptingFailed.currentUserIsOwner" = "Du kannst nicht deine eigene Einladung akzeptierten.";
+"share.acceptingFailed.error" = "Die Einladung kann momentan nicht akzeptiert werden.";
 "sort.by.runtime" = "Laufzeit";
 "sort.by.runtime.lessThanTenMinutes" = "Weniger als 10 Minuten";
 "sort.by.runtime.unknownHeader" = "Unbekannt";

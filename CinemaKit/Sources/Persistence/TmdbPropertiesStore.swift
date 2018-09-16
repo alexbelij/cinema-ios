@@ -20,9 +20,12 @@ class FileBasedTmdbPropertiesStore: TmdbPropertiesStore {
     do {
       let urlData = try Data(contentsOf: fileURL)
       let decoder = JSONDecoder()
-      return try decoder.decode([TmdbIdentifier: Movie.TmdbProperties].self, from: urlData)
+      let propertiesKeyedByInts = try decoder.decode([Int: Movie.TmdbProperties].self, from: urlData)
+      let properties: [TmdbIdentifier: Movie.TmdbProperties]
+          = Dictionary(uniqueKeysWithValues: propertiesKeyedByInts.map { (TmdbIdentifier(rawValue: $0.key), $0.value) })
+      return properties
     } catch {
-      os_log("cache is corrupt: %{public}@",
+      os_log("data corrupted: %{public}@",
              log: FileBasedTmdbPropertiesStore.logger,
              type: .error,
              String(describing: error))
@@ -35,10 +38,11 @@ class FileBasedTmdbPropertiesStore: TmdbPropertiesStore {
     do {
       let encoder = JSONEncoder()
       encoder.outputFormatting = .prettyPrinted
-      let encodedData = try encoder.encode(properties)
+      let propertiesKeyedByInts = Dictionary(uniqueKeysWithValues: properties.map { ($0.key.rawValue, $0.value) })
+      let encodedData = try encoder.encode(propertiesKeyedByInts)
       try encodedData.write(to: fileURL)
     } catch {
-      os_log("error saving records: %{public}@",
+      os_log("unable to save: %{public}@",
              log: FileBasedTmdbPropertiesStore.logger,
              type: .error,
              String(describing: error))

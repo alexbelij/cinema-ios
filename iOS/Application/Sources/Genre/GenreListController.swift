@@ -93,7 +93,7 @@ extension GenreListController {
 
   private func configureBackgroundView() {
     let backgroundView: GenericEmptyView?
-    let separatorStyle: UITableViewCellSeparatorStyle
+    let separatorStyle: UITableViewCell.SeparatorStyle
     switch listData {
       case .loading:
         backgroundView = GenericEmptyView(

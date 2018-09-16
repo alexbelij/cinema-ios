@@ -78,6 +78,9 @@
 "setup.uploading" = "Uploading";
 "setup.uploadMovies" = "Upload Movies";
 "setup.uploadMovies.secondaryText" = "Your movies will be transferred to iCloud.";
+"share.acceptingFailed.alreadyAccepted" = "You already accepted this share.";
+"share.acceptingFailed.currentUserIsOwner" = "You can not accept your own share.";
+"share.acceptingFailed.error" = "The share can not be accepted right now.";
 "sort.by.runtime" = "Runtime";
 "sort.by.runtime.lessThanTenMinutes" = "Less than 10 minutes";
 "sort.by.runtime.unknownHeader" = "Unknown";

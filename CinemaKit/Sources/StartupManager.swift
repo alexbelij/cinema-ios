@@ -98,7 +98,7 @@ public class CinemaKitStartupManager: StartupManager {
         clearPosterCache()
         markCurrentVersion()
       } else if previousVersion > currentVersion {
-        fatalError("unsupported -> clean app data")
+        fatalError("going back from \(previousVersion) to \(currentVersion) is not supported -> clear app data")
       }
     } else {
       os_log("app has never been launched before", log: CinemaKitStartupManager.logger, type: .info)
