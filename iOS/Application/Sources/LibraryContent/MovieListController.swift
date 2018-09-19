@@ -212,6 +212,7 @@ extension MovieListController {
   }
 
   private func scrollToTop() {
+    tableView.layoutIfNeeded()
     tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
   }
 }
