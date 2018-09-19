@@ -137,11 +137,13 @@ private struct RuntimeSortingStrategy: SectionSortingStrategy {
 
 private struct YearSortingStrategy: SectionSortingStrategy {
   private let unknownSymbol = "?"
+  private let currentYear = Calendar.current.component(.year, from: Date())
+  private let numberOfStandaloneYears = 10
 
   func sectionIndexTitle(for movie: Movie) -> String {
     guard let releaseDate = movie.releaseDate else { return unknownSymbol }
     let year = Calendar.current.component(.year, from: releaseDate)
-    if year < 2010 {
+    if year < currentYear - numberOfStandaloneYears {
       return String(year / 10 * 10)
     } else {
       return String(year)
