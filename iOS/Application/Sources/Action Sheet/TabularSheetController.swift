@@ -37,8 +37,8 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
   private var registeredCells = [String: UINib]()
   private let cellConfig: AnyTabularSheetCellConfiguration<SheetItem>
 
-  public var sheetMargin: CGFloat = 10.0
-  public var sheetCornerRadius: CGFloat = 14.0
+  private let sheetMargin: CGFloat = 10.0
+  private let sheetCornerRadius: CGFloat = 14.0
 
   private var contentWidth: CGFloat = 0.0
   private var scrollableContentHeight: CGFloat = 0.0
