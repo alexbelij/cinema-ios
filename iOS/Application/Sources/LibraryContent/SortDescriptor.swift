@@ -164,7 +164,13 @@ private struct YearSortingStrategy: SectionSortingStrategy {
       case unknownSymbol:
         return NSLocalizedString("sort.by.year.unknownHeader", comment: "")
       default:
-        return sectionIndexTitle
+        let year = Int(sectionIndexTitle)!
+        let thresholdYear = currentYear - numberOfStandaloneYears
+        if year < thresholdYear {
+          return "\(year) - \(min(thresholdYear, year + 10) - 1)"
+        } else {
+          return sectionIndexTitle
+        }
     }
   }
 
