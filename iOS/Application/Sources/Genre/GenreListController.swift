@@ -138,6 +138,35 @@ extension GenreListController {
 
 // MARK: - Table View
 
+extension UITableView {
+  fileprivate func reloadRow(for genre: GenreListController.Genre,
+                             at indexPathProvider: @escaping () -> IndexPath?,
+                             using genreImageProvider: GenreImageProvider) {
+    guard let indexPath = indexPathProvider() else { return }
+    if let cell = cellForRow(at: indexPath) as? GenreCell {
+      configure(cell,
+                for: genre,
+                at: indexPathProvider,
+                using: genreImageProvider)
+    }
+  }
+
+  fileprivate func configure(_ cell: GenreCell,
+                             for genre: GenreListController.Genre,
+                             at indexPathProvider: @escaping () -> IndexPath?,
+                             using genreImageProvider: GenreImageProvider) {
+    cell.configure(for: genre, genreImageProvider: genreImageProvider) {
+      guard let indexPath = indexPathProvider() else { return }
+      if let cell = self.cellForRow(at: indexPath) as? GenreCell {
+        self.configure(cell,
+                       for: genre,
+                       at: indexPathProvider,
+                       using: genreImageProvider)
+      }
+    }
+  }
+}
+
 extension GenreListController: UITableViewDataSourcePrefetching {
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     guard let viewModel = self.viewModel else { return 0 }
@@ -147,11 +176,13 @@ extension GenreListController: UITableViewDataSourcePrefetching {
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell: GenreCell = tableView.dequeueReusableCell(for: indexPath)
     let genre = viewModel[indexPath.row]
-    cell.configure(for: genre, genreImageProvider: genreImageProvider) { [weak self] in
-      guard let `self` = self else { return }
-      guard let rowIndex = self.viewModel.index(where: { $0.id == genre.id }) else { return }
-      tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
-    }
+    tableView.configure(cell,
+                        for: genre,
+                        at: { [weak self] in
+                          self?.viewModel.index { $0.id == genre.id }
+                                         .map { IndexPath(row: $0, section: 0) }
+                        },
+                        using: genreImageProvider)
     return cell
   }
 
@@ -166,14 +197,17 @@ extension GenreListController: UITableViewDataSourcePrefetching {
   func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
     for indexPath in indexPaths {
       let genre = viewModel[indexPath.row]
-      if case .unknown = genre.image {
-        genre.image = .loading
-        DispatchQueue.global(qos: .background).async {
-          fetchBackdrop(for: genre, using: self.genreImageProvider) { [weak self] in
-            guard let `self` = self else { return }
-            guard let rowIndex = self.viewModel.index(where: { $0.id == genre.id }) else { return }
-            tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
-          }
+      guard case .unknown = genre.image else { return }
+      genre.image = .loading
+      DispatchQueue.global(qos: .background).async {
+        fetchBackdrop(for: genre, using: self.genreImageProvider) { [weak self] in
+          guard let `self` = self else { return }
+          tableView.reloadRow(for: genre,
+                              at: { [weak self] in
+                                self?.viewModel.index { $0.id == genre.id }
+                                               .map { IndexPath(row: $0, section: 0) }
+                              },
+                              using: self.genreImageProvider)
         }
       }
     }

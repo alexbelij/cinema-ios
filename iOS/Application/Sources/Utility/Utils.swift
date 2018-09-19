@@ -39,14 +39,6 @@ extension String {
   }
 }
 
-extension UITableView {
-  func reloadRowWithoutAnimation(at indexPath: IndexPath) {
-    UIView.performWithoutAnimation {
-      reloadRows(at: [indexPath], with: .none)
-    }
-  }
-}
-
 extension UIViewController {
   func presentErrorAlert() {
     presentAlert(title: NSLocalizedString("error.genericError", comment: ""),

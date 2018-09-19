@@ -34,14 +34,16 @@ class SearchTmdbController: UIViewController {
       self.delegate?.searchTmdbController(self, didSelect: selectedItem)
     }
     resultsController.deselectImmediately = true
-    resultsController.cellConfiguration = { [weak self, weak resultsController] tableView, indexPath, listItem in
-      guard let `self` = self, let resultsController = resultsController else { return UITableViewCell() }
+    resultsController.cellConfiguration = { [weak self] tableView, indexPath, listItem in
+      guard let `self` = self else { return UITableViewCell() }
       let cell: SearchTmdbSearchResultTableCell = tableView.dequeueReusableCell(for: indexPath)
-      cell.configure(for: listItem, posterProvider: self.posterProvider) {
-        guard let rowIndex = resultsController.items.index(where: { $0.movie.tmdbID == listItem.movie.tmdbID })
-            else { return }
-        tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
-      }
+      tableView.configure(cell,
+                          for: listItem,
+                          at: { [weak resultsController] in
+                            resultsController?.items.index { $0.movie.tmdbID == listItem.movie.tmdbID }
+                                                    .map { IndexPath(row: $0, section: 0) }
+                          },
+                          using: self.posterProvider)
       return cell
     }
     resultsController.prefetchHandler = { [weak self, weak resultsController] tableView, indexPaths in
@@ -55,9 +57,12 @@ class SearchTmdbController: UIViewController {
                         using: self.posterProvider,
                         size: MovieListListItemTableCell.posterSize,
                         purpose: .searchResult) {
-              guard let rowIndex = resultsController.items.index(where: { $0.movie.tmdbID == model.movie.tmdbID })
-                  else { return }
-              tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
+              tableView.reloadRow(for: model,
+                                  at: { [weak resultsController] in
+                                    resultsController?.items.index { $0.movie.tmdbID == model.movie.tmdbID }
+                                                            .map { IndexPath(row: $0, section: 0) }
+                                  },
+                                  using: self.posterProvider)
             }
           }
         }
@@ -93,6 +98,35 @@ class SearchTmdbController: UIViewController {
     navigationItem.searchController = searchController
     navigationItem.hidesSearchBarWhenScrolling = false
     title = NSLocalizedString("addMovie.title", comment: "")
+  }
+}
+
+extension UITableView {
+  fileprivate func reloadRow(for movie: ExternalMovieViewModel,
+                             at indexPathProvider: @escaping () -> IndexPath?,
+                             using posterProvider: PosterProvider) {
+    guard let indexPath = indexPathProvider() else { return }
+    if let cell = cellForRow(at: indexPath) as? SearchTmdbSearchResultTableCell {
+      configure(cell,
+                for: movie,
+                at: indexPathProvider,
+                using: posterProvider)
+    }
+  }
+
+  fileprivate func configure(_ cell: SearchTmdbSearchResultTableCell,
+                             for movie: ExternalMovieViewModel,
+                             at indexPathProvider: @escaping () -> IndexPath?,
+                             using posterProvider: PosterProvider) {
+    cell.configure(for: movie, posterProvider: posterProvider) {
+      guard let indexPath = indexPathProvider() else { return }
+      if let cell = self.cellForRow(at: indexPath) as? SearchTmdbSearchResultTableCell {
+        self.configure(cell,
+                       for: movie,
+                       at: indexPathProvider,
+                       using: posterProvider)
+      }
+    }
   }
 }
 
