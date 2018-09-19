@@ -3,6 +3,7 @@ import Dispatch
 import UIKit
 
 protocol MovieListControllerDelegate: class {
+  func movieListControllerShowSortDescriptorSheet(_ controller: MovieListController)
   func movieListController(_ controller: MovieListController, didSelect movie: Movie)
   func movieListControllerDidDismiss(_ controller: MovieListController)
 }
@@ -93,7 +94,11 @@ class MovieListController: UITableViewController {
     return resultsController
   }()
 
-  private var sortDescriptor = SortDescriptor.title
+  var sortDescriptor = SortDescriptor.title {
+    didSet {
+      setup()
+    }
+  }
   @IBOutlet private weak var sortButton: UIBarButtonItem!
 
   @IBOutlet private var summaryView: UIView!
@@ -327,21 +332,8 @@ extension MovieListController: UISearchResultsUpdating {
 // MARK: - User Actions
 
 extension MovieListController {
-  @IBAction private func showSortDescriptorSheet() {
-    let controller = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
-    for descriptor in [SortDescriptor.title, .runtime, .year] {
-      controller.addSheetItem(SelectableLabelSheetItem(title: descriptor.localizedName,
-                                                       showCheckmark: descriptor == self.sortDescriptor) { _ in
-        guard self.sortDescriptor != descriptor else { return }
-        self.sortDescriptor = descriptor
-        DispatchQueue.main.async {
-          self.setupViewModel()
-          self.tableView.reloadData()
-          self.scrollToTop()
-        }
-      })
-    }
-    self.present(controller, animated: true)
+  @IBAction private func sortButtonTapped() {
+    delegate?.movieListControllerShowSortDescriptorSheet(self)
   }
 }
 

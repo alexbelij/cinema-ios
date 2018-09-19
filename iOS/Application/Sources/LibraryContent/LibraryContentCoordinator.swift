@@ -128,6 +128,18 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 // MARK: - MovieListControllerDelegate
 
 extension LibraryContentCoordinator: MovieListControllerDelegate {
+  func movieListControllerShowSortDescriptorSheet(_ controller: MovieListController) {
+    let sheet = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
+    for descriptor in [SortDescriptor.title, .runtime, .year] {
+      sheet.addSheetItem(SelectableLabelSheetItem(title: descriptor.localizedName,
+                                                  showCheckmark: descriptor == controller.sortDescriptor) { _ in
+        guard controller.sortDescriptor != descriptor else { return }
+        controller.sortDescriptor = descriptor
+      })
+    }
+    controller.present(sheet, animated: true)
+  }
+
   func movieListController(_ controller: MovieListController, didSelect movie: Movie) {
     movieDetailsCoordinator = MovieDetailsCoordinator(for: movie, using: dependencies.movieDb)
     movieDetailsCoordinator!.delegate = self

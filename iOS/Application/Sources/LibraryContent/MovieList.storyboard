@@ -231,7 +231,7 @@
                     <navigationItem key="navigationItem" id="Zdf-7t-Un8">
                         <barButtonItem key="rightBarButtonItem" image="Sort" style="done" id="xa6-xy-PhH">
                             <connections>
-                                <action selector="showSortDescriptorSheet" destination="7bK-jq-Zjz" id="Gk4-lS-fKy"/>
+                                <action selector="sortButtonTapped" destination="7bK-jq-Zjz" id="Gk4-lS-fKy"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
