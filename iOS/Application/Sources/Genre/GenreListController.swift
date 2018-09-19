@@ -255,14 +255,14 @@ class GenreCell: UITableViewCell {
         genreNameLabel.layer.shadowOpacity = 1.0
         scrim.isHidden = false
         backdropImageView.contentMode = .scaleAspectFill
-        backdropImageView.image = genreImage
+        configureBackdrop(genreImage)
         self.activityIndicator.stopAnimating()
       case .unavailable:
         genreNameLabel.textColor = #colorLiteral(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
         genreNameLabel.layer.shadowOpacity = 0.0
         scrim.isHidden = true
         backdropImageView.contentMode = .center
-        backdropImageView.image = #imageLiteral(resourceName: "MissingGenreImage")
+        configureBackdrop(#imageLiteral(resourceName: "MissingGenreImage"))
         activityIndicator.stopAnimating()
     }
   }
@@ -271,8 +271,19 @@ class GenreCell: UITableViewCell {
     genreNameLabel.textColor = #colorLiteral(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
     genreNameLabel.layer.shadowOpacity = 0.0
     scrim.isHidden = true
-    backdropImageView.image = nil
+    configureBackdrop(nil)
     activityIndicator.startAnimating()
+  }
+
+  private func configureBackdrop(_ image: UIImage?) {
+    backdropImageView.image = image
+    if image == nil {
+      backdropImageView.alpha = 0.0
+    } else if backdropImageView.alpha < 1.0 {
+      UIView.animate(withDuration: 0.2) {
+        self.backdropImageView.alpha = 1.0
+      }
+    }
   }
 
   override func prepareForReuse() {

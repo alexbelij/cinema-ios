@@ -490,9 +490,8 @@ class MovieListListItemTableCell: UITableViewCell {
     tertiaryLabel.text = item.movie.diskType.localizedName
     switch item.poster {
       case .unknown:
-        posterView.image = nil
-        posterView.alpha = 0.0
         item.poster = .loading
+        configurePoster(nil)
         DispatchQueue.global(qos: .userInteractive).async {
           fetchPoster(for: item,
                       using: posterProvider,
@@ -501,17 +500,25 @@ class MovieListListItemTableCell: UITableViewCell {
                       then: onNeedsReload)
         }
       case .loading:
-        posterView.image = nil
-        posterView.alpha = 0.0
+        configurePoster(nil)
       case let .available(posterImage):
-        posterView.image = posterImage
-        posterView.alpha = 1.0
+        configurePoster(posterImage)
       case .unavailable:
-        posterView.image = #imageLiteral(resourceName: "GenericPoster")
-        posterView.alpha = 1.0
+        configurePoster(#imageLiteral(resourceName: "GenericPoster"))
     }
     separatorInset = isSectionIndexVisible
         ? MovieListListItemTableCell.separatorInsetsWithSectionIndex
         : MovieListListItemTableCell.separatorInsetsWithoutSectionIndex
+  }
+
+  private func configurePoster(_ image: UIImage?) {
+    posterView.image = image
+    if image == nil {
+      posterView.alpha = 0.0
+    } else if posterView.alpha < 1.0 {
+      UIView.animate(withDuration: 0.2) {
+        self.posterView.alpha = 1.0
+      }
+    }
   }
 }
