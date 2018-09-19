@@ -161,7 +161,8 @@ class SearchTmdbSearchResultTableCell: UITableViewCell {
     }
     switch model.poster {
       case .unknown:
-        posterView.image = #imageLiteral(resourceName: "GenericPoster")
+        posterView.image = nil
+        posterView.alpha = 0.0
         model.poster = .loading
         DispatchQueue.global(qos: .userInteractive).async {
           fetchPoster(for: model,
@@ -170,10 +171,15 @@ class SearchTmdbSearchResultTableCell: UITableViewCell {
                       purpose: .searchResult,
                       then: onNeedsReload)
         }
+      case .loading:
+        posterView.image = nil
+        posterView.alpha = 0.0
       case let .available(posterImage):
         posterView.image = posterImage
-      case .loading, .unavailable:
+        posterView.alpha = 1.0
+      case .unavailable:
         posterView.image = #imageLiteral(resourceName: "GenericPoster")
+        posterView.alpha = 1.0
     }
   }
 

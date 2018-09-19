@@ -447,7 +447,8 @@ class MovieListListItemTableCell: UITableViewCell {
     tertiaryLabel.text = item.movie.diskType.localizedName
     switch item.poster {
       case .unknown:
-        posterView.image = #imageLiteral(resourceName: "GenericPoster")
+        posterView.image = nil
+        posterView.alpha = 0.0
         item.poster = .loading
         DispatchQueue.global(qos: .userInteractive).async {
           fetchPoster(for: item,
@@ -456,10 +457,15 @@ class MovieListListItemTableCell: UITableViewCell {
                       purpose: .list,
                       then: onNeedsReload)
         }
+      case .loading:
+        posterView.image = nil
+        posterView.alpha = 0.0
       case let .available(posterImage):
         posterView.image = posterImage
-      case .loading, .unavailable:
+        posterView.alpha = 1.0
+      case .unavailable:
         posterView.image = #imageLiteral(resourceName: "GenericPoster")
+        posterView.alpha = 1.0
     }
     separatorInset = isSectionIndexVisible
         ? MovieListListItemTableCell.separatorInsetsWithSectionIndex

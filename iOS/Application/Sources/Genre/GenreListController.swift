@@ -190,6 +190,7 @@ class GenreCell: UITableViewCell {
 
   override func awakeFromNib() {
     super.awakeFromNib()
+    contentView.backgroundColor = .missingArtworkBackground
     scrim = ScrimView()
     contentView.insertSubview(scrim, belowSubview: genreNameLabel)
     genreNameLabel.layer.shadowColor = UIColor.black.cgColor
@@ -218,27 +219,25 @@ class GenreCell: UITableViewCell {
       case let .available(genreImage):
         genreNameLabel.textColor = .white
         genreNameLabel.layer.shadowOpacity = 1.0
-        backdropImageView.image = genreImage
-        backdropImageView.contentMode = .scaleAspectFill
         scrim.isHidden = false
+        backdropImageView.contentMode = .scaleAspectFill
+        backdropImageView.image = genreImage
         self.activityIndicator.stopAnimating()
       case .unavailable:
         genreNameLabel.textColor = #colorLiteral(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
         genreNameLabel.layer.shadowOpacity = 0.0
-        backdropImageView.image = #imageLiteral(resourceName: "MissingGenreImage")
-        backdropImageView.contentMode = .center
-        backdropImageView.backgroundColor = .missingArtworkBackground
         scrim.isHidden = true
-        self.activityIndicator.stopAnimating()
+        backdropImageView.contentMode = .center
+        backdropImageView.image = #imageLiteral(resourceName: "MissingGenreImage")
+        activityIndicator.stopAnimating()
     }
   }
 
   private func configureBackdropForUnknownOrLoadingImageState() {
     genreNameLabel.textColor = #colorLiteral(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
     genreNameLabel.layer.shadowOpacity = 0.0
-    backdropImageView.image = nil
-    backdropImageView.backgroundColor = .missingArtworkBackground
     scrim.isHidden = true
+    backdropImageView.image = nil
     activityIndicator.startAnimating()
   }
 
