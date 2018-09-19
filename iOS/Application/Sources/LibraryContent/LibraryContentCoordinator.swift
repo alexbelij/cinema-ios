@@ -130,7 +130,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 extension LibraryContentCoordinator: MovieListControllerDelegate {
   func movieListControllerShowSortDescriptorSheet(_ controller: MovieListController) {
     let sheet = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
-    for descriptor in [SortDescriptor.title, .runtime, .year] {
+    for descriptor in SortDescriptor.allCases {
       sheet.addSheetItem(SelectableLabelSheetItem(title: descriptor.localizedName,
                                                   showCheckmark: descriptor == controller.sortDescriptor) { _ in
         guard controller.sortDescriptor != descriptor else { return }
