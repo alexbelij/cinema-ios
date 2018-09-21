@@ -14,11 +14,14 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     case allWith(GenreIdentifier)
   }
 
+  private static let sortDescriptorKey = UserDefaultsKey<String>("MovieSortDescriptor")
+
   // coordinator stuff
   weak var delegate: LibraryContentCoordinatorDelegate?
 
   // other properties
   private let dependencies: AppDependencies
+  private let userDefaults: UserDefaultsProtocol
   private let notificationCenter: NotificationCenter
   var library: MovieLibrary {
     willSet {
@@ -57,12 +60,17 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
        navigationController: UINavigationController,
        dependencies: AppDependencies) {
     self.dependencies = dependencies
+    self.userDefaults = dependencies.userDefaults
     self.notificationCenter = dependencies.notificationCenter
     self.library = library
     self.content = content
     self.navigationController = navigationController
     movieListController.delegate = self
     movieListController.posterProvider = MovieDbPosterProvider(dependencies.movieDb)
+    if let rawSortDescriptor = userDefaults.get(for: LibraryContentCoordinator.sortDescriptorKey),
+       let sortDescriptor = SortDescriptor(rawValue: rawSortDescriptor) {
+      movieListController.sortDescriptor = sortDescriptor
+    }
     setup()
   }
 
@@ -135,6 +143,7 @@ extension LibraryContentCoordinator: MovieListControllerDelegate {
                                                   showCheckmark: descriptor == controller.sortDescriptor) { _ in
         guard controller.sortDescriptor != descriptor else { return }
         controller.sortDescriptor = descriptor
+        self.userDefaults.set(descriptor.rawValue, for: LibraryContentCoordinator.sortDescriptorKey)
       })
     }
     controller.present(sheet, animated: true)

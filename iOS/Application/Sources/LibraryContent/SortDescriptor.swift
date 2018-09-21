@@ -1,7 +1,7 @@
 import CinemaKit
 import Foundation
 
-enum SortDescriptor: CaseIterable {
+enum SortDescriptor: String, CaseIterable {
   case title, runtime, year
 
   func makeTableViewStrategy() -> SectionSortingStrategy {
