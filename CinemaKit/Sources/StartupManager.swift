@@ -408,6 +408,9 @@ extension CinemaKitStartupManager {
     if previousVersion < "2.0" {
       clearPosterCache()
     }
+    if previousVersion < "2.0.2" {
+      renamePrimaryLibraryKey()
+    }
   }
 
   private func clearPosterCache() {
@@ -419,6 +422,14 @@ extension CinemaKitStartupManager {
              log: CinemaKitStartupManager.logger,
              type: .fault,
              String(describing: error))
+    }
+  }
+
+  private func renamePrimaryLibraryKey() {
+    if let primaryLibrary = UserDefaults.standard.string(forKey: "primaryLibrary") {
+      os_log("renaming user defaults key", log: CinemaKitStartupManager.logger, type: .default)
+      UserDefaults.standard.removeObject(forKey: "primaryLibrary")
+      UserDefaults.standard.set(primaryLibrary, forKey: "PrimaryLibrary")
     }
   }
 }

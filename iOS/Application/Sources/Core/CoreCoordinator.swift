@@ -5,7 +5,7 @@ import os.log
 import UIKit
 
 class CoreCoordinator: CustomPresentableCoordinator {
-  static let primaryLibraryKey = UserDefaultsKey<String>("primaryLibrary")
+  static let primaryLibraryKey = UserDefaultsKey<String>("PrimaryLibrary")
   private static let logger = Logging.createLogger(category: "CoreCoordinator")
 
   // coordinator stuff
