@@ -58,7 +58,7 @@
 		CB65D7AC1F8A108200457386 /* DimmingPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB65D7AA1F8A103000457386 /* DimmingPresentationController.swift */; };
 		CB65D7AD1F8A108A00457386 /* ArrayTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB65D7A91F8A103000457386 /* ArrayTableController.swift */; };
 		CB6F1A0E211083AF009239BD /* ExternalMovieViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB6F1A0C2110836F009239BD /* ExternalMovieViewModel.swift */; };
-		CB76F8262144FF7F002E6A92 /* UserDefaultsMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8032144FF0F002E6A92 /* UserDefaultsMock.swift */; };
+		CB76F8262144FF7F002E6A92 /* UserDefaultsDataStoreMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8032144FF0F002E6A92 /* UserDefaultsDataStoreMock.swift */; };
 		CB76F8272144FF7F002E6A92 /* DatabaseOperationQueueMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8072144FF0F002E6A92 /* DatabaseOperationQueueMock.swift */; };
 		CB76F8282144FF7F002E6A92 /* OperationStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8082144FF0F002E6A92 /* OperationStubs.swift */; };
 		CB76F8292144FF7F002E6A92 /* FetchManagerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB76F8092144FF0F002E6A92 /* FetchManagerMock.swift */; };
@@ -231,7 +231,7 @@
 		CB76F8002144FF0F002E6A92 /* DeviceSyncingLibraryManagerHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSyncingLibraryManagerHelpers.swift; sourceTree = "<group>"; };
 		CB76F8012144FF0F002E6A92 /* MovieBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieBuilder.swift; sourceTree = "<group>"; };
 		CB76F8022144FF0F002E6A92 /* MovieLibraryMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieLibraryMock.swift; sourceTree = "<group>"; };
-		CB76F8032144FF0F002E6A92 /* UserDefaultsMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDefaultsMock.swift; sourceTree = "<group>"; };
+		CB76F8032144FF0F002E6A92 /* UserDefaultsDataStoreMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDefaultsDataStoreMock.swift; sourceTree = "<group>"; };
 		CB76F8042144FF0F002E6A92 /* TmdbMoviePropertiesProviderMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TmdbMoviePropertiesProviderMock.swift; sourceTree = "<group>"; };
 		CB76F8052144FF0F002E6A92 /* SyncManagerMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SyncManagerMock.swift; sourceTree = "<group>"; };
 		CB76F8062144FF0F002E6A92 /* DeviceSyncingMovieLibraryHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSyncingMovieLibraryHelpers.swift; sourceTree = "<group>"; };
@@ -474,7 +474,7 @@
 		CB76F7FB2144FF0F002E6A92 /* Mocks */ = {
 			isa = PBXGroup;
 			children = (
-				CB76F8032144FF0F002E6A92 /* UserDefaultsMock.swift */,
+				CB76F8032144FF0F002E6A92 /* UserDefaultsDataStoreMock.swift */,
 				CB76F8072144FF0F002E6A92 /* DatabaseOperationQueueMock.swift */,
 				CB76F8082144FF0F002E6A92 /* OperationStubs.swift */,
 				CB76F8092144FF0F002E6A92 /* FetchManagerMock.swift */,
@@ -1091,7 +1091,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CB76F8262144FF7F002E6A92 /* UserDefaultsMock.swift in Sources */,
+				CB76F8262144FF7F002E6A92 /* UserDefaultsDataStoreMock.swift in Sources */,
 				CB76F8302144FF7F002E6A92 /* TmdbMoviePropertiesProviderMock.swift in Sources */,
 				CB76F8322144FF7F002E6A92 /* MovieLibraryManagerModelControllerMock.swift in Sources */,
 				CB76F82C2144FF7F002E6A92 /* ShareManagerMock.swift in Sources */,

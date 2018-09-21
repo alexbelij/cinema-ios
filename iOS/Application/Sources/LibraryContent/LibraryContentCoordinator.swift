@@ -54,6 +54,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
   // child coordinators
   private var movieDetailsCoordinator: MovieDetailsCoordinator?
   private var editMovieCoordinator: EditMovieCoordinator?
+  private var token: ObservationToken?
 
   init(for library: MovieLibrary,
        displaying content: ContentSpecification,
@@ -70,6 +71,16 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     if let rawSortDescriptor = userDefaults.get(for: LibraryContentCoordinator.sortDescriptorKey),
        let sortDescriptor = SortDescriptor(rawValue: rawSortDescriptor) {
       movieListController.sortDescriptor = sortDescriptor
+    }
+    self.token = userDefaults.observerValue(for: LibraryContentCoordinator.sortDescriptorKey) { [weak self] value in
+      guard let `self` = self else { return }
+      guard let rawSortDescriptor = value,
+            let sortDescriptor = SortDescriptor(rawValue: rawSortDescriptor) else { return }
+      DispatchQueue.main.async {
+        if self.movieListController.sortDescriptor != sortDescriptor {
+          self.movieListController.sortDescriptor = sortDescriptor
+        }
+      }
     }
     setup()
   }

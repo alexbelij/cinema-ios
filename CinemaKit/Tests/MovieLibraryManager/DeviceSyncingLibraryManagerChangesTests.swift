@@ -27,8 +27,8 @@ class DeviceSyncingLibraryManagerChangesTests: XCTestCase {
 
   func testFetchChangesButUnableToLoad() {
     let changes = FetchedChanges(changedRecords: [LibraryRecord(from: MovieLibraryMetadata(name: "Library")).rawRecord])
-    let userDefaults = UserDefaultsMock()
-    let dataInvalidationFlag = LocalDataInvalidationFlag(userDefaults: userDefaults)
+    let dataStoreMock = UserDefaultsDataStoreMock()
+    let dataInvalidationFlag = LocalDataInvalidationFlag(userDefaults: StandardUserDefaults(dataStore: dataStoreMock))
     let libraryManager = DeviceSyncingLibraryManager.makeForTesting(
         modelController: MovieLibraryManagerModelControllerMock.fail(with: .nonRecoverableError),
         changesManager: ChangesManagerMock.fetch(changes),
@@ -390,8 +390,8 @@ class DeviceSyncingLibraryManagerChangesTests: XCTestCase {
     let shareManager = ShareManagerMock()
     shareManager.whenFetchShareMetadata { (nil, CloudKitError.nonRecoverableError) }
     let changes = FetchedChanges(changedRecords: [share])
-    let userDefaults = UserDefaultsMock()
-    let dataInvalidationFlag = LocalDataInvalidationFlag(userDefaults: userDefaults)
+    let dataStoreMock = UserDefaultsDataStoreMock()
+    let dataInvalidationFlag = LocalDataInvalidationFlag(userDefaults: StandardUserDefaults(dataStore: dataStoreMock))
     let libraryManager = DeviceSyncingLibraryManager.makeForTesting(
         modelController: modelController,
         changesManager: ChangesManagerMock.fetch(changes),
