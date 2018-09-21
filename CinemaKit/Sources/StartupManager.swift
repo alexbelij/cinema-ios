@@ -73,7 +73,7 @@ public class CinemaKitStartupManager: StartupManager {
 
   private let application: UIApplication
   private let container = CKContainer.default()
-  private let userDefaults: UserDefaultsProtocol = UserDefaults.standard
+  private let userDefaults = StandardUserDefaults()
   private let migratedLibraryName: String
   private var progressHandler: ((StartupProgress) -> Void)!
 
