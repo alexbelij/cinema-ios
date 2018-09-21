@@ -91,11 +91,7 @@ public class CinemaKitStartupManager: StartupManager {
              type: .info,
              previousVersion.description)
       if previousVersion < currentVersion {
-        os_log("migrating from version %{public}@",
-               log: CinemaKitStartupManager.logger,
-               type: .info,
-               previousVersion.description)
-        clearPosterCache()
+        migrate(from: previousVersion)
         markCurrentVersion()
       } else if previousVersion > currentVersion {
         fatalError("going back from \(previousVersion) to \(currentVersion) is not supported -> clear app data")
@@ -113,18 +109,6 @@ public class CinemaKitStartupManager: StartupManager {
     }
     setUpDirectories()
     setUpDeviceSyncZone()
-  }
-
-  private func clearPosterCache() {
-    do {
-      os_log("clearing poster cache", log: CinemaKitStartupManager.logger, type: .default)
-      try FileManager.default.removeItem(at: CinemaKitStartupManager.posterCacheDir)
-    } catch {
-      os_log("unable to clear poster cache: %{public}@",
-             log: CinemaKitStartupManager.logger,
-             type: .fault,
-             String(describing: error))
-    }
   }
 
   private func markCurrentVersion() {
@@ -411,4 +395,30 @@ private class DefaultMovieLibraryFactory: MovieLibraryFactory {
 
 private func fail() -> Never {
   fatalError("error during startup")
+}
+
+// MARK: - migration
+
+extension CinemaKitStartupManager {
+  private func migrate(from previousVersion: AppVersion) {
+    os_log("migrating from version %{public}@",
+           log: CinemaKitStartupManager.logger,
+           type: .info,
+           previousVersion.description)
+    if previousVersion < "2.0" {
+      clearPosterCache()
+    }
+  }
+
+  private func clearPosterCache() {
+    do {
+      os_log("clearing poster cache", log: CinemaKitStartupManager.logger, type: .default)
+      try FileManager.default.removeItem(at: CinemaKitStartupManager.posterCacheDir)
+    } catch {
+      os_log("unable to clear poster cache: %{public}@",
+             log: CinemaKitStartupManager.logger,
+             type: .fault,
+             String(describing: error))
+    }
+  }
 }
