@@ -62,7 +62,7 @@ class MovieListController: UITableViewController {
                           for: listItem,
                           isSectionIndexVisible: false,
                           at: { [weak resultsController] in
-                            resultsController?.items.index { $0.movie.tmdbID == listItem.movie.tmdbID }
+                            resultsController?.items.firstIndex { $0.movie.tmdbID == listItem.movie.tmdbID }
                                                     .map { IndexPath(row: $0, section: 0) }
                           },
                           using: self.posterProvider)
@@ -83,7 +83,7 @@ class MovieListController: UITableViewController {
             tableView.reloadRow(for: listItem,
                                 isSectionIndexVisible: false,
                                 at: { [weak resultsController] in
-                                  resultsController?.items.index { $0.movie.tmdbID == listItem.movie.tmdbID }
+                                  resultsController?.items.firstIndex { $0.movie.tmdbID == listItem.movie.tmdbID }
                                                           .map { IndexPath(row: $0, section: 0) }
                                 },
                                 using: self.posterProvider)

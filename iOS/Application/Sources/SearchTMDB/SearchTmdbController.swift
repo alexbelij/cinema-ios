@@ -40,7 +40,7 @@ class SearchTmdbController: UIViewController {
       tableView.configure(cell,
                           for: listItem,
                           at: { [weak resultsController] in
-                            resultsController?.items.index { $0.movie.tmdbID == listItem.movie.tmdbID }
+                            resultsController?.items.firstIndex { $0.movie.tmdbID == listItem.movie.tmdbID }
                                                     .map { IndexPath(row: $0, section: 0) }
                           },
                           using: self.posterProvider)
@@ -59,7 +59,7 @@ class SearchTmdbController: UIViewController {
                         purpose: .searchResult) {
               tableView.reloadRow(for: model,
                                   at: { [weak resultsController] in
-                                    resultsController?.items.index { $0.movie.tmdbID == model.movie.tmdbID }
+                                    resultsController?.items.firstIndex { $0.movie.tmdbID == model.movie.tmdbID }
                                                             .map { IndexPath(row: $0, section: 0) }
                                   },
                                   using: self.posterProvider)

@@ -284,7 +284,7 @@ extension LibraryContentCoordinator: MovieLibraryDelegate {
     // updated movies
     if !changeSet.modifications.isEmpty {
       for (id, movie) in changeSet.modifications {
-        guard let index = listItems.index(where: { $0.tmdbID == id }) else { continue }
+        guard let index = listItems.firstIndex(where: { $0.tmdbID == id }) else { continue }
         listItems.remove(at: index)
         listItems.insert(movie, at: index)
       }

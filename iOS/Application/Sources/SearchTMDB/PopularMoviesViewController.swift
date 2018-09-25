@@ -65,7 +65,7 @@ extension PopularMoviesController: UICollectionViewDataSourcePrefetching {
     let model = movies[indexPath.row]
     cell.configure(for: model, posterProvider: posterProvider) { [weak self] in
       guard let `self` = self else { return }
-      guard let rowIndex = self.movies.index(where: { $0.movie.tmdbID == model.movie.tmdbID }) else { return }
+      guard let rowIndex = self.movies.firstIndex(where: { $0.movie.tmdbID == model.movie.tmdbID }) else { return }
       collectionView.reloadItems(at: [IndexPath(row: rowIndex, section: 0)])
     }
     return cell
@@ -82,7 +82,7 @@ extension PopularMoviesController: UICollectionViewDataSourcePrefetching {
                       size: PosterCell.posterSize,
                       purpose: .popularMovies) { [weak self] in
             guard let `self` = self else { return }
-            guard let rowIndex = self.movies.index(where: { $0.movie.tmdbID == item.movie.tmdbID }) else { return }
+            guard let rowIndex = self.movies.firstIndex(where: { $0.movie.tmdbID == item.movie.tmdbID }) else { return }
             collectionView.reloadItems(at: [IndexPath(row: rowIndex, section: 0)])
           }
         }
@@ -140,7 +140,7 @@ extension PopularMoviesController {
   }
 
   func reloadRow(forMovieWithId id: TmdbIdentifier) {
-    if let index = movies.index(where: { $0.movie.tmdbID == id }) {
+    if let index = movies.firstIndex(where: { $0.movie.tmdbID == id }) {
       super.collectionView!.reloadItems(at: [IndexPath(row: index, section: 0)])
     }
   }
@@ -186,7 +186,7 @@ extension PopularMoviesController {
 
 extension PopularMoviesController {
   func removeMovie(withId id: TmdbIdentifier) {
-    guard let index = movies.index(where: { $0.movie.tmdbID == id }) else { return }
+    guard let index = movies.firstIndex(where: { $0.movie.tmdbID == id }) else { return }
     self.movies.remove(at: index)
     collectionView!.deleteItems(at: [IndexPath(row: index, section: 0)])
     fetchMovies(count: 1)

@@ -179,7 +179,7 @@ extension GenreListController: UITableViewDataSourcePrefetching {
     tableView.configure(cell,
                         for: genre,
                         at: { [weak self] in
-                          self?.viewModel.index { $0.id == genre.id }
+                          self?.viewModel.firstIndex { $0.id == genre.id }
                                          .map { IndexPath(row: $0, section: 0) }
                         },
                         using: genreImageProvider)
@@ -204,7 +204,7 @@ extension GenreListController: UITableViewDataSourcePrefetching {
           guard let `self` = self else { return }
           tableView.reloadRow(for: genre,
                               at: { [weak self] in
-                                self?.viewModel.index { $0.id == genre.id }
+                                self?.viewModel.firstIndex { $0.id == genre.id }
                                                .map { IndexPath(row: $0, section: 0) }
                               },
                               using: self.genreImageProvider)

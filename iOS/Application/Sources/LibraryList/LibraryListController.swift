@@ -88,7 +88,7 @@ extension LibraryListController {
   }
 
   private func libraryItemIndex(for metadata: MovieLibraryMetadata) -> Int? {
-    return libraryItems.index {
+    return libraryItems.firstIndex {
       switch $0 {
         case let .placeholder(metadata1): return metadata1.id == metadata.id
         case let .selectLibrary(metadata1): return metadata1.id == metadata.id
