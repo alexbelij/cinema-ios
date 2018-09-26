@@ -39,14 +39,6 @@ extension String {
   }
 }
 
-extension UITableView {
-  func reloadRowWithoutAnimation(at indexPath: IndexPath) {
-    UIView.performWithoutAnimation {
-      reloadRows(at: [indexPath], with: .none)
-    }
-  }
-}
-
 extension UIViewController {
   func presentErrorAlert() {
     presentAlert(title: NSLocalizedString("error.genericError", comment: ""),
@@ -99,14 +91,14 @@ func fetchPoster(for model: PosterHaving,
 
 enum StandardSortDescriptors {
   static let byLibraryName: (MovieLibrary, MovieLibrary) -> Bool = { library1, library2 in
-    return byMetadataName(library1.metadata, library2.metadata)
+    byMetadataName(library1.metadata, library2.metadata)
   }
 
   static let byMetadataName: (MovieLibraryMetadata, MovieLibraryMetadata) -> Bool = { metadata1, metadata2 in
-    return byName(metadata1.name, metadata2.name)
+    byName(metadata1.name, metadata2.name)
   }
 
   static let byName: (String, String) -> Bool = { string1, string2 in
-    return string1.compare(string2, options: [.diacriticInsensitive, .caseInsensitive]) == .orderedAscending
+    string1.compare(string2, options: [.diacriticInsensitive, .caseInsensitive]) == .orderedAscending
   }
 }

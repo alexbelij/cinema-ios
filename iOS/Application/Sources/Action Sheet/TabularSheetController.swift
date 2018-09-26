@@ -37,22 +37,13 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
   private var registeredCells = [String: UINib]()
   private let cellConfig: AnyTabularSheetCellConfiguration<SheetItem>
 
-  public var sheetMargin: CGFloat = 10.0
-  public var sheetCornerRadius: CGFloat = 14.0
+  private let sheetMargin: CGFloat = 10.0
+  private let groupGap: CGFloat = 10.0
+  private let sheetCornerRadius: CGFloat = 14.0
 
   private var contentWidth: CGFloat = 0.0
   private var scrollableContentHeight: CGFloat = 0.0
   private var hasViewBeenShown = false
-
-  // all devices except iPhone X use sheetMargin as bottom margin
-  private var bottomMargin: CGFloat {
-    let bottomSafeAreaInset = presentingViewController!.view.safeAreaInsets.bottom
-    if bottomSafeAreaInset == 0 {
-      return sheetMargin
-    } else {
-      return bottomSafeAreaInset
-    }
-  }
 
   public init<C: TabularSheetCellConfiguration>(cellConfig: C) where C.SheetItem == SheetItem {
     self.cellConfig = AnyTabularSheetCellConfiguration(cellConfig)
@@ -97,15 +88,18 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
 
   override public func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
+    let safeAreaInsets = view.safeAreaInsets
+    let topMargin = max(safeAreaInsets.top, sheetMargin)
+    let bottomMargin = max(safeAreaInsets.bottom, sheetMargin)
     let bounds = presentingViewController!.view.bounds
-    let maxHeight = 0.9 * bounds.height
-    let cancelGroupHeight = cancelTableView == nil ? 0 : cancelTableView!.contentSize.height + sheetMargin
+    let maxHeight = bounds.height - topMargin - bottomMargin
+    let cancelGroupHeight = cancelTableView == nil ? 0 : cancelTableView!.contentSize.height + groupGap
     let scrollViewHeight = scrollableContentHeight + cancelGroupHeight <= maxHeight
         ? scrollableContentHeight
-        : maxHeight - sheetMargin - cancelGroupHeight
+        : maxHeight - cancelGroupHeight
     scrollView.frame = CGRect(x: 0, y: 0, width: contentWidth, height: scrollViewHeight)
     if cancelTableView != nil {
-      cancelTableView!.frame.origin = CGPoint(x: 0, y: scrollViewHeight + sheetMargin)
+      cancelTableView!.frame.origin = CGPoint(x: 0, y: scrollViewHeight + groupGap)
     }
     let contentHeight = cancelGroupHeight + scrollViewHeight
     view.frame = CGRect(x: (bounds.width - self.contentWidth) / 2,
@@ -135,9 +129,9 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
                                y: scrollableContentHeight,
                                width: contentWidth,
                                height: tableViewHeight)
-      scrollableContentHeight += tableViewHeight + sheetMargin
+      scrollableContentHeight += tableViewHeight + groupGap
     }
-    scrollableContentHeight -= sheetMargin
+    scrollableContentHeight -= groupGap
     scrollView.contentSize = CGSize(width: contentWidth, height: scrollableContentHeight)
 
     // last group (cancel)

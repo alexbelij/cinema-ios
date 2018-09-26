@@ -89,8 +89,21 @@ extension GenreListCoordinator: GenreListControllerDelegate {
                                                                displaying: .allWith(genreId),
                                                                navigationController: navigationController,
                                                                dependencies: dependencies)
+    self.libraryContentCoordinator!.delegate = self
     self.libraryContentCoordinator!.dismissWhenEmpty = true
     self.libraryContentCoordinator!.presentRootViewController()
+  }
+}
+
+// MARK: - LibraryContentCoordinatorDelegate
+
+extension GenreListCoordinator: LibraryContentCoordinatorDelegate {
+  func libraryContentCoordinatorShowLibraryList(_ coordinator: LibraryContentCoordinator) {
+    fatalError("library can not be switched here")
+  }
+
+  func libraryContentCoordinatorDidDismiss(_ coordinator: LibraryContentCoordinator) {
+    libraryContentCoordinator = nil
   }
 }
 

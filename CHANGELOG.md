@@ -2,6 +2,17 @@
 
 All notable changes to the project will be documented in this file.
 
+## v2.0.2 - 2018-09-26
+
+### Added
+- sort descriptor is preserved
+
+### Changed
+- loading of poster images is animated
+
+### Fixed
+- poster cache is cleared on every new version
+
 ## v2.0.1 - 2018-09-16
 
 ### Added

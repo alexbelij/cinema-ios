@@ -3,6 +3,7 @@ import Dispatch
 import UIKit
 
 protocol MovieListControllerDelegate: class {
+  func movieListControllerShowSortDescriptorSheet(_ controller: MovieListController)
   func movieListController(_ controller: MovieListController, didSelect movie: Movie)
   func movieListControllerDidDismiss(_ controller: MovieListController)
 }
@@ -54,31 +55,38 @@ class MovieListController: UITableViewController {
       guard let `self` = self else { return }
       self.delegate?.movieListController(self, didSelect: selectedItem.movie)
     }
-    resultsController.cellConfiguration = { [weak self, weak resultsController] tableView, indexPath, listItem in
-      guard let `self` = self, let resultsController = resultsController else { return UITableViewCell() }
+    resultsController.cellConfiguration = { [weak self] tableView, indexPath, listItem in
+      guard let `self` = self else { return UITableViewCell() }
       let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
-      cell.configure(for: listItem, posterProvider: self.posterProvider, isSectionIndexVisible: false) {
-        guard let rowIndex = resultsController.items.index(where: { $0.movie.tmdbID == listItem.movie.tmdbID })
-            else { return }
-        tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
-      }
+      tableView.configure(cell,
+                          for: listItem,
+                          isSectionIndexVisible: false,
+                          at: { [weak resultsController] in
+                            resultsController?.items.firstIndex { $0.movie.tmdbID == listItem.movie.tmdbID }
+                                                    .map { IndexPath(row: $0, section: 0) }
+                          },
+                          using: self.posterProvider)
       return cell
     }
     resultsController.prefetchHandler = { [weak self, weak resultsController] tableView, indexPaths in
       guard let `self` = self, let resultsController = resultsController else { return }
       for indexPath in indexPaths {
         let listItem = resultsController.items[indexPath.row]
-        if case .unknown = listItem.poster {
-          listItem.poster = .loading
-          DispatchQueue.global(qos: .background).async {
-            fetchPoster(for: listItem,
-                        using: self.posterProvider,
-                        size: MovieListListItemTableCell.posterSize,
-                        purpose: .list) {
-              guard let rowIndex = resultsController.items.index(where: { $0.movie.tmdbID == listItem.movie.tmdbID })
-                  else { return }
-              tableView.reloadRowWithoutAnimation(at: IndexPath(row: rowIndex, section: 0))
-            }
+        guard case .unknown = listItem.poster else { return }
+        listItem.poster = .loading
+        DispatchQueue.global(qos: .background).async {
+          fetchPoster(for: listItem,
+                      using: self.posterProvider,
+                      size: MovieListListItemTableCell.posterSize,
+                      purpose: .list) { [weak self] in
+            guard let `self` = self else { return }
+            tableView.reloadRow(for: listItem,
+                                isSectionIndexVisible: false,
+                                at: { [weak resultsController] in
+                                  resultsController?.items.firstIndex { $0.movie.tmdbID == listItem.movie.tmdbID }
+                                                          .map { IndexPath(row: $0, section: 0) }
+                                },
+                                using: self.posterProvider)
           }
         }
       }
@@ -86,7 +94,11 @@ class MovieListController: UITableViewController {
     return resultsController
   }()
 
-  private var sortDescriptor = SortDescriptor.title
+  var sortDescriptor = SortDescriptor.title {
+    didSet {
+      setup()
+    }
+  }
   @IBOutlet private weak var sortButton: UIBarButtonItem!
 
   @IBOutlet private var summaryView: UIView!
@@ -200,11 +212,45 @@ extension MovieListController {
   }
 
   private func scrollToTop() {
+    tableView.layoutIfNeeded()
     tableView.setContentOffset(CGPoint(x: 0, y: -tableView.safeAreaInsets.top), animated: false)
   }
 }
 
 // MARK: - Table View
+
+extension UITableView {
+  fileprivate func reloadRow(for listItem: MovieListController.ListItem,
+                             isSectionIndexVisible: Bool,
+                             at indexPathProvider: @escaping () -> IndexPath?,
+                             using posterProvider: PosterProvider) {
+    guard let indexPath = indexPathProvider() else { return }
+    if let cell = cellForRow(at: indexPath) as? MovieListListItemTableCell {
+      configure(cell,
+                for: listItem,
+                isSectionIndexVisible: isSectionIndexVisible,
+                at: indexPathProvider,
+                using: posterProvider)
+    }
+  }
+
+  fileprivate func configure(_ cell: MovieListListItemTableCell,
+                             for listItem: MovieListController.ListItem,
+                             isSectionIndexVisible: Bool,
+                             at indexPathProvider: @escaping () -> IndexPath?,
+                             using posterProvider: PosterProvider) {
+    cell.configure(for: listItem, posterProvider: posterProvider, isSectionIndexVisible: false) {
+      guard let indexPath = indexPathProvider() else { return }
+      if let cell = self.cellForRow(at: indexPath) as? MovieListListItemTableCell {
+        self.configure(cell,
+                       for: listItem,
+                       isSectionIndexVisible: isSectionIndexVisible,
+                       at: indexPathProvider,
+                       using: posterProvider)
+      }
+    }
+  }
+}
 
 extension MovieListController: UITableViewDataSourcePrefetching {
   override func numberOfSections(in tableView: UITableView) -> Int {
@@ -219,11 +265,11 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
     let item = viewModel.item(at: indexPath)
-    cell.configure(for: item, posterProvider: posterProvider, isSectionIndexVisible: true) { [weak self] in
-      guard let `self` = self else { return }
-      guard let newIndexPath = self.viewModel.indexPath(for: item) else { return }
-      tableView.reloadRowWithoutAnimation(at: newIndexPath)
-    }
+    tableView.configure(cell,
+                        for: item,
+                        isSectionIndexVisible: true,
+                        at: { [weak viewModel] in viewModel?.indexPath(for: item) },
+                        using: posterProvider)
     return cell
   }
 
@@ -251,17 +297,20 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
     for indexPath in indexPaths {
       let listItem = viewModel.item(at: indexPath)
-      if case .unknown = listItem.poster {
-        listItem.poster = .loading
-        DispatchQueue.global(qos: .background).async {
-          fetchPoster(for: listItem,
-                      using: self.posterProvider,
-                      size: MovieListListItemTableCell.posterSize,
-                      purpose: .list) { [weak self] in
-            guard let `self` = self else { return }
-            guard let newIndexPath = self.viewModel.indexPath(for: listItem) else { return }
-            tableView.reloadRowWithoutAnimation(at: newIndexPath)
-          }
+      guard case .unknown = listItem.poster else { return }
+      listItem.poster = .loading
+      DispatchQueue.global(qos: .background).async {
+        fetchPoster(for: listItem,
+                    using: self.posterProvider,
+                    size: MovieListListItemTableCell.posterSize,
+                    purpose: .list) { [weak self] in
+          guard let `self` = self else { return }
+          tableView.reloadRow(for: listItem,
+                              isSectionIndexVisible: true,
+                              at: { [weak viewModel = self.viewModel] in
+                                viewModel?.indexPath(for: listItem)
+                              },
+                              using: self.posterProvider)
         }
       }
     }
@@ -284,21 +333,8 @@ extension MovieListController: UISearchResultsUpdating {
 // MARK: - User Actions
 
 extension MovieListController {
-  @IBAction private func showSortDescriptorSheet() {
-    let controller = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
-    for descriptor in [SortDescriptor.title, .runtime, .year] {
-      controller.addSheetItem(SelectableLabelSheetItem(title: descriptor.localizedName,
-                                                       showCheckmark: descriptor == self.sortDescriptor) { _ in
-        guard self.sortDescriptor != descriptor else { return }
-        self.sortDescriptor = descriptor
-        DispatchQueue.main.async {
-          self.setupViewModel()
-          self.tableView.reloadData()
-          self.scrollToTop()
-        }
-      })
-    }
-    self.present(controller, animated: true)
+  @IBAction private func sortButtonTapped() {
+    delegate?.movieListControllerShowSortDescriptorSheet(self)
   }
 }
 
@@ -447,8 +483,8 @@ class MovieListListItemTableCell: UITableViewCell {
     tertiaryLabel.text = item.movie.diskType.localizedName
     switch item.poster {
       case .unknown:
-        posterView.image = #imageLiteral(resourceName: "GenericPoster")
         item.poster = .loading
+        configurePoster(nil)
         DispatchQueue.global(qos: .userInteractive).async {
           fetchPoster(for: item,
                       using: posterProvider,
@@ -456,13 +492,26 @@ class MovieListListItemTableCell: UITableViewCell {
                       purpose: .list,
                       then: onNeedsReload)
         }
+      case .loading:
+        configurePoster(nil)
       case let .available(posterImage):
-        posterView.image = posterImage
-      case .loading, .unavailable:
-        posterView.image = #imageLiteral(resourceName: "GenericPoster")
+        configurePoster(posterImage)
+      case .unavailable:
+        configurePoster(#imageLiteral(resourceName: "GenericPoster"))
     }
     separatorInset = isSectionIndexVisible
         ? MovieListListItemTableCell.separatorInsetsWithSectionIndex
         : MovieListListItemTableCell.separatorInsetsWithoutSectionIndex
+  }
+
+  private func configurePoster(_ image: UIImage?) {
+    posterView.image = image
+    if image == nil {
+      posterView.alpha = 0.0
+    } else if posterView.alpha < 1.0 {
+      UIView.animate(withDuration: 0.2) {
+        self.posterView.alpha = 1.0
+      }
+    }
   }
 }

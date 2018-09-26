@@ -14,11 +14,14 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     case allWith(GenreIdentifier)
   }
 
+  private static let sortDescriptorKey = UserDefaultsKey<String>("MovieSortDescriptor")
+
   // coordinator stuff
   weak var delegate: LibraryContentCoordinatorDelegate?
 
   // other properties
   private let dependencies: AppDependencies
+  private let userDefaults: UserDefaultsProtocol
   private let notificationCenter: NotificationCenter
   var library: MovieLibrary {
     willSet {
@@ -51,18 +54,34 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
   // child coordinators
   private var movieDetailsCoordinator: MovieDetailsCoordinator?
   private var editMovieCoordinator: EditMovieCoordinator?
+  private var token: ObservationToken?
 
   init(for library: MovieLibrary,
        displaying content: ContentSpecification,
        navigationController: UINavigationController,
        dependencies: AppDependencies) {
     self.dependencies = dependencies
+    self.userDefaults = dependencies.userDefaults
     self.notificationCenter = dependencies.notificationCenter
     self.library = library
     self.content = content
     self.navigationController = navigationController
     movieListController.delegate = self
     movieListController.posterProvider = MovieDbPosterProvider(dependencies.movieDb)
+    if let rawSortDescriptor = userDefaults.get(for: LibraryContentCoordinator.sortDescriptorKey),
+       let sortDescriptor = SortDescriptor(rawValue: rawSortDescriptor) {
+      movieListController.sortDescriptor = sortDescriptor
+    }
+    self.token = userDefaults.observerValue(for: LibraryContentCoordinator.sortDescriptorKey) { [weak self] value in
+      guard let `self` = self else { return }
+      guard let rawSortDescriptor = value,
+            let sortDescriptor = SortDescriptor(rawValue: rawSortDescriptor) else { return }
+      DispatchQueue.main.async {
+        if self.movieListController.sortDescriptor != sortDescriptor {
+          self.movieListController.sortDescriptor = sortDescriptor
+        }
+      }
+    }
     setup()
   }
 
@@ -128,6 +147,19 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 // MARK: - MovieListControllerDelegate
 
 extension LibraryContentCoordinator: MovieListControllerDelegate {
+  func movieListControllerShowSortDescriptorSheet(_ controller: MovieListController) {
+    let sheet = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
+    for descriptor in SortDescriptor.allCases {
+      sheet.addSheetItem(SelectableLabelSheetItem(title: descriptor.localizedName,
+                                                  showCheckmark: descriptor == controller.sortDescriptor) { _ in
+        guard controller.sortDescriptor != descriptor else { return }
+        controller.sortDescriptor = descriptor
+        self.userDefaults.set(descriptor.rawValue, for: LibraryContentCoordinator.sortDescriptorKey)
+      })
+    }
+    controller.present(sheet, animated: true)
+  }
+
   func movieListController(_ controller: MovieListController, didSelect movie: Movie) {
     movieDetailsCoordinator = MovieDetailsCoordinator(for: movie, using: dependencies.movieDb)
     movieDetailsCoordinator!.delegate = self
@@ -252,7 +284,7 @@ extension LibraryContentCoordinator: MovieLibraryDelegate {
     // updated movies
     if !changeSet.modifications.isEmpty {
       for (id, movie) in changeSet.modifications {
-        guard let index = listItems.index(where: { $0.tmdbID == id }) else { continue }
+        guard let index = listItems.firstIndex(where: { $0.tmdbID == id }) else { continue }
         listItems.remove(at: index)
         listItems.insert(movie, at: index)
       }

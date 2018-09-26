@@ -8,8 +8,8 @@ extension DeviceSyncingLibraryManager {
       syncManager: SyncManager = SyncManagerMock(),
       changesManager: ChangesManager = ChangesManagerMock.trap(),
       shareManager: ShareManager = ShareManagerMock(),
-      dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag(userDefaults: UserDefaultsMock())
-  ) -> DeviceSyncingLibraryManager {
+      dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag.makeForTesting())
+          -> DeviceSyncingLibraryManager {
     return DeviceSyncingLibraryManager(containerProvider: TestCKContainerProvider(),
                                        fetchManager: fetchManager,
                                        syncManager: syncManager,
@@ -18,6 +18,12 @@ extension DeviceSyncingLibraryManager {
                                        libraryFactory: MockMovieLibraryFactory(),
                                        modelController: modelController,
                                        dataInvalidationFlag: dataInvalidationFlag)
+  }
+}
+
+extension LocalDataInvalidationFlag {
+  static func makeForTesting() -> LocalDataInvalidationFlag {
+    return LocalDataInvalidationFlag(userDefaults: StandardUserDefaults(dataStore: UserDefaultsDataStoreMock()))
   }
 }
 

@@ -1,6 +1,6 @@
 @testable import CinemaKit
 
-class UserDefaultsMock: UserDefaultsProtocol {
+class UserDefaultsDataStoreMock: UserDefaultsDataStore {
   var values = [String: Any]()
 
   func get<Value>(for key: UserDefaultsKey<Value>) -> Value? {

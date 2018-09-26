@@ -51,7 +51,7 @@ class GenericSearchResultsController<Item>: UITableViewController, UITableViewDa
   }
 
   func reloadRow(where predicate: (Item) -> Bool) {
-    if let index = items.index(where: predicate) {
+    if let index = items.firstIndex(where: predicate) {
       super.tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none)
     }
   }
