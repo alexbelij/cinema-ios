@@ -99,7 +99,7 @@ class MovieListController: UITableViewController {
       setup()
     }
   }
-  @IBOutlet private weak var sortButton: UIBarButtonItem!
+  @IBOutlet private var sortButton: UIBarButtonItem!
 
   @IBOutlet private var summaryView: UIView!
   @IBOutlet private var movieCountLabel: UILabel!
@@ -459,10 +459,10 @@ class MovieListListItemTableCell: UITableViewCell {
     return formatter
   }()
 
-  @IBOutlet private weak var posterView: UIImageView!
-  @IBOutlet private weak var titleLabel: UILabel!
-  @IBOutlet private weak var secondaryLabel: UILabel!
-  @IBOutlet private weak var tertiaryLabel: UILabel!
+  @IBOutlet private var posterView: UIImageView!
+  @IBOutlet private var titleLabel: UILabel!
+  @IBOutlet private var secondaryLabel: UILabel!
+  @IBOutlet private var tertiaryLabel: UILabel!
 
   override func awakeFromNib() {
     super.awakeFromNib()

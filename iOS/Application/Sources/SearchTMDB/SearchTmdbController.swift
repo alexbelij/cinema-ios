@@ -89,7 +89,7 @@ class SearchTmdbController: UIViewController {
       }
     }
   }
-  @IBOutlet private weak var containerView: UIView!
+  @IBOutlet private var containerView: UIView!
   var posterProvider: PosterProvider = EmptyPosterProvider()
 
   override func viewDidLoad() {
@@ -163,9 +163,9 @@ extension SearchTmdbController {
 class SearchTmdbSearchResultTableCell: UITableViewCell {
   static let rowHeight: CGFloat = 100
   static let posterSize = PosterSize(minWidth: 60)
-  @IBOutlet private weak var posterView: UIImageView!
-  @IBOutlet private weak var titleLabel: UILabel!
-  @IBOutlet private weak var yearLabel: UILabel!
+  @IBOutlet private var posterView: UIImageView!
+  @IBOutlet private var titleLabel: UILabel!
+  @IBOutlet private var yearLabel: UILabel!
   private lazy var activityIndicator = UIActivityIndicatorView(style: .gray)
 
   override func awakeFromNib() {

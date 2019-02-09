@@ -414,7 +414,6 @@ extension DeviceSyncingLibraryManager {
             fatalError("should not occur: \(error)")
         }
       } else {
-
         model.setShare(share, with: rootRecord)
         self.modelController.persist()
         let changeSet = ChangeSet<CKRecord.ID, MovieLibrary>(modifications: [library.metadata.id: library])
@@ -541,7 +540,6 @@ extension DeviceSyncingLibraryManager: CloudSharingControllerCallback {
                 fatalError("should not occur: \(error)")
             }
           } else if let rawRecord = rawRecord {
-
             self.modelController.access { model in
               model.setShare(nil, with: LibraryRecord(rawRecord))
               self.modelController.persist()

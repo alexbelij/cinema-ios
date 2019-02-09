@@ -89,7 +89,7 @@ public class TMDBSwiftWrapper: MovieDbClient {
   }
 
   private func movie(for id: TmdbIdentifier) -> MovieDetailedMDB? {
-    var createdMovie: MovieDetailedMDB? = nil
+    var createdMovie: MovieDetailedMDB?
     let movieJson = cache.string(for: "movie-\(id)-\(language.rawValue)") {
       var jsonString: String?
       waitUntil { done in

@@ -1,5 +1,7 @@
 import CloudKit
 
+// swiftlint:disable large_tuple
+
 class QueryOperationStub {
   private var calls = [(String?) -> ([CKRecord]?, Error?)]()
   fileprivate var callCount: Int?

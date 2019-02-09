@@ -14,7 +14,7 @@ class ButtonTableCell: UITableViewCell {
       label.text = newValue
     }
   }
-  @IBOutlet private weak var label: UILabel!
+  @IBOutlet private var label: UILabel!
 
   var actionTitleAlignment: NSTextAlignment = .left {
     didSet {
@@ -33,7 +33,7 @@ class ButtonTableCell: UITableViewCell {
     }
   }
 
-  @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
+  @IBOutlet private var activityIndicator: UIActivityIndicatorView!
   var showsActivityIndicator: Bool = false {
     didSet {
       if showsActivityIndicator {

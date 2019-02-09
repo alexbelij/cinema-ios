@@ -25,5 +25,5 @@ class MessageTableCell: UITableViewCell {
       label.text = newValue
     }
   }
-  @IBOutlet private weak var label: UILabel!
+  @IBOutlet private var label: UILabel!
 }

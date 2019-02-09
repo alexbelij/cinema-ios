@@ -196,7 +196,7 @@ extension PopularMoviesController {
 // MARK: - Header Views, Footer Views & Cells
 
 class TitleHeaderView: UICollectionReusableView {
-  @IBOutlet private weak var label: UILabel!
+  @IBOutlet private var label: UILabel!
 
   func configure(title: String) {
     label.text = title
@@ -205,11 +205,11 @@ class TitleHeaderView: UICollectionReusableView {
 
 class PosterCell: UICollectionViewCell {
   static let posterSize = PosterSize(minWidth: 130)
-  @IBOutlet private weak var posterView: UIImageView!
-  @IBOutlet private weak var titleLabel: UILabel!
+  @IBOutlet private var posterView: UIImageView!
+  @IBOutlet private var titleLabel: UILabel!
   @IBOutlet private var blurView: UIVisualEffectView!
   @IBOutlet private var activityIndicator: UIActivityIndicatorView!
-  @IBOutlet private weak var checkmarkView: UIVisualEffectView!
+  @IBOutlet private var checkmarkView: UIVisualEffectView!
   private var highlightView: UIView!
 
   override func awakeFromNib() {
@@ -275,6 +275,6 @@ class PosterCell: UICollectionViewCell {
 }
 
 class TmdbFooterView: UICollectionReusableView {
-  @IBOutlet fileprivate weak var activityIndicator: UIActivityIndicatorView!
-  @IBOutlet fileprivate weak var imageView: UIImageView!
+  @IBOutlet fileprivate var activityIndicator: UIActivityIndicatorView!
+  @IBOutlet fileprivate var imageView: UIImageView!
 }
