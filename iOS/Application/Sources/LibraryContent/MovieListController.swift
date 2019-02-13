@@ -3,7 +3,6 @@ import Dispatch
 import UIKit
 
 protocol MovieListControllerDelegate: class {
-  func movieListControllerShowSortDescriptorSheet(_ controller: MovieListController)
   func movieListController(_ controller: MovieListController, didSelect movie: Movie)
   func movieListControllerDidDismiss(_ controller: MovieListController)
 }
@@ -99,7 +98,6 @@ class MovieListController: UITableViewController {
       setup()
     }
   }
-  @IBOutlet private var sortButton: UIBarButtonItem!
 
   @IBOutlet private var summaryView: UIView!
   @IBOutlet private var movieCountLabel: UILabel!
@@ -142,11 +140,9 @@ extension MovieListController {
     configureFooterView()
     tableView.reloadData()
     if dataSource == nil || dataSource.isEmpty {
-      sortButton.isEnabled = false
       searchController.isActive = false
       navigationItem.searchController = nil
     } else {
-      sortButton.isEnabled = true
       navigationItem.searchController = searchController
       if searchController.isActive {
         updateSearchResults(for: searchController)
@@ -329,13 +325,5 @@ extension MovieListController: UISearchResultsUpdating {
     let searchResults = self.dataSource.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
                                       .sorted { titleSortingStrategy.movieSorting(left: $0.movie, right: $1.movie) }
     resultsController.reload(searchText: searchText, searchResults: searchResults)
-  }
-}
-
-// MARK: - User Actions
-
-extension MovieListController {
-  @IBAction private func sortButtonTapped() {
-    delegate?.movieListControllerShowSortDescriptorSheet(self)
   }
 }
