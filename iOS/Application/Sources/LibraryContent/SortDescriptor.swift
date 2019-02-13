@@ -6,13 +6,7 @@ enum SortDescriptor: String, CaseIterable {
 
   func makeTableViewStrategy() -> SectionSortingStrategy {
     switch self {
-      case .title:
-        guard let path = Bundle.main.path(forResource: "SortPrefixes", ofType: "plist"),
-              let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
-              let prefixes = try? PropertyListDecoder().decode([String].self, from: data) else {
-          fatalError("could not load sort prefixes")
-        }
-        return TitleSortingStrategy(ignoredPrefixes: prefixes)
+      case .title: return TitleSortingStrategy()
       case .runtime: return RuntimeSortingStrategy()
       case .year: return YearSortingStrategy()
     }
@@ -30,14 +24,9 @@ enum SortDescriptor: String, CaseIterable {
 private struct TitleSortingStrategy: SectionSortingStrategy {
   private let allSectionIndexTitles = ["#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
                                        "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
-  private let ignoredPrefixes: [String]
-
-  init(ignoredPrefixes: [String]) {
-    self.ignoredPrefixes = ignoredPrefixes
-  }
 
   func sectionIndexTitle(for movie: Movie) -> String {
-    let title = removeArticlesAtBeginning(from: movie.title)
+    let title = movie.title.removingIgnoredPrefixes()
     let firstCharacter = String(title[title.startIndex])
     let folded = firstCharacter.folding(options: .diacriticInsensitive, locale: Locale.current)
     if folded.rangeOfCharacter(from: .letters) != nil {
@@ -59,8 +48,8 @@ private struct TitleSortingStrategy: SectionSortingStrategy {
   }
 
   func movieSorting(left: Movie, right: Movie) -> Bool {
-    let title1 = removeArticlesAtBeginning(from: left.title)
-    let title2 = removeArticlesAtBeginning(from: right.title)
+    let title1 = left.title.removingIgnoredPrefixes()
+    let title2 = right.title.removingIgnoredPrefixes()
     switch title1.compare(title2, options: [.diacriticInsensitive, .caseInsensitive]) {
       case .orderedSame:
         guard let leftDate = left.releaseDate else { return false }
@@ -68,17 +57,6 @@ private struct TitleSortingStrategy: SectionSortingStrategy {
         return leftDate <= rightDate
       case .orderedAscending: return true
       case .orderedDescending: return false
-    }
-  }
-
-  private func removeArticlesAtBeginning(from str: String) -> String {
-    do {
-      let regex = try NSRegularExpression(pattern: "^(\(ignoredPrefixes.joined(separator: "|")))",
-                                          options: NSRegularExpression.Options.caseInsensitive)
-      let range = NSRange(location: 0, length: str.count)
-      return regex.stringByReplacingMatches(in: str, range: range, withTemplate: "")
-    } catch {
-      return str
     }
   }
 }

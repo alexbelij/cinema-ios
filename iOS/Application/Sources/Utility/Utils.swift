@@ -34,6 +34,22 @@ extension UIColor {
 }
 
 extension String {
+  private static var titleRegex: NSRegularExpression = {
+    guard let path = Bundle.main.path(forResource: "SortPrefixes", ofType: "plist"),
+          let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
+          let prefixes = try? PropertyListDecoder().decode([String].self, from: data) else {
+      fatalError("could not load sort prefixes")
+    }
+    // swiftlint:disable:next force_try
+    return try! NSRegularExpression(pattern: "^(\(prefixes.joined(separator: "|")))",
+                                    options: NSRegularExpression.Options.caseInsensitive)
+  }()
+
+  func removingIgnoredPrefixes() -> String {
+    let range = NSRange(location: 0, length: count)
+    return String.titleRegex.stringByReplacingMatches(in: self, range: range, withTemplate: "")
+  }
+
   var nilIfEmptyString: String? {
     return self.isEmpty ? nil : self
   }
