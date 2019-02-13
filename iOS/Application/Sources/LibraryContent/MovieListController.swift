@@ -37,7 +37,7 @@ class MovieListController: UITableViewController {
     }
   }
   var posterProvider: PosterProvider = EmptyPosterProvider()
-  private var viewModel: ViewModel!
+  private var dataSource: MovieListDataSource!
 
   private let titleSortingStrategy = SortDescriptor.title.makeTableViewStrategy()
   private lazy var searchController: UISearchController = {
@@ -137,11 +137,11 @@ extension MovieListController {
 
 extension MovieListController {
   private func setup() {
-    setupViewModel()
+    setupDataSource()
     configureBackgroundView()
     configureFooterView()
     tableView.reloadData()
-    if viewModel == nil || viewModel.isEmpty {
+    if dataSource == nil || dataSource.isEmpty {
       sortButton.isEnabled = false
       searchController.isActive = false
       navigationItem.searchController = nil
@@ -155,12 +155,12 @@ extension MovieListController {
     scrollToTop()
   }
 
-  private func setupViewModel() {
+  private func setupDataSource() {
     switch listData {
       case .loading, .unavailable:
-        viewModel = nil
+        dataSource = nil
       case let .available(movies):
-        viewModel = ViewModel(movies, sortingStrategy: sortDescriptor.makeTableViewStrategy())
+        dataSource = MovieListDataSource(movies, sortingStrategy: sortDescriptor.makeTableViewStrategy())
     }
   }
 
@@ -256,32 +256,32 @@ extension UITableView {
 
 extension MovieListController: UITableViewDataSourcePrefetching {
   override func numberOfSections(in tableView: UITableView) -> Int {
-    guard let viewModel = self.viewModel else { return 0 }
-    return viewModel.numberOfSections
+    guard let dataSource = self.dataSource else { return 0 }
+    return dataSource.numberOfSections
   }
 
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return viewModel.numberOfRowsInSection(section)
+    return dataSource.numberOfRowsInSection(section)
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
-    let item = viewModel.item(at: indexPath)
+    let item = dataSource.item(at: indexPath)
     tableView.configure(cell,
                         for: item,
                         isSectionIndexVisible: true,
-                        at: { [weak viewModel] in viewModel?.indexPath(for: item) },
+                        at: { [weak dataSource] in dataSource?.indexPath(for: item) },
                         using: posterProvider)
     return cell
   }
 
   override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    return viewModel.titleForHeaderInSection(section)
+    return dataSource.titleForHeaderInSection(section)
   }
 
   override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
-    guard let viewModel = self.viewModel, !viewModel.isEmpty else { return nil }
-    guard let titles = viewModel.sectionIndexTitles else { return nil }
+    guard let dataSource = self.dataSource, !dataSource.isEmpty else { return nil }
+    guard let titles = dataSource.sectionIndexTitles else { return nil }
     return [UITableView.indexSearch] + titles
   }
 
@@ -289,16 +289,16 @@ extension MovieListController: UITableViewDataSourcePrefetching {
                           sectionForSectionIndexTitle title: String,
                           at index: Int) -> Int {
     guard title != UITableView.indexSearch else { return -1 }
-    return viewModel.sectionForSectionIndexTitle(title, at: index - 1)
+    return dataSource.sectionForSectionIndexTitle(title, at: index - 1)
   }
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    self.delegate?.movieListController(self, didSelect: viewModel.item(at: indexPath).movie)
+    self.delegate?.movieListController(self, didSelect: dataSource.item(at: indexPath).movie)
   }
 
   func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
     for indexPath in indexPaths {
-      let listItem = viewModel.item(at: indexPath)
+      let listItem = dataSource.item(at: indexPath)
       guard case .unknown = listItem.poster else { return }
       listItem.poster = .loading
       DispatchQueue.global(qos: .background).async {
@@ -309,8 +309,8 @@ extension MovieListController: UITableViewDataSourcePrefetching {
           guard let `self` = self else { return }
           tableView.reloadRow(for: listItem,
                               isSectionIndexVisible: true,
-                              at: { [weak viewModel = self.viewModel] in
-                                viewModel?.indexPath(for: listItem)
+                              at: { [weak dataSource = self.dataSource] in
+                                dataSource?.indexPath(for: listItem)
                               },
                               using: self.posterProvider)
         }
@@ -326,7 +326,7 @@ extension MovieListController: UISearchResultsUpdating {
     guard searchController.isActive else { return }
     let searchText = searchController.searchBar.text ?? ""
     let lowercasedSearchText = searchText.lowercased()
-    let searchResults = self.viewModel.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
+    let searchResults = self.dataSource.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
                                       .sorted { titleSortingStrategy.movieSorting(left: $0.movie, right: $1.movie) }
     resultsController.reload(searchText: searchText, searchResults: searchResults)
   }
@@ -337,113 +337,5 @@ extension MovieListController: UISearchResultsUpdating {
 extension MovieListController {
   @IBAction private func sortButtonTapped() {
     delegate?.movieListControllerShowSortDescriptorSheet(self)
-  }
-}
-
-private class ViewModel {
-  private struct Section {
-    let indexTitle: String?
-    let title: String?
-    let rows: [MovieListController.ListItem]?
-
-    // standard section
-    init(indexTitle: String, title: String, rows: [MovieListController.ListItem]) {
-      self.indexTitle = indexTitle
-      self.title = title
-      self.rows = rows
-    }
-
-    // section index is shown, but no corresponding data
-    init(indexTitle: String) {
-      self.indexTitle = indexTitle
-      self.title = nil
-      self.rows = nil
-    }
-
-    // appended at the end
-    init(title: String, rows: [MovieListController.ListItem]) {
-      self.indexTitle = nil
-      self.title = title
-      self.rows = rows
-    }
-  }
-
-  private let sections: [Section]
-  private let indexPaths: [TmdbIdentifier: IndexPath]
-  let isEmpty: Bool
-
-  init(_ movies: [Movie], sortingStrategy: SectionSortingStrategy) {
-    var indexPaths = [TmdbIdentifier: IndexPath]()
-    var sections = [Section]()
-    let sectionData: [String: [Movie]] = Dictionary(grouping: movies) { sortingStrategy.sectionIndexTitle(for: $0) }
-    let existingSectionIndexTitles = Array(sectionData.keys).sorted(by: sortingStrategy.sectionIndexTitleSorting)
-    let refinedSectionIndexTitles = sortingStrategy.refineSectionIndexTitles(existingSectionIndexTitles)
-    for sectionIndex in refinedSectionIndexTitles.startIndex..<refinedSectionIndexTitles.endIndex {
-      let indexTitle = refinedSectionIndexTitles[sectionIndex]
-      if existingSectionIndexTitles.contains(indexTitle) {
-        let rows: [MovieListController.ListItem] = sectionData[indexTitle]!.sorted(by: sortingStrategy.movieSorting)
-                                                                           .map(MovieListController.ListItem.init)
-        for rowIndex in rows.startIndex..<rows.endIndex {
-          indexPaths[rows[rowIndex].movie.tmdbID] = IndexPath(row: rowIndex, section: sectionIndex)
-        }
-        sections.append(Section(indexTitle: indexTitle,
-                                title: sortingStrategy.sectionTitle(for: indexTitle),
-                                rows: rows))
-      } else {
-        sections.append(Section(indexTitle: indexTitle))
-      }
-    }
-    let additionalIndexTitles = Set(existingSectionIndexTitles).subtracting(Set(refinedSectionIndexTitles))
-    for indexTitle in additionalIndexTitles {
-      let rows = sectionData[indexTitle]!.sorted(by: sortingStrategy.movieSorting)
-                                         .map(MovieListController.ListItem.init)
-      let sectionIndex = sections.count
-      for rowIndex in rows.startIndex..<rows.endIndex {
-        indexPaths[rows[rowIndex].movie.tmdbID] = IndexPath(row: rowIndex, section: sectionIndex)
-      }
-      sections.append(Section(title: sortingStrategy.sectionTitle(for: indexTitle), rows: rows))
-    }
-    self.sections = sections
-    self.indexPaths = indexPaths
-    isEmpty = movies.isEmpty
-  }
-
-  func item(at indexPath: IndexPath) -> MovieListController.ListItem {
-    guard let item = sections[indexPath.section].rows?[indexPath.row] else {
-      fatalError("accessing invalid row \(indexPath.row) in section \(indexPath)")
-    }
-    return item
-  }
-
-  func indexPath(for item: MovieListController.ListItem) -> IndexPath? {
-    return indexPaths[item.movie.tmdbID]
-  }
-
-  var numberOfSections: Int {
-    return sections.count
-  }
-
-  func numberOfRowsInSection(_ section: Int) -> Int {
-    guard let rows = sections[section].rows else { return 0 }
-    return rows.count
-  }
-
-  func titleForHeaderInSection(_ section: Int) -> String? {
-    guard let title = sections[section].title else { return nil }
-    return title
-  }
-
-  lazy var sectionIndexTitles: [String]? = {
-    let titles = sections.compactMap { $0.indexTitle }
-    return titles.isEmpty ? nil : titles
-  }()
-
-  func sectionForSectionIndexTitle(_ title: String, at index: Int) -> Int {
-    return sections[index].rows == nil ? -1 : index
-  }
-
-  func filtered(by filter: (Movie) -> Bool) -> [MovieListController.ListItem] {
-    let allItems: [MovieListController.ListItem] = sections.flatMap { $0.rows ?? [] }
-    return allItems.filter { filter($0.movie) }
   }
 }
