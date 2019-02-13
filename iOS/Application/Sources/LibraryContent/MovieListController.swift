@@ -10,10 +10,10 @@ protocol MovieListControllerDelegate: class {
 class MovieListController: UITableViewController {
   enum ListData {
     case loading
-    case available(MovieListDataSource)
+    case available(SectionedMovieListDataSource)
     case unavailable
 
-    var dataSource: MovieListDataSource? {
+    var dataSource: SectionedMovieListDataSource? {
       guard case let ListData.available(dataSource) = self else {
         return nil
       }
@@ -190,7 +190,7 @@ extension MovieListController {
   private func configureFooterView() {
     if let dataSource = listData.dataSource, !dataSource.isEmpty {
       let format = NSLocalizedString("movieList.summary.movieCount", comment: "")
-      movieCountLabel.text = .localizedStringWithFormat(format, dataSource.movieCount)
+      movieCountLabel.text = .localizedStringWithFormat(format, dataSource.numberOfMovies)
       tableView.tableFooterView = summaryView
     } else {
       tableView.tableFooterView = nil
@@ -246,7 +246,7 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   }
 
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return listData.dataSource!.numberOfRowsInSection(section)
+    return listData.dataSource!.numberOfMovies(in: section)
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -261,7 +261,7 @@ extension MovieListController: UITableViewDataSourcePrefetching {
   }
 
   override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    return listData.dataSource!.titleForHeaderInSection(section)
+    return listData.dataSource!.titleForHeader(in: section)
   }
 
   override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
@@ -310,7 +310,7 @@ extension MovieListController: UISearchResultsUpdating {
     let searchText = searchController.searchBar.text ?? ""
     let lowercasedSearchText = searchText.lowercased()
     let searchResults = listData.dataSource!
-                                .filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
+                                .filtered { $0.movie.fullTitle.lowercased().contains(lowercasedSearchText) }
                                 .sorted { titleSortingStrategy.movieSorting(left: $0.movie, right: $1.movie) }
     resultsController.reload(searchText: searchText, searchResults: searchResults)
   }

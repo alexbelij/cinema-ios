@@ -168,7 +168,8 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
         }
       case let .success(movies):
         DispatchQueue.main.async {
-          let dataSource = MovieListDataSource(movies, sortingStrategy: self.sortDescriptor.makeTableViewStrategy())
+          let dataSource = SectionedMovieListDataSource(for: movies.map(MovieListController.ListItem.init),
+                                                        sortingStrategy: self.sortDescriptor.makeTableViewStrategy())
           self.movieListController.listData = .available(dataSource)
           self.movieListController.navigationItem.rightBarButtonItem?.isEnabled = !movies.isEmpty
         }
