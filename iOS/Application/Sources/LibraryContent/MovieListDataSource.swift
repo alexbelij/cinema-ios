@@ -31,6 +31,7 @@ class MovieListDataSource {
   private let sections: [Section]
   private let indexPaths: [TmdbIdentifier: IndexPath]
   let isEmpty: Bool
+  let movieCount: Int
 
   init(_ movies: [Movie], sortingStrategy: SectionSortingStrategy) {
     var indexPaths = [TmdbIdentifier: IndexPath]()
@@ -66,6 +67,7 @@ class MovieListDataSource {
     self.sections = sections
     self.indexPaths = indexPaths
     isEmpty = movies.isEmpty
+    movieCount = movies.count
   }
 
   func item(at indexPath: IndexPath) -> MovieListController.ListItem {

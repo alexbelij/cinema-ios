@@ -10,7 +10,7 @@ protocol MovieListControllerDelegate: class {
 class MovieListController: UITableViewController {
   enum ListData {
     case loading
-    case available([Movie])
+    case available(MovieListDataSource)
     case unavailable
   }
 
@@ -36,7 +36,12 @@ class MovieListController: UITableViewController {
     }
   }
   var posterProvider: PosterProvider = EmptyPosterProvider()
-  private var dataSource: MovieListDataSource!
+  private var dataSource: MovieListDataSource! {
+    guard case let ListData.available(dataSource) = listData else {
+      return nil
+    }
+    return dataSource
+  }
 
   private let titleSortingStrategy = SortDescriptor.title.makeTableViewStrategy()
   private lazy var searchController: UISearchController = {
@@ -93,12 +98,6 @@ class MovieListController: UITableViewController {
     return resultsController
   }()
 
-  var sortDescriptor = SortDescriptor.title {
-    didSet {
-      setup()
-    }
-  }
-
   @IBOutlet private var summaryView: UIView!
   @IBOutlet private var movieCountLabel: UILabel!
 
@@ -135,7 +134,6 @@ extension MovieListController {
 
 extension MovieListController {
   private func setup() {
-    setupDataSource()
     configureBackgroundView()
     configureFooterView()
     tableView.reloadData()
@@ -149,15 +147,6 @@ extension MovieListController {
       }
     }
     scrollToTop()
-  }
-
-  private func setupDataSource() {
-    switch listData {
-      case .loading, .unavailable:
-        dataSource = nil
-      case let .available(movies):
-        dataSource = MovieListDataSource(movies, sortingStrategy: sortDescriptor.makeTableViewStrategy())
-    }
   }
 
   private func configureBackgroundView() {
@@ -176,8 +165,8 @@ extension MovieListController {
           )
           self.tableView.separatorStyle = .none
         }
-      case let .available(movies):
-        if movies.isEmpty {
+      case let .available(dataSource):
+        if dataSource.isEmpty {
           backgroundView = GenericEmptyView(
               accessory: .image(#imageLiteral(resourceName: "EmptyLibrary")),
               description: .basic(NSLocalizedString("library.empty", comment: ""))
@@ -198,9 +187,9 @@ extension MovieListController {
   }
 
   private func configureFooterView() {
-    if case let .available(movies) = listData, !movies.isEmpty {
+    if case let .available(dataSource) = listData, !dataSource.isEmpty {
       let format = NSLocalizedString("movieList.summary.movieCount", comment: "")
-      movieCountLabel.text = .localizedStringWithFormat(format, movies.count)
+      movieCountLabel.text = .localizedStringWithFormat(format, dataSource.movieCount)
       tableView.tableFooterView = summaryView
     } else {
       tableView.tableFooterView = nil

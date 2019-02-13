@@ -49,6 +49,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
   // managed controllers
   private let navigationController: UINavigationController
   private let movieListController = UIStoryboard.movieList.instantiate(MovieListController.self)
+  private var sortDescriptor = SortDescriptor.title
 
   // child coordinators
   private var movieDetailsCoordinator: MovieDetailsCoordinator?
@@ -74,15 +75,18 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     movieListController.navigationItem.rightBarButtonItem = sortButton
     if let rawSortDescriptor = userDefaults.get(for: LibraryContentCoordinator.sortDescriptorKey),
        let sortDescriptor = SortDescriptor(rawValue: rawSortDescriptor) {
-      movieListController.sortDescriptor = sortDescriptor
+      self.sortDescriptor = sortDescriptor
     }
     self.token = userDefaults.observerValue(for: LibraryContentCoordinator.sortDescriptorKey) { [weak self] value in
       guard let `self` = self else { return }
       guard let rawSortDescriptor = value,
             let sortDescriptor = SortDescriptor(rawValue: rawSortDescriptor) else { return }
       DispatchQueue.main.async {
-        if self.movieListController.sortDescriptor != sortDescriptor {
-          self.movieListController.sortDescriptor = sortDescriptor
+        if self.sortDescriptor != sortDescriptor {
+          self.sortDescriptor = sortDescriptor
+          DispatchQueue.global(qos: .default).async {
+            self.fetchListData()
+          }
         }
       }
     }
@@ -144,7 +148,8 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
         }
       case let .success(movies):
         DispatchQueue.main.async {
-          self.movieListController.listData = .available(movies)
+          let dataSource = MovieListDataSource(movies, sortingStrategy: self.sortDescriptor.makeTableViewStrategy())
+          self.movieListController.listData = .available(dataSource)
           self.movieListController.navigationItem.rightBarButtonItem?.isEnabled = !movies.isEmpty
         }
     }
@@ -245,12 +250,15 @@ extension LibraryContentCoordinator {
   private func showSortDescriptorSheet() {
     let sheet = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
     for descriptor in SortDescriptor.allCases {
-      let isCurrentSorting = descriptor == movieListController.sortDescriptor
+      let isCurrentSorting = descriptor == self.sortDescriptor
       sheet.addSheetItem(SelectableLabelSheetItem(title: descriptor.localizedName,
                                                   showCheckmark: isCurrentSorting) { _ in
-        guard self.movieListController.sortDescriptor != descriptor else { return }
-        self.movieListController.sortDescriptor = descriptor
+        guard self.sortDescriptor != descriptor else { return }
+        self.sortDescriptor = descriptor
         self.userDefaults.set(descriptor.rawValue, for: LibraryContentCoordinator.sortDescriptorKey)
+        DispatchQueue.global(qos: .default).async {
+          self.fetchListData()
+        }
       })
     }
     movieListController.present(sheet, animated: true)
