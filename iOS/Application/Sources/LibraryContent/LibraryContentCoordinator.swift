@@ -32,7 +32,6 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     }
   }
   private let content: ContentSpecification
-  var dismissWhenEmpty = false
   var showsLibrarySwitch = false {
     didSet {
       if showsLibrarySwitch {
@@ -289,34 +288,6 @@ extension LibraryContentCoordinator: MovieLibraryDelegate {
   }
 
   func library(_ library: MovieLibrary, didUpdateMovies changeSet: ChangeSet<TmdbIdentifier, Movie>) {
-    guard case var .available(listItems) = movieListController.listData else { return }
-
-    // updated movies
-    if !changeSet.modifications.isEmpty {
-      for (id, movie) in changeSet.modifications {
-        guard let index = listItems.firstIndex(where: { $0.tmdbID == id }) else { continue }
-        listItems.remove(at: index)
-        listItems.insert(movie, at: index)
-      }
-    }
-
-    // new movies
-    let newMovies: [Movie]
-    switch content {
-      case .all:
-        newMovies = changeSet.insertions
-      case let .allWith(genreId):
-        newMovies = changeSet.insertions.filter { $0.genreIds.contains(genreId) }
-    }
-    listItems.append(contentsOf: newMovies)
-
-    // removed movies
-    if !changeSet.deletions.isEmpty {
-      for (_, movie) in changeSet.deletions {
-        guard let index = listItems.index(of: movie) else { continue }
-        listItems.remove(at: index)
-      }
-    }
     DispatchQueue.main.async {
       if let movieDetailsCoordinator = self.movieDetailsCoordinator {
         if let updatedMovie = changeSet.modifications[movieDetailsCoordinator.movie.tmdbID] {
@@ -335,16 +306,8 @@ extension LibraryContentCoordinator: MovieLibraryDelegate {
           }
         }
       }
-
-      // commit changes only when controller is not being dismissed anyway
-      if listItems.isEmpty && self.dismissWhenEmpty {
-        self.movieListController.onViewDidAppear = { [weak self] in
-          guard let `self` = self else { return }
-          self.navigationController.popViewController(animated: true)
-        }
-      } else {
-        self.movieListController.listData = .available(listItems)
-        self.movieListController.navigationItem.rightBarButtonItem?.isEnabled = !listItems.isEmpty
+      DispatchQueue.global(qos: .default).async {
+        self.fetchListData()
       }
     }
   }

@@ -44,7 +44,7 @@
 "library" = "Mediathek";
 "library.defaultName" = "Meine Filme";
 "library.migratedNameFormat" = "Filme von %@";
-"library.empty" = "Die Mediathek ist leer.";
+"library.empty" = "Keine Filme";
 "library.search.placeholder" = "Suchen";
 "libraryList.invitations" = "Einladungen";
 "libraryList.addNewLibrary" = "Neue Mediathek hinzufügen …";
