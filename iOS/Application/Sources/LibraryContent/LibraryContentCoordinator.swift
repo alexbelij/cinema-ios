@@ -14,6 +14,26 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     case allWith(GenreIdentifier)
   }
 
+  private enum SortDescriptor: String, CaseIterable {
+    case title, runtime, year
+
+    func makeTableViewStrategy() -> SectionSortingStrategy {
+      switch self {
+        case .title: return TitleSortingStrategy()
+        case .runtime: return RuntimeSortingStrategy()
+        case .year: return YearSortingStrategy()
+      }
+    }
+
+    var localizedName: String {
+      switch self {
+        case .title: return NSLocalizedString("sort.by.title", comment: "")
+        case .runtime: return NSLocalizedString("sort.by.runtime", comment: "")
+        case .year: return NSLocalizedString("sort.by.year", comment: "")
+      }
+    }
+  }
+
   private static let sortDescriptorKey = UserDefaultsKey<String>("MovieSortDescriptor")
 
   // coordinator stuff

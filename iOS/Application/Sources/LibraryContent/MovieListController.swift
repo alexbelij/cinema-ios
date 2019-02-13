@@ -12,6 +12,13 @@ class MovieListController: UITableViewController {
     case loading
     case available(MovieListDataSource)
     case unavailable
+
+    var dataSource: MovieListDataSource? {
+      guard case let ListData.available(dataSource) = self else {
+        return nil
+      }
+      return dataSource
+    }
   }
 
   final class ListItem: PosterHaving {
@@ -36,14 +43,8 @@ class MovieListController: UITableViewController {
     }
   }
   var posterProvider: PosterProvider = EmptyPosterProvider()
-  private var dataSource: MovieListDataSource! {
-    guard case let ListData.available(dataSource) = listData else {
-      return nil
-    }
-    return dataSource
-  }
 
-  private let titleSortingStrategy = SortDescriptor.title.makeTableViewStrategy()
+  private let titleSortingStrategy = TitleSortingStrategy()
   private lazy var searchController: UISearchController = {
     let searchController = UISearchController(searchResultsController: resultsController)
     searchController.searchResultsUpdater = self
@@ -137,14 +138,14 @@ extension MovieListController {
     configureBackgroundView()
     configureFooterView()
     tableView.reloadData()
-    if dataSource == nil || dataSource.isEmpty {
-      searchController.isActive = false
-      navigationItem.searchController = nil
-    } else {
+    if let dataSource = listData.dataSource, !dataSource.isEmpty {
       navigationItem.searchController = searchController
       if searchController.isActive {
         updateSearchResults(for: searchController)
       }
+    } else {
+      searchController.isActive = false
+      navigationItem.searchController = nil
     }
     scrollToTop()
   }
@@ -187,7 +188,7 @@ extension MovieListController {
   }
 
   private func configureFooterView() {
-    if case let .available(dataSource) = listData, !dataSource.isEmpty {
+    if let dataSource = listData.dataSource, !dataSource.isEmpty {
       let format = NSLocalizedString("movieList.summary.movieCount", comment: "")
       movieCountLabel.text = .localizedStringWithFormat(format, dataSource.movieCount)
       tableView.tableFooterView = summaryView
@@ -241,31 +242,30 @@ extension UITableView {
 
 extension MovieListController: UITableViewDataSourcePrefetching {
   override func numberOfSections(in tableView: UITableView) -> Int {
-    guard let dataSource = self.dataSource else { return 0 }
-    return dataSource.numberOfSections
+    return listData.dataSource?.numberOfSections ?? 0
   }
 
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return dataSource.numberOfRowsInSection(section)
+    return listData.dataSource!.numberOfRowsInSection(section)
   }
 
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell: MovieListListItemTableCell = tableView.dequeueReusableCell(for: indexPath)
-    let item = dataSource.item(at: indexPath)
+    let item = listData.dataSource!.item(at: indexPath)
     tableView.configure(cell,
                         for: item,
                         isSectionIndexVisible: true,
-                        at: { [weak dataSource] in dataSource?.indexPath(for: item) },
+                        at: { [weak self] in self?.listData.dataSource?.indexPath(for: item) },
                         using: posterProvider)
     return cell
   }
 
   override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    return dataSource.titleForHeaderInSection(section)
+    return listData.dataSource!.titleForHeaderInSection(section)
   }
 
   override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
-    guard let dataSource = self.dataSource, !dataSource.isEmpty else { return nil }
+    guard let dataSource = listData.dataSource, !dataSource.isEmpty else { return nil }
     guard let titles = dataSource.sectionIndexTitles else { return nil }
     return [UITableView.indexSearch] + titles
   }
@@ -274,16 +274,16 @@ extension MovieListController: UITableViewDataSourcePrefetching {
                           sectionForSectionIndexTitle title: String,
                           at index: Int) -> Int {
     guard title != UITableView.indexSearch else { return -1 }
-    return dataSource.sectionForSectionIndexTitle(title, at: index - 1)
+    return listData.dataSource!.sectionForSectionIndexTitle(title, at: index - 1)
   }
 
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    self.delegate?.movieListController(self, didSelect: dataSource.item(at: indexPath).movie)
+    self.delegate?.movieListController(self, didSelect: listData.dataSource!.item(at: indexPath).movie)
   }
 
   func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
     for indexPath in indexPaths {
-      let listItem = dataSource.item(at: indexPath)
+      let listItem = listData.dataSource!.item(at: indexPath)
       guard case .unknown = listItem.poster else { return }
       listItem.poster = .loading
       DispatchQueue.global(qos: .background).async {
@@ -294,9 +294,7 @@ extension MovieListController: UITableViewDataSourcePrefetching {
           guard let `self` = self else { return }
           tableView.reloadRow(for: listItem,
                               isSectionIndexVisible: true,
-                              at: { [weak dataSource = self.dataSource] in
-                                dataSource?.indexPath(for: listItem)
-                              },
+                              at: { [weak self] in self?.listData.dataSource?.indexPath(for: listItem) },
                               using: self.posterProvider)
         }
       }
@@ -311,8 +309,9 @@ extension MovieListController: UISearchResultsUpdating {
     guard searchController.isActive else { return }
     let searchText = searchController.searchBar.text ?? ""
     let lowercasedSearchText = searchText.lowercased()
-    let searchResults = self.dataSource.filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
-                                      .sorted { titleSortingStrategy.movieSorting(left: $0.movie, right: $1.movie) }
+    let searchResults = listData.dataSource!
+                                .filtered { $0.fullTitle.lowercased().contains(lowercasedSearchText) }
+                                .sorted { titleSortingStrategy.movieSorting(left: $0.movie, right: $1.movie) }
     resultsController.reload(searchText: searchText, searchResults: searchResults)
   }
 }
