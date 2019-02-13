@@ -1,12 +1,11 @@
 import CinemaKit
 
 protocol MovieListItemGrouping {
-  var sorting: MovieListItemSorting { get }
-
   func sectionIndexTitle(for movie: Movie) -> String
   func areSectionIndexTitlesInIncreasingOrder(left: String, right: String) -> Bool
   func refinedSectionIndexTitles(_ sectionIndexTitles: [String]) -> [String]
   func sectionTitle(for sectionIndexTitle: String) -> String
+  func sorting(for sectionIndexTitle: String) -> MovieListItemSorting
 }
 
 extension MovieListItemGrouping {
@@ -22,8 +21,7 @@ extension MovieListItemGrouping {
 struct FirstCharacterOfTitleGrouping: MovieListItemGrouping {
   private static let allSectionIndexTitles = ["#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
                                               "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
-
-  let sorting: MovieListItemSorting = TitleSorting()
+  private let titleSorting = TitleSorting()
 
   func sectionIndexTitle(for movie: Movie) -> String {
     let title = movie.title.removingIgnoredPrefixes()
@@ -46,6 +44,10 @@ struct FirstCharacterOfTitleGrouping: MovieListItemGrouping {
   func refinedSectionIndexTitles(_ sectionIndexTitles: [String]) -> [String] {
     return FirstCharacterOfTitleGrouping.allSectionIndexTitles
   }
+
+  func sorting(for sectionIndexTitle: String) -> MovieListItemSorting {
+    return titleSorting
+  }
 }
 
 struct RuntimeGrouping: MovieListItemGrouping {
@@ -58,7 +60,8 @@ struct RuntimeGrouping: MovieListItemGrouping {
 
   private let unknownSymbol = "?"
 
-  let sorting: MovieListItemSorting = RuntimeSorting()
+  private let runtimeSorting = RuntimeSorting()
+  private let titleSorting = TitleSorting()
 
   func sectionIndexTitle(for movie: Movie) -> String {
     guard let runtime = movie.runtime else { return unknownSymbol }
@@ -85,6 +88,10 @@ struct RuntimeGrouping: MovieListItemGrouping {
     }
   }
 
+  func sorting(for sectionIndexTitle: String) -> MovieListItemSorting {
+    return sectionIndexTitle == unknownSymbol ? titleSorting : runtimeSorting
+  }
+
   func sectionTitle(for sectionIndexTitle: String) -> String {
     switch sectionIndexTitle {
       case unknownSymbol: return NSLocalizedString("sort.by.runtime.unknownHeader", comment: "")
@@ -101,7 +108,7 @@ struct ReleaseDateGrouping: MovieListItemGrouping {
   private let currentYear = Calendar.current.component(.year, from: Date())
   private let numberOfStandaloneYears = 10
 
-  let sorting: MovieListItemSorting = TitleSorting()
+  private let titleSorting = TitleSorting()
 
   func sectionIndexTitle(for movie: Movie) -> String {
     guard let releaseDate = movie.releaseDate else { return unknownSymbol }
@@ -126,6 +133,10 @@ struct ReleaseDateGrouping: MovieListItemGrouping {
       return sectionIndexTitles
     }
     return sectionIndexTitles
+  }
+
+  func sorting(for sectionIndexTitle: String) -> MovieListItemSorting {
+    return titleSorting
   }
 
   func sectionTitle(for sectionIndexTitle: String) -> String {

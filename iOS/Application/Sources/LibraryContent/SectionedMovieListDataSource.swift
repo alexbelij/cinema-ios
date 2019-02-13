@@ -48,7 +48,7 @@ class SectionedMovieListDataSource {
       let sectionIndexTitle = refinedSectionIndexTitles[sectionIndex]
       if existingSectionIndexTitles.contains(sectionIndexTitle) {
         let dataSource = SimpleMovieListDataSource(listItems: sectionData[sectionIndexTitle]!,
-                                                   sortBy: grouping.sorting)
+                                                   sortBy: grouping.sorting(for: sectionIndexTitle))
         sections.append(Section(indexTitle: sectionIndexTitle,
                                 title: grouping.sectionTitle(for: sectionIndexTitle),
                                 dataSource: dataSource))
@@ -63,7 +63,7 @@ class SectionedMovieListDataSource {
     var sectionIndex = refinedSectionIndexTitles.endIndex
     for sectionIndexTitle in additionalIndexTitles {
       let dataSource = SimpleMovieListDataSource(listItems: sectionData[sectionIndexTitle]!,
-                                                 sortBy: grouping.sorting)
+                                                 sortBy: grouping.sorting(for: sectionIndexTitle))
       sections.append(Section(title: grouping.sectionTitle(for: sectionIndexTitle),
                               dataSource: dataSource))
       sectionIndexBySectionIndexTitle[sectionIndexTitle] = sectionIndex
