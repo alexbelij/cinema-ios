@@ -44,7 +44,7 @@ class MovieListController: UITableViewController {
   }
   var posterProvider: PosterProvider = EmptyPosterProvider()
 
-  private let titleSortingStrategy = TitleSortingStrategy()
+  private let titleSorting = TitleSorting()
   private lazy var searchController: UISearchController = {
     let searchController = UISearchController(searchResultsController: resultsController)
     searchController.searchResultsUpdater = self
@@ -311,7 +311,7 @@ extension MovieListController: UISearchResultsUpdating {
     let lowercasedSearchText = searchText.lowercased()
     let searchResults = listData.dataSource!
                                 .filtered { $0.movie.fullTitle.lowercased().contains(lowercasedSearchText) }
-                                .sorted { titleSortingStrategy.movieSorting(left: $0.movie, right: $1.movie) }
+                                .sorted(by: titleSorting.areInIncreasingOrder)
     resultsController.reload(searchText: searchText, searchResults: searchResults)
   }
 }

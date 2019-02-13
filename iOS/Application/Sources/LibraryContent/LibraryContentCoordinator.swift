@@ -17,11 +17,11 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
   private enum SortDescriptor: String, CaseIterable {
     case title, runtime, year
 
-    func makeTableViewStrategy() -> SectionSortingStrategy {
+    var grouping: MovieListItemGrouping {
       switch self {
-        case .title: return TitleSortingStrategy()
-        case .runtime: return RuntimeSortingStrategy()
-        case .year: return YearSortingStrategy()
+        case .title: return FirstCharacterOfTitleGrouping()
+        case .runtime: return RuntimeGrouping()
+        case .year: return ReleaseDateGrouping()
       }
     }
 
@@ -169,7 +169,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
       case let .success(movies):
         DispatchQueue.main.async {
           let dataSource = SectionedMovieListDataSource(for: movies.map(MovieListController.ListItem.init),
-                                                        sortingStrategy: self.sortDescriptor.makeTableViewStrategy())
+                                                        groupingBy: self.sortDescriptor.grouping)
           self.movieListController.listData = .available(dataSource)
           self.movieListController.navigationItem.rightBarButtonItem?.isEnabled = !movies.isEmpty
         }

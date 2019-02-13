@@ -5,10 +5,8 @@ class SimpleMovieListDataSource {
   private var listItems: [MovieListController.ListItem]
   private var indexes: [TmdbIdentifier: Int]
 
-  init(listItems: [MovieListController.ListItem], sortingStrategy: SectionSortingStrategy) {
-    self.listItems = listItems.sorted { left, right in
-      sortingStrategy.movieSorting(left: left.movie, right: right.movie)
-    }
+  init(listItems: [MovieListController.ListItem], sortBy sorting: MovieListItemSorting) {
+    self.listItems = listItems.sorted(by: sorting.areInIncreasingOrder)
     self.indexes = Dictionary(minimumCapacity: listItems.count)
     for (index, listItem) in self.listItems.enumerated() {
       indexes[listItem.tmdbID] = index

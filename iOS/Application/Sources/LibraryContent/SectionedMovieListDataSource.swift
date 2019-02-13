@@ -32,25 +32,25 @@ class SectionedMovieListDataSource {
   private var sections: [Section]
   private(set) var sectionIndexTitles: [String]?
   private var sectionIndexBySectionIndexTitle: [String: Int]
-  private let sortingStrategy: SectionSortingStrategy
+  private let grouping: MovieListItemGrouping
 
-  init(for listItems: [MovieListController.ListItem], sortingStrategy: SectionSortingStrategy) {
+  init(for listItems: [MovieListController.ListItem], groupingBy grouping: MovieListItemGrouping) {
     self.sectionIndexBySectionIndexTitle = [:]
-    self.sortingStrategy = sortingStrategy
+    self.grouping = grouping
     var sections = [Section]()
-    let sectionData = Dictionary(grouping: listItems) { sortingStrategy.sectionIndexTitle(for: $0.movie) }
+    let sectionData = Dictionary(grouping: listItems) { grouping.sectionIndexTitle(for: $0.movie) }
     let existingSectionIndexTitles = Array(sectionData.keys)
-        .sorted(by: sortingStrategy.sectionIndexTitleSorting)
-    let refinedSectionIndexTitles = sortingStrategy.refineSectionIndexTitles(existingSectionIndexTitles)
+        .sorted(by: grouping.areSectionIndexTitlesInIncreasingOrder)
+    let refinedSectionIndexTitles = grouping.refinedSectionIndexTitles(existingSectionIndexTitles)
 
     // map every section index title to one section
     for sectionIndex in refinedSectionIndexTitles.startIndex..<refinedSectionIndexTitles.endIndex {
       let sectionIndexTitle = refinedSectionIndexTitles[sectionIndex]
       if existingSectionIndexTitles.contains(sectionIndexTitle) {
         let dataSource = SimpleMovieListDataSource(listItems: sectionData[sectionIndexTitle]!,
-                                                   sortingStrategy: sortingStrategy)
+                                                   sortBy: grouping.sorting)
         sections.append(Section(indexTitle: sectionIndexTitle,
-                                title: sortingStrategy.sectionTitle(for: sectionIndexTitle),
+                                title: grouping.sectionTitle(for: sectionIndexTitle),
                                 dataSource: dataSource))
       } else {
         sections.append(Section(indexTitle: sectionIndexTitle))
@@ -63,8 +63,8 @@ class SectionedMovieListDataSource {
     var sectionIndex = refinedSectionIndexTitles.endIndex
     for sectionIndexTitle in additionalIndexTitles {
       let dataSource = SimpleMovieListDataSource(listItems: sectionData[sectionIndexTitle]!,
-                                                 sortingStrategy: sortingStrategy)
-      sections.append(Section(title: sortingStrategy.sectionTitle(for: sectionIndexTitle),
+                                                 sortBy: grouping.sorting)
+      sections.append(Section(title: grouping.sectionTitle(for: sectionIndexTitle),
                               dataSource: dataSource))
       sectionIndexBySectionIndexTitle[sectionIndexTitle] = sectionIndex
       sectionIndex += 1
@@ -103,7 +103,7 @@ class SectionedMovieListDataSource {
   }
 
   func indexPath(for item: MovieListController.ListItem) -> IndexPath? {
-    let sectionIndexTitle = sortingStrategy.sectionIndexTitle(for: item.movie)
+    let sectionIndexTitle = grouping.sectionIndexTitle(for: item.movie)
     if let sectionIndex = sectionIndexBySectionIndexTitle[sectionIndexTitle],
        let rowIndex = sections[sectionIndex].dataSource?.index(for: item) {
       return IndexPath(row: rowIndex, section: sectionIndex)
