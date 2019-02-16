@@ -7,7 +7,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-    appCoordinator = AppCoordinator(application: application)
+    appCoordinator = AppCoordinator(for: application)
     appCoordinator.presentRootViewController()
     return true
   }

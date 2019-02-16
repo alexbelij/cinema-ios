@@ -20,7 +20,7 @@ class AppCoordinator: AutoPresentableCoordinator {
   private var state = State.launched
   private var initializationRound = 0
 
-  init(application: UIApplication) {
+  init(for application: UIApplication) {
     self.application = application
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(applicationWideEventDidOccur),
@@ -31,6 +31,11 @@ class AppCoordinator: AutoPresentableCoordinator {
   func presentRootViewController() {
     startUp()
     window.makeKeyAndVisible()
+  }
+
+  private func restart() {
+    initializationRound = 0
+    startUp()
   }
 
   private func startUp() {
@@ -61,7 +66,7 @@ class AppCoordinator: AutoPresentableCoordinator {
   private func initializeCinemaKit() {
     let migratedLibraryNameFormat = NSLocalizedString("library.migratedNameFormat", comment: "")
     let migratedLibraryName = String.localizedStringWithFormat(migratedLibraryNameFormat, UIDevice.current.name)
-    CinemaKitStartupManager(using: self.application, migratedLibraryName: migratedLibraryName).initialize { progress in
+    CinemaKitStartupManager(using: application, migratedLibraryName: migratedLibraryName).initialize { progress in
       switch progress {
         case .settingUpCloudEnvironment:
           DispatchQueue.main.async {
@@ -87,16 +92,10 @@ class AppCoordinator: AutoPresentableCoordinator {
             coordinator.change(to: .migratingFailed)
           }
         case let .ready(dependencies):
-          self.loadData(using: dependencies)
-      }
-    }
-  }
-
-  private func loadData(using dependencies: AppDependencies) {
-    DispatchQueue.main.async {
-      os_log("loading data", log: AppCoordinator.logger, type: .default)
-      DispatchQueue.global(qos: .userInitiated).async {
-        self.fetchLibraries(using: dependencies)
+          os_log("loading data", log: AppCoordinator.logger, type: .default)
+          DispatchQueue.global(qos: .userInitiated).async {
+            self.fetchLibraries(using: dependencies)
+          }
       }
     }
   }
@@ -291,8 +290,7 @@ extension AppCoordinator {
         image: #imageLiteral(resourceName: "CloudFailure"),
         actionTitle: NSLocalizedString("continue", comment: "")) { [weak self] in
       guard let `self` = self else { return }
-      self.initializationRound = 0
-      self.startUp()
+      self.restart()
     }
     state = .notAuthenticated(page)
     window.rootViewController = page
@@ -306,8 +304,7 @@ extension AppCoordinator {
         image: #imageLiteral(resourceName: "CloudDeleted"),
         actionTitle: NSLocalizedString("iCloud.userDeletedZone.actionTitle", comment: "")) { [weak self] in
       guard let `self` = self else { return }
-      self.initializationRound = 0
-      self.startUp()
+      self.restart()
     }
     state = .readyForRestart(page)
     window.rootViewController = page
