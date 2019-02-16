@@ -8,7 +8,7 @@ class AppCoordinator: AutoPresentableCoordinator {
   enum State {
     case launched
     case initializing
-    case settingUp(StartupCoordinator)
+    case settingUp(SetupCoordinator)
     case notAuthenticated(UIViewController)
     case upAndRunning(AppDependencies, CoreCoordinator)
     case readyForRestart(UIViewController)
@@ -65,7 +65,7 @@ class AppCoordinator: AutoPresentableCoordinator {
       switch progress {
         case .settingUpCloudEnvironment:
           DispatchQueue.main.async {
-            let coordinator = StartupCoordinator()
+            let coordinator = SetupCoordinator()
             coordinator.change(to: .initializingCloud)
             self.state = .settingUp(coordinator)
             self.window.rootViewController = coordinator.rootViewController

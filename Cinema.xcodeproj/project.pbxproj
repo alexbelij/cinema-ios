@@ -25,7 +25,7 @@
 		816BF4E3B50A7125D116F4A2 /* PersistentRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF5BD7B80EE7F92F43A89 /* PersistentRecordStore.swift */; };
 		816BF565762A799B909DF7EB /* FetchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF8FC2C1C4FE8E84FBE63 /* FetchManager.swift */; };
 		816BF5B03430D75DD4D08973 /* MovieLibraryManagerModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF91512E4D3E5E5BD4AED /* MovieLibraryManagerModelController.swift */; };
-		816BF604123EB92BD1977E38 /* StartupCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF0DBF0BD85AF1BA22775 /* StartupCoordinator.swift */; };
+		816BF604123EB92BD1977E38 /* SetupCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF0DBF0BD85AF1BA22775 /* SetupCoordinator.swift */; };
 		816BF60ADB7CCD6D57A4F0DB /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF530E641C52408287FAF /* Utilities.swift */; };
 		816BF68AD5183E9A65E57593 /* GenericEmptyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFD2D067C0F79106D9254 /* GenericEmptyView.swift */; };
 		816BF6B7DF1104EB79B0FE50 /* DeviceSyncingMovieLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFE54A4452C163C789885 /* DeviceSyncingMovieLibrary.swift */; };
@@ -174,7 +174,7 @@
 		816BF0249B9FE92FDCAF65C0 /* GenericPages.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenericPages.swift; sourceTree = "<group>"; };
 		816BF09753AED0716E1BBC94 /* TMDBSwiftCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TMDBSwiftCache.swift; sourceTree = "<group>"; };
 		816BF0AA69C69AAF93EA0F7E /* MessageTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageTableCell.swift; sourceTree = "<group>"; };
-		816BF0DBF0BD85AF1BA22775 /* StartupCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartupCoordinator.swift; sourceTree = "<group>"; };
+		816BF0DBF0BD85AF1BA22775 /* SetupCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetupCoordinator.swift; sourceTree = "<group>"; };
 		816BF1736861B92F3C805B3D /* MulticastDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MulticastDelegate.swift; sourceTree = "<group>"; };
 		816BF23B3E183EE77E401FBC /* Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		816BF2612290416EB1BFCA59 /* MovieDbClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieDbClient.swift; sourceTree = "<group>"; };
@@ -702,7 +702,7 @@
 				CBF3CE631FF2385C00F4B6C0 /* CoreCoordinator.swift */,
 				816BF6419B90D268ECB087A8 /* LibrarySheet.swift */,
 				CBC2E3B521358F8C0088F5C8 /* SharedLibrarySheetCell.xib */,
-				816BF0DBF0BD85AF1BA22775 /* StartupCoordinator.swift */,
+				816BF0DBF0BD85AF1BA22775 /* SetupCoordinator.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -1062,7 +1062,7 @@
 				816BF087ADAD47C5E4C2EB48 /* ButtonTableCell.swift in Sources */,
 				816BFDE4F1ED427E21DCBDC5 /* TextFieldTableCell.swift in Sources */,
 				816BF06563923602AB2343F0 /* MessageTableCell.swift in Sources */,
-				816BF604123EB92BD1977E38 /* StartupCoordinator.swift in Sources */,
+				816BF604123EB92BD1977E38 /* SetupCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
