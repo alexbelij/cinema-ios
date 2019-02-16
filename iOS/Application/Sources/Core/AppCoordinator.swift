@@ -96,6 +96,10 @@ class AppCoordinator: AutoPresentableCoordinator {
           DispatchQueue.global(qos: .userInitiated).async {
             self.fetchLibraries(using: dependencies)
           }
+        case .failed:
+          DispatchQueue.main.async {
+            self.showErrorPage()
+          }
       }
     }
   }
@@ -122,7 +126,9 @@ class AppCoordinator: AutoPresentableCoordinator {
                   fatalError("should not occur: \(error)")
               }
             case .nonRecoverableError:
-              fatalError("non-recoverable error during initial libraries fetch")
+              DispatchQueue.main.async {
+                self.showErrorPage()
+              }
             case .libraryDoesNotExist, .permissionFailure:
               fatalError("should not occur: \(error)")
           }
@@ -185,7 +191,9 @@ class AppCoordinator: AutoPresentableCoordinator {
                   fatalError("should not occur: \(error)")
               }
             case .nonRecoverableError:
-              fatalError("non-recoverable error during creation of default library")
+              DispatchQueue.main.async {
+                self.showErrorPage()
+              }
             case .libraryDoesNotExist, .permissionFailure:
               fatalError("should not occur: \(error)")
           }
@@ -293,6 +301,20 @@ extension AppCoordinator {
       self.restart()
     }
     state = .notAuthenticated(page)
+    window.rootViewController = page
+  }
+
+  private func showErrorPage() {
+    dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
+    if case .readyForRestart = state { return }
+    let page = ActionPage.initWith(
+        primaryText: NSLocalizedString("error.genericError", comment: ""),
+        image: #imageLiteral(resourceName: "CloudFailure"),
+        actionTitle: NSLocalizedString("tryAgain", comment: "")) { [weak self] in
+      guard let `self` = self else { return }
+      self.restart()
+    }
+    state = .readyForRestart(page)
     window.rootViewController = page
   }
 

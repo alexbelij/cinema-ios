@@ -30,6 +30,7 @@ public enum StartupProgress {
   case foundLegacyData((Bool) -> Void)
   case migrationFailed
   case ready(AppDependencies)
+  case failed
 }
 
 public class CinemaKitStartupManager: StartupManager {
@@ -177,7 +178,7 @@ public class CinemaKitStartupManager: StartupManager {
                log: CinemaKitStartupManager.logger,
                type: .error,
                String(describing: error))
-        fail()
+        self.fail()
       } else {
         self.setUpSubscriptions()
       }
@@ -249,7 +250,7 @@ public class CinemaKitStartupManager: StartupManager {
                log: CinemaKitStartupManager.logger,
                type: .error,
                String(describing: error))
-        fail()
+        self.fail()
       } else {
         DispatchQueue.main.async {
           self.application.registerForRemoteNotifications()
@@ -351,6 +352,10 @@ public class CinemaKitStartupManager: StartupManager {
     os_log("finished initializing CinemaKit", log: CinemaKitStartupManager.logger, type: .default)
     self.progressHandler!(StartupProgress.ready(dependencies))
   }
+
+  private func fail() {
+    progressHandler!(StartupProgress.failed)
+  }
 }
 
 private struct DefaultCKContainerProvider: CKContainerProvider {
@@ -391,10 +396,6 @@ private class DefaultMovieLibraryFactory: MovieLibraryFactory {
                                      tmdbPropertiesProvider: tmdbWrapper,
                                      syncManager: syncManager)
   }
-}
-
-private func fail() -> Never {
-  fatalError("error during startup")
 }
 
 // MARK: - migration
