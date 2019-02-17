@@ -4,7 +4,7 @@ import os.log
 import UIKit
 
 protocol SubscriptionManager {
-  func subscribeForChanges(then completion: @escaping (CloudKitError?) -> Void)
+  func subscribeForChanges(then completion: @escaping (Bool) -> Void)
 }
 
 enum SubscriptionTarget: String, Codable {
@@ -68,43 +68,37 @@ class DefaultSubscriptionManager: SubscriptionManager {
   }
 }
 
-  func subscribeForChanges(then completion: @escaping (CloudKitError?) -> Void) {
-    subscribeForChanges(for: .deviceSyncZone) { error in
-      if let error = error {
-        completion(error)
-      } else {
+  func subscribeForChanges(then completion: @escaping (Bool) -> Void) {
+    subscribeForChanges(for: .deviceSyncZone) { success in
+      if success {
         self.subscribeForChanges(for: .sharedDatabase, then: completion)
+      } else {
+        completion(false)
       }
     }
   }
 
   private func subscribeForChanges(for target: SubscriptionTarget,
-                                   then completion: @escaping (CloudKitError?) -> Void) {
+                                   then completion: @escaping (Bool) -> Void) {
     if subscriptionStore.hasSubscribedTo(target) {
-      completion(nil)
+      completion(true)
       return
     }
-    fetchAllSubscriptions(in: target.scope, retryCount: defaultRetryCount) { subscriptions, error in
-      if let error = error {
-        os_log("already subscribed to %{public}@ (local)",
-               log: DefaultSubscriptionManager.logger,
-               type: .info,
-               String(describing: target))
-        completion(error)
-      } else if let subscriptions = subscriptions {
+    fetchAllSubscriptions(in: target.scope, retryCount: defaultRetryCount) { subscriptions in
+      if let subscriptions = subscriptions {
         if subscriptions[target.subscriptionID] == nil {
           self.saveSubscription(target.makeSubscription(),
                                 in: target.scope,
-                                retryCount: defaultRetryCount) { error in
-            if let error = error {
-              completion(error)
-            } else {
+                                retryCount: defaultRetryCount) { success in
+            if success {
               self.subscriptionStore.setHasSubscribedTo(target)
               os_log("saved subscription for %{public}@",
                      log: DefaultSubscriptionManager.logger,
                      type: .info,
                      String(describing: target))
-              completion(nil)
+              completion(true)
+            } else {
+              completion(false)
             }
           }
         } else {
@@ -113,8 +107,10 @@ class DefaultSubscriptionManager: SubscriptionManager {
                  type: .info,
                  String(describing: target))
           self.subscriptionStore.setHasSubscribedTo(target)
-          completion(nil)
+          completion(true)
         }
+      } else {
+        completion(false)
       }
     }
   }
@@ -122,7 +118,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
   private func fetchAllSubscriptions(
       in scope: CKDatabase.Scope,
       retryCount: Int,
-      then completion: @escaping ([String: CKSubscription]?, CloudKitError?) -> Void) {
+      then completion: @escaping ([String: CKSubscription]?) -> Void) {
     let operation = CKFetchSubscriptionsOperation.fetchAllSubscriptionsOperation()
     operation.fetchSubscriptionCompletionBlock = { subscriptions, error in
       if let error = error {
@@ -136,18 +132,13 @@ class DefaultSubscriptionManager: SubscriptionManager {
           }
           return
         }
-        switch error.ckerrorCode {
-          case .notAuthenticated?:
-            completion(nil, .notAuthenticated)
-          default:
-            os_log("<fetchAllSubscriptions> unhandled error: %{public}@",
-                   log: DefaultSubscriptionManager.logger,
-                   type: .error,
-                   String(describing: error))
-            completion(nil, .nonRecoverableError)
-        }
+        os_log("<fetchAllSubscriptions> unhandled error: %{public}@",
+               log: DefaultSubscriptionManager.logger,
+               type: .error,
+               String(describing: error))
+        completion(nil)
       } else if let subscriptions = subscriptions {
-        completion(subscriptions, nil)
+        completion(subscriptions)
       }
     }
     databaseOperationQueue(for: scope).add(operation)
@@ -156,7 +147,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
   private func saveSubscription(_ subscription: CKSubscription,
                                 in scope: CKDatabase.Scope,
                                 retryCount: Int,
-                                then completion: @escaping (CloudKitError?) -> Void) {
+                                then completion: @escaping (Bool) -> Void) {
     let operation = CKModifySubscriptionsOperation(subscriptionsToSave: [subscription],
                                                    subscriptionIDsToDelete: nil)
     operation.modifySubscriptionsCompletionBlock = { _, _, error in
@@ -171,21 +162,13 @@ class DefaultSubscriptionManager: SubscriptionManager {
           }
           return
         }
-        switch error.ckerrorCode {
-          case .notAuthenticated?:
-            completion(.notAuthenticated)
-          case .userDeletedZone?:
-            self.dataInvalidationFlag.set()
-            completion(.userDeletedZone)
-          default:
-            os_log("<saveSubscription> unhandled error: %{public}@",
-                   log: DefaultSubscriptionManager.logger,
-                   type: .error,
-                   String(describing: error))
-            completion(.nonRecoverableError)
-        }
+        os_log("<saveSubscription> unhandled error: %{public}@",
+               log: DefaultSubscriptionManager.logger,
+               type: .error,
+               String(describing: error))
+        completion(false)
       } else {
-        completion(nil)
+        completion(true)
       }
     }
     databaseOperationQueue(for: scope).add(operation)

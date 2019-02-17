@@ -172,24 +172,20 @@ public class CinemaKitStartupManager: StartupManager {
   }
 
   private func setUpDeviceSyncZone() {
-    setUpDeviceSyncZone(using: container.database(with: .private), retryCount: defaultRetryCount) { error in
-      if let error = error {
-        os_log("unable to setup deviceSyncZone: %{public}@",
-               log: CinemaKitStartupManager.logger,
-               type: .error,
-               String(describing: error))
-        self.fail()
-      } else {
+    setUpDeviceSyncZone(using: container.database(with: .private), retryCount: defaultRetryCount) { success in
+      if success {
         self.setUpSubscriptions()
+      } else {
+        self.progressHandler!(StartupProgress.failed)
       }
     }
   }
 
   private func setUpDeviceSyncZone(using queue: DatabaseOperationQueue,
                                    retryCount: Int,
-                                   then completion: @escaping (CloudKitError?) -> Void) {
+                                   then completion: @escaping (Bool) -> Void) {
     if userDefaults.get(for: CinemaKitStartupManager.deviceSyncZoneCreatedKey) {
-      completion(nil)
+      completion(true)
       return
     }
     progressHandler!(StartupProgress.settingUpCloudEnvironment)
@@ -209,20 +205,15 @@ public class CinemaKitStartupManager: StartupManager {
           }
           return
         }
-        switch error.ckerrorCode {
-          case .notAuthenticated?:
-            completion(.notAuthenticated)
-          default:
-            os_log("<setUpDeviceSyncZone> unhandled error: %{public}@",
-                   log: CinemaKitStartupManager.logger,
-                   type: .error,
-                   String(describing: error))
-            completion(.nonRecoverableError)
-        }
+        os_log("<setUpDeviceSyncZone> unhandled error: %{public}@",
+               log: CinemaKitStartupManager.logger,
+               type: .error,
+               String(describing: error))
+        completion(false)
       } else {
         os_log("device sync zone is set up", log: CinemaKitStartupManager.logger, type: .info)
         self.userDefaults.set(true, for: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
-        completion(nil)
+        completion(true)
       }
     }
     queue.add(operation)
@@ -233,18 +224,14 @@ public class CinemaKitStartupManager: StartupManager {
         privateDatabaseOperationQueue: container.database(with: .private),
         sharedDatabaseOperationQueue: container.database(with: .shared),
         dataInvalidationFlag: LocalDataInvalidationFlag(userDefaults: userDefaults))
-    subscriptionManager.subscribeForChanges { error in
-      if let error = error {
-        os_log("unable to subscribe for changes: %{public}@",
-               log: CinemaKitStartupManager.logger,
-               type: .error,
-               String(describing: error))
-        self.fail()
-      } else {
+    subscriptionManager.subscribeForChanges { success in
+      if success {
         DispatchQueue.main.async {
           self.application.registerForRemoteNotifications()
         }
         self.makeDependencies()
+      } else {
+        self.progressHandler!(StartupProgress.failed)
       }
     }
   }
@@ -340,10 +327,6 @@ public class CinemaKitStartupManager: StartupManager {
   private func finishStartup(_ dependencies: AppDependencies) {
     os_log("finished initializing CinemaKit", log: CinemaKitStartupManager.logger, type: .default)
     self.progressHandler!(StartupProgress.ready(dependencies))
-  }
-
-  private func fail() {
-    progressHandler!(StartupProgress.failed)
   }
 }
 

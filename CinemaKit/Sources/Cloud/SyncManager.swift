@@ -149,13 +149,6 @@ class DefaultSyncManager: SyncManager {
           case .userDeletedZone?:
             self.dataInvalidationFlag.set()
             completion(.userDeletedZone)
-          case .partialFailure?:
-            os_log("<syncAll> partial error: %{public}@",
-                   log: DefaultSyncManager.logger,
-                   type: .error,
-                   // swiftlint:disable:next force_cast
-                   String(describing: (error as! CKError).partialErrorsByItemID))
-            completion(.nonRecoverableError)
           default:
             os_log("<syncAll> unhandled error: %{public}@",
                    log: DefaultSyncManager.logger,
