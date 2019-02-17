@@ -209,24 +209,16 @@ public class CinemaKitStartupManager: StartupManager {
           }
           return
         }
-        guard let ckerror = error as? CKError else {
-          os_log("<setUpDeviceSyncZone> unhandled error: %{public}@",
-                 log: CinemaKitStartupManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(.nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(.notAuthenticated)
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(.nonRecoverableError)
           default:
-            os_log("<setUpDeviceSyncZone> unhandled CKError: %{public}@",
+            os_log("<setUpDeviceSyncZone> unhandled error: %{public}@",
                    log: CinemaKitStartupManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(.nonRecoverableError)
         }
       } else {

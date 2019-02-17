@@ -45,29 +45,22 @@ class DefaultShareManager: ShareManager {
           }
           return
         }
-        guard let ckerror = error as? CKError else {
-          os_log("<saveShare> unhandled error: %{public}@",
-                 log: DefaultShareManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(.nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(.notAuthenticated)
-          case .userDeletedZone:
+          case .userDeletedZone?:
             self.dataInvalidationFlag.set()
             completion(.userDeletedZone)
-          case .serverRecordChanged:
-            completion(.conflict(serverRecord: ckerror.serverRecord!))
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .serverRecordChanged?:
+            // swiftlint:disable:next force_cast
+            completion(.conflict(serverRecord: (error as! CKError).serverRecord!))
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(.nonRecoverableError)
           default:
-            os_log("<saveShare> unhandled CKError: %{public}@",
+            os_log("<saveShare> unhandled error: %{public}@",
                    log: DefaultShareManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(.nonRecoverableError)
         }
       } else {
@@ -99,26 +92,18 @@ class DefaultShareManager: ShareManager {
           }
           return
         }
-        guard let ckerror = error as? CKError else {
-          os_log("<acceptCloudKitShare> unhandled error: %{public}@",
-                 log: DefaultShareManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(.nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(.notAuthenticated)
-          case .unknownItem:
+          case .unknownItem?:
             completion(.itemNoLongerExists)
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(.nonRecoverableError)
           default:
-            os_log("<acceptCloudKitShare> unhandled CKError: %{public}@",
+            os_log("<acceptCloudKitShare> unhandled error: %{public}@",
                    log: DefaultShareManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(.nonRecoverableError)
         }
       } else {
@@ -143,8 +128,7 @@ class DefaultShareManager: ShareManager {
     var unhandledErrorOccurred = false
     operation.perShareMetadataBlock = { _, shareMetadata, error in
       if let error = error {
-        guard let ckerror = error as? CKError else { return }
-        if ckerror.code != CKError.Code.unknownItem {
+        if error.ckerrorCode != .unknownItem {
           unhandledErrorOccurred = true
         }
       } else if let shareMetadata = shareMetadata {
@@ -153,26 +137,18 @@ class DefaultShareManager: ShareManager {
     }
     operation.fetchShareMetadataCompletionBlock = { error in
       if let error = error {
-        guard let ckerror = error as? CKError else {
-          os_log("<fetchShareMetadata> unhandled error: %{public}@",
-                 log: DefaultShareManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(nil, .nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(nil, .notAuthenticated)
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(nil, .nonRecoverableError)
-          case .partialFailure where !unhandledErrorOccurred:
+          case .partialFailure? where !unhandledErrorOccurred:
             completion(shareMetadatas, nil)
           default:
-            os_log("<fetchShareMetadata> unhandled CKError: %{public}@",
+            os_log("<fetchShareMetadata> unhandled error: %{public}@",
                    log: DefaultShareManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(nil, .nonRecoverableError)
         }
       } else {

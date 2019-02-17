@@ -73,24 +73,16 @@ class DefaultFetchManager: FetchManager {
           }
           return
         }
-        guard let ckerror = error as? CKError else {
-          os_log("<fetchZones> unhandled error: %{public}@",
-                 log: DefaultFetchManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(nil, .nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(nil, .notAuthenticated)
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(nil, .nonRecoverableError)
           default:
-            os_log("<fetchZones> unhandled CKError: %{public}@",
+            os_log("<fetchZones> unhandled error: %{public}@",
                    log: DefaultFetchManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(nil, .nonRecoverableError)
         }
       } else if let zones = zones {
@@ -151,29 +143,21 @@ class DefaultFetchManager: FetchManager {
           }
           return
         }
-        guard let ckerror = error as? CKError else {
-          os_log("<fetchAll> unhandled error: %{public}@",
-                 log: DefaultFetchManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(nil, .nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(nil, .notAuthenticated)
-          case .zoneNotFound:
+          case .zoneNotFound?:
             completion(nil, .zoneNotFound)
-          case .userDeletedZone:
+          case .userDeletedZone?:
             self.dataInvalidationFlag.set()
             completion(nil, .userDeletedZone)
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(nil, .nonRecoverableError)
           default:
-            os_log("<fetchAll> unhandled CKError: %{public}@",
+            os_log("<fetchAll> unhandled error: %{public}@",
                    log: DefaultFetchManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(nil, .nonRecoverableError)
         }
       } else if let cursor = cursor {
@@ -226,28 +210,20 @@ class DefaultFetchManager: FetchManager {
           }
           return
         }
-        guard let ckerror = error as? CKError else {
-          os_log("<fetchRecord> unhandled error: %{public}@",
-                 log: DefaultFetchManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(nil, .nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(nil, .notAuthenticated)
-          case .zoneNotFound:
+          case .zoneNotFound?:
             completion(nil, .zoneNotFound)
-          case .unknownItem:
+          case .unknownItem?:
             completion(nil, .itemNoLongerExists)
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(nil, .nonRecoverableError)
           default:
-            os_log("<fetchRecord> unhandled CKError: %{public}@",
+            os_log("<fetchRecord> unhandled error: %{public}@",
                    log: DefaultFetchManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(nil, .nonRecoverableError)
         }
       } else if let records = records {

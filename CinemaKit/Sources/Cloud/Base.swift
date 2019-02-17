@@ -76,6 +76,10 @@ extension Error {
     return (partialErrorInfo[key] as! NSError) as Error
   }
 
+  var ckerrorCode: CKError.Code? {
+    return (self as? CKError)?.code
+  }
+
   var retryAfterSeconds: Int? {
     return ((self as? CKError)?.retryAfterSeconds?.rounded(.up)).map(Int.init)
   }

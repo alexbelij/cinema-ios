@@ -105,26 +105,18 @@ class DefaultChangesManager: ChangesManager {
     // handle result
     operation.fetchDatabaseChangesCompletionBlock = { newChangeToken, _, error in
       if let error = error {
-        guard let ckerror = error as? CKError else {
-          os_log("<fetchChangesForDatabase> unhandled error: %{public}@",
-                 log: DefaultChangesManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(nil, .nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(nil, .notAuthenticated)
-          case .changeTokenExpired:
+          case .changeTokenExpired?:
             self.dataInvalidationFlag.set()
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(nil, .nonRecoverableError)
           default:
-            os_log("<fetchChangesForDatabase> unhandled CKError: %{public}@",
+            os_log("<fetchChangesForDatabase> unhandled error: %{public}@",
                    log: DefaultChangesManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(nil, .nonRecoverableError)
         }
       } else {
@@ -167,9 +159,7 @@ class DefaultChangesManager: ChangesManager {
     var newChangeTokens = [CKRecordZone.ID: CKServerChangeToken]()
     operation.recordZoneFetchCompletionBlock = { zoneID, newChangeToken, _, _, error in
       if let error = error {
-        guard let ckerror = error as? CKError else { return }
-        if ckerror.code == CKError.Code.changeTokenExpired
-           || ckerror.code == CKError.Code.userDeletedZone {
+        if error.ckerrorCode == .changeTokenExpired || error.ckerrorCode == .userDeletedZone {
           self.dataInvalidationFlag.set()
         }
       } else {
@@ -190,24 +180,16 @@ class DefaultChangesManager: ChangesManager {
           completion(nil, .userDeletedZone)
           return
         }
-        guard let ckerror = error as? CKError else {
-          os_log("<fetchChangesInZones> unhandled error: %{public}@",
-                 log: DefaultChangesManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(nil, .nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(nil, .notAuthenticated)
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(nil, .nonRecoverableError)
           default:
-            os_log("<fetchChangesInZones> unhandled CKError: %{public}@",
+            os_log("<fetchChangesInZones> unhandled error: %{public}@",
                    log: DefaultChangesManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(nil, .nonRecoverableError)
         }
       } else {

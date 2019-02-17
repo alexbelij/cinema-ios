@@ -136,24 +136,16 @@ class DefaultSubscriptionManager: SubscriptionManager {
           }
           return
         }
-        guard let ckerror = error as? CKError else {
-          os_log("<fetchAllSubscriptions> unhandled error: %{public}@",
-                 log: DefaultSubscriptionManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(nil, .nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(nil, .notAuthenticated)
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(nil, .nonRecoverableError)
           default:
-            os_log("<fetchAllSubscriptions> unhandled CKError: %{public}@",
+            os_log("<fetchAllSubscriptions> unhandled error: %{public}@",
                    log: DefaultSubscriptionManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(nil, .nonRecoverableError)
         }
       } else if let subscriptions = subscriptions {
@@ -181,27 +173,19 @@ class DefaultSubscriptionManager: SubscriptionManager {
           }
           return
         }
-        guard let ckerror = error as? CKError else {
-          os_log("<saveSubscription> unhandled error: %{public}@",
-                 log: DefaultSubscriptionManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(.nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(.notAuthenticated)
-          case .userDeletedZone:
+          case .userDeletedZone?:
             self.dataInvalidationFlag.set()
             completion(.userDeletedZone)
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(.nonRecoverableError)
           default:
-            os_log("<saveSubscription> unhandled CKError: %{public}@",
+            os_log("<saveSubscription> unhandled error: %{public}@",
                    log: DefaultSubscriptionManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(.nonRecoverableError)
         }
       } else {

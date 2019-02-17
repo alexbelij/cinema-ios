@@ -63,33 +63,26 @@ class DefaultSyncManager: SyncManager {
           }
           return
         }
-        guard let ckerror = error as? CKError else {
-          os_log("<sync> unhandled error: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(.nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(.notAuthenticated)
-          case .userDeletedZone:
+          case .userDeletedZone?:
             self.dataInvalidationFlag.set()
             completion(.userDeletedZone)
-          case .serverRecordChanged:
-            completion(.conflict(serverRecord: ckerror.serverRecord!))
-          case .unknownItem:
+          case .serverRecordChanged?:
+            // swiftlint:disable:next force_cast
+            completion(.conflict(serverRecord: (error as! CKError).serverRecord!))
+          case .unknownItem?:
             completion(.itemNoLongerExists)
-          case .permissionFailure:
+          case .permissionFailure?:
             completion(.permissionFailure)
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(.nonRecoverableError)
           default:
-            os_log("<sync> unhandled CKError: %{public}@",
+            os_log("<sync> unhandled error: %{public}@",
                    log: DefaultSyncManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(.nonRecoverableError)
         }
       } else {
@@ -152,33 +145,26 @@ class DefaultSyncManager: SyncManager {
           }
           return
         }
-        guard let ckerror = error as? CKError else {
-          os_log("<syncAll> unhandled error: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(.nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(.notAuthenticated)
-          case .userDeletedZone:
+          case .userDeletedZone?:
             self.dataInvalidationFlag.set()
             completion(.userDeletedZone)
-          case .partialFailure:
+          case .partialFailure?:
             os_log("<syncAll> partial error: %{public}@",
                    log: DefaultSyncManager.logger,
                    type: .error,
-                   String(describing: ckerror.partialErrorsByItemID))
+                   // swiftlint:disable:next force_cast
+                   String(describing: (error as! CKError).partialErrorsByItemID))
             completion(.nonRecoverableError)
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(.nonRecoverableError)
           default:
-            os_log("<syncAll> unhandled CKError: %{public}@",
+            os_log("<syncAll> unhandled error: %{public}@",
                    log: DefaultSyncManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(.nonRecoverableError)
         }
       } else {
@@ -214,31 +200,23 @@ class DefaultSyncManager: SyncManager {
           }
           return
         }
-        guard let ckerror = error as? CKError else {
-          os_log("<delete> unhandled error: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(.nonRecoverableError)
-          return
-        }
-        switch ckerror.code {
-          case .notAuthenticated:
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
             completion(.notAuthenticated)
-          case .userDeletedZone:
+          case .userDeletedZone?:
             self.dataInvalidationFlag.set()
             completion(.userDeletedZone)
-          case .unknownItem:
+          case .unknownItem?:
             completion(nil)
-          case .permissionFailure:
+          case .permissionFailure?:
             completion(.permissionFailure)
-          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
             completion(.nonRecoverableError)
           default:
-            os_log("<delete> unhandled CKError: %{public}@",
+            os_log("<delete> unhandled error: %{public}@",
                    log: DefaultSyncManager.logger,
                    type: .error,
-                   String(describing: ckerror))
+                   String(describing: error))
             completion(.nonRecoverableError)
         }
       } else {
