@@ -71,29 +71,26 @@ class DefaultSyncManager: SyncManager {
           completion(.nonRecoverableError)
           return
         }
-        if ckerror.code == CKError.Code.notAuthenticated {
-          completion(.notAuthenticated)
-        } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.dataInvalidationFlag.set()
-          completion(.userDeletedZone)
-        } else if ckerror.code == CKError.Code.serverRecordChanged {
-          completion(.conflict(serverRecord: ckerror.serverRecord!))
-        } else if ckerror.code == CKError.Code.unknownItem {
-          completion(.itemNoLongerExists)
-        } else if ckerror.code == CKError.Code.permissionFailure {
-          completion(.permissionFailure)
-        } else if ckerror.code == CKError.Code.networkFailure
-                  || ckerror.code == CKError.Code.networkUnavailable
-                  || ckerror.code == CKError.Code.requestRateLimited
-                  || ckerror.code == CKError.Code.serviceUnavailable
-                  || ckerror.code == CKError.Code.zoneBusy {
-          completion(.nonRecoverableError)
-        } else {
-          os_log("<sync> unhandled CKError: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(.nonRecoverableError)
+        switch ckerror.code {
+          case .notAuthenticated:
+            completion(.notAuthenticated)
+          case .userDeletedZone:
+            self.dataInvalidationFlag.set()
+            completion(.userDeletedZone)
+          case .serverRecordChanged:
+            completion(.conflict(serverRecord: ckerror.serverRecord!))
+          case .unknownItem:
+            completion(.itemNoLongerExists)
+          case .permissionFailure:
+            completion(.permissionFailure)
+          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+            completion(.nonRecoverableError)
+          default:
+            os_log("<sync> unhandled CKError: %{public}@",
+                   log: DefaultSyncManager.logger,
+                   type: .error,
+                   String(describing: ckerror))
+            completion(.nonRecoverableError)
         }
       } else {
         os_log("pushed %{public}@ record",
@@ -163,29 +160,26 @@ class DefaultSyncManager: SyncManager {
           completion(.nonRecoverableError)
           return
         }
-        if ckerror.code == CKError.Code.notAuthenticated {
-          completion(.notAuthenticated)
-        } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.dataInvalidationFlag.set()
-          completion(.userDeletedZone)
-        } else if ckerror.code == CKError.Code.partialFailure {
-          os_log("<syncAll> partial error: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: ckerror.partialErrorsByItemID))
-          completion(.nonRecoverableError)
-        } else if ckerror.code == CKError.Code.networkFailure
-                  || ckerror.code == CKError.Code.networkUnavailable
-                  || ckerror.code == CKError.Code.requestRateLimited
-                  || ckerror.code == CKError.Code.serviceUnavailable
-                  || ckerror.code == CKError.Code.zoneBusy {
-          completion(.nonRecoverableError)
-        } else {
-          os_log("<syncAll> unhandled CKError: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(.nonRecoverableError)
+        switch ckerror.code {
+          case .notAuthenticated:
+            completion(.notAuthenticated)
+          case .userDeletedZone:
+            self.dataInvalidationFlag.set()
+            completion(.userDeletedZone)
+          case .partialFailure:
+            os_log("<syncAll> partial error: %{public}@",
+                   log: DefaultSyncManager.logger,
+                   type: .error,
+                   String(describing: ckerror.partialErrorsByItemID))
+            completion(.nonRecoverableError)
+          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+            completion(.nonRecoverableError)
+          default:
+            os_log("<syncAll> unhandled CKError: %{public}@",
+                   log: DefaultSyncManager.logger,
+                   type: .error,
+                   String(describing: ckerror))
+            completion(.nonRecoverableError)
         }
       } else {
         os_log("pushed %d record",
@@ -228,27 +222,24 @@ class DefaultSyncManager: SyncManager {
           completion(.nonRecoverableError)
           return
         }
-        if ckerror.code == CKError.Code.notAuthenticated {
-          completion(.notAuthenticated)
-        } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.dataInvalidationFlag.set()
-          completion(.userDeletedZone)
-        } else if ckerror.code == CKError.Code.unknownItem {
-          completion(nil)
-        } else if ckerror.code == CKError.Code.permissionFailure {
-          completion(.permissionFailure)
-        } else if ckerror.code == CKError.Code.networkFailure
-                  || ckerror.code == CKError.Code.networkUnavailable
-                  || ckerror.code == CKError.Code.requestRateLimited
-                  || ckerror.code == CKError.Code.serviceUnavailable
-                  || ckerror.code == CKError.Code.zoneBusy {
-          completion(.nonRecoverableError)
-        } else {
-          os_log("<delete> unhandled CKError: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(.nonRecoverableError)
+        switch ckerror.code {
+          case .notAuthenticated:
+            completion(.notAuthenticated)
+          case .userDeletedZone:
+            self.dataInvalidationFlag.set()
+            completion(.userDeletedZone)
+          case .unknownItem:
+            completion(nil)
+          case .permissionFailure:
+            completion(.permissionFailure)
+          case .networkFailure, .networkUnavailable, .requestRateLimited, .serviceUnavailable, .zoneBusy:
+            completion(.nonRecoverableError)
+          default:
+            os_log("<delete> unhandled CKError: %{public}@",
+                   log: DefaultSyncManager.logger,
+                   type: .error,
+                   String(describing: ckerror))
+            completion(.nonRecoverableError)
         }
       } else {
         os_log("deleted %{public}@ record",
