@@ -75,6 +75,10 @@ extension Error {
     // swiftlint:disable:next force_cast
     return (partialErrorInfo[key] as! NSError) as Error
   }
+
+  var retryAfterSeconds: Int? {
+    return ((self as? CKError)?.retryAfterSeconds?.rounded(.up)).map(Int.init)
+  }
 }
 
 public enum CloudKitError: Error {

@@ -200,6 +200,15 @@ public class CinemaKitStartupManager: StartupManager {
     let operation = CKModifyRecordZonesOperation(recordZonesToSave: [zone], recordZoneIDsToDelete: nil)
     operation.modifyRecordZonesCompletionBlock = { _, _, error in
       if let error = error?.singlePartialError(forKey: deviceSyncZoneID) {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
+          os_log("retry setup after %.1f seconds", log: CinemaKitStartupManager.logger, type: .default, retryAfter)
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
+            self.setUpDeviceSyncZone(using: queue,
+                                     retryCount: retryCount - 1,
+                                     then: completion)
+          }
+          return
+        }
         guard let ckerror = error as? CKError else {
           os_log("<setUpDeviceSyncZone> unhandled error: %{public}@",
                  log: CinemaKitStartupManager.logger,
@@ -208,14 +217,7 @@ public class CinemaKitStartupManager: StartupManager {
           completion(.nonRecoverableError)
           return
         }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
-          os_log("retry setup after %.1f seconds", log: CinemaKitStartupManager.logger, type: .default, retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
-            self.setUpDeviceSyncZone(using: queue,
-                                     retryCount: retryCount - 1,
-                                     then: completion)
-          }
-        } else if ckerror.code == CKError.Code.notAuthenticated {
+        if ckerror.code == CKError.Code.notAuthenticated {
           completion(.notAuthenticated)
         } else if ckerror.code == CKError.Code.networkFailure
                   || ckerror.code == CKError.Code.networkUnavailable

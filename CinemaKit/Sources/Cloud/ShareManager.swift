@@ -38,6 +38,13 @@ class DefaultShareManager: ShareManager {
     operation.modifyRecordsCompletionBlock = { _, _, error in
       // if there is a partial error, then it is the root record which caused it
       if let error = error?.singlePartialError(forKey: rootRecord.recordID) {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
+          os_log("retry sync after %.1f seconds", log: DefaultShareManager.logger, type: .default, retryAfter)
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
+            self.saveShare(share, with: rootRecord, retryCount: retryCount - 1, then: completion)
+          }
+          return
+        }
         guard let ckerror = error as? CKError else {
           os_log("<saveShare> unhandled error: %{public}@",
                  log: DefaultShareManager.logger,
@@ -46,12 +53,7 @@ class DefaultShareManager: ShareManager {
           completion(.nonRecoverableError)
           return
         }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
-          os_log("retry sync after %.1f seconds", log: DefaultShareManager.logger, type: .default, retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
-            self.saveShare(share, with: rootRecord, retryCount: retryCount - 1, then: completion)
-          }
-        } else if ckerror.code == CKError.Code.serverRecordChanged {
+        if ckerror.code == CKError.Code.serverRecordChanged {
           completion(.conflict(serverRecord: ckerror.serverRecord!))
         } else if ckerror.code == CKError.Code.notAuthenticated {
           completion(.notAuthenticated)
@@ -88,6 +90,18 @@ class DefaultShareManager: ShareManager {
     let operation = CKAcceptSharesOperation(shareMetadatas: [metadata])
     operation.perShareCompletionBlock = { _, share, error in
       if let error = error {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
+          os_log("retry accept share after %.1f seconds",
+                 log: DefaultShareManager.logger,
+                 type: .default,
+                 retryAfter)
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
+            self.acceptShare(with: metadata,
+                             retryCount: retryCount - 1,
+                             then: completion)
+          }
+          return
+        }
         guard let ckerror = error as? CKError else {
           os_log("<acceptCloudKitShare> unhandled error: %{public}@",
                  log: DefaultShareManager.logger,
@@ -96,17 +110,7 @@ class DefaultShareManager: ShareManager {
           completion(.nonRecoverableError)
           return
         }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
-          os_log("retry accept share after %.1f seconds",
-                 log: DefaultShareManager.logger,
-                 type: .default,
-                 retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
-            self.acceptShare(with: metadata,
-                             retryCount: retryCount - 1,
-                             then: completion)
-          }
-        } else if ckerror.code == CKError.Code.notAuthenticated {
+        if ckerror.code == CKError.Code.notAuthenticated {
           completion(.notAuthenticated)
         } else if ckerror.code == CKError.Code.unknownItem {
           completion(.itemNoLongerExists)

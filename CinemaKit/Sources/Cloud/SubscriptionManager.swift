@@ -126,6 +126,16 @@ class DefaultSubscriptionManager: SubscriptionManager {
     let operation = CKFetchSubscriptionsOperation.fetchAllSubscriptionsOperation()
     operation.fetchSubscriptionCompletionBlock = { subscriptions, error in
       if let error = error {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
+          os_log("retry fetchAllSubscriptions after %.1f seconds",
+                 log: DefaultSubscriptionManager.logger,
+                 type: .default,
+                 retryAfter)
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
+            self.fetchAllSubscriptions(in: scope, retryCount: retryCount - 1, then: completion)
+          }
+          return
+        }
         guard let ckerror = error as? CKError else {
           os_log("<fetchAllSubscriptions> unhandled error: %{public}@",
                  log: DefaultSubscriptionManager.logger,
@@ -134,15 +144,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
           completion(nil, .nonRecoverableError)
           return
         }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
-          os_log("retry fetchAllSubscriptions after %.1f seconds",
-                 log: DefaultSubscriptionManager.logger,
-                 type: .default,
-                 retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
-            self.fetchAllSubscriptions(in: scope, retryCount: retryCount - 1, then: completion)
-          }
-        } else if ckerror.code == CKError.Code.notAuthenticated {
+        if ckerror.code == CKError.Code.notAuthenticated {
           completion(nil, .notAuthenticated)
         } else if ckerror.code == CKError.Code.networkFailure
                   || ckerror.code == CKError.Code.networkUnavailable
@@ -172,6 +174,16 @@ class DefaultSubscriptionManager: SubscriptionManager {
                                                    subscriptionIDsToDelete: nil)
     operation.modifySubscriptionsCompletionBlock = { _, _, error in
       if let error = error?.singlePartialError(forKey: subscription.subscriptionID) {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
+          os_log("retry saveSubscription after %.1f seconds",
+                 log: DefaultSubscriptionManager.logger,
+                 type: .default,
+                 retryAfter)
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
+            self.saveSubscription(subscription, in: scope, retryCount: retryCount - 1, then: completion)
+          }
+          return
+        }
         guard let ckerror = error as? CKError else {
           os_log("<saveSubscription> unhandled error: %{public}@",
                  log: DefaultSubscriptionManager.logger,
@@ -180,15 +192,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
           completion(.nonRecoverableError)
           return
         }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
-          os_log("retry saveSubscription after %.1f seconds",
-                 log: DefaultSubscriptionManager.logger,
-                 type: .default,
-                 retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
-            self.saveSubscription(subscription, in: scope, retryCount: retryCount - 1, then: completion)
-          }
-        } else if ckerror.code == CKError.Code.notAuthenticated {
+        if ckerror.code == CKError.Code.notAuthenticated {
           completion(.notAuthenticated)
         } else if ckerror.code == CKError.Code.userDeletedZone {
           self.dataInvalidationFlag.set()
