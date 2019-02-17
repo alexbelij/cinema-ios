@@ -110,8 +110,6 @@ class DefaultChangesManager: ChangesManager {
             completion(nil, .notAuthenticated)
           case .changeTokenExpired?:
             self.dataInvalidationFlag.set()
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(nil, .nonRecoverableError)
           default:
             os_log("<fetchChangesForDatabase> unhandled error: %{public}@",
                    log: DefaultChangesManager.logger,
@@ -183,8 +181,6 @@ class DefaultChangesManager: ChangesManager {
         switch error.ckerrorCode {
           case .notAuthenticated?:
             completion(nil, .notAuthenticated)
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(nil, .nonRecoverableError)
           default:
             os_log("<fetchChangesInZones> unhandled error: %{public}@",
                    log: DefaultChangesManager.logger,

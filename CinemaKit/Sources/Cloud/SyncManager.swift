@@ -76,8 +76,6 @@ class DefaultSyncManager: SyncManager {
             completion(.itemNoLongerExists)
           case .permissionFailure?:
             completion(.permissionFailure)
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(.nonRecoverableError)
           default:
             os_log("<sync> unhandled error: %{public}@",
                    log: DefaultSyncManager.logger,
@@ -158,8 +156,6 @@ class DefaultSyncManager: SyncManager {
                    // swiftlint:disable:next force_cast
                    String(describing: (error as! CKError).partialErrorsByItemID))
             completion(.nonRecoverableError)
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(.nonRecoverableError)
           default:
             os_log("<syncAll> unhandled error: %{public}@",
                    log: DefaultSyncManager.logger,
@@ -210,8 +206,6 @@ class DefaultSyncManager: SyncManager {
             completion(nil)
           case .permissionFailure?:
             completion(.permissionFailure)
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(.nonRecoverableError)
           default:
             os_log("<delete> unhandled error: %{public}@",
                    log: DefaultSyncManager.logger,

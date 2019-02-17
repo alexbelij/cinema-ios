@@ -54,8 +54,6 @@ class DefaultShareManager: ShareManager {
           case .serverRecordChanged?:
             // swiftlint:disable:next force_cast
             completion(.conflict(serverRecord: (error as! CKError).serverRecord!))
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(.nonRecoverableError)
           default:
             os_log("<saveShare> unhandled error: %{public}@",
                    log: DefaultShareManager.logger,
@@ -97,8 +95,6 @@ class DefaultShareManager: ShareManager {
             completion(.notAuthenticated)
           case .unknownItem?:
             completion(.itemNoLongerExists)
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(.nonRecoverableError)
           default:
             os_log("<acceptCloudKitShare> unhandled error: %{public}@",
                    log: DefaultShareManager.logger,
@@ -140,8 +136,6 @@ class DefaultShareManager: ShareManager {
         switch error.ckerrorCode {
           case .notAuthenticated?:
             completion(nil, .notAuthenticated)
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(nil, .nonRecoverableError)
           case .partialFailure? where !unhandledErrorOccurred:
             completion(shareMetadatas, nil)
           default:

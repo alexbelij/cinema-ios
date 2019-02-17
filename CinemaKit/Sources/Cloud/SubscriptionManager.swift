@@ -139,8 +139,6 @@ class DefaultSubscriptionManager: SubscriptionManager {
         switch error.ckerrorCode {
           case .notAuthenticated?:
             completion(nil, .notAuthenticated)
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(nil, .nonRecoverableError)
           default:
             os_log("<fetchAllSubscriptions> unhandled error: %{public}@",
                    log: DefaultSubscriptionManager.logger,
@@ -179,8 +177,6 @@ class DefaultSubscriptionManager: SubscriptionManager {
           case .userDeletedZone?:
             self.dataInvalidationFlag.set()
             completion(.userDeletedZone)
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(.nonRecoverableError)
           default:
             os_log("<saveSubscription> unhandled error: %{public}@",
                    log: DefaultSubscriptionManager.logger,

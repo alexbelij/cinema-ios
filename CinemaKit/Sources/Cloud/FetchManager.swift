@@ -76,8 +76,6 @@ class DefaultFetchManager: FetchManager {
         switch error.ckerrorCode {
           case .notAuthenticated?:
             completion(nil, .notAuthenticated)
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(nil, .nonRecoverableError)
           default:
             os_log("<fetchZones> unhandled error: %{public}@",
                    log: DefaultFetchManager.logger,
@@ -151,8 +149,6 @@ class DefaultFetchManager: FetchManager {
           case .userDeletedZone?:
             self.dataInvalidationFlag.set()
             completion(nil, .userDeletedZone)
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(nil, .nonRecoverableError)
           default:
             os_log("<fetchAll> unhandled error: %{public}@",
                    log: DefaultFetchManager.logger,
@@ -217,8 +213,6 @@ class DefaultFetchManager: FetchManager {
             completion(nil, .zoneNotFound)
           case .unknownItem?:
             completion(nil, .itemNoLongerExists)
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(nil, .nonRecoverableError)
           default:
             os_log("<fetchRecord> unhandled error: %{public}@",
                    log: DefaultFetchManager.logger,

@@ -212,8 +212,6 @@ public class CinemaKitStartupManager: StartupManager {
         switch error.ckerrorCode {
           case .notAuthenticated?:
             completion(.notAuthenticated)
-          case .networkFailure?, .networkUnavailable?, .requestRateLimited?, .serviceUnavailable?, .zoneBusy?:
-            completion(.nonRecoverableError)
           default:
             os_log("<setUpDeviceSyncZone> unhandled error: %{public}@",
                    log: CinemaKitStartupManager.logger,
