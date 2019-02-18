@@ -22,7 +22,7 @@ class FileBasedRecordStore: PersistentRecordStore {
   private let fileURL: URL
   private let errorReporter: ErrorReporter
 
-  init(fileURL: URL, errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
+  init(fileURL: URL, errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared) {
     self.fileURL = fileURL
     self.errorReporter = errorReporter
   }

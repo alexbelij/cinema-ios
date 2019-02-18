@@ -28,7 +28,7 @@ public class TMDBSwiftWrapper: MovieDbClient {
   private let errorReporter: ErrorReporter
 
   public convenience init(language: MovieDbLanguage, country: MovieDbCountry) {
-    self.init(language: language, country: country, errorReporter: LoggingErrorReporter.shared)
+    self.init(language: language, country: country, errorReporter: CrashlyticsErrorReporter.shared)
   }
 
   init(language: MovieDbLanguage, country: MovieDbCountry, errorReporter: ErrorReporter) {

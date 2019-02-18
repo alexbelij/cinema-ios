@@ -20,7 +20,7 @@ class DefaultShareManager: ShareManager {
   init(generalOperationQueue: GeneralOperationQueue,
        privateDatabaseOperationQueue: DatabaseOperationQueue,
        dataInvalidationFlag: LocalDataInvalidationFlag,
-       errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
+       errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared) {
     self.generalOperationQueue = generalOperationQueue
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.dataInvalidationFlag = dataInvalidationFlag

@@ -32,7 +32,7 @@ class FileBasedServerChangeTokenStore: ServerChangeTokenStore {
   private var tokens: [String: Data]
   private let errorReporter: ErrorReporter
 
-  init(errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
+  init(errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared) {
     self.errorReporter = errorReporter
     if FileManager.default.fileExists(atPath: FileBasedServerChangeTokenStore.fileURL.path) {
       do {

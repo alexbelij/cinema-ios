@@ -17,7 +17,7 @@ class StandardTMDBSwiftCache: TMDBSwiftCache {
   private let backdropCache: Storage<UIImage>
   private let errorReporter: ErrorReporter
 
-  init?(errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
+  init?(errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared) {
     self.errorReporter = errorReporter
     do {
       movieCache = try Storage(diskConfig: DiskConfig(name: "MovieCache", maxSize: 10_000_000),

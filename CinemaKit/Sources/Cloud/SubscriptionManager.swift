@@ -52,7 +52,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
        sharedDatabaseOperationQueue: DatabaseOperationQueue,
        subscriptionStore: SubscriptionStore = FileBasedSubscriptionStore(),
        dataInvalidationFlag: LocalDataInvalidationFlag,
-       errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
+       errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared) {
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.subscriptionStore = subscriptionStore

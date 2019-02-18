@@ -12,7 +12,7 @@ class FileBasedSubscriptionStore: SubscriptionStore {
   private var targets: Set<SubscriptionTarget>
   private let errorReporter: ErrorReporter
 
-  init(errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
+  init(errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared) {
     self.errorReporter = errorReporter
     if FileManager.default.fileExists(atPath: FileBasedSubscriptionStore.fileURL.path) {
       do {

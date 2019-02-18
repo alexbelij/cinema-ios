@@ -1,4 +1,5 @@
 import CloudKit
+import Firebase
 import Foundation
 import os.log
 import UIKit
@@ -77,7 +78,7 @@ public class CinemaKitStartupManager: StartupManager {
   private let userDefaults = StandardUserDefaults()
   private let migratedLibraryName: String
   private var progressHandler: ((StartupProgress) -> Void)!
-  private let errorReporter: ErrorReporter = LoggingErrorReporter.shared
+  private let errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared
 
   public init(using application: UIApplication, migratedLibraryName: String) {
     self.application = application
@@ -111,6 +112,10 @@ public class CinemaKitStartupManager: StartupManager {
     }
     setUpDirectories()
     setUpDeviceSyncZone()
+    DispatchQueue.main.async {
+      os_log("setting up Firebase", log: CinemaKitStartupManager.logger, type: .info)
+      FirebaseApp.configure()
+    }
   }
 
   private func markCurrentVersion() {

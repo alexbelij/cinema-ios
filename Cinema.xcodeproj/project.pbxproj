@@ -11,6 +11,7 @@
 		67F28248E64E29D9A77D9D8F /* Pods_iOS_Application.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 13242D2B0EF60F72BA6B29B0 /* Pods_iOS_Application.framework */; };
 		816BF06563923602AB2343F0 /* MessageTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF0AA69C69AAF93EA0F7E /* MessageTableCell.swift */; };
 		816BF087ADAD47C5E4C2EB48 /* ButtonTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFDD0C3C0B06C95E85FEF /* ButtonTableCell.swift */; };
+		816BF0EC163A188DB3194E86 /* CrashlyticsErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF2DC5714287D43B0AEB7 /* CrashlyticsErrorReporter.swift */; };
 		816BF12226A30047F4E426A6 /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFB089CECEE7E6D463824 /* Logging.swift */; };
 		816BF1D51BE680D66C74F73B /* MovieLibraryModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF8076C7D477837A55D4D /* MovieLibraryModelController.swift */; };
 		816BF2540CD2AF462FA4CA7C /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF2DB9CBD6D603F273231 /* Result.swift */; };
@@ -53,7 +54,6 @@
 		CB34AF0C2141482A0088A6C5 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB34AEF5214148290088A6C5 /* Helpers.swift */; };
 		CB370C1F1FFD08270034BB2F /* PageCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB370C1E1FFD08270034BB2F /* PageCoordinator.swift */; };
 		CB456B6B22198967001D7C1D /* ErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF77007782096BD4A0415 /* ErrorReporter.swift */; };
-		CB456B70221A965F001D7C1D /* LoggingErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB456B6F221A965F001D7C1D /* LoggingErrorReporter.swift */; };
 		CB456B71221AA014001D7C1D /* ErrorReporterMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF83BBE987284A1811EF9 /* ErrorReporterMock.swift */; };
 		CB4C40631FF2A63F00A6C32B /* SearchTmdbCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4C40621FF2A63F00A6C32B /* SearchTmdbCoordinator.swift */; };
 		CB5EF37D212FFF3700B33DEF /* MovieRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5EF37C212FFF3700B33DEF /* MovieRecord.swift */; };
@@ -183,6 +183,7 @@
 		816BF23B3E183EE77E401FBC /* Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		816BF2612290416EB1BFCA59 /* MovieDbClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieDbClient.swift; sourceTree = "<group>"; };
 		816BF2DB9CBD6D603F273231 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
+		816BF2DC5714287D43B0AEB7 /* CrashlyticsErrorReporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CrashlyticsErrorReporter.swift; sourceTree = "<group>"; };
 		816BF337C1C387B6E159CA70 /* ThreadSafeModelController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadSafeModelController.swift; sourceTree = "<group>"; };
 		816BF39D756B87E54D10E758 /* ModelController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelController.swift; sourceTree = "<group>"; };
 		816BF465F46F0045D7B2CAD3 /* UserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
@@ -223,7 +224,6 @@
 		CB1A15CC2061322D003BD8D0 /* CinemaKit-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CinemaKit-Info.plist"; sourceTree = "<group>"; };
 		CB34AEF5214148290088A6C5 /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		CB370C1E1FFD08270034BB2F /* PageCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PageCoordinator.swift; sourceTree = "<group>"; };
-		CB456B6F221A965F001D7C1D /* LoggingErrorReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingErrorReporter.swift; sourceTree = "<group>"; };
 		CB4C40621FF2A63F00A6C32B /* SearchTmdbCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTmdbCoordinator.swift; sourceTree = "<group>"; };
 		CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
 		CB5EF37C212FFF3700B33DEF /* MovieRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieRecord.swift; sourceTree = "<group>"; };
@@ -464,7 +464,7 @@
 			isa = PBXGroup;
 			children = (
 				816BF77007782096BD4A0415 /* ErrorReporter.swift */,
-				CB456B6F221A965F001D7C1D /* LoggingErrorReporter.swift */,
+				816BF2DC5714287D43B0AEB7 /* CrashlyticsErrorReporter.swift */,
 			);
 			path = ErrorReporting;
 			sourceTree = "<group>";
@@ -1006,7 +1006,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CB1A15D720613478003BD8D0 /* MovieLibrary.swift in Sources */,
-				CB456B70221A965F001D7C1D /* LoggingErrorReporter.swift in Sources */,
 				CB797D372120289F00F59618 /* AppDependencies.swift in Sources */,
 				CBC2E3BB2136A7750088F5C8 /* ChangeSet.swift in Sources */,
 				CBBC59362121BDD200067DEA /* MovieLibraryManager.swift in Sources */,
@@ -1043,6 +1042,7 @@
 				816BF4E3B50A7125D116F4A2 /* PersistentRecordStore.swift in Sources */,
 				816BF9D296F00F62EF9F83B8 /* Legacy.swift in Sources */,
 				816BF2E3EDE2200B4977F330 /* ModelController.swift in Sources */,
+				816BF0EC163A188DB3194E86 /* CrashlyticsErrorReporter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1181,6 +1181,7 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 77DM9DN8P3;
 				DYLIB_COMPATIBILITY_VERSION = 1;
