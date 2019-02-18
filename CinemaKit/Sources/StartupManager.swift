@@ -267,7 +267,8 @@ public class CinemaKitStartupManager: StartupManager {
     let dependencies = AppDependencies(libraryManager: libraryManager,
                                        movieDb: movieDb,
                                        notificationCenter: NotificationCenter.default,
-                                       userDefaults: userDefaults)
+                                       userDefaults: userDefaults,
+                                       errorReporter: errorReporter)
     checkForMigration(dependencies)
   }
 
