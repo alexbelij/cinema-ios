@@ -1,5 +1,3 @@
-import os.log
-
 protocol TmdbPropertiesStore {
   func load() -> [TmdbIdentifier: Movie.TmdbProperties]?
   func save(_ properties: [TmdbIdentifier: Movie.TmdbProperties])
@@ -7,12 +5,13 @@ protocol TmdbPropertiesStore {
 }
 
 class FileBasedTmdbPropertiesStore: TmdbPropertiesStore {
-  private static let logger = Logging.createLogger(category: "FileBasedTmdbPropertiesStore")
 
   private let fileURL: URL
+  private let errorReporter: ErrorReporter
 
-  init(fileURL: URL) {
+  init(fileURL: URL, errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
     self.fileURL = fileURL
+    self.errorReporter = errorReporter
   }
 
   func load() -> [TmdbIdentifier: Movie.TmdbProperties]? {
@@ -25,10 +24,7 @@ class FileBasedTmdbPropertiesStore: TmdbPropertiesStore {
           = Dictionary(uniqueKeysWithValues: propertiesKeyedByInts.map { (TmdbIdentifier(rawValue: $0.key), $0.value) })
       return properties
     } catch {
-      os_log("data corrupted: %{public}@",
-             log: FileBasedTmdbPropertiesStore.logger,
-             type: .error,
-             String(describing: error))
+      errorReporter.report(error)
       clear()
       return nil
     }
@@ -42,10 +38,7 @@ class FileBasedTmdbPropertiesStore: TmdbPropertiesStore {
       let encodedData = try encoder.encode(propertiesKeyedByInts)
       try encodedData.write(to: fileURL)
     } catch {
-      os_log("unable to save: %{public}@",
-             log: FileBasedTmdbPropertiesStore.logger,
-             type: .error,
-             String(describing: error))
+      errorReporter.report(error)
       clear()
     }
   }

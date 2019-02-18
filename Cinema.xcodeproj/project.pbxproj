@@ -54,6 +54,7 @@
 		CB370C1F1FFD08270034BB2F /* PageCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB370C1E1FFD08270034BB2F /* PageCoordinator.swift */; };
 		CB456B6B22198967001D7C1D /* ErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF77007782096BD4A0415 /* ErrorReporter.swift */; };
 		CB456B70221A965F001D7C1D /* LoggingErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB456B6F221A965F001D7C1D /* LoggingErrorReporter.swift */; };
+		CB456B71221AA014001D7C1D /* ErrorReporterMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF83BBE987284A1811EF9 /* ErrorReporterMock.swift */; };
 		CB4C40631FF2A63F00A6C32B /* SearchTmdbCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4C40621FF2A63F00A6C32B /* SearchTmdbCoordinator.swift */; };
 		CB5EF37D212FFF3700B33DEF /* MovieRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5EF37C212FFF3700B33DEF /* MovieRecord.swift */; };
 		CB65D7AB1F8A107F00457386 /* TabularSheetController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB65D7A81F8A103000457386 /* TabularSheetController.swift */; };
@@ -192,6 +193,7 @@
 		816BF77007782096BD4A0415 /* ErrorReporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorReporter.swift; sourceTree = "<group>"; };
 		816BF8076C7D477837A55D4D /* MovieLibraryModelController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieLibraryModelController.swift; sourceTree = "<group>"; };
 		816BF834DE5625BD98004005 /* DeviceSync.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSync.swift; sourceTree = "<group>"; };
+		816BF83BBE987284A1811EF9 /* ErrorReporterMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorReporterMock.swift; sourceTree = "<group>"; };
 		816BF8FC2C1C4FE8E84FBE63 /* FetchManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FetchManager.swift; sourceTree = "<group>"; };
 		816BF91512E4D3E5E5BD4AED /* MovieLibraryManagerModelController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieLibraryManagerModelController.swift; sourceTree = "<group>"; };
 		816BFA06395E8170CDF4FD04 /* TextFieldTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableCell.swift; sourceTree = "<group>"; };
@@ -502,6 +504,7 @@
 				CB76F8002144FF0F002E6A92 /* DeviceSyncingLibraryManagerHelpers.swift */,
 				CB76F7FF2144FF0F002E6A92 /* MovieLibraryManagerModelControllerMock.swift */,
 				CB76F8022144FF0F002E6A92 /* MovieLibraryMock.swift */,
+				816BF83BBE987284A1811EF9 /* ErrorReporterMock.swift */,
 			);
 			path = Mocks;
 			sourceTree = "<group>";
@@ -1108,6 +1111,7 @@
 				CB76F8342144FF85002E6A92 /* DeviceSyncingLibraryManagerTests.swift in Sources */,
 				CB76F8372144FF8B002E6A92 /* DeviceSyncingLibraryTests.swift in Sources */,
 				816BFB0481C8B2FDFA6FBE80 /* StandardUserDefaultsTests.swift in Sources */,
+				CB456B71221AA014001D7C1D /* ErrorReporterMock.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

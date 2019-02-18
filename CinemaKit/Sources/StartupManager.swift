@@ -128,11 +128,7 @@ public class CinemaKitStartupManager: StartupManager {
       try fileManager.removeItem(at: CinemaKitStartupManager.shareRecordStoreURL)
       try fileManager.removeItem(at: CinemaKitStartupManager.movieRecordsDir)
     } catch {
-      os_log("unable to remove local data: %{public}@",
-             log: CinemaKitStartupManager.logger,
-             type: .fault,
-             String(describing: error))
-      fatalError("unable to remove local data")
+      errorReporter.report(error)
     }
     resetMovieDetails()
   }
@@ -143,11 +139,7 @@ public class CinemaKitStartupManager: StartupManager {
       let fileManager = FileManager.default
       try fileManager.removeItem(at: CinemaKitStartupManager.tmdbPropertiesDir)
     } catch {
-      os_log("unable to remove local data: %{public}@",
-             log: CinemaKitStartupManager.logger,
-             type: .fault,
-             String(describing: error))
-      fatalError("unable to remove local data")
+      errorReporter.report(error)
     }
   }
 
@@ -164,11 +156,7 @@ public class CinemaKitStartupManager: StartupManager {
     do {
       try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
     } catch {
-      os_log("unable to create directory at %{public}@: %{public}@",
-             log: CinemaKitStartupManager.logger,
-             type: .fault,
-             url.path,
-             String(describing: error))
+      errorReporter.report(error)
     }
   }
 
@@ -250,7 +238,8 @@ public class CinemaKitStartupManager: StartupManager {
                                            dataInvalidationFlag: dataInvalidationFlag)
     let libraryFactory = DefaultMovieLibraryFactory(fetchManager: fetchManager,
                                                     syncManager: syncManager,
-                                                    tmdbWrapper: movieDb)
+                                                    tmdbWrapper: movieDb,
+                                                    errorReporter: errorReporter)
     let modelController = MovieLibraryManagerModelController(
         fetchManager: fetchManager,
         libraryFactory: libraryFactory,
@@ -268,7 +257,8 @@ public class CinemaKitStartupManager: StartupManager {
                                           dataInvalidationFlag: dataInvalidationFlag),
         libraryFactory: libraryFactory,
         modelController: modelController,
-        dataInvalidationFlag: dataInvalidationFlag)
+        dataInvalidationFlag: dataInvalidationFlag,
+        errorReporter: errorReporter)
     let dependencies = AppDependencies(libraryManager: libraryManager,
                                        movieDb: movieDb,
                                        notificationCenter: NotificationCenter.default,
@@ -315,10 +305,7 @@ public class CinemaKitStartupManager: StartupManager {
     do {
       try FileManager.default.removeItem(at: url)
     } catch {
-      os_log("unable to remove legacy data file: %{public}@",
-             log: CinemaKitStartupManager.logger,
-             type: .fault,
-             String(describing: error))
+      errorReporter.report(error)
     }
   }
 
@@ -340,13 +327,16 @@ private class DefaultMovieLibraryFactory: MovieLibraryFactory {
   private let fetchManager: FetchManager
   private let syncManager: SyncManager
   private let tmdbWrapper: TMDBSwiftWrapper
+  private let errorReporter: ErrorReporter
 
   init(fetchManager: FetchManager,
        syncManager: SyncManager,
-       tmdbWrapper: TMDBSwiftWrapper) {
+       tmdbWrapper: TMDBSwiftWrapper,
+       errorReporter: ErrorReporter) {
     self.fetchManager = fetchManager
     self.syncManager = syncManager
     self.tmdbWrapper = tmdbWrapper
+    self.errorReporter = errorReporter
   }
 
   func makeLibrary(with metadata: MovieLibraryMetadata) -> InternalMovieLibrary {
@@ -364,7 +354,8 @@ private class DefaultMovieLibraryFactory: MovieLibraryFactory {
     return DeviceSyncingMovieLibrary(metadata: metadata,
                                      modelController: modelController,
                                      tmdbPropertiesProvider: tmdbWrapper,
-                                     syncManager: syncManager)
+                                     syncManager: syncManager,
+                                     errorReporter: errorReporter)
   }
 }
 
@@ -389,10 +380,7 @@ extension CinemaKitStartupManager {
       os_log("clearing poster cache", log: CinemaKitStartupManager.logger, type: .default)
       try FileManager.default.removeItem(at: CinemaKitStartupManager.posterCacheDir)
     } catch {
-      os_log("unable to clear poster cache: %{public}@",
-             log: CinemaKitStartupManager.logger,
-             type: .fault,
-             String(describing: error))
+      errorReporter.report(error)
     }
   }
 

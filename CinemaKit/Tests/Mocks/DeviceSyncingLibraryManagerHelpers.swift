@@ -8,7 +8,8 @@ extension DeviceSyncingLibraryManager {
       syncManager: SyncManager = SyncManagerMock(),
       changesManager: ChangesManager = ChangesManagerMock.trap(),
       shareManager: ShareManager = ShareManagerMock(),
-      dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag.makeForTesting())
+      dataInvalidationFlag: LocalDataInvalidationFlag = LocalDataInvalidationFlag.makeForTesting(),
+      errorReporter: ErrorReporter = ErrorReporterMock())
           -> DeviceSyncingLibraryManager {
     return DeviceSyncingLibraryManager(containerProvider: TestCKContainerProvider(),
                                        fetchManager: fetchManager,
@@ -17,7 +18,8 @@ extension DeviceSyncingLibraryManager {
                                        shareManager: shareManager,
                                        libraryFactory: MockMovieLibraryFactory(),
                                        modelController: modelController,
-                                       dataInvalidationFlag: dataInvalidationFlag)
+                                       dataInvalidationFlag: dataInvalidationFlag,
+                                       errorReporter: errorReporter)
   }
 }
 

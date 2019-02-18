@@ -6,10 +6,12 @@ extension DeviceSyncingMovieLibrary {
       metadata: MovieLibraryMetadata = MovieLibraryMetadata(name: "Library"),
       modelController: MovieLibraryModelControllerMock = .load([]),
       tmdbPropertiesProvider: TmdbMoviePropertiesProvider = TmdbMoviePropertiesProviderMock.trap(),
-      syncManager: SyncManager = SyncManagerMock()) -> DeviceSyncingMovieLibrary {
+      syncManager: SyncManager = SyncManagerMock(),
+      errorReporter: ErrorReporter = ErrorReporterMock()) -> DeviceSyncingMovieLibrary {
     return DeviceSyncingMovieLibrary(metadata: metadata,
                                      modelController: modelController,
                                      tmdbPropertiesProvider: tmdbPropertiesProvider,
-                                     syncManager: syncManager)
+                                     syncManager: syncManager,
+                                     errorReporter: errorReporter)
   }
 }

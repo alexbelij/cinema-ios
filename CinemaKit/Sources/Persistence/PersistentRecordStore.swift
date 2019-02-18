@@ -1,5 +1,4 @@
 import CloudKit
-import os.log
 
 protocol PersistentRecordStore {
   func loadRecords(asCKShare: Bool) -> [CKRecord]?
@@ -20,12 +19,12 @@ extension PersistentRecordStore {
 }
 
 class FileBasedRecordStore: PersistentRecordStore {
-  private static let logger = Logging.createLogger(category: "FileBasedRecordStore")
-
   private let fileURL: URL
+  private let errorReporter: ErrorReporter
 
-  init(fileURL: URL) {
+  init(fileURL: URL, errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
     self.fileURL = fileURL
+    self.errorReporter = errorReporter
   }
 
   func loadRecords(asCKShare: Bool) -> [CKRecord]? {
@@ -46,7 +45,7 @@ class FileBasedRecordStore: PersistentRecordStore {
         return record
       }
     } catch {
-      os_log("data corrupted: %{public}@", log: FileBasedRecordStore.logger, type: .error, String(describing: error))
+      errorReporter.report(error)
       clear()
       return nil
     }
@@ -66,10 +65,7 @@ class FileBasedRecordStore: PersistentRecordStore {
       let encodedData = try encoder.encode(data)
       try encodedData.write(to: fileURL)
     } catch {
-      os_log("unable to save: %{public}@",
-             log: FileBasedRecordStore.logger,
-             type: .error,
-             String(describing: error))
+      errorReporter.report(error)
       clear()
     }
   }

@@ -15,8 +15,10 @@ class StandardTMDBSwiftCache: TMDBSwiftCache {
   private let posterCache: Storage<UIImage>
   private let largePosterCache: Storage<UIImage>
   private let backdropCache: Storage<UIImage>
+  private let errorReporter: ErrorReporter
 
-  init?() {
+  init?(errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
+    self.errorReporter = errorReporter
     do {
       movieCache = try Storage(diskConfig: DiskConfig(name: "MovieCache", maxSize: 10_000_000),
                                memoryConfig: MemoryConfig(expiry: .never),
@@ -31,10 +33,7 @@ class StandardTMDBSwiftCache: TMDBSwiftCache {
                                   memoryConfig: MemoryConfig(expiry: .never),
                                   transformer: TransformerFactory.forImage())
     } catch {
-      os_log("unable to create cache: %{public}@",
-             log: StandardTMDBSwiftCache.logger,
-             type: .fault,
-             String(describing: error))
+      errorReporter.report(error)
       return nil
     }
     NotificationCenter.default.addObserver(self,
@@ -56,10 +55,7 @@ class StandardTMDBSwiftCache: TMDBSwiftCache {
       try largePosterCache.removeExpiredObjects()
       try backdropCache.removeExpiredObjects()
     } catch {
-      os_log("unable to clear expired data: %{public}@",
-             log: StandardTMDBSwiftCache.logger,
-             type: .fault,
-             String(describing: error))
+      errorReporter.report(error)
     }
   }
 

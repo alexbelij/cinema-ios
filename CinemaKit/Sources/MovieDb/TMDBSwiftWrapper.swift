@@ -25,10 +25,17 @@ public class TMDBSwiftWrapper: MovieDbClient {
   private var remainingRequests = TMDBSwiftWrapper.requestsPerBucket
   private var requestBucketStartTime: UInt64 = DispatchTime.now().uptimeNanoseconds / 1_000_000_000
 
-  public init(language: MovieDbLanguage, country: MovieDbCountry) {
+  private let errorReporter: ErrorReporter
+
+  public convenience init(language: MovieDbLanguage, country: MovieDbCountry) {
+    self.init(language: language, country: country, errorReporter: LoggingErrorReporter.shared)
+  }
+
+  init(language: MovieDbLanguage, country: MovieDbCountry, errorReporter: ErrorReporter) {
     self.language = language
     self.country = country
     self.cache = StandardTMDBSwiftCache() ?? DummyTMDBSwiftCache()
+    self.errorReporter = errorReporter
     TMDBConfig.apikey = TMDBSwiftWrapper.apiKey
   }
 
@@ -81,7 +88,8 @@ public class TMDBSwiftWrapper: MovieDbClient {
   private func fetchImage(at path: String, size: String) -> UIImage? {
     let urlString: String = TMDBSwiftWrapper.baseUrl + size + path
     guard let url = URL(string: urlString) else {
-      os_log("image path is no valid URL: %{public}@", log: TMDBSwiftWrapper.logger, type: .error, urlString)
+      errorReporter.report(NSError(domain: URLError.errorDomain, code: URLError.badURL.rawValue, userInfo: nil),
+                           info: ["image_path": urlString])
       return nil
     }
     guard let data = try? Data(contentsOf: url) else { return nil }

@@ -24,6 +24,7 @@ class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
   private let libraryFactory: MovieLibraryFactory
   private var modelController: AnyModelController<MovieLibraryManagerModel, MovieLibraryManagerError>
   private let dataInvalidationFlag: LocalDataInvalidationFlag
+  private let errorReporter: ErrorReporter
 
   init<Controller: ModelController>(containerProvider: CKContainerProvider,
                                     fetchManager: FetchManager,
@@ -32,7 +33,8 @@ class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
                                     shareManager: ShareManager,
                                     libraryFactory: MovieLibraryFactory,
                                     modelController: Controller,
-                                    dataInvalidationFlag: LocalDataInvalidationFlag)
+                                    dataInvalidationFlag: LocalDataInvalidationFlag,
+                                    errorReporter: ErrorReporter)
       where Controller.ModelType == MovieLibraryManagerModel, Controller.ErrorType == MovieLibraryManagerError {
     self.containerProvider = containerProvider
     self.fetchManager = fetchManager
@@ -42,6 +44,7 @@ class DeviceSyncingLibraryManager: InternalMovieLibraryManager {
     self.libraryFactory = libraryFactory
     self.modelController = AnyModelController(modelController)
     self.dataInvalidationFlag = dataInvalidationFlag
+    self.errorReporter = errorReporter
   }
 }
 
@@ -237,10 +240,7 @@ extension DeviceSyncingLibraryManager {
       }
       model.allLibraries.forEach { $0.processChanges(changes) }
     }, whenUnableToLoad: { error in
-      os_log("unable to process changes, because loading failed: %{public}@",
-             log: DeviceSyncingLibraryManager.logger,
-             type: .error,
-             String(describing: error))
+      self.errorReporter.report(error)
       self.dataInvalidationFlag.set()
     })
   }
@@ -250,10 +250,7 @@ extension DeviceSyncingLibraryManager {
       if let error = error {
         switch error {
           case .notAuthenticated, .nonRecoverableError:
-            os_log("unable to fetch share metadata %{public}@",
-                   log: DeviceSyncingLibraryManager.logger,
-                   type: .error,
-                   String(describing: error))
+            self.errorReporter.report(error)
             self.dataInvalidationFlag.set()
           case .conflict, .userDeletedZone, .permissionFailure, .zoneNotFound, .itemNoLongerExists:
             fatalError("should not occur: \(error)")
@@ -444,7 +441,8 @@ extension DeviceSyncingLibraryManager {
       self.delegates.invoke { $0.libraryManager(self, willAcceptSharedLibraryWith: title) }
       self.shareManager.acceptShare(with: shareMetadata) { error in
         self.acceptShareCompletion(shareMetadata, error) { result in
-          if result.isFailure {
+          if let error = result.error {
+            self.errorReporter.report(error)
             self.delegates.invoke {
               $0.libraryManager(self, didFailToAcceptSharedLibraryWith: title, reason: .error)
             }
@@ -453,10 +451,7 @@ extension DeviceSyncingLibraryManager {
         }
       }
     }, whenUnableToLoad: { error in
-      os_log("unable to accept share, because libraries could not be loaded: %{public}@",
-             log: DeviceSyncingLibraryManager.logger,
-             type: .error,
-             String(describing: error))
+      self.errorReporter.report(error)
       self.delegates.invoke {
         $0.libraryManager(self, didFailToAcceptSharedLibraryWith: title, reason: .error)
       }
@@ -496,10 +491,6 @@ extension DeviceSyncingLibraryManager {
           os_log("owner stopped sharing record", log: DeviceSyncingLibraryManager.logger, type: .default)
           completion(.failure(.libraryDoesNotExist))
         case .notAuthenticated, .nonRecoverableError:
-          os_log("unable to fetch shared record %{public}@",
-                 log: DeviceSyncingLibraryManager.logger,
-                 type: .error,
-                 String(describing: error))
           completion(.failure(error.asMovieLibraryManagerError))
         case .conflict, .userDeletedZone, .permissionFailure:
           fatalError("should not occur: \(error)")
@@ -531,10 +522,6 @@ extension DeviceSyncingLibraryManager: CloudSharingControllerCallback {
             switch error {
               case .nonRecoverableError:
                 self.dataInvalidationFlag.set()
-                os_log("unable to fetch record after sharing stopped: %{public}@",
-                       log: DeviceSyncingLibraryManager.logger,
-                       type: .error,
-                       String(describing: error))
               case .notAuthenticated, .userDeletedZone, .itemNoLongerExists, .zoneNotFound, .conflict,
                    .permissionFailure:
                 fatalError("should not occur: \(error)")
@@ -568,10 +555,6 @@ extension DeviceSyncingLibraryManager {
       if let error = error {
         switch error {
           case .notAuthenticated, .userDeletedZone, .nonRecoverableError:
-            os_log("unable to add library record for migration: %{public}@",
-                   log: DeviceSyncingLibraryManager.logger,
-                   type: .error,
-                   String(describing: error))
             completion(false)
           case .conflict, .itemNoLongerExists, .zoneNotFound, .permissionFailure:
             fatalError("should not occur: \(error)")
@@ -594,10 +577,7 @@ extension DeviceSyncingLibraryManager {
             completion(success)
           }
         }, whenUnableToLoad: { error in
-          os_log("unable to add library: %{public}@",
-                 log: DeviceSyncingLibraryManager.logger,
-                 type: .error,
-                 String(describing: error))
+          self.errorReporter.report(error)
           completion(false)
         })
       }
