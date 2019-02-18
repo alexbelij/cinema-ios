@@ -29,15 +29,18 @@ class DefaultChangesManager: ChangesManager {
   private let sharedDatabaseOperationQueue: DatabaseOperationQueue
   private let serverChangeTokenStore: ServerChangeTokenStore
   private let dataInvalidationFlag: LocalDataInvalidationFlag
+  private let errorReporter: ErrorReporter
 
   init(privateDatabaseOperationQueue: DatabaseOperationQueue,
        sharedDatabaseOperationQueue: DatabaseOperationQueue,
        serverChangeTokenStore: ServerChangeTokenStore = FileBasedServerChangeTokenStore(),
-       dataInvalidationFlag: LocalDataInvalidationFlag) {
+       dataInvalidationFlag: LocalDataInvalidationFlag,
+       errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.serverChangeTokenStore = serverChangeTokenStore
     self.dataInvalidationFlag = dataInvalidationFlag
+    self.errorReporter = errorReporter
   }
 
   func fetchChanges(then completion: @escaping (FetchedChanges?, CloudKitError?) -> Void) {
@@ -111,10 +114,7 @@ class DefaultChangesManager: ChangesManager {
           case .changeTokenExpired?:
             self.dataInvalidationFlag.set()
           default:
-            os_log("<fetchChangesForDatabase> unhandled error: %{public}@",
-                   log: DefaultChangesManager.logger,
-                   type: .error,
-                   String(describing: error))
+            self.errorReporter.report(error)
             completion(nil, .nonRecoverableError)
         }
       } else {
@@ -182,10 +182,7 @@ class DefaultChangesManager: ChangesManager {
           case .notAuthenticated?:
             completion(nil, .notAuthenticated)
           default:
-            os_log("<fetchChangesInZones> unhandled error: %{public}@",
-                   log: DefaultChangesManager.logger,
-                   type: .error,
-                   String(describing: error))
+            self.errorReporter.report(error)
             completion(nil, .nonRecoverableError)
         }
       } else {

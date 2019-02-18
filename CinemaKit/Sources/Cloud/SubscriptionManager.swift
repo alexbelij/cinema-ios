@@ -46,15 +46,18 @@ class DefaultSubscriptionManager: SubscriptionManager {
   private let sharedDatabaseOperationQueue: DatabaseOperationQueue
   private let subscriptionStore: SubscriptionStore
   private let dataInvalidationFlag: LocalDataInvalidationFlag
+  private let errorReporter: ErrorReporter
 
   init(privateDatabaseOperationQueue: DatabaseOperationQueue,
        sharedDatabaseOperationQueue: DatabaseOperationQueue,
        subscriptionStore: SubscriptionStore = FileBasedSubscriptionStore(),
-       dataInvalidationFlag: LocalDataInvalidationFlag) {
+       dataInvalidationFlag: LocalDataInvalidationFlag,
+       errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.subscriptionStore = subscriptionStore
     self.dataInvalidationFlag = dataInvalidationFlag
+    self.errorReporter = errorReporter
   }
 
   private func databaseOperationQueue(for scope: CKDatabase.Scope) -> DatabaseOperationQueue {
@@ -132,10 +135,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
           }
           return
         }
-        os_log("<fetchAllSubscriptions> unhandled error: %{public}@",
-               log: DefaultSubscriptionManager.logger,
-               type: .error,
-               String(describing: error))
+        self.errorReporter.report(error)
         completion(nil)
       } else if let subscriptions = subscriptions {
         completion(subscriptions)
@@ -162,10 +162,7 @@ class DefaultSubscriptionManager: SubscriptionManager {
           }
           return
         }
-        os_log("<saveSubscription> unhandled error: %{public}@",
-               log: DefaultSubscriptionManager.logger,
-               type: .error,
-               String(describing: error))
+        self.errorReporter.report(error)
         completion(false)
       } else {
         completion(true)

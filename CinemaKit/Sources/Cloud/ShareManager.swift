@@ -15,13 +15,16 @@ class DefaultShareManager: ShareManager {
   private let generalOperationQueue: GeneralOperationQueue
   private let privateDatabaseOperationQueue: DatabaseOperationQueue
   private let dataInvalidationFlag: LocalDataInvalidationFlag
+  private let errorReporter: ErrorReporter
 
   init(generalOperationQueue: GeneralOperationQueue,
        privateDatabaseOperationQueue: DatabaseOperationQueue,
-       dataInvalidationFlag: LocalDataInvalidationFlag) {
+       dataInvalidationFlag: LocalDataInvalidationFlag,
+       errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
     self.generalOperationQueue = generalOperationQueue
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.dataInvalidationFlag = dataInvalidationFlag
+    self.errorReporter = errorReporter
   }
 
   func saveShare(_ share: CKShare,
@@ -55,10 +58,7 @@ class DefaultShareManager: ShareManager {
             // swiftlint:disable:next force_cast
             completion(.conflict(serverRecord: (error as! CKError).serverRecord!))
           default:
-            os_log("<saveShare> unhandled error: %{public}@",
-                   log: DefaultShareManager.logger,
-                   type: .error,
-                   String(describing: error))
+            self.errorReporter.report(error)
             completion(.nonRecoverableError)
         }
       } else {
@@ -96,10 +96,7 @@ class DefaultShareManager: ShareManager {
           case .unknownItem?:
             completion(.itemNoLongerExists)
           default:
-            os_log("<acceptCloudKitShare> unhandled error: %{public}@",
-                   log: DefaultShareManager.logger,
-                   type: .error,
-                   String(describing: error))
+            self.errorReporter.report(error)
             completion(.nonRecoverableError)
         }
       } else {
@@ -139,10 +136,7 @@ class DefaultShareManager: ShareManager {
           case .partialFailure? where !unhandledErrorOccurred:
             completion(shareMetadatas, nil)
           default:
-            os_log("<fetchShareMetadata> unhandled error: %{public}@",
-                   log: DefaultShareManager.logger,
-                   type: .error,
-                   String(describing: error))
+            self.errorReporter.report(error)
             completion(nil, .nonRecoverableError)
         }
       } else {

@@ -35,13 +35,16 @@ class DefaultFetchManager: FetchManager {
   private let privateDatabaseOperationQueue: DatabaseOperationQueue
   private let sharedDatabaseOperationQueue: DatabaseOperationQueue
   private let dataInvalidationFlag: LocalDataInvalidationFlag
+  private let errorReporter: ErrorReporter
 
   init(privateDatabaseOperationQueue: DatabaseOperationQueue,
        sharedDatabaseOperationQueue: DatabaseOperationQueue,
-       dataInvalidationFlag: LocalDataInvalidationFlag) {
+       dataInvalidationFlag: LocalDataInvalidationFlag,
+       errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.dataInvalidationFlag = dataInvalidationFlag
+    self.errorReporter = errorReporter
   }
 
   private func databaseOperationQueue(for scope: CKDatabase.Scope) -> DatabaseOperationQueue {
@@ -77,10 +80,7 @@ class DefaultFetchManager: FetchManager {
           case .notAuthenticated?:
             completion(nil, .notAuthenticated)
           default:
-            os_log("<fetchZones> unhandled error: %{public}@",
-                   log: DefaultFetchManager.logger,
-                   type: .error,
-                   String(describing: error))
+            self.errorReporter.report(error)
             completion(nil, .nonRecoverableError)
         }
       } else if let zones = zones {
@@ -150,10 +150,7 @@ class DefaultFetchManager: FetchManager {
             self.dataInvalidationFlag.set()
             completion(nil, .userDeletedZone)
           default:
-            os_log("<fetchAll> unhandled error: %{public}@",
-                   log: DefaultFetchManager.logger,
-                   type: .error,
-                   String(describing: error))
+            self.errorReporter.report(error)
             completion(nil, .nonRecoverableError)
         }
       } else if let cursor = cursor {
@@ -214,10 +211,7 @@ class DefaultFetchManager: FetchManager {
           case .unknownItem?:
             completion(nil, .itemNoLongerExists)
           default:
-            os_log("<fetchRecord> unhandled error: %{public}@",
-                   log: DefaultFetchManager.logger,
-                   type: .error,
-                   String(describing: error))
+            self.errorReporter.report(error)
             completion(nil, .nonRecoverableError)
         }
       } else if let records = records {

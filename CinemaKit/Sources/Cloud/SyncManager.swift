@@ -21,13 +21,16 @@ class DefaultSyncManager: SyncManager {
   private let privateDatabaseOperationQueue: DatabaseOperationQueue
   private let sharedDatabaseOperationQueue: DatabaseOperationQueue
   private let dataInvalidationFlag: LocalDataInvalidationFlag
+  private let errorReporter: ErrorReporter
 
   init(privateDatabaseOperationQueue: DatabaseOperationQueue,
        sharedDatabaseOperationQueue: DatabaseOperationQueue,
-       dataInvalidationFlag: LocalDataInvalidationFlag) {
+       dataInvalidationFlag: LocalDataInvalidationFlag,
+       errorReporter: ErrorReporter = LoggingErrorReporter.shared) {
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.dataInvalidationFlag = dataInvalidationFlag
+    self.errorReporter = errorReporter
   }
 
   private func databaseOperationQueue(for scope: CKDatabase.Scope) -> DatabaseOperationQueue {
@@ -77,10 +80,7 @@ class DefaultSyncManager: SyncManager {
           case .permissionFailure?:
             completion(.permissionFailure)
           default:
-            os_log("<sync> unhandled error: %{public}@",
-                   log: DefaultSyncManager.logger,
-                   type: .error,
-                   String(describing: error))
+            self.errorReporter.report(error)
             completion(.nonRecoverableError)
         }
       } else {
@@ -150,10 +150,7 @@ class DefaultSyncManager: SyncManager {
             self.dataInvalidationFlag.set()
             completion(.userDeletedZone)
           default:
-            os_log("<syncAll> unhandled error: %{public}@",
-                   log: DefaultSyncManager.logger,
-                   type: .error,
-                   String(describing: error))
+            self.errorReporter.report(error)
             completion(.nonRecoverableError)
         }
       } else {
@@ -200,10 +197,7 @@ class DefaultSyncManager: SyncManager {
           case .permissionFailure?:
             completion(.permissionFailure)
           default:
-            os_log("<delete> unhandled error: %{public}@",
-                   log: DefaultSyncManager.logger,
-                   type: .error,
-                   String(describing: error))
+            self.errorReporter.report(error)
             completion(.nonRecoverableError)
         }
       } else {
@@ -225,10 +219,7 @@ class DefaultSyncManager: SyncManager {
     let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: recordIDs)
     operation.modifyRecordsCompletionBlock = { _, _, error in
       if let error = error {
-        os_log("batch delete failed: %{public}@",
-               log: DefaultSyncManager.logger,
-               type: .error,
-               String(describing: error))
+        self.errorReporter.report(error)
       } else {
         os_log("deleted %d record",
                log: DefaultSyncManager.logger,

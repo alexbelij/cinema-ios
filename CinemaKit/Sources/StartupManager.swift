@@ -77,6 +77,7 @@ public class CinemaKitStartupManager: StartupManager {
   private let userDefaults = StandardUserDefaults()
   private let migratedLibraryName: String
   private var progressHandler: ((StartupProgress) -> Void)!
+  private let errorReporter: ErrorReporter = LoggingErrorReporter.shared
 
   public init(using application: UIApplication, migratedLibraryName: String) {
     self.application = application
@@ -205,10 +206,7 @@ public class CinemaKitStartupManager: StartupManager {
           }
           return
         }
-        os_log("<setUpDeviceSyncZone> unhandled error: %{public}@",
-               log: CinemaKitStartupManager.logger,
-               type: .error,
-               String(describing: error))
+        self.errorReporter.report(error)
         completion(false)
       } else {
         os_log("device sync zone is set up", log: CinemaKitStartupManager.logger, type: .info)

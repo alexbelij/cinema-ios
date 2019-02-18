@@ -52,6 +52,8 @@
 		CB1A15DF2061347E003BD8D0 /* TMDBSwiftWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BFC9CFD7B36183A006B9A /* TMDBSwiftWrapper.swift */; };
 		CB34AF0C2141482A0088A6C5 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB34AEF5214148290088A6C5 /* Helpers.swift */; };
 		CB370C1F1FFD08270034BB2F /* PageCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB370C1E1FFD08270034BB2F /* PageCoordinator.swift */; };
+		CB456B6B22198967001D7C1D /* ErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816BF77007782096BD4A0415 /* ErrorReporter.swift */; };
+		CB456B70221A965F001D7C1D /* LoggingErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB456B6F221A965F001D7C1D /* LoggingErrorReporter.swift */; };
 		CB4C40631FF2A63F00A6C32B /* SearchTmdbCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4C40621FF2A63F00A6C32B /* SearchTmdbCoordinator.swift */; };
 		CB5EF37D212FFF3700B33DEF /* MovieRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5EF37C212FFF3700B33DEF /* MovieRecord.swift */; };
 		CB65D7AB1F8A107F00457386 /* TabularSheetController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB65D7A81F8A103000457386 /* TabularSheetController.swift */; };
@@ -187,6 +189,7 @@
 		816BF5C6051F5F9FF8F817DF /* DeviceSyncingLibraryManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSyncingLibraryManager.swift; sourceTree = "<group>"; };
 		816BF6419B90D268ECB087A8 /* LibrarySheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LibrarySheet.swift; sourceTree = "<group>"; };
 		816BF76FA3CA6466230D5381 /* StartupManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartupManager.swift; sourceTree = "<group>"; };
+		816BF77007782096BD4A0415 /* ErrorReporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorReporter.swift; sourceTree = "<group>"; };
 		816BF8076C7D477837A55D4D /* MovieLibraryModelController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieLibraryModelController.swift; sourceTree = "<group>"; };
 		816BF834DE5625BD98004005 /* DeviceSync.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceSync.swift; sourceTree = "<group>"; };
 		816BF8FC2C1C4FE8E84FBE63 /* FetchManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FetchManager.swift; sourceTree = "<group>"; };
@@ -217,6 +220,7 @@
 		CB1A15CC2061322D003BD8D0 /* CinemaKit-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CinemaKit-Info.plist"; sourceTree = "<group>"; };
 		CB34AEF5214148290088A6C5 /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		CB370C1E1FFD08270034BB2F /* PageCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PageCoordinator.swift; sourceTree = "<group>"; };
+		CB456B6F221A965F001D7C1D /* LoggingErrorReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingErrorReporter.swift; sourceTree = "<group>"; };
 		CB4C40621FF2A63F00A6C32B /* SearchTmdbCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTmdbCoordinator.swift; sourceTree = "<group>"; };
 		CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
 		CB5EF37C212FFF3700B33DEF /* MovieRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieRecord.swift; sourceTree = "<group>"; };
@@ -391,6 +395,7 @@
 				CBBC59092121BBC400067DEA /* LibraryManager */,
 				CBED94141F6BF63500FA4045 /* MovieDb */,
 				816BF0D02582F9B8DDE7B600 /* Persistence */,
+				CB456B6E221A9640001D7C1D /* ErrorReporting */,
 				CB797D642120ACDB00F59618 /* Utility */,
 				CB4C40641FF2C65A00A6C32B /* AppDependencies.swift */,
 				816BFC85BEEA3CBEDD260D8E /* AppVersion.swift */,
@@ -448,6 +453,15 @@
 				CBBC592F2121BD4400067DEA /* GenericPages.storyboard */,
 			);
 			path = Pages;
+			sourceTree = "<group>";
+		};
+		CB456B6E221A9640001D7C1D /* ErrorReporting */ = {
+			isa = PBXGroup;
+			children = (
+				816BF77007782096BD4A0415 /* ErrorReporter.swift */,
+				CB456B6F221A965F001D7C1D /* LoggingErrorReporter.swift */,
+			);
+			path = ErrorReporting;
 			sourceTree = "<group>";
 		};
 		CB4ED0042062387900B33EB8 /* Application */ = {
@@ -981,6 +995,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CB1A15D720613478003BD8D0 /* MovieLibrary.swift in Sources */,
+				CB456B70221A965F001D7C1D /* LoggingErrorReporter.swift in Sources */,
 				CB797D372120289F00F59618 /* AppDependencies.swift in Sources */,
 				CBC2E3BB2136A7750088F5C8 /* ChangeSet.swift in Sources */,
 				CBBC59362121BDD200067DEA /* MovieLibraryManager.swift in Sources */,
@@ -1010,6 +1025,7 @@
 				816BFD87C7B2CBA0BAAD2461 /* DeviceSyncingLibraryManager.swift in Sources */,
 				816BF60ADB7CCD6D57A4F0DB /* Utilities.swift in Sources */,
 				816BF565762A799B909DF7EB /* FetchManager.swift in Sources */,
+				CB456B6B22198967001D7C1D /* ErrorReporter.swift in Sources */,
 				816BF39541854A73C99478F1 /* ThreadSafeModelController.swift in Sources */,
 				816BF1D51BE680D66C74F73B /* MovieLibraryModelController.swift in Sources */,
 				816BF5B03430D75DD4D08973 /* MovieLibraryManagerModelController.swift in Sources */,
