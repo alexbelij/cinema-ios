@@ -9,6 +9,10 @@ class CrashlyticsErrorReporter: ErrorReporter {
   }
 
   func report(_ error: Error, info: [String: Any]?) {
+    #if targetEnvironment(simulator)
+    fatalError("unhandled error")
+    #else
     reporter.recordError(error, withAdditionalUserInfo: info)
+    #endif
   }
 }
