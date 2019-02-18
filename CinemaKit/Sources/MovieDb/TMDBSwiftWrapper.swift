@@ -162,9 +162,7 @@ public class TMDBSwiftWrapper: MovieDbClient {
   }
 
   private func waitUntil(_ asyncProcess: (_ done: @escaping () -> Void) -> Void) {
-    if Thread.isMainThread {
-      fatalError("must not be called on the main thread")
-    }
+    dispatchPrecondition(condition: DispatchPredicate.notOnQueue(.main))
     let semaphore = DispatchSemaphore(value: 0)
     let done = { _ = semaphore.signal() }
     asyncProcess(done)

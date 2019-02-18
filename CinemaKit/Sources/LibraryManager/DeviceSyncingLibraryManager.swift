@@ -353,7 +353,7 @@ extension DeviceSyncingLibraryManager {
       }
       if metadata.isShared {
         guard let share = model.share(for: metadata) else {
-          fatalError("share should have been already fetched")
+          preconditionFailure("share should have been already fetched")
         }
         completion(.success(.hasBeenShared(share, self.containerProvider.container, self)))
       } else {

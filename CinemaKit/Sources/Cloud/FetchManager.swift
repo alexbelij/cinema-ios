@@ -216,8 +216,6 @@ class DefaultFetchManager: FetchManager {
         }
       } else if let records = records {
         completion(records[recordID], nil)
-      } else {
-        fatalError("both records and error were nil")
       }
     }
     databaseOperationQueue(for: scope).add(operation)

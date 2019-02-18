@@ -19,7 +19,7 @@ private extension CKDatabase.Scope {
   var serverChangeTokenKey: String {
     switch self {
       case .shared: return "SharedDatabase"
-      case .private, .public: fatalError("not implemented")
+      case .private, .public: fatalError("server change tokens are only supported for shared database")
     }
   }
 }
