@@ -59,6 +59,7 @@
                     <constraint firstItem="jRP-4J-IlI" firstAttribute="top" secondItem="hQy-AB-Blx" secondAttribute="top" id="TMZ-4d-rbH"/>
                 </constraints>
             </tableViewCellContentView>
+            <inset key="separatorInset" minX="90" minY="0.0" maxX="0.0" maxY="0.0"/>
             <connections>
                 <outlet property="posterView" destination="Tyk-DA-haW" id="x86-dY-2gR"/>
                 <outlet property="titleLabel" destination="evR-Lm-hhz" id="1BP-zE-Zp8"/>

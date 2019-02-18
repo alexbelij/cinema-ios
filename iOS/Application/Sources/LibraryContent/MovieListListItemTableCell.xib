@@ -65,7 +65,7 @@
                     <constraint firstItem="0ym-Ut-UNy" firstAttribute="top" secondItem="gOx-KT-zp6" secondAttribute="top" id="ugV-Fw-qlG"/>
                 </constraints>
             </tableViewCellContentView>
-            <inset key="separatorInset" minX="80" minY="0.0" maxX="0.0" maxY="0.0"/>
+            <inset key="separatorInset" minX="90" minY="0.0" maxX="0.0" maxY="0.0"/>
             <connections>
                 <outlet property="posterView" destination="N5r-4M-dLI" id="bB1-32-z5D"/>
                 <outlet property="secondaryLabel" destination="Snd-bP-Oyk" id="hEs-jr-AC5"/>

@@ -239,7 +239,9 @@ extension UITableView {
                              isSectionIndexVisible: Bool,
                              at indexPathProvider: @escaping () -> IndexPath?,
                              using posterProvider: PosterProvider) {
-    cell.configure(for: listItem, posterProvider: posterProvider, isSectionIndexVisible: false) {
+    cell.configure(for: listItem,
+                   posterProvider: posterProvider,
+                   isSectionIndexVisible: isSectionIndexVisible) {
       guard let indexPath = indexPathProvider() else { return }
       if let cell = self.cellForRow(at: indexPath) as? MovieListListItemTableCell {
         self.configure(cell,
@@ -449,8 +451,8 @@ private class ViewModel {
 class MovieListListItemTableCell: UITableViewCell {
   static let rowHeight: CGFloat = 100
   static let posterSize = PosterSize(minWidth: 60)
-  private static let separatorInsetsWithSectionIndex = UIEdgeInsets(top: 0, left: 80, bottom: 0, right: 16)
-  private static let separatorInsetsWithoutSectionIndex = UIEdgeInsets(top: 0, left: 80, bottom: 0, right: 0)
+  private static let separatorInsetsWithSectionIndex = UIEdgeInsets(top: 0, left: 90, bottom: 0, right: 16)
+  private static let separatorInsetsWithoutSectionIndex = UIEdgeInsets(top: 0, left: 90, bottom: 0, right: 0)
   private static let runtimeFormatter: DateComponentsFormatter = {
     let formatter = DateComponentsFormatter()
     formatter.unitsStyle = .full
