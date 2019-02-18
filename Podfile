@@ -9,7 +9,6 @@ target 'CinemaKit' do
   pod 'Crashlytics', '~> 3.12.0'
 
   target 'CinemaKitTests' do
-    inherit! :search_paths
   end
 end
 
