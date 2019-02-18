@@ -110,7 +110,6 @@
 		CBBC593E2121BDED00067DEA /* LibraryListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBBC59382121BDED00067DEA /* LibraryListController.swift */; };
 		CBBC593F2121BDED00067DEA /* LibraryList.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBBC59392121BDED00067DEA /* LibraryList.storyboard */; };
 		CBBC59422121BDED00067DEA /* LibraryListCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBBC593C2121BDED00067DEA /* LibraryListCoordinator.swift */; };
-		CBBD7D2F221AE67800BF42B0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CBBD7D2E221AE67800BF42B0 /* GoogleService-Info.plist */; };
 		CBC2E3B62135951D0088F5C8 /* SharedLibrarySheetCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CBC2E3B521358F8C0088F5C8 /* SharedLibrarySheetCell.xib */; };
 		CBC2E3BB2136A7750088F5C8 /* ChangeSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC2E3BA2136A7750088F5C8 /* ChangeSet.swift */; };
 		CBC2E3C22136DF790088F5C8 /* TextFieldTableCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CBC2E3BC2136DE1E0088F5C8 /* TextFieldTableCell.xib */; };
@@ -284,7 +283,8 @@
 		CBBC59382121BDED00067DEA /* LibraryListController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LibraryListController.swift; sourceTree = "<group>"; };
 		CBBC59392121BDED00067DEA /* LibraryList.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LibraryList.storyboard; sourceTree = "<group>"; };
 		CBBC593C2121BDED00067DEA /* LibraryListCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LibraryListCoordinator.swift; sourceTree = "<group>"; };
-		CBBD7D2E221AE67800BF42B0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		CBBD7D2E221AE67800BF42B0 /* GoogleService-Info-Debug.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-Debug.plist"; sourceTree = "<group>"; };
+		CBBD7D32221AF9F400BF42B0 /* GoogleService-Info-Release.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-Release.plist"; sourceTree = "<group>"; };
 		CBC2E3B521358F8C0088F5C8 /* SharedLibrarySheetCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SharedLibrarySheetCell.xib; sourceTree = "<group>"; };
 		CBC2E3BA2136A7750088F5C8 /* ChangeSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeSet.swift; sourceTree = "<group>"; };
 		CBC2E3BC2136DE1E0088F5C8 /* TextFieldTableCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TextFieldTableCell.xib; sourceTree = "<group>"; };
@@ -414,7 +414,8 @@
 				CB1A15CB2061322D003BD8D0 /* CinemaKit.h */,
 				CB1A15CC2061322D003BD8D0 /* CinemaKit-Info.plist */,
 				CBD00FA021414341009DA4E9 /* Tests-Info.plist */,
-				CBBD7D2E221AE67800BF42B0 /* GoogleService-Info.plist */,
+				CBBD7D2E221AE67800BF42B0 /* GoogleService-Info-Debug.plist */,
+				CBBD7D32221AF9F400BF42B0 /* GoogleService-Info-Release.plist */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -762,7 +763,7 @@
 				CB1A15C42061322D003BD8D0 /* Sources */,
 				CB1A15C52061322D003BD8D0 /* Frameworks */,
 				CB1A15C62061322D003BD8D0 /* Headers */,
-				CB1A15C72061322D003BD8D0 /* Resources */,
+				CBBD7D33221AFA5500BF42B0 /* Setup Firebase Environment */,
 			);
 			buildRules = (
 			);
@@ -875,14 +876,6 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		CB1A15C72061322D003BD8D0 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				CBBD7D2F221AE67800BF42B0 /* GoogleService-Info.plist in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		CBB569611EA4D6A2005F7BA7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -955,6 +948,24 @@
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
+		};
+		CBBD7D33221AFA5500BF42B0 /* Setup Firebase Environment */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Setup Firebase Environment";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "PLIST_DESTINATION=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework\nGOOGLESERVICE_INFO=\"${PROJECT_DIR}/${TARGET_NAME}/Assets/GoogleService-Info-${CONFIGURATION}.plist\"\nif [ -f $GOOGLESERVICE_INFO ]; then\n    echo \"Using ${GOOGLESERVICE_INFO}\"\n    cp \"${GOOGLESERVICE_INFO}\" \"${PLIST_DESTINATION}/GoogleService-Info.plist\"\nelse\n    echo \"No ${CONFIGURATION} GoogleService-Info.plist found.\"\n    exit 1\nfi\n";
 		};
 		DC1E6D12712D559D0EFE75F5 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
