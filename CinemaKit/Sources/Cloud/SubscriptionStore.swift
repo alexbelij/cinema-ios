@@ -1,5 +1,4 @@
 import CloudKit
-import os.log
 
 protocol SubscriptionStore {
   func hasSubscribedTo(_ target: SubscriptionTarget) -> Bool
@@ -10,21 +9,18 @@ class FileBasedSubscriptionStore: SubscriptionStore {
   static let fileURL = directoryUrl(for: .applicationSupportDirectory)
       .appendingPathComponent(Bundle.main.bundleIdentifier!, isDirectory: true)
       .appendingPathComponent("Subscriptions.plist")
-  private static let logger = Logging.createLogger(category: "SubscriptionStore")
-
   private var targets: Set<SubscriptionTarget>
+  private let errorReporter: ErrorReporter
 
-  init() {
+  init(errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared) {
+    self.errorReporter = errorReporter
     if FileManager.default.fileExists(atPath: FileBasedSubscriptionStore.fileURL.path) {
       do {
         let data = try Data(contentsOf: FileBasedSubscriptionStore.fileURL)
         let decoder = PropertyListDecoder()
         targets = Set(try decoder.decode([SubscriptionTarget].self, from: data))
       } catch {
-        os_log("unable to load data: %{public}@",
-               log: FileBasedSubscriptionStore.logger,
-               type: .fault,
-               String(describing: error))
+        errorReporter.report(error)
         fatalError("unable to load data")
       }
     } else {
@@ -47,10 +43,7 @@ class FileBasedSubscriptionStore: SubscriptionStore {
       let data = try encoder.encode(targets)
       FileManager.default.createFile(atPath: FileBasedSubscriptionStore.fileURL.path, contents: data)
     } catch {
-      os_log("unable to store data: %{public}@",
-             log: FileBasedSubscriptionStore.logger,
-             type: .fault,
-             String(describing: error))
+      errorReporter.report(error)
       fatalError("unable to store data")
     }
   }

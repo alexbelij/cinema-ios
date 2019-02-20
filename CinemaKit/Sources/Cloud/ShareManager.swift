@@ -15,13 +15,16 @@ class DefaultShareManager: ShareManager {
   private let generalOperationQueue: GeneralOperationQueue
   private let privateDatabaseOperationQueue: DatabaseOperationQueue
   private let dataInvalidationFlag: LocalDataInvalidationFlag
+  private let errorReporter: ErrorReporter
 
   init(generalOperationQueue: GeneralOperationQueue,
        privateDatabaseOperationQueue: DatabaseOperationQueue,
-       dataInvalidationFlag: LocalDataInvalidationFlag) {
+       dataInvalidationFlag: LocalDataInvalidationFlag,
+       errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared) {
     self.generalOperationQueue = generalOperationQueue
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.dataInvalidationFlag = dataInvalidationFlag
+    self.errorReporter = errorReporter
   }
 
   func saveShare(_ share: CKShare,
@@ -38,38 +41,25 @@ class DefaultShareManager: ShareManager {
     operation.modifyRecordsCompletionBlock = { _, _, error in
       // if there is a partial error, then it is the root record which caused it
       if let error = error?.singlePartialError(forKey: rootRecord.recordID) {
-        guard let ckerror = error as? CKError else {
-          os_log("<saveShare> unhandled error: %{public}@",
-                 log: DefaultShareManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(.nonRecoverableError)
-          return
-        }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
           os_log("retry sync after %.1f seconds", log: DefaultShareManager.logger, type: .default, retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
             self.saveShare(share, with: rootRecord, retryCount: retryCount - 1, then: completion)
           }
-        } else if ckerror.code == CKError.Code.serverRecordChanged {
-          completion(.conflict(serverRecord: ckerror.serverRecord!))
-        } else if ckerror.code == CKError.Code.notAuthenticated {
-          completion(.notAuthenticated)
-        } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.dataInvalidationFlag.set()
-          completion(.userDeletedZone)
-        } else if ckerror.code == CKError.Code.networkFailure
-                  || ckerror.code == CKError.Code.networkUnavailable
-                  || ckerror.code == CKError.Code.requestRateLimited
-                  || ckerror.code == CKError.Code.serviceUnavailable
-                  || ckerror.code == CKError.Code.zoneBusy {
-          completion(.nonRecoverableError)
-        } else {
-          os_log("<saveShare> unhandled CKError: %{public}@",
-                 log: DefaultShareManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(.nonRecoverableError)
+          return
+        }
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
+            completion(.notAuthenticated)
+          case .userDeletedZone?:
+            self.dataInvalidationFlag.set()
+            completion(.userDeletedZone)
+          case .serverRecordChanged?:
+            // swiftlint:disable:next force_cast
+            completion(.conflict(serverRecord: (error as! CKError).serverRecord!))
+          default:
+            self.errorReporter.report(error)
+            completion(.nonRecoverableError)
         }
       } else {
         completion(nil)
@@ -88,40 +78,26 @@ class DefaultShareManager: ShareManager {
     let operation = CKAcceptSharesOperation(shareMetadatas: [metadata])
     operation.perShareCompletionBlock = { _, share, error in
       if let error = error {
-        guard let ckerror = error as? CKError else {
-          os_log("<acceptCloudKitShare> unhandled error: %{public}@",
-                 log: DefaultShareManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(.nonRecoverableError)
-          return
-        }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
           os_log("retry accept share after %.1f seconds",
                  log: DefaultShareManager.logger,
                  type: .default,
                  retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
             self.acceptShare(with: metadata,
                              retryCount: retryCount - 1,
                              then: completion)
           }
-        } else if ckerror.code == CKError.Code.notAuthenticated {
-          completion(.notAuthenticated)
-        } else if ckerror.code == CKError.Code.unknownItem {
-          completion(.itemNoLongerExists)
-        } else if ckerror.code == CKError.Code.networkFailure
-                  || ckerror.code == CKError.Code.networkUnavailable
-                  || ckerror.code == CKError.Code.requestRateLimited
-                  || ckerror.code == CKError.Code.serviceUnavailable
-                  || ckerror.code == CKError.Code.zoneBusy {
-          completion(.nonRecoverableError)
-        } else {
-          os_log("<acceptCloudKitShare> unhandled CKError: %{public}@",
-                 log: DefaultShareManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(.nonRecoverableError)
+          return
+        }
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
+            completion(.notAuthenticated)
+          case .unknownItem?:
+            completion(.itemNoLongerExists)
+          default:
+            self.errorReporter.report(error)
+            completion(.nonRecoverableError)
         }
       } else {
         completion(nil)
@@ -145,8 +121,7 @@ class DefaultShareManager: ShareManager {
     var unhandledErrorOccurred = false
     operation.perShareMetadataBlock = { _, shareMetadata, error in
       if let error = error {
-        guard let ckerror = error as? CKError else { return }
-        if ckerror.code != CKError.Code.unknownItem {
+        if error.ckerrorCode != .unknownItem {
           unhandledErrorOccurred = true
         }
       } else if let shareMetadata = shareMetadata {
@@ -155,30 +130,14 @@ class DefaultShareManager: ShareManager {
     }
     operation.fetchShareMetadataCompletionBlock = { error in
       if let error = error {
-        guard let ckerror = error as? CKError else {
-          os_log("<fetchShareMetadata> unhandled error: %{public}@",
-                 log: DefaultShareManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(nil, .nonRecoverableError)
-          return
-        }
-        if ckerror.code == CKError.Code.notAuthenticated {
-          completion(nil, .notAuthenticated)
-        } else if ckerror.code == CKError.Code.networkFailure
-           || ckerror.code == CKError.Code.networkUnavailable
-           || ckerror.code == CKError.Code.requestRateLimited
-           || ckerror.code == CKError.Code.serviceUnavailable
-           || ckerror.code == CKError.Code.zoneBusy {
-          completion(nil, .nonRecoverableError)
-        } else if ckerror.code == CKError.Code.partialFailure && !unhandledErrorOccurred {
-          completion(shareMetadatas, nil)
-        } else {
-          os_log("<fetchShareMetadata> unhandled CKError: %{public}@",
-                 log: DefaultShareManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(nil, .nonRecoverableError)
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
+            completion(nil, .notAuthenticated)
+          case .partialFailure? where !unhandledErrorOccurred:
+            completion(shareMetadatas, nil)
+          default:
+            self.errorReporter.report(error)
+            completion(nil, .nonRecoverableError)
         }
       } else {
         completion(shareMetadatas, nil)

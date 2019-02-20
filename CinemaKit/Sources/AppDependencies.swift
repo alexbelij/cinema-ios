@@ -8,14 +8,17 @@ public struct AppDependencies {
   public let movieDb: MovieDbClient
   public let notificationCenter: NotificationCenter
   public let userDefaults: UserDefaultsProtocol
+  public let errorReporter: ErrorReporter
 
   init(libraryManager: InternalMovieLibraryManager,
        movieDb: MovieDbClient,
        notificationCenter: NotificationCenter,
-       userDefaults: UserDefaultsProtocol) {
+       userDefaults: UserDefaultsProtocol,
+       errorReporter: ErrorReporter) {
     self.internalLibraryManager = libraryManager
     self.movieDb = movieDb
     self.notificationCenter = notificationCenter
     self.userDefaults = userDefaults
+    self.errorReporter = errorReporter
   }
 }

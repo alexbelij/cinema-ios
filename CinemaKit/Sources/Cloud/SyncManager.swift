@@ -21,13 +21,16 @@ class DefaultSyncManager: SyncManager {
   private let privateDatabaseOperationQueue: DatabaseOperationQueue
   private let sharedDatabaseOperationQueue: DatabaseOperationQueue
   private let dataInvalidationFlag: LocalDataInvalidationFlag
+  private let errorReporter: ErrorReporter
 
   init(privateDatabaseOperationQueue: DatabaseOperationQueue,
        sharedDatabaseOperationQueue: DatabaseOperationQueue,
-       dataInvalidationFlag: LocalDataInvalidationFlag) {
+       dataInvalidationFlag: LocalDataInvalidationFlag,
+       errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared) {
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.dataInvalidationFlag = dataInvalidationFlag
+    self.errorReporter = errorReporter
   }
 
   private func databaseOperationQueue(for scope: CKDatabase.Scope) -> DatabaseOperationQueue {
@@ -56,42 +59,29 @@ class DefaultSyncManager: SyncManager {
     let operation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
     operation.modifyRecordsCompletionBlock = { _, _, error in
       if let error = error?.singlePartialError(forKey: record.recordID) {
-        guard let ckerror = error as? CKError else {
-          os_log("<sync> unhandled error: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(.nonRecoverableError)
-          return
-        }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
           os_log("retry sync after %.1f seconds", log: DefaultSyncManager.logger, type: .default, retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
             self.sync(record, in: scope, retryCount: retryCount - 1, then: completion)
           }
-        } else if ckerror.code == CKError.Code.notAuthenticated {
-          completion(.notAuthenticated)
-        } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.dataInvalidationFlag.set()
-          completion(.userDeletedZone)
-        } else if ckerror.code == CKError.Code.serverRecordChanged {
-          completion(.conflict(serverRecord: ckerror.serverRecord!))
-        } else if ckerror.code == CKError.Code.unknownItem {
-          completion(.itemNoLongerExists)
-        } else if ckerror.code == CKError.Code.permissionFailure {
-          completion(.permissionFailure)
-        } else if ckerror.code == CKError.Code.networkFailure
-                  || ckerror.code == CKError.Code.networkUnavailable
-                  || ckerror.code == CKError.Code.requestRateLimited
-                  || ckerror.code == CKError.Code.serviceUnavailable
-                  || ckerror.code == CKError.Code.zoneBusy {
-          completion(.nonRecoverableError)
-        } else {
-          os_log("<sync> unhandled CKError: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(.nonRecoverableError)
+          return
+        }
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
+            completion(.notAuthenticated)
+          case .userDeletedZone?:
+            self.dataInvalidationFlag.set()
+            completion(.userDeletedZone)
+          case .serverRecordChanged?:
+            // swiftlint:disable:next force_cast
+            completion(.conflict(serverRecord: (error as! CKError).serverRecord!))
+          case .unknownItem?:
+            completion(.itemNoLongerExists)
+          case .permissionFailure?:
+            completion(.permissionFailure)
+          default:
+            self.errorReporter.report(error)
+            completion(.nonRecoverableError)
         }
       } else {
         os_log("pushed %{public}@ record",
@@ -146,42 +136,22 @@ class DefaultSyncManager: SyncManager {
     let operation = CKModifyRecordsOperation(recordsToSave: records, recordIDsToDelete: nil)
     operation.modifyRecordsCompletionBlock = { _, _, error in
       if let error = error {
-        guard let ckerror = error as? CKError else {
-          os_log("<syncAll> unhandled error: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(.nonRecoverableError)
-          return
-        }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
           os_log("retry sync after %.1f seconds", log: DefaultSyncManager.logger, type: .default, retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
             self.syncAll(records, in: scope, retryCount: retryCount - 1, then: completion)
           }
-        } else if ckerror.code == CKError.Code.notAuthenticated {
-          completion(.notAuthenticated)
-        } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.dataInvalidationFlag.set()
-          completion(.userDeletedZone)
-        } else if ckerror.code == CKError.Code.partialFailure {
-          os_log("<syncAll> partial error: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: ckerror.partialErrorsByItemID))
-          completion(.nonRecoverableError)
-        } else if ckerror.code == CKError.Code.networkFailure
-                  || ckerror.code == CKError.Code.networkUnavailable
-                  || ckerror.code == CKError.Code.requestRateLimited
-                  || ckerror.code == CKError.Code.serviceUnavailable
-                  || ckerror.code == CKError.Code.zoneBusy {
-          completion(.nonRecoverableError)
-        } else {
-          os_log("<syncAll> unhandled CKError: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(.nonRecoverableError)
+          return
+        }
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
+            completion(.notAuthenticated)
+          case .userDeletedZone?:
+            self.dataInvalidationFlag.set()
+            completion(.userDeletedZone)
+          default:
+            self.errorReporter.report(error)
+            completion(.nonRecoverableError)
         }
       } else {
         os_log("pushed %d record",
@@ -209,40 +179,26 @@ class DefaultSyncManager: SyncManager {
     let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: [record.recordID])
     operation.modifyRecordsCompletionBlock = { _, _, error in
       if let error = error?.singlePartialError(forKey: record.recordID) {
-        guard let ckerror = error as? CKError else {
-          os_log("<delete> unhandled error: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(.nonRecoverableError)
-          return
-        }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
           os_log("retry delete after %.1f seconds", log: DefaultSyncManager.logger, type: .default, retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
             self.delete(record, in: scope, retryCount: retryCount - 1, then: completion)
           }
-        } else if ckerror.code == CKError.Code.notAuthenticated {
-          completion(.notAuthenticated)
-        } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.dataInvalidationFlag.set()
-          completion(.userDeletedZone)
-        } else if ckerror.code == CKError.Code.unknownItem {
-          completion(nil)
-        } else if ckerror.code == CKError.Code.permissionFailure {
-          completion(.permissionFailure)
-        } else if ckerror.code == CKError.Code.networkFailure
-                  || ckerror.code == CKError.Code.networkUnavailable
-                  || ckerror.code == CKError.Code.requestRateLimited
-                  || ckerror.code == CKError.Code.serviceUnavailable
-                  || ckerror.code == CKError.Code.zoneBusy {
-          completion(.nonRecoverableError)
-        } else {
-          os_log("<delete> unhandled CKError: %{public}@",
-                 log: DefaultSyncManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(.nonRecoverableError)
+          return
+        }
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
+            completion(.notAuthenticated)
+          case .userDeletedZone?:
+            self.dataInvalidationFlag.set()
+            completion(.userDeletedZone)
+          case .unknownItem?:
+            completion(nil)
+          case .permissionFailure?:
+            completion(.permissionFailure)
+          default:
+            self.errorReporter.report(error)
+            completion(.nonRecoverableError)
         }
       } else {
         os_log("deleted %{public}@ record",
@@ -263,10 +219,7 @@ class DefaultSyncManager: SyncManager {
     let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: recordIDs)
     operation.modifyRecordsCompletionBlock = { _, _, error in
       if let error = error {
-        os_log("batch delete failed: %{public}@",
-               log: DefaultSyncManager.logger,
-               type: .error,
-               String(describing: error))
+        self.errorReporter.report(error)
       } else {
         os_log("deleted %d record",
                log: DefaultSyncManager.logger,

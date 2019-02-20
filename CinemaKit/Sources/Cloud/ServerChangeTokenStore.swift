@@ -19,7 +19,7 @@ private extension CKDatabase.Scope {
   var serverChangeTokenKey: String {
     switch self {
       case .shared: return "SharedDatabase"
-      case .private, .public: fatalError("not implemented")
+      case .private, .public: fatalError("server change tokens are only supported for shared database")
     }
   }
 }
@@ -28,21 +28,19 @@ class FileBasedServerChangeTokenStore: ServerChangeTokenStore {
   static let fileURL = directoryUrl(for: .applicationSupportDirectory)
       .appendingPathComponent(Bundle.main.bundleIdentifier!, isDirectory: true)
       .appendingPathComponent("ServerChangeTokens.plist")
-  private static let logger = Logging.createLogger(category: "ServerChangeTokenStore")
 
   private var tokens: [String: Data]
+  private let errorReporter: ErrorReporter
 
-  init() {
+  init(errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared) {
+    self.errorReporter = errorReporter
     if FileManager.default.fileExists(atPath: FileBasedServerChangeTokenStore.fileURL.path) {
       do {
         let data = try Data(contentsOf: FileBasedServerChangeTokenStore.fileURL)
         let decoder = PropertyListDecoder()
         tokens = try decoder.decode([String: Data].self, from: data)
       } catch {
-        os_log("unable to load data: %{public}@",
-               log: FileBasedServerChangeTokenStore.logger,
-               type: .fault,
-               String(describing: error))
+        errorReporter.report(error)
         fatalError("unable to load data")
       }
     } else {
@@ -90,10 +88,7 @@ class FileBasedServerChangeTokenStore: ServerChangeTokenStore {
       let data = try encoder.encode(tokens)
       FileManager.default.createFile(atPath: FileBasedServerChangeTokenStore.fileURL.path, contents: data)
     } catch {
-      os_log("unable to store data: %{public}@",
-             log: FileBasedServerChangeTokenStore.logger,
-             type: .fault,
-             String(describing: error))
+      errorReporter.report(error)
       fatalError("unable to store data")
     }
   }

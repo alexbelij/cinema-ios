@@ -245,7 +245,7 @@ extension MovieLibraryManagerData {
     var errors = [MovieLibraryManagerError]()
     for record in records {
       group.enter()
-      guard let shareID = record.shareID else { fatalError("record is not shared") }
+      guard let shareID = record.shareID else { preconditionFailure("record is not shared") }
       let scope = shareID.zoneID.ownerName == CKCurrentUserDefaultName
           ? CKDatabase.Scope.private
           : CKDatabase.Scope.shared

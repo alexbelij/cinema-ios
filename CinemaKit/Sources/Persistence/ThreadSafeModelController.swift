@@ -12,7 +12,7 @@ class ThreadSafeModelController<ModelType, ErrorType>: ModelController {
 
   final func initializeWithDefaultValue() {
     queue.async {
-      guard self.model == nil else { fatalError("model has already been initialized") }
+      guard self.model == nil else { preconditionFailure("model has already been initialized") }
       self.model = self.makeWithDefaultValue()
     }
   }
