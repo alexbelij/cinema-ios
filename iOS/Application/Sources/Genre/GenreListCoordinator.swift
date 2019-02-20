@@ -90,7 +90,6 @@ extension GenreListCoordinator: GenreListControllerDelegate {
                                                                navigationController: navigationController,
                                                                dependencies: dependencies)
     self.libraryContentCoordinator!.delegate = self
-    self.libraryContentCoordinator!.dismissWhenEmpty = true
     self.libraryContentCoordinator!.presentRootViewController()
   }
 }

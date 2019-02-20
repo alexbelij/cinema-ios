@@ -44,7 +44,7 @@
 "library" = "Library";
 "library.defaultName" = "My Movies";
 "library.migratedNameFormat" = "Movies from %@";
-"library.empty" = "The library is empty.";
+"library.empty" = "No Movies";
 "library.search.placeholder" = "Search";
 "libraryList.addNewLibrary" = "Add New Library…";
 "libraryList.invitations" = "Invitations";
