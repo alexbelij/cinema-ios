@@ -4,7 +4,6 @@ import Foundation
 import UIKit
 
 protocol LibraryContentCoordinatorDelegate: class {
-  func libraryContentCoordinatorShowLibraryList(_ coordinator: LibraryContentCoordinator)
   func libraryContentCoordinatorDidDismiss(_ coordinator: LibraryContentCoordinator)
 }
 
@@ -52,17 +51,12 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     }
   }
   private let content: ContentSpecification
-  var showsLibrarySwitch = false {
-    didSet {
-      if showsLibrarySwitch {
-        let button = UIBarButtonItem(image: #imageLiteral(resourceName: "SwitchLibrary"),
-                                     style: .done,
-                                     target: self,
-                                     action: #selector(showLibraryListSheet))
-        movieListController.navigationItem.leftBarButtonItem = button
-      } else {
-        movieListController.navigationItem.leftBarButtonItem = nil
-      }
+  var leftBarButtonItem: UIBarButtonItem? {
+    get {
+      return movieListController.navigationItem.leftBarButtonItem
+    }
+    set {
+      movieListController.navigationItem.leftBarButtonItem = newValue
     }
   }
 
@@ -262,11 +256,6 @@ extension LibraryContentCoordinator: EditMovieCoordinatorDelegate {
 // MARK: - User Actions
 
 extension LibraryContentCoordinator {
-  @objc
-  private func showLibraryListSheet() {
-    self.delegate?.libraryContentCoordinatorShowLibraryList(self)
-  }
-
   @objc
   private func showSortDescriptorSheet() {
     let sheet = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
