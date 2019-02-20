@@ -29,15 +29,18 @@ class DefaultChangesManager: ChangesManager {
   private let sharedDatabaseOperationQueue: DatabaseOperationQueue
   private let serverChangeTokenStore: ServerChangeTokenStore
   private let dataInvalidationFlag: LocalDataInvalidationFlag
+  private let errorReporter: ErrorReporter
 
   init(privateDatabaseOperationQueue: DatabaseOperationQueue,
        sharedDatabaseOperationQueue: DatabaseOperationQueue,
        serverChangeTokenStore: ServerChangeTokenStore = FileBasedServerChangeTokenStore(),
-       dataInvalidationFlag: LocalDataInvalidationFlag) {
+       dataInvalidationFlag: LocalDataInvalidationFlag,
+       errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared) {
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.serverChangeTokenStore = serverChangeTokenStore
     self.dataInvalidationFlag = dataInvalidationFlag
+    self.errorReporter = errorReporter
   }
 
   func fetchChanges(then completion: @escaping (FetchedChanges?, CloudKitError?) -> Void) {
@@ -105,30 +108,14 @@ class DefaultChangesManager: ChangesManager {
     // handle result
     operation.fetchDatabaseChangesCompletionBlock = { newChangeToken, _, error in
       if let error = error {
-        guard let ckerror = error as? CKError else {
-          os_log("<fetchChangesForDatabase> unhandled error: %{public}@",
-                 log: DefaultChangesManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(nil, .nonRecoverableError)
-          return
-        }
-        if ckerror.code == CKError.Code.changeTokenExpired {
-          self.dataInvalidationFlag.set()
-        } else if ckerror.code == CKError.Code.notAuthenticated {
-          completion(nil, .notAuthenticated)
-        } else if ckerror.code == CKError.Code.networkFailure
-                  || ckerror.code == CKError.Code.networkUnavailable
-                  || ckerror.code == CKError.Code.requestRateLimited
-                  || ckerror.code == CKError.Code.serviceUnavailable
-                  || ckerror.code == CKError.Code.zoneBusy {
-          completion(nil, .nonRecoverableError)
-        } else {
-          os_log("<fetchChangesForDatabase> unhandled CKError: %{public}@",
-                 log: DefaultChangesManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(nil, .nonRecoverableError)
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
+            completion(nil, .notAuthenticated)
+          case .changeTokenExpired?:
+            self.dataInvalidationFlag.set()
+          default:
+            self.errorReporter.report(error)
+            completion(nil, .nonRecoverableError)
         }
       } else {
         if let newChangeToken = newChangeToken, newChangeToken != previousChangeToken {
@@ -170,9 +157,7 @@ class DefaultChangesManager: ChangesManager {
     var newChangeTokens = [CKRecordZone.ID: CKServerChangeToken]()
     operation.recordZoneFetchCompletionBlock = { zoneID, newChangeToken, _, _, error in
       if let error = error {
-        guard let ckerror = error as? CKError else { return }
-        if ckerror.code == CKError.Code.changeTokenExpired
-           || ckerror.code == CKError.Code.userDeletedZone {
+        if error.ckerrorCode == .changeTokenExpired || error.ckerrorCode == .userDeletedZone {
           self.dataInvalidationFlag.set()
         }
       } else {
@@ -193,28 +178,12 @@ class DefaultChangesManager: ChangesManager {
           completion(nil, .userDeletedZone)
           return
         }
-        guard let ckerror = error as? CKError else {
-          os_log("<fetchChangesInZones> unhandled error: %{public}@",
-                 log: DefaultChangesManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(nil, .nonRecoverableError)
-          return
-        }
-        if ckerror.code == CKError.Code.notAuthenticated {
-          completion(nil, .notAuthenticated)
-        } else if ckerror.code == CKError.Code.networkFailure
-           || ckerror.code == CKError.Code.networkUnavailable
-           || ckerror.code == CKError.Code.requestRateLimited
-           || ckerror.code == CKError.Code.serviceUnavailable
-           || ckerror.code == CKError.Code.zoneBusy {
-          completion(nil, .nonRecoverableError)
-        } else {
-          os_log("<fetchChangesInZones> unhandled CKError: %{public}@",
-                 log: DefaultChangesManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(nil, .nonRecoverableError)
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
+            completion(nil, .notAuthenticated)
+          default:
+            self.errorReporter.report(error)
+            completion(nil, .nonRecoverableError)
         }
       } else {
         for (zoneID, newChangeToken) in newChangeTokens {

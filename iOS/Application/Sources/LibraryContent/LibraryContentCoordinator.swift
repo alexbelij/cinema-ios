@@ -4,7 +4,6 @@ import Foundation
 import UIKit
 
 protocol LibraryContentCoordinatorDelegate: class {
-  func libraryContentCoordinatorShowLibraryList(_ coordinator: LibraryContentCoordinator)
   func libraryContentCoordinatorDidDismiss(_ coordinator: LibraryContentCoordinator)
 }
 
@@ -12,6 +11,26 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
   enum ContentSpecification {
     case all
     case allWith(GenreIdentifier)
+  }
+
+  private enum SortDescriptor: String, CaseIterable {
+    case title, runtime, year
+
+    var grouping: MovieListItemGrouping {
+      switch self {
+        case .title: return FirstCharacterOfTitleGrouping()
+        case .runtime: return RuntimeGrouping()
+        case .year: return ReleaseDateGrouping()
+      }
+    }
+
+    var localizedName: String {
+      switch self {
+        case .title: return NSLocalizedString("sort.by.title", comment: "")
+        case .runtime: return NSLocalizedString("sort.by.runtime", comment: "")
+        case .year: return NSLocalizedString("sort.by.year", comment: "")
+      }
+    }
   }
 
   private static let sortDescriptorKey = UserDefaultsKey<String>("MovieSortDescriptor")
@@ -32,24 +51,19 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     }
   }
   private let content: ContentSpecification
-  var dismissWhenEmpty = false
-  var showsLibrarySwitch = false {
-    didSet {
-      if showsLibrarySwitch {
-        let button = UIBarButtonItem(image: #imageLiteral(resourceName: "SwitchLibrary"),
-                                     style: .done,
-                                     target: self,
-                                     action: #selector(showLibraryListSheet))
-        movieListController.navigationItem.leftBarButtonItem = button
-      } else {
-        movieListController.navigationItem.leftBarButtonItem = nil
-      }
+  var leftBarButtonItem: UIBarButtonItem? {
+    get {
+      return movieListController.navigationItem.leftBarButtonItem
+    }
+    set {
+      movieListController.navigationItem.leftBarButtonItem = newValue
     }
   }
 
   // managed controllers
   private let navigationController: UINavigationController
   private let movieListController = UIStoryboard.movieList.instantiate(MovieListController.self)
+  private var sortDescriptor = SortDescriptor.title
 
   // child coordinators
   private var movieDetailsCoordinator: MovieDetailsCoordinator?
@@ -68,17 +82,25 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     self.navigationController = navigationController
     movieListController.delegate = self
     movieListController.posterProvider = MovieDbPosterProvider(dependencies.movieDb)
+    let sortButton = UIBarButtonItem(image: #imageLiteral(resourceName: "Sort"),
+                                     style: .done,
+                                     target: self,
+                                     action: #selector(showSortDescriptorSheet))
+    movieListController.navigationItem.rightBarButtonItem = sortButton
     if let rawSortDescriptor = userDefaults.get(for: LibraryContentCoordinator.sortDescriptorKey),
        let sortDescriptor = SortDescriptor(rawValue: rawSortDescriptor) {
-      movieListController.sortDescriptor = sortDescriptor
+      self.sortDescriptor = sortDescriptor
     }
     self.token = userDefaults.observerValue(for: LibraryContentCoordinator.sortDescriptorKey) { [weak self] value in
       guard let `self` = self else { return }
       guard let rawSortDescriptor = value,
             let sortDescriptor = SortDescriptor(rawValue: rawSortDescriptor) else { return }
       DispatchQueue.main.async {
-        if self.movieListController.sortDescriptor != sortDescriptor {
-          self.movieListController.sortDescriptor = sortDescriptor
+        if self.sortDescriptor != sortDescriptor {
+          self.sortDescriptor = sortDescriptor
+          DispatchQueue.global(qos: .default).async {
+            self.fetchListData()
+          }
         }
       }
     }
@@ -93,6 +115,7 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
     library.delegates.add(self)
     updateTitle()
     movieListController.listData = .loading
+    movieListController.navigationItem.rightBarButtonItem?.isEnabled = false
     if let editMovieCoordinator = editMovieCoordinator {
       editMovieCoordinator.rootViewController.dismiss(animated: true) {
         self.navigationController.popToRootViewController(animated: true)
@@ -132,13 +155,17 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
           case .nonRecoverableError:
             DispatchQueue.main.async {
               self.movieListController.listData = .unavailable
+              self.movieListController.navigationItem.rightBarButtonItem?.isEnabled = false
             }
           case .tmdbDetailsCouldNotBeFetched, .movieDoesNotExist, .permissionFailure:
             fatalError("should not occur")
         }
       case let .success(movies):
         DispatchQueue.main.async {
-          self.movieListController.listData = .available(movies)
+          let dataSource = SectionedMovieListDataSource(for: movies.map(MovieListController.ListItem.init),
+                                                        groupingBy: self.sortDescriptor.grouping)
+          self.movieListController.listData = .available(dataSource)
+          self.movieListController.navigationItem.rightBarButtonItem?.isEnabled = !movies.isEmpty
         }
     }
   }
@@ -147,19 +174,6 @@ class LibraryContentCoordinator: AutoPresentableCoordinator {
 // MARK: - MovieListControllerDelegate
 
 extension LibraryContentCoordinator: MovieListControllerDelegate {
-  func movieListControllerShowSortDescriptorSheet(_ controller: MovieListController) {
-    let sheet = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
-    for descriptor in SortDescriptor.allCases {
-      sheet.addSheetItem(SelectableLabelSheetItem(title: descriptor.localizedName,
-                                                  showCheckmark: descriptor == controller.sortDescriptor) { _ in
-        guard controller.sortDescriptor != descriptor else { return }
-        controller.sortDescriptor = descriptor
-        self.userDefaults.set(descriptor.rawValue, for: LibraryContentCoordinator.sortDescriptorKey)
-      })
-    }
-    controller.present(sheet, animated: true)
-  }
-
   func movieListController(_ controller: MovieListController, didSelect movie: Movie) {
     movieDetailsCoordinator = MovieDetailsCoordinator(for: movie, using: dependencies.movieDb)
     movieDetailsCoordinator!.delegate = self
@@ -239,12 +253,25 @@ extension LibraryContentCoordinator: EditMovieCoordinatorDelegate {
   }
 }
 
-// MARK: - Switching Libraries
+// MARK: - User Actions
 
 extension LibraryContentCoordinator {
   @objc
-  private func showLibraryListSheet() {
-    self.delegate?.libraryContentCoordinatorShowLibraryList(self)
+  private func showSortDescriptorSheet() {
+    let sheet = TabularSheetController<SelectableLabelSheetItem>(cellConfig: SelectableLabelCellConfig())
+    for descriptor in SortDescriptor.allCases {
+      let isCurrentSorting = descriptor == self.sortDescriptor
+      sheet.addSheetItem(SelectableLabelSheetItem(title: descriptor.localizedName,
+                                                  showCheckmark: isCurrentSorting) { _ in
+        guard self.sortDescriptor != descriptor else { return }
+        self.sortDescriptor = descriptor
+        self.userDefaults.set(descriptor.rawValue, for: LibraryContentCoordinator.sortDescriptorKey)
+        DispatchQueue.global(qos: .default).async {
+          self.fetchListData()
+        }
+      })
+    }
+    movieListController.present(sheet, animated: true)
   }
 }
 
@@ -279,34 +306,6 @@ extension LibraryContentCoordinator: MovieLibraryDelegate {
   }
 
   func library(_ library: MovieLibrary, didUpdateMovies changeSet: ChangeSet<TmdbIdentifier, Movie>) {
-    guard case var .available(listItems) = movieListController.listData else { return }
-
-    // updated movies
-    if !changeSet.modifications.isEmpty {
-      for (id, movie) in changeSet.modifications {
-        guard let index = listItems.firstIndex(where: { $0.tmdbID == id }) else { continue }
-        listItems.remove(at: index)
-        listItems.insert(movie, at: index)
-      }
-    }
-
-    // new movies
-    let newMovies: [Movie]
-    switch content {
-      case .all:
-        newMovies = changeSet.insertions
-      case let .allWith(genreId):
-        newMovies = changeSet.insertions.filter { $0.genreIds.contains(genreId) }
-    }
-    listItems.append(contentsOf: newMovies)
-
-    // removed movies
-    if !changeSet.deletions.isEmpty {
-      for (_, movie) in changeSet.deletions {
-        guard let index = listItems.index(of: movie) else { continue }
-        listItems.remove(at: index)
-      }
-    }
     DispatchQueue.main.async {
       if let movieDetailsCoordinator = self.movieDetailsCoordinator {
         if let updatedMovie = changeSet.modifications[movieDetailsCoordinator.movie.tmdbID] {
@@ -325,15 +324,8 @@ extension LibraryContentCoordinator: MovieLibraryDelegate {
           }
         }
       }
-
-      // commit changes only when controller is not being dismissed anyway
-      if listItems.isEmpty && self.dismissWhenEmpty {
-        self.movieListController.onViewDidAppear = { [weak self] in
-          guard let `self` = self else { return }
-          self.navigationController.popViewController(animated: true)
-        }
-      } else {
-        self.movieListController.listData = .available(listItems)
+      DispatchQueue.global(qos: .default).async {
+        self.fetchListData()
       }
     }
   }

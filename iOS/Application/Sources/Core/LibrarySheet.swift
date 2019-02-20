@@ -16,8 +16,8 @@ enum LibrarySheetItem: SheetItemProtocol {
 }
 
 class SharedLibrarySheetCell: UITableViewCell {
-  @IBOutlet private weak var sharedImageView: UIImageView!
-  @IBOutlet private weak var label: UILabel!
+  @IBOutlet private var sharedImageView: UIImageView!
+  @IBOutlet private var label: UILabel!
 
   override func awakeFromNib() {
     super.awakeFromNib()

@@ -8,7 +8,7 @@ class AppCoordinator: AutoPresentableCoordinator {
   enum State {
     case launched
     case initializing
-    case settingUp(StartupCoordinator)
+    case settingUp(SetupCoordinator)
     case notAuthenticated(UIViewController)
     case upAndRunning(AppDependencies, CoreCoordinator)
     case readyForRestart(UIViewController)
@@ -20,7 +20,7 @@ class AppCoordinator: AutoPresentableCoordinator {
   private var state = State.launched
   private var initializationRound = 0
 
-  init(application: UIApplication) {
+  init(for application: UIApplication) {
     self.application = application
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(applicationWideEventDidOccur),
@@ -31,6 +31,11 @@ class AppCoordinator: AutoPresentableCoordinator {
   func presentRootViewController() {
     startUp()
     window.makeKeyAndVisible()
+  }
+
+  private func restart() {
+    initializationRound = 0
+    startUp()
   }
 
   private func startUp() {
@@ -61,11 +66,11 @@ class AppCoordinator: AutoPresentableCoordinator {
   private func initializeCinemaKit() {
     let migratedLibraryNameFormat = NSLocalizedString("library.migratedNameFormat", comment: "")
     let migratedLibraryName = String.localizedStringWithFormat(migratedLibraryNameFormat, UIDevice.current.name)
-    CinemaKitStartupManager(using: self.application, migratedLibraryName: migratedLibraryName).initialize { progress in
+    CinemaKitStartupManager(using: application, migratedLibraryName: migratedLibraryName).initialize { progress in
       switch progress {
         case .settingUpCloudEnvironment:
           DispatchQueue.main.async {
-            let coordinator = StartupCoordinator()
+            let coordinator = SetupCoordinator()
             coordinator.change(to: .initializingCloud)
             self.state = .settingUp(coordinator)
             self.window.rootViewController = coordinator.rootViewController
@@ -87,16 +92,14 @@ class AppCoordinator: AutoPresentableCoordinator {
             coordinator.change(to: .migratingFailed)
           }
         case let .ready(dependencies):
-          self.loadData(using: dependencies)
-      }
-    }
-  }
-
-  private func loadData(using dependencies: AppDependencies) {
-    DispatchQueue.main.async {
-      os_log("loading data", log: AppCoordinator.logger, type: .default)
-      DispatchQueue.global(qos: .userInitiated).async {
-        self.fetchLibraries(using: dependencies)
+          os_log("loading data", log: AppCoordinator.logger, type: .default)
+          DispatchQueue.global(qos: .userInitiated).async {
+            self.fetchLibraries(using: dependencies)
+          }
+        case .failed:
+          DispatchQueue.main.async {
+            self.showErrorPage()
+          }
       }
     }
   }
@@ -123,7 +126,9 @@ class AppCoordinator: AutoPresentableCoordinator {
                   fatalError("should not occur: \(error)")
               }
             case .nonRecoverableError:
-              fatalError("non-recoverable error during initial libraries fetch")
+              DispatchQueue.main.async {
+                self.showErrorPage()
+              }
             case .libraryDoesNotExist, .permissionFailure:
               fatalError("should not occur: \(error)")
           }
@@ -186,7 +191,9 @@ class AppCoordinator: AutoPresentableCoordinator {
                   fatalError("should not occur: \(error)")
               }
             case .nonRecoverableError:
-              fatalError("non-recoverable error during creation of default library")
+              DispatchQueue.main.async {
+                self.showErrorPage()
+              }
             case .libraryDoesNotExist, .permissionFailure:
               fatalError("should not occur: \(error)")
           }
@@ -291,10 +298,23 @@ extension AppCoordinator {
         image: #imageLiteral(resourceName: "CloudFailure"),
         actionTitle: NSLocalizedString("continue", comment: "")) { [weak self] in
       guard let `self` = self else { return }
-      self.initializationRound = 0
-      self.startUp()
+      self.restart()
     }
     state = .notAuthenticated(page)
+    window.rootViewController = page
+  }
+
+  private func showErrorPage() {
+    dispatchPrecondition(condition: DispatchPredicate.onQueue(.main))
+    if case .readyForRestart = state { return }
+    let page = ActionPage.initWith(
+        primaryText: NSLocalizedString("error.genericError", comment: ""),
+        image: #imageLiteral(resourceName: "CloudFailure"),
+        actionTitle: NSLocalizedString("tryAgain", comment: "")) { [weak self] in
+      guard let `self` = self else { return }
+      self.restart()
+    }
+    state = .readyForRestart(page)
     window.rootViewController = page
   }
 
@@ -306,8 +326,7 @@ extension AppCoordinator {
         image: #imageLiteral(resourceName: "CloudDeleted"),
         actionTitle: NSLocalizedString("iCloud.userDeletedZone.actionTitle", comment: "")) { [weak self] in
       guard let `self` = self else { return }
-      self.initializationRound = 0
-      self.startUp()
+      self.restart()
     }
     state = .readyForRestart(page)
     window.rootViewController = page

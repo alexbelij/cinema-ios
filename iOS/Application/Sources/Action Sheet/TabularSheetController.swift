@@ -20,7 +20,7 @@ public class TabularSheetController<SheetItem: SheetItemProtocol>: UIViewControl
   private var sheetItems = [SheetItem]()
   private var sheetItemGroups: [[SheetItem]] {
     var groups = [[SheetItem]]()
-    var previousStyle: SheetItemGroupingStyle? = nil
+    var previousStyle: SheetItemGroupingStyle?
     for item in sheetItems {
       if item.groupingStyle != previousStyle || previousStyle == .detached {
         previousStyle = item.groupingStyle

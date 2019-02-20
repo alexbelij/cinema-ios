@@ -18,7 +18,7 @@ struct SelectableLabelSheetItem: SheetItemProtocol {
 }
 
 class SelectableLabelCell: UITableViewCell {
-  @IBOutlet private weak var label: UILabel!
+  @IBOutlet private var label: UILabel!
 
   override func awakeFromNib() {
     super.awakeFromNib()

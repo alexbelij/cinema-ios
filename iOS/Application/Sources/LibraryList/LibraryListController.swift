@@ -219,8 +219,8 @@ extension LibraryListController {
 }
 
 class PlaceholderTableCell: UITableViewCell {
-  @IBOutlet private weak var label: UILabel!
-  @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
+  @IBOutlet private var label: UILabel!
+  @IBOutlet private var activityIndicator: UIActivityIndicatorView!
 
   func configure(with title: String) {
     label.text = title
@@ -229,7 +229,7 @@ class PlaceholderTableCell: UITableViewCell {
 }
 
 class AddNewLibraryTableCell: UITableViewCell {
-  @IBOutlet private weak var label: UILabel!
+  @IBOutlet private var label: UILabel!
 
   override func awakeFromNib() {
     super.awakeFromNib()

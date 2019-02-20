@@ -1,4 +1,5 @@
 import CloudKit
+import Firebase
 import Foundation
 import os.log
 import UIKit
@@ -30,6 +31,7 @@ public enum StartupProgress {
   case foundLegacyData((Bool) -> Void)
   case migrationFailed
   case ready(AppDependencies)
+  case failed
 }
 
 public class CinemaKitStartupManager: StartupManager {
@@ -76,6 +78,7 @@ public class CinemaKitStartupManager: StartupManager {
   private let userDefaults = StandardUserDefaults()
   private let migratedLibraryName: String
   private var progressHandler: ((StartupProgress) -> Void)!
+  private let errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared
 
   public init(using application: UIApplication, migratedLibraryName: String) {
     self.application = application
@@ -109,6 +112,12 @@ public class CinemaKitStartupManager: StartupManager {
     }
     setUpDirectories()
     setUpDeviceSyncZone()
+    DispatchQueue.main.async {
+      if FirebaseApp.app() == nil {
+        os_log("setting up Firebase", log: CinemaKitStartupManager.logger, type: .info)
+        FirebaseApp.configure()
+      }
+    }
   }
 
   private func markCurrentVersion() {
@@ -118,34 +127,29 @@ public class CinemaKitStartupManager: StartupManager {
   private func resetLocalData() {
     userDefaults.removeValue(for: LocalDataInvalidationFlag.key)
     userDefaults.removeValue(for: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
-    do {
-      let fileManager = FileManager.default
-      try fileManager.removeItem(at: FileBasedSubscriptionStore.fileURL)
-      try fileManager.removeItem(at: FileBasedServerChangeTokenStore.fileURL)
-      try fileManager.removeItem(at: CinemaKitStartupManager.libraryRecordStoreURL)
-      try fileManager.removeItem(at: CinemaKitStartupManager.shareRecordStoreURL)
-      try fileManager.removeItem(at: CinemaKitStartupManager.movieRecordsDir)
-    } catch {
-      os_log("unable to remove local data: %{public}@",
-             log: CinemaKitStartupManager.logger,
-             type: .fault,
-             String(describing: error))
-      fatalError("unable to remove local data")
-    }
+    removeItems(FileBasedSubscriptionStore.fileURL,
+                FileBasedServerChangeTokenStore.fileURL,
+                CinemaKitStartupManager.libraryRecordStoreURL,
+                CinemaKitStartupManager.shareRecordStoreURL,
+                CinemaKitStartupManager.movieRecordsDir)
     resetMovieDetails()
   }
 
   private func resetMovieDetails() {
     userDefaults.removeValue(for: CinemaKitStartupManager.shouldResetMovieDetailsKey)
-    do {
-      let fileManager = FileManager.default
-      try fileManager.removeItem(at: CinemaKitStartupManager.tmdbPropertiesDir)
-    } catch {
-      os_log("unable to remove local data: %{public}@",
-             log: CinemaKitStartupManager.logger,
-             type: .fault,
-             String(describing: error))
-      fatalError("unable to remove local data")
+    removeItems(CinemaKitStartupManager.tmdbPropertiesDir)
+  }
+
+  private func removeItems(_ urls: URL...) {
+    let fileManager = FileManager.default
+    for url in urls {
+      do {
+        if fileManager.fileExists(atPath: url.path) {
+          try fileManager.removeItem(at: url)
+        }
+      } catch {
+        errorReporter.report(error)
+      }
     }
   }
 
@@ -162,33 +166,25 @@ public class CinemaKitStartupManager: StartupManager {
     do {
       try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
     } catch {
-      os_log("unable to create directory at %{public}@: %{public}@",
-             log: CinemaKitStartupManager.logger,
-             type: .fault,
-             url.path,
-             String(describing: error))
+      errorReporter.report(error)
     }
   }
 
   private func setUpDeviceSyncZone() {
-    setUpDeviceSyncZone(using: container.database(with: .private), retryCount: defaultRetryCount) { error in
-      if let error = error {
-        os_log("unable to setup deviceSyncZone: %{public}@",
-               log: CinemaKitStartupManager.logger,
-               type: .error,
-               String(describing: error))
-        fail()
-      } else {
+    setUpDeviceSyncZone(using: container.database(with: .private), retryCount: defaultRetryCount) { success in
+      if success {
         self.setUpSubscriptions()
+      } else {
+        self.progressHandler!(StartupProgress.failed)
       }
     }
   }
 
   private func setUpDeviceSyncZone(using queue: DatabaseOperationQueue,
                                    retryCount: Int,
-                                   then completion: @escaping (CloudKitError?) -> Void) {
+                                   then completion: @escaping (Bool) -> Void) {
     if userDefaults.get(for: CinemaKitStartupManager.deviceSyncZoneCreatedKey) {
-      completion(nil)
+      completion(true)
       return
     }
     progressHandler!(StartupProgress.settingUpCloudEnvironment)
@@ -199,40 +195,21 @@ public class CinemaKitStartupManager: StartupManager {
     let operation = CKModifyRecordZonesOperation(recordZonesToSave: [zone], recordZoneIDsToDelete: nil)
     operation.modifyRecordZonesCompletionBlock = { _, _, error in
       if let error = error?.singlePartialError(forKey: deviceSyncZoneID) {
-        guard let ckerror = error as? CKError else {
-          os_log("<setUpDeviceSyncZone> unhandled error: %{public}@",
-                 log: CinemaKitStartupManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(.nonRecoverableError)
-          return
-        }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
           os_log("retry setup after %.1f seconds", log: CinemaKitStartupManager.logger, type: .default, retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
             self.setUpDeviceSyncZone(using: queue,
                                      retryCount: retryCount - 1,
                                      then: completion)
           }
-        } else if ckerror.code == CKError.Code.notAuthenticated {
-          completion(.notAuthenticated)
-        } else if ckerror.code == CKError.Code.networkFailure
-                  || ckerror.code == CKError.Code.networkUnavailable
-                  || ckerror.code == CKError.Code.requestRateLimited
-                  || ckerror.code == CKError.Code.serviceUnavailable
-                  || ckerror.code == CKError.Code.zoneBusy {
-          completion(.nonRecoverableError)
-        } else {
-          os_log("<setUpDeviceSyncZone> unhandled CKError: %{public}@",
-                 log: CinemaKitStartupManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(.nonRecoverableError)
+          return
         }
+        self.errorReporter.report(error)
+        completion(false)
       } else {
         os_log("device sync zone is set up", log: CinemaKitStartupManager.logger, type: .info)
         self.userDefaults.set(true, for: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
-        completion(nil)
+        completion(true)
       }
     }
     queue.add(operation)
@@ -243,18 +220,14 @@ public class CinemaKitStartupManager: StartupManager {
         privateDatabaseOperationQueue: container.database(with: .private),
         sharedDatabaseOperationQueue: container.database(with: .shared),
         dataInvalidationFlag: LocalDataInvalidationFlag(userDefaults: userDefaults))
-    subscriptionManager.subscribeForChanges { error in
-      if let error = error {
-        os_log("unable to subscribe for changes: %{public}@",
-               log: CinemaKitStartupManager.logger,
-               type: .error,
-               String(describing: error))
-        fail()
-      } else {
+    subscriptionManager.subscribeForChanges { success in
+      if success {
         DispatchQueue.main.async {
           self.application.registerForRemoteNotifications()
         }
         self.makeDependencies()
+      } else {
+        self.progressHandler!(StartupProgress.failed)
       }
     }
   }
@@ -275,7 +248,8 @@ public class CinemaKitStartupManager: StartupManager {
                                            dataInvalidationFlag: dataInvalidationFlag)
     let libraryFactory = DefaultMovieLibraryFactory(fetchManager: fetchManager,
                                                     syncManager: syncManager,
-                                                    tmdbWrapper: movieDb)
+                                                    tmdbWrapper: movieDb,
+                                                    errorReporter: errorReporter)
     let modelController = MovieLibraryManagerModelController(
         fetchManager: fetchManager,
         libraryFactory: libraryFactory,
@@ -293,11 +267,13 @@ public class CinemaKitStartupManager: StartupManager {
                                           dataInvalidationFlag: dataInvalidationFlag),
         libraryFactory: libraryFactory,
         modelController: modelController,
-        dataInvalidationFlag: dataInvalidationFlag)
+        dataInvalidationFlag: dataInvalidationFlag,
+        errorReporter: errorReporter)
     let dependencies = AppDependencies(libraryManager: libraryManager,
                                        movieDb: movieDb,
                                        notificationCenter: NotificationCenter.default,
-                                       userDefaults: userDefaults)
+                                       userDefaults: userDefaults,
+                                       errorReporter: errorReporter)
     checkForMigration(dependencies)
   }
 
@@ -340,10 +316,7 @@ public class CinemaKitStartupManager: StartupManager {
     do {
       try FileManager.default.removeItem(at: url)
     } catch {
-      os_log("unable to remove legacy data file: %{public}@",
-             log: CinemaKitStartupManager.logger,
-             type: .fault,
-             String(describing: error))
+      errorReporter.report(error)
     }
   }
 
@@ -365,13 +338,16 @@ private class DefaultMovieLibraryFactory: MovieLibraryFactory {
   private let fetchManager: FetchManager
   private let syncManager: SyncManager
   private let tmdbWrapper: TMDBSwiftWrapper
+  private let errorReporter: ErrorReporter
 
   init(fetchManager: FetchManager,
        syncManager: SyncManager,
-       tmdbWrapper: TMDBSwiftWrapper) {
+       tmdbWrapper: TMDBSwiftWrapper,
+       errorReporter: ErrorReporter) {
     self.fetchManager = fetchManager
     self.syncManager = syncManager
     self.tmdbWrapper = tmdbWrapper
+    self.errorReporter = errorReporter
   }
 
   func makeLibrary(with metadata: MovieLibraryMetadata) -> InternalMovieLibrary {
@@ -389,12 +365,9 @@ private class DefaultMovieLibraryFactory: MovieLibraryFactory {
     return DeviceSyncingMovieLibrary(metadata: metadata,
                                      modelController: modelController,
                                      tmdbPropertiesProvider: tmdbWrapper,
-                                     syncManager: syncManager)
+                                     syncManager: syncManager,
+                                     errorReporter: errorReporter)
   }
-}
-
-private func fail() -> Never {
-  fatalError("error during startup")
 }
 
 // MARK: - migration
@@ -418,10 +391,7 @@ extension CinemaKitStartupManager {
       os_log("clearing poster cache", log: CinemaKitStartupManager.logger, type: .default)
       try FileManager.default.removeItem(at: CinemaKitStartupManager.posterCacheDir)
     } catch {
-      os_log("unable to clear poster cache: %{public}@",
-             log: CinemaKitStartupManager.logger,
-             type: .fault,
-             String(describing: error))
+      errorReporter.report(error)
     }
   }
 

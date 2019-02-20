@@ -21,16 +21,19 @@ class DeviceSyncingMovieLibrary: InternalMovieLibrary {
   private var modelController: AnyModelController<MovieLibraryModel, MovieLibraryError>
   private let tmdbPropertiesProvider: TmdbMoviePropertiesProvider
   private let syncManager: SyncManager
+  private let errorReporter: ErrorReporter
 
   init<Controller: ModelController>(metadata: MovieLibraryMetadata,
                                     modelController: Controller,
                                     tmdbPropertiesProvider: TmdbMoviePropertiesProvider,
-                                    syncManager: SyncManager)
+                                    syncManager: SyncManager,
+                                    errorReporter: ErrorReporter)
       where Controller.ModelType == MovieLibraryModel, Controller.ErrorType == MovieLibraryError {
     self.metadata = metadata
     self.modelController = AnyModelController(modelController)
     self.tmdbPropertiesProvider = tmdbPropertiesProvider
     self.syncManager = syncManager
+    self.errorReporter = errorReporter
   }
 }
 
@@ -315,10 +318,7 @@ extension DeviceSyncingMovieLibrary {
     do {
       data = try Data(contentsOf: url)
     } catch {
-      os_log("unable to load movies from url: %{public}@",
-             log: DeviceSyncingMovieLibrary.logger,
-             type: .error,
-             String(describing: error))
+      errorReporter.report(error)
       completion(false)
       return
     }
@@ -373,10 +373,6 @@ extension DeviceSyncingMovieLibrary {
       if let error = error {
         switch error {
           case .notAuthenticated, .userDeletedZone, .nonRecoverableError:
-            os_log("unable to sync movies: %{public}@",
-                   log: DeviceSyncingMovieLibrary.logger,
-                   type: .error,
-                   String(describing: error))
             completion(nil)
           case .conflict, .itemNoLongerExists, .zoneNotFound, .permissionFailure:
             fatalError("should not occur: \(error)")

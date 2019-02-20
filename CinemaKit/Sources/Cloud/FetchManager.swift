@@ -35,13 +35,16 @@ class DefaultFetchManager: FetchManager {
   private let privateDatabaseOperationQueue: DatabaseOperationQueue
   private let sharedDatabaseOperationQueue: DatabaseOperationQueue
   private let dataInvalidationFlag: LocalDataInvalidationFlag
+  private let errorReporter: ErrorReporter
 
   init(privateDatabaseOperationQueue: DatabaseOperationQueue,
        sharedDatabaseOperationQueue: DatabaseOperationQueue,
-       dataInvalidationFlag: LocalDataInvalidationFlag) {
+       dataInvalidationFlag: LocalDataInvalidationFlag,
+       errorReporter: ErrorReporter = CrashlyticsErrorReporter.shared) {
     self.privateDatabaseOperationQueue = privateDatabaseOperationQueue
     self.sharedDatabaseOperationQueue = sharedDatabaseOperationQueue
     self.dataInvalidationFlag = dataInvalidationFlag
+    self.errorReporter = errorReporter
   }
 
   private func databaseOperationQueue(for scope: CKDatabase.Scope) -> DatabaseOperationQueue {
@@ -66,33 +69,19 @@ class DefaultFetchManager: FetchManager {
     let operation = CKFetchRecordZonesOperation.fetchAllRecordZonesOperation()
     operation.fetchRecordZonesCompletionBlock = { zones, error in
       if let error = error {
-        guard let ckerror = error as? CKError else {
-          os_log("<fetchZones> unhandled error: %{public}@",
-                 log: DefaultFetchManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(nil, .nonRecoverableError)
-          return
-        }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
           os_log("retry fetchZones after %.1f seconds", log: DefaultFetchManager.logger, type: .default, retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
             self.fetchZones(in: scope, retryCount: retryCount - 1, then: completion)
           }
-        } else if ckerror.code == CKError.Code.notAuthenticated {
-          completion(nil, .notAuthenticated)
-        } else if ckerror.code == CKError.Code.networkFailure
-                  || ckerror.code == CKError.Code.networkUnavailable
-                  || ckerror.code == CKError.Code.requestRateLimited
-                  || ckerror.code == CKError.Code.serviceUnavailable
-                  || ckerror.code == CKError.Code.zoneBusy {
-          completion(nil, .nonRecoverableError)
-        } else {
-          os_log("<fetchZones> unhandled CKError: %{public}@",
-                 log: DefaultFetchManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(nil, .nonRecoverableError)
+          return
+        }
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
+            completion(nil, .notAuthenticated)
+          default:
+            self.errorReporter.report(error)
+            completion(nil, .nonRecoverableError)
         }
       } else if let zones = zones {
         os_log("fetched %d zones",
@@ -140,17 +129,9 @@ class DefaultFetchManager: FetchManager {
     operation.recordFetchedBlock = { record in fetchedRecords.append(record) }
     operation.queryCompletionBlock = { cursor, error in
       if let error = error {
-        guard let ckerror = error as? CKError else {
-          os_log("<fetchAll> unhandled error: %{public}@",
-                 log: DefaultFetchManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(nil, .nonRecoverableError)
-          return
-        }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
           os_log("retry fetch after %.1f seconds", log: DefaultFetchManager.logger, type: .default, retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
             self.fetch(with: operation,
                        inZoneWithID: zoneID,
                        into: accumulator,
@@ -158,25 +139,19 @@ class DefaultFetchManager: FetchManager {
                        retryCount: retryCount - 1,
                        then: completion)
           }
-        } else if ckerror.code == CKError.Code.notAuthenticated {
-          completion(nil, .notAuthenticated)
-        } else if ckerror.code == CKError.Code.zoneNotFound {
-          completion(nil, .zoneNotFound)
-        } else if ckerror.code == CKError.Code.userDeletedZone {
-          self.dataInvalidationFlag.set()
-          completion(nil, .userDeletedZone)
-        } else if ckerror.code == CKError.Code.networkFailure
-                  || ckerror.code == CKError.Code.networkUnavailable
-                  || ckerror.code == CKError.Code.requestRateLimited
-                  || ckerror.code == CKError.Code.serviceUnavailable
-                  || ckerror.code == CKError.Code.zoneBusy {
-          completion(nil, .nonRecoverableError)
-        } else {
-          os_log("<fetchAll> unhandled CKError: %{public}@",
-                 log: DefaultFetchManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(nil, .nonRecoverableError)
+          return
+        }
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
+            completion(nil, .notAuthenticated)
+          case .zoneNotFound?:
+            completion(nil, .zoneNotFound)
+          case .userDeletedZone?:
+            self.dataInvalidationFlag.set()
+            completion(nil, .userDeletedZone)
+          default:
+            self.errorReporter.report(error)
+            completion(nil, .nonRecoverableError)
         }
       } else if let cursor = cursor {
         os_log("fetched %d records but still some left",
@@ -215,48 +190,32 @@ class DefaultFetchManager: FetchManager {
     let operation = CKFetchRecordsOperation(recordIDs: [recordID])
     operation.fetchRecordsCompletionBlock = { records, error in
       if let error = error?.singlePartialError(forKey: recordID) {
-        guard let ckerror = error as? CKError else {
-          os_log("<fetchRecord> unhandled error: %{public}@",
-                 log: DefaultFetchManager.logger,
-                 type: .error,
-                 String(describing: error))
-          completion(nil, .nonRecoverableError)
-          return
-        }
-        if retryCount > 1, let retryAfter = ckerror.retryAfterSeconds?.rounded(.up) {
+        if let retryAfter = error.retryAfterSeconds, retryCount > 1 {
           os_log("retry fetchRecord after %.1f seconds",
                  log: DefaultFetchManager.logger,
                  type: .default,
                  retryAfter)
-          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(Int(retryAfter))) {
+          DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(retryAfter)) {
             self.fetchRecord(with: recordID,
                              in: scope,
                              retryCount: retryCount - 1,
                              then: completion)
           }
-        } else if ckerror.code == CKError.Code.notAuthenticated {
-          completion(nil, .notAuthenticated)
-        } else if ckerror.code == CKError.Code.zoneNotFound {
-          completion(nil, .zoneNotFound)
-        } else if ckerror.code == CKError.Code.unknownItem {
-          completion(nil, .itemNoLongerExists)
-        } else if ckerror.code == CKError.Code.networkFailure
-                  || ckerror.code == CKError.Code.networkUnavailable
-                  || ckerror.code == CKError.Code.requestRateLimited
-                  || ckerror.code == CKError.Code.serviceUnavailable
-                  || ckerror.code == CKError.Code.zoneBusy {
-          completion(nil, .nonRecoverableError)
-        } else {
-          os_log("<fetchRecord> unhandled CKError: %{public}@",
-                 log: DefaultFetchManager.logger,
-                 type: .error,
-                 String(describing: ckerror))
-          completion(nil, .nonRecoverableError)
+          return
+        }
+        switch error.ckerrorCode {
+          case .notAuthenticated?:
+            completion(nil, .notAuthenticated)
+          case .zoneNotFound?:
+            completion(nil, .zoneNotFound)
+          case .unknownItem?:
+            completion(nil, .itemNoLongerExists)
+          default:
+            self.errorReporter.report(error)
+            completion(nil, .nonRecoverableError)
         }
       } else if let records = records {
         completion(records[recordID], nil)
-      } else {
-        fatalError("both records and error were nil")
       }
     }
     databaseOperationQueue(for: scope).add(operation)

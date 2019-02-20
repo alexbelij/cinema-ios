@@ -2,6 +2,15 @@
 
 All notable changes to the project will be documented in this file.
 
+## v2.0.3 - 2019-02-20
+
+### Added
+- Crashlytics
+
+### Fixed
+- crash when a switch in settings bundle is on but data has already been reset
+- separator insets do no align with content
+
 ## v2.0.2 - 2018-09-26
 
 ### Added

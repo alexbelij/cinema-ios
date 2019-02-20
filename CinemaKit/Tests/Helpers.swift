@@ -2,6 +2,8 @@
 import CloudKit
 import XCTest
 
+// swiftlint:disable large_tuple
+
 func makeRecordID() -> CKRecord.ID {
   return CKRecord.ID(recordName: UUID().uuidString, zoneID: deviceSyncZoneID)
 }

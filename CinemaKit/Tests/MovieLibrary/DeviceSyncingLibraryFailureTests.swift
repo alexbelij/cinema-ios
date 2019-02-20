@@ -24,8 +24,10 @@ class DeviceSyncingLibraryFailureTests: XCTestCase {
   }
 
   func testFetchMoviesButUnableToLoad() {
+    let errorReporter = ErrorReporterMock()
     let library = DeviceSyncingMovieLibrary.makeForTesting(
-        modelController: MovieLibraryModelControllerMock.fail(with: .nonRecoverableError)
+        modelController: MovieLibraryModelControllerMock.fail(with: .nonRecoverableError),
+        errorReporter: errorReporter
     )
 
     var result: Result<[Movie], MovieLibraryError>!
@@ -38,12 +40,14 @@ class DeviceSyncingLibraryFailureTests: XCTestCase {
 
     XCTAssertTrue(result.isFailure)
     assertNonRecoverableError(result.error)
-    assertNonRecoverableError(result.error)
+    XCTAssertTrue(errorReporter.reportedErrors.isEmpty)
   }
 
   func testFetchMoviesWithSpecificGenreButUnableToLoad() {
+    let errorReporter = ErrorReporterMock()
     let library = DeviceSyncingMovieLibrary.makeForTesting(
-        modelController: MovieLibraryModelControllerMock.fail(with: .nonRecoverableError)
+        modelController: MovieLibraryModelControllerMock.fail(with: .nonRecoverableError),
+        errorReporter: errorReporter
     )
 
     var result: Result<[Movie], MovieLibraryError>!
@@ -56,6 +60,7 @@ class DeviceSyncingLibraryFailureTests: XCTestCase {
 
     XCTAssertTrue(result.isFailure)
     assertNonRecoverableError(result.error)
+    XCTAssertTrue(errorReporter.reportedErrors.isEmpty)
   }
 
   func testAddMovieWithoutTmdbProperties() {
@@ -81,9 +86,11 @@ class DeviceSyncingLibraryFailureTests: XCTestCase {
   }
 
   func testAddMovieButUnableToLoad() {
+    let errorReporter = ErrorReporterMock()
     let library = DeviceSyncingMovieLibrary.makeForTesting(
         modelController: MovieLibraryModelControllerMock.fail(with: .nonRecoverableError),
-        tmdbPropertiesProvider: TmdbMoviePropertiesProviderMock.returnEmpty()
+        tmdbPropertiesProvider: TmdbMoviePropertiesProviderMock.returnEmpty(),
+        errorReporter: errorReporter
     )
 
     var result: Result<Movie, MovieLibraryError>!
@@ -96,6 +103,7 @@ class DeviceSyncingLibraryFailureTests: XCTestCase {
 
     XCTAssertTrue(result.isFailure)
     assertNonRecoverableError(result.error)
+    XCTAssertTrue(errorReporter.reportedErrors.isEmpty)
   }
 
   func testAddMovie() {
@@ -142,9 +150,11 @@ class DeviceSyncingLibraryFailureTests: XCTestCase {
   func testUpdateMovieButUnableToLoad() {
     let metadata = MovieLibraryMetadata(name: "Library")
     let modelController = MovieLibraryModelControllerMock.fail(with: .nonRecoverableError)
+    let errorReporter = ErrorReporterMock()
     let library = DeviceSyncingMovieLibrary.makeForTesting(
         metadata: metadata,
-        modelController: modelController
+        modelController: modelController,
+        errorReporter: errorReporter
     )
 
     var result: Result<Movie, MovieLibraryError>!
@@ -157,6 +167,7 @@ class DeviceSyncingLibraryFailureTests: XCTestCase {
 
     XCTAssertTrue(result.isFailure)
     assertNonRecoverableError(result.error)
+    XCTAssertTrue(errorReporter.reportedErrors.isEmpty)
   }
 
   func testUpdateMovieButSyncFails() {
@@ -217,8 +228,10 @@ class DeviceSyncingLibraryFailureTests: XCTestCase {
   }
 
   func testRemoveMovieButUnableToLoad() {
+    let errorReporter = ErrorReporterMock()
     let library = DeviceSyncingMovieLibrary.makeForTesting(
-        modelController: MovieLibraryModelControllerMock.fail(with: .nonRecoverableError)
+        modelController: MovieLibraryModelControllerMock.fail(with: .nonRecoverableError),
+        errorReporter: errorReporter
     )
 
     var result: Result<Void, MovieLibraryError>!
@@ -231,6 +244,7 @@ class DeviceSyncingLibraryFailureTests: XCTestCase {
 
     XCTAssertTrue(result.isFailure)
     assertNonRecoverableError(result.error)
+    XCTAssertTrue(errorReporter.reportedErrors.isEmpty)
   }
 
   func testRemoveMovie() {

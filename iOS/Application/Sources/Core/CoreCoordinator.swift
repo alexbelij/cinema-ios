@@ -43,7 +43,6 @@ class CoreCoordinator: CustomPresentableCoordinator {
                                                           displaying: .all,
                                                           navigationController: libraryContentNavigationController,
                                                           dependencies: dependencies)
-    libraryContentCoordinator.showsLibrarySwitch = true
     libraryContentNavigationController.tabBarItem = UITabBarItem(
         title: NSLocalizedString("library", comment: ""),
         image: #imageLiteral(resourceName: "Tab-Library-normal"),
@@ -59,7 +58,10 @@ class CoreCoordinator: CustomPresentableCoordinator {
     )
 
     libraryManager.delegates.add(self)
-    libraryContentCoordinator.delegate = self
+    libraryContentCoordinator.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "SwitchLibrary"),
+                                                                  style: .done,
+                                                                  target: self,
+                                                                  action: #selector(showLibraryList))
     setTabs(includeSearchTab: library.metadata.currentUserCanModify)
   }
 
@@ -84,8 +86,9 @@ class CoreCoordinator: CustomPresentableCoordinator {
 
 // MARK: - Switching Libraries
 
-extension CoreCoordinator: LibraryContentCoordinatorDelegate {
-  func libraryContentCoordinatorShowLibraryList(_ coordinator: LibraryContentCoordinator) {
+extension CoreCoordinator {
+  @objc
+  private func showLibraryList() {
     DispatchQueue.global(qos: .userInitiated).async {
       self.libraryManager.fetchLibraries { result in
         switch result {
@@ -135,10 +138,6 @@ extension CoreCoordinator: LibraryContentCoordinatorDelegate {
       self.genreListCoordinator.library = newLibrary
       self.setTabs(includeSearchTab: newLibrary.metadata.currentUserCanModify)
     }
-  }
-
-  func libraryContentCoordinatorDidDismiss(_ coordinator: LibraryContentCoordinator) {
-    fatalError("root should not be dismissed")
   }
 }
 

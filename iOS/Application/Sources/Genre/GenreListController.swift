@@ -217,9 +217,9 @@ extension GenreListController: UITableViewDataSourcePrefetching {
 // MARK: - Genre Cell
 
 class GenreCell: UITableViewCell {
-  @IBOutlet private weak var backdropImageView: UIImageView!
-  @IBOutlet private weak var genreNameLabel: UILabel!
-  @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
+  @IBOutlet private var backdropImageView: UIImageView!
+  @IBOutlet private var genreNameLabel: UILabel!
+  @IBOutlet private var activityIndicator: UIActivityIndicatorView!
   private var scrim: ScrimView!
 
   override func awakeFromNib() {

@@ -20,7 +20,7 @@ class MovieDetailsController: UIViewController {
       self.titleLabel.text = movieTitle
     }
   }
-  @IBOutlet private weak var titleLabel: UILabel!
+  @IBOutlet private var titleLabel: UILabel!
 
   var poster: RemoteProperty<UIImage> = .loading {
     didSet {
@@ -33,7 +33,7 @@ class MovieDetailsController: UIViewController {
       }
     }
   }
-  @IBOutlet private weak var posterView: UIImageView!
+  @IBOutlet private var posterView: UIImageView!
 
   var genreIds = [GenreIdentifier]() {
     didSet {
@@ -47,8 +47,8 @@ class MovieDetailsController: UIViewController {
       }
     }
   }
-  @IBOutlet private weak var genreLabel: UILabel!
-  @IBOutlet private weak var genreStackView: UIStackView!
+  @IBOutlet private var genreLabel: UILabel!
+  @IBOutlet private var genreStackView: UIStackView!
 
   private static let runtimeFormatter: DateComponentsFormatter = {
     let formatter = DateComponentsFormatter()
@@ -69,8 +69,8 @@ class MovieDetailsController: UIViewController {
       }
     }
   }
-  @IBOutlet private weak var runtimeLabel: UILabel!
-  @IBOutlet private weak var runtimeStackView: UIStackView!
+  @IBOutlet private var runtimeLabel: UILabel!
+  @IBOutlet private var runtimeStackView: UIStackView!
 
   private static let releaseDateFormatter: DateFormatter = {
     let formatter = DateFormatter()
@@ -90,8 +90,8 @@ class MovieDetailsController: UIViewController {
       }
     }
   }
-  @IBOutlet private weak var releaseDateLabel: UILabel!
-  @IBOutlet private weak var releaseDateStackView: UIStackView!
+  @IBOutlet private var releaseDateLabel: UILabel!
+  @IBOutlet private var releaseDateStackView: UIStackView!
 
   var certification: String? {
     didSet {
@@ -104,8 +104,8 @@ class MovieDetailsController: UIViewController {
       }
     }
   }
-  @IBOutlet private weak var certificationLabel: UILabel!
-  @IBOutlet private weak var certificationStackView: UIStackView!
+  @IBOutlet private var certificationLabel: UILabel!
+  @IBOutlet private var certificationStackView: UIStackView!
 
   var diskType: DiskType? {
     didSet {
@@ -114,9 +114,9 @@ class MovieDetailsController: UIViewController {
       diskLabel.text = diskType.localizedName
     }
   }
-  @IBOutlet private weak var diskLabel: UILabel!
+  @IBOutlet private var diskLabel: UILabel!
 
-  @IBOutlet private weak var storyLineLabel: UILabel!
+  @IBOutlet private var storyLineLabel: UILabel!
 
   var overview: String? {
     didSet {
@@ -128,7 +128,7 @@ class MovieDetailsController: UIViewController {
       }
     }
   }
-  @IBOutlet private weak var overviewLabel: UILabel!
+  @IBOutlet private var overviewLabel: UILabel!
 }
 
 // MARK: - View Controller Lifecycle

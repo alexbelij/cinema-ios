@@ -2,7 +2,7 @@ import CinemaKit
 import Dispatch
 import UIKit
 
-class StartupCoordinator: PageCoordinator {
+class SetupCoordinator: PageCoordinator {
   enum State {
     case initializingCloud
     case foundLegacyData((Bool) -> Void)
