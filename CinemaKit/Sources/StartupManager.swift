@@ -127,26 +127,29 @@ public class CinemaKitStartupManager: StartupManager {
   private func resetLocalData() {
     userDefaults.removeValue(for: LocalDataInvalidationFlag.key)
     userDefaults.removeValue(for: CinemaKitStartupManager.deviceSyncZoneCreatedKey)
-    do {
-      let fileManager = FileManager.default
-      try fileManager.removeItem(at: FileBasedSubscriptionStore.fileURL)
-      try fileManager.removeItem(at: FileBasedServerChangeTokenStore.fileURL)
-      try fileManager.removeItem(at: CinemaKitStartupManager.libraryRecordStoreURL)
-      try fileManager.removeItem(at: CinemaKitStartupManager.shareRecordStoreURL)
-      try fileManager.removeItem(at: CinemaKitStartupManager.movieRecordsDir)
-    } catch {
-      errorReporter.report(error)
-    }
+    removeItems(FileBasedSubscriptionStore.fileURL,
+                FileBasedServerChangeTokenStore.fileURL,
+                CinemaKitStartupManager.libraryRecordStoreURL,
+                CinemaKitStartupManager.shareRecordStoreURL,
+                CinemaKitStartupManager.movieRecordsDir)
     resetMovieDetails()
   }
 
   private func resetMovieDetails() {
     userDefaults.removeValue(for: CinemaKitStartupManager.shouldResetMovieDetailsKey)
-    do {
-      let fileManager = FileManager.default
-      try fileManager.removeItem(at: CinemaKitStartupManager.tmdbPropertiesDir)
-    } catch {
-      errorReporter.report(error)
+    removeItems(CinemaKitStartupManager.tmdbPropertiesDir)
+  }
+
+  private func removeItems(_ urls: URL...) {
+    let fileManager = FileManager.default
+    for url in urls {
+      do {
+        if fileManager.fileExists(atPath: url.path) {
+          try fileManager.removeItem(at: url)
+        }
+      } catch {
+        errorReporter.report(error)
+      }
     }
   }
 
