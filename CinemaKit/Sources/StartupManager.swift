@@ -113,8 +113,10 @@ public class CinemaKitStartupManager: StartupManager {
     setUpDirectories()
     setUpDeviceSyncZone()
     DispatchQueue.main.async {
-      os_log("setting up Firebase", log: CinemaKitStartupManager.logger, type: .info)
-      FirebaseApp.configure()
+      if FirebaseApp.app() == nil {
+        os_log("setting up Firebase", log: CinemaKitStartupManager.logger, type: .info)
+        FirebaseApp.configure()
+      }
     }
   }
 
